@@ -110,7 +110,7 @@ const RoiBarChart = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClick }
         .attr("text-anchor", "middle")
         .attr("font-size", "12px")
         .attr("fill", "black")
-        .text(ceilingMax.toFixed(2));
+        .text(ceilingMean.toFixed(2));
 
       // correlation_points
       const points = ceiling[roi][dataset]?.correlation_points || [];
@@ -250,7 +250,7 @@ const RoiBarChart = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClick }
             height - margin.bottom
           })`
       )
-   
+
       .text((d) => d.model)
       .style("cursor", "pointer") // ✅ 可以链式写
       .on("click", (event, d) => {
