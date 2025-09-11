@@ -30,6 +30,7 @@ const Uploader: React.FC<UploaderProps> = ({ onFilesUploaded, onFileMappingsUpda
     const files = selected.map((id) => ({
       blobURL: DEMO_IMAGES[id].url,
       file: null, // ⚠️ 没有真实 file，只是假数据
+      name: DEMO_IMAGES[id].name,
     }));
     onFilesUploaded(files);
     onFileMappingsUpdate(files);

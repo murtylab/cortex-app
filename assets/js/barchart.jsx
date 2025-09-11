@@ -55,27 +55,35 @@ const BarChart = ({ barChartData, height, fileMappings}) => {
     return barChartData;
   };
 
-  const getFileInfo = (filename) => {
-    const mapping = fileMappings?.find(m => m.file.name === filename);
-    if (!mapping) return { blobURL: null, folder: null };
+const getFileInfo = (filename) => {
+  // 兼容 demo 模式：优先找 file.name，否则用我们自己加的 name
+  const mapping = fileMappings?.find(
+    (m) => (m.file ? m.file.name : m.name) === filename
+  );
+  if (!mapping) return { blobURL: null, folder: null };
 
-    // webkitRelativePath is non-standard, so just access it directly
+  let folder = null;
+
+  if (mapping.file) {
+    // ✅ 真实上传的文件才可能有 webkitRelativePath
     const relPath = mapping.file.webkitRelativePath || "";
-    const folder =
-      relPath && relPath.includes("/")
-        ? relPath.split("/").slice(0, -1).join("/") // everything except the filename
-        : null;
+    folder = relPath && relPath.includes("/")
+      ? relPath.split("/").slice(0, -1).join("/")
+      : null;
+  } else {
+    // ✅ demo 模式：用一个假 folder（比如 "demo"）
+    folder = "demo";
+  }
 
-    return { blobURL: mapping.blobURL, folder };
-  };
+  return { blobURL: mapping.blobURL, folder };
+};
+
 
   const getFolderForFilename = (filename) => {
-    const mapping = fileMappings?.find(m => m.file.name === filename);
-    if (!mapping) return "";
-    const relPath = mapping.file.webkitRelativePath || "";
-    return relPath && relPath.includes("/")
-      ? relPath.split("/").slice(0, -1).join("/")   // everything except filename
-      : "";
+  // ✅ 找到文件在 fileMappings 里的 index，当作“folder顺序”
+    const index = fileMappings?.findIndex(m => m.name === filename);
+    if (index === -1) return "";
+    return `Folder-${Math.floor(index / 5) + 1}`;  // 比如每5个一组，Folder-1, Folder-2
   };
 
   useEffect(() => {
@@ -133,13 +141,11 @@ const BarChart = ({ barChartData, height, fileMappings}) => {
       .append("g")
       .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-    let tooltip = d3.select(containerRef.current).select(".tooltip");
-    if (tooltip.empty()) {
-      tooltip = d3.select(containerRef.current)
-        .append("div")
-        .attr("class", "tooltip");
-    }
-    styleTooltip(tooltip);
+     d3.select(containerRef.current).select(".tooltip").remove();
+        const tooltip = d3.select(containerRef.current)
+          .append("div")
+          .attr("class", "tooltip");
+        styleTooltip(tooltip);
 
     //Draw bars
 

@@ -35,10 +35,17 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
       };
     }, []);
   
-    const getBlobURL = (filename) => {
-      const mapping = fileMappings?.find(mapping => mapping.file.name === filename);
-      return mapping ? mapping.blobURL : null;
-    };
+   const getBlobURL = (filename) => {
+  const mapping = fileMappings?.find(
+    (m) => (m.file ? m.file.name : m.name) === filename
+  );
+  console.log("🔍 getBlobURL lookup:", {
+    filename,
+    mapping,
+    allFileMappings: fileMappings
+  });
+  return mapping ? mapping.blobURL : null;
+};
 
   useEffect(() => {
 
@@ -118,12 +125,23 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
                     </p>
                   </div>
                 `).style("display", "block");
+                console.log("✅ Tooltip updated:", tooltip.node());
             })
-            .on("mousemove", event => {
+            .on("mousemove", (event,d) => {
+              const blobURL_imageX = getBlobURL(d.x);
+  const blobURL_imageY = getBlobURL(d.y);
+
+  console.log("blobURL_imageX:", blobURL_imageX);
+  console.log("blobURL_imageY:", blobURL_imageY);
+
+               console.log("heatmap x:", d.x, "y:", d.y, "fileMappings:", fileMappings);
+
               const containerRect = containerRef.current.getBoundingClientRect(); 
               tooltip
                 .style("left", `${event.clientX - containerRect.left + 10}px`)
-                .style("top", `${event.clientY - containerRect.top - 40}px`);
+                .style("top", `${event.clientY - containerRect.top - 40}px`)
+                .style("opacity", 1)
+                .style("visibility", "visible");
             })
             .on("mouseout", () => {tooltip.style("display", "none");}),
       );
@@ -177,10 +195,10 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
       .attr("text-anchor", "middle") // Center align the text
       .style("font-size", "15px")
       .text("distance");
-
-    return () => {
-        d3.select(".tooltip").remove(); // Cleanup tooltip on component unmount
-    };
+       return () => {
+            d3.select(".tooltip").remove(); // Cleanup tooltip on component unmount
+          };
+   
 
   }, [heatmapData, originalFilenames, sortedFilenames, width, height, order, fileMappings]);
 
