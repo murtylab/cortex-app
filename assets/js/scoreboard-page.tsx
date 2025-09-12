@@ -549,14 +549,14 @@ const ScoreboardPage: React.FC = () => {
           {!loadingNew && (
             <div className="chart-title">
               { region === "" && dataset === "" && newData
-                ? `Model Performance Gap to Ceiling vs Ceiling`
+                ? `Across-Regions: Models Performence (Trained on Murty vs Trained on NSD1000)`
                 :region !== "" && dataset === "" && newData
-                ? `${region.toUpperCase()}: Model Performance Gap to Ceiling vs Ceiling`
+                ? `${region.toUpperCase()}: Models Performence (Trained on Murty vs Trained on NSD1000)`
                 :region === "" && dataset !== "" && newData
-                ? `${DATASET_LABEL_MAP[dataset]}: Model Performance Gap to Ceiling vs Ceiling`
+                ? `${DATASET_LABEL_MAP[dataset]}: Models Performence (Trained on Murty vs Trained on NSD1000)`
 
                 :region !== "" && dataset !== "" && newData
-                ? `${region.toUpperCase()}/${DATASET_LABEL_MAP[dataset]}: Model Performance Gap to Ceiling vs Ceiling`
+                ? `${region.toUpperCase()}/${DATASET_LABEL_MAP[dataset]}: Models Performence (Trained on Murty vs Trained on NSD1000)`
 
 
                 : ""}
