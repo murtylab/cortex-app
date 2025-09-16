@@ -281,7 +281,7 @@ const getFileInfo = (filename) => {
       <label htmlFor="order">Order by: </label>
       <select id="order" value={order} onChange={e => setOrder(e.target.value)}>
         <option value="name">Image Name</option>
-        <option value="folder">Folder</option>
+        {/* <option value="folder">Folder</option> */}
         <option value="ranking">Rank</option>
       </select>
     </div>

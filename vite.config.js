@@ -22,7 +22,7 @@ export default defineConfig({
         main: 'index.html',
         admin: 'lab-page.html',
         scoreboard: 'scoreboard-page.html',
-        scoreboardNew: 'scoreboard-page-new.html',
+        scoreboardNew: 'scoreboard-page.html',
         scoreboardLanding: 'scoreboard-landing.html',
         labLanding: 'lab-landing.html',
         overallPerformance: 'overall-performance-accross-all-regions.html',

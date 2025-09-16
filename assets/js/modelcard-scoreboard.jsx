@@ -5,7 +5,8 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import { Typography, Link } from '@mui/material';
-import { MODEL_OPTIONS, MODELCARD_INFO_LOOKUP } from './constants';
+import { MODEL_OPTIONS } from './constants';
+import { MODELCARD_INFO_LOOKUP } from './constants-scoreboard';
 
 const ModelCardNew = ({ region, dataset, model, evalDataset }) => {
   console.log("ModelCard: model:", model, "region:", region, "dataset:", dataset);

@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Starter Page - FlexStart Bootstrap Template</title>
+  <title>The Lab - Virtual Visual Cortex</title>
   <meta name="description" content="">
   <meta name="keywords" content="">
 
@@ -17,6 +17,7 @@
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+
   <!-- Vendor CSS Files -->
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
@@ -27,86 +28,41 @@
   <!-- Main CSS File -->
   <link href="assets/css/main.css" rel="stylesheet">
 
-  <link rel="stylesheet" href="assets/css/style_scoreboard/scoreboard.css">
-
-  <!-- script for the scoreboard main part -->
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script defer src="assets/js/utils_scoreboard/data_process.js"></script>
-  <script defer src="assets/js/utils_scoreboard/draw_chart.js"></script>
-
 </head>
 
-<body class="scoreboard-page">
+<body class="lab-page">
 
   <header id="header" class="header d-flex align-items-center sticky-top">
     <div class="container-fluid container-xl position-relative d-flex align-items-center">
 
       <a href="index.html" class="logo d-flex align-items-center me-auto">
-        <!-- Uncomment the line below if you also wish to use an image logo -->
         <img src="assets/img/logo.svg" alt="">
         <h1 class="sitename">Cortex</h1>
       </a>
 
-      <!-- <div class="header-title mx-auto">
-        <h1>Scoreboard</h1>
-      </div> -->
-
       <nav id="navmenu" class="navmenu">
         <ul>
-          <li><a href="index.html">Home<br></a></li>
+          <li><a href="index.html">Home</a></li>
           <li><a href="lab-page.html">The Lab</a></li>
-          <li><a href="scoreboard-page.html" class="active">The Scoreboard</a></li>
+          <li><a href="scoreboard-landing.html" class="active">The Scoreboard</a></li>
+
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
 
+
+
     </div>
+
+
   </header>
 
-  <main class="main">
-    <div class="container text-center mt-5">
-      <h2 class="mb-4">Coming Soon</h2>
-      <!-- <div class="row justify-content-center">
-        <div class="col-md-4">
-          <button class="btn btn-primary custom-btn" onclick="window.location.href='overall-performance-accross-all-regions.html'">
-            Overall performance across all regions
-          </button>
-        </div>
-        <div class="col-md-4">
-          <button class="btn btn-primary custom-btn" onclick="window.location.href='specify-roi-page.html'">
-            A specific ROI
-          </button>
-        </div>
-        <div class="col-md-4">
-          <button class="btn btn-primary custom-btn" onclick="window.location.href='specify-dataset-page.html'">
-            A specific Dataset
-          </button>
-        </div> -->
-      </div>
-    </div>
-    
 
+  <main class="main">
+    <div id="container" class="container"></div>
   </main>
 
 
-
-
-
-
-    
-   
-</body>
-
-  <footer id="footer" class="footer">
-
-    <div class="container copyright text-center mt-4">
-      <p>© <span>Copyright</span> <strong class="px-1 sitename"><a href="https://www.murtylab.com" target="_blank" rel="noopener noreferrer">Murty Lab @ Georgia Tech</a></strong> <span>All Rights Reserved</span></p>
-      <p> <a href="https://forms.office.com/r/nT01GfLtZs">Send us your feedback here!</a> </p>
-      <div class="credits">
-      </div>
-    </div>
-
-  </footer>
 
   <!-- Scroll Top -->
   <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
@@ -123,6 +79,21 @@
 
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
+  <script type="module" src="assets/js/scoreboard.tsx"></script>
+
+  <script type="module" src="assets/js/barchart.jsx"></script>
+  <script type="module" src="assets/js/barchartstyles.jsx"></script>
+
+  <script type="module" src="assets/js/heatmap.jsx"></script>
+  <script type="module" src="assets/js/heatmapstyles.jsx"></script>
+
+  <script type="module" src="assets/js/settings.jsx"></script>
+  <script type="module" src="assets/js/constants.jsx"></script>
+
+  <script type="module" src="assets/js/modelcard.jsx"></script>
+
+
+
 
 </body>
 
