@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import BoostrapClient from "@/components/BoostrapClient";
+import RuleBasedChatbot from "@/components/RuleBasedChatbot";
 import "bootstrap-icons/font/bootstrap-icons.css"
 import 'aos/dist/aos.css';
 
@@ -21,7 +22,8 @@ export default function RootLayout({
     <html lang="en">
       <body className="index-page">
         {children}
-        <BoostrapClient />    
+        <BoostrapClient />
+        <RuleBasedChatbot />
       </body>
     </html>
   );
