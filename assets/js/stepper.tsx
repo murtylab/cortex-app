@@ -167,6 +167,10 @@ const Stepper: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [predictionLoading, setPredictionLoading] = useState(false); // new state
 
+
+  //visualization
+  const [vizOrder, setVizOrder] = useState("group");
+
   const next = () => setCurrent((prev) => prev + 1);
   const prev = () => setCurrent((prev) => prev - 1);
 
@@ -280,6 +284,8 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
   setFileMappings(prev => prev.map(f => (f.groupKey === oldKey ? { ...f, groupKey: newKey } : f)));
 };
 
+
+
   useEffect(() => {
     setPredictionResult(null); // Clear previous results
     setPredictstep(1); // Reset button
@@ -355,7 +361,61 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
 
   const barchartData = useBarchartData(predictionResult);
 
+
+
   const { heatmapData, originalFilenames, sortedFilenames } = useHeatmapData(predictionResult);
+
+  const orderedFilenames = useMemo(() => {
+  if (!barchartData || barchartData.length === 0) return [];
+
+  const fileMap = new Map();
+  (fileMappings || []).forEach((f) => {
+    if (f.serverKey) fileMap.set(f.serverKey, f);
+    if (f.uid) fileMap.set(f.uid, f);
+    if (f.file?.name) fileMap.set(f.file.name, f);
+  });
+
+  const getGroupForFilename = (filename: string) => {
+    const m = fileMap.get(filename);
+    return m?.groupKey || "Ungrouped";
+  };
+
+  const getDisplayLabel = (filename: string) => {
+    const m = fileMap.get(filename);
+    return m?.label || filename;
+  };
+
+  if (vizOrder === "ranking") {
+    return [...barchartData]
+      .sort((a, b) => b.mean - a.mean)
+      .map((d) => d.filename);
+  }
+
+  if (vizOrder === "group") {
+    return [...barchartData]
+      .sort((a, b) => {
+        const groupA = getGroupForFilename(a.filename);
+        const groupB = getGroupForFilename(b.filename);
+
+        if (groupA === groupB) {
+          const labelA = getDisplayLabel(a.filename);
+          const labelB = getDisplayLabel(b.filename);
+          return labelA.localeCompare(labelB, undefined, {
+            numeric: true,
+            sensitivity: "base",
+          });
+        }
+
+        return groupA.localeCompare(groupB, undefined, {
+          numeric: true,
+          sensitivity: "base",
+        });
+      })
+      .map((d) => d.filename);
+  }
+
+  return barchartData.map((d) => d.filename);
+}, [barchartData, fileMappings, vizOrder]);
 
   console.log("Extract Heatmap Data from predictionResult:", heatmapData);
 
@@ -517,7 +577,7 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
             <h3 style={{ textAlign: "left", color:"black", fontSize: "18px", marginBottom: "10px", marginTop: "40px"}}>
             <b>Univariate Analysis:</b> Predicted voxel average responses
             </h3>
-          <BarChart barChartData={barchartData} height={600} fileMappings={fileMappings}/>
+          <BarChart barChartData={barchartData} height={600} fileMappings={fileMappings} order={vizOrder} setOrder={setVizOrder}/>
             <h3 style={{ textAlign: "left", color:"black", fontSize: "18px", marginBottom: "50px", marginTop: "40px"}}><b>Multivariate Analysis:</b> Respresentational dissimilarity matrix (RDM) from predicted voxel responses</h3>
           {/* <Heatmap heatmapData={heatmapData} originalFilenames={originalFilenames} sortedFilenames={sortedFilenames} width={800} height={800} fileMappings={fileMappings}/> */}
           {barchartData.length <= 1 ? (
@@ -525,7 +585,7 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
               RDM unavailable for one image. Please upload more than 2 images to see the visualization.
             </div>
           ) : (
-            <Heatmap heatmapData={heatmapData} originalFilenames={originalFilenames} sortedFilenames={sortedFilenames} width={800} height={800} fileMappings={fileMappings}
+            <Heatmap heatmapData={heatmapData} originalFilenames={originalFilenames} sortedFilenames={orderedFilenames} width={800} height={800} fileMappings={fileMappings} order={vizOrder} 
             />
           )}
         </div>

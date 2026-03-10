@@ -2,10 +2,9 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { heatmapStyles, styleTooltip } from './heatmapstyles';
 
-const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, height, fileMappings}) => {
+const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, height, fileMappings, order}) => {
   const svgRef = useRef();
   const containerRef = useRef();
-  const [order, setOrder] = useState("name");
   const [containerWidth, setContainerWidth] = useState(0); 
 
     // Update container width dynamically
@@ -53,6 +52,16 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
       };
     };
 
+    const getGroupForFilename = (filename) => {
+      const m = fileMap.get(filename);
+      return m?.groupKey || "Ungrouped";
+    };
+
+    const getDisplayLabel = (filename) => {
+      const m = fileMap.get(filename);
+      return m?.label || filename;
+    };
+
   useEffect(() => {
 
     if (!heatmapData || heatmapData.length === 0) {
@@ -67,7 +76,7 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
-    const currentOrder = order === "name" ? originalFilenames : sortedFilenames;
+    const currentOrder = sortedFilenames?.length ? sortedFilenames : originalFilenames;
 
     const xScale = d3.scaleBand().domain(currentOrder).range([0, innerWidth]).padding(0);
     const yScale = d3.scaleBand().domain(currentOrder).range([0, innerHeight]).padding(0);
@@ -202,7 +211,9 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
 
                 </div>
               `)
-              .style("display", "block");
+              .style("display", "block")
+              .style("opacity", 1)
+              .style("visibility", "visible");
             })
             .on("mousemove", event => {
               const containerRect = containerRef.current.getBoundingClientRect(); 
@@ -210,7 +221,12 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
                 .style("left", `${event.clientX - containerRect.left + 10}px`)
                 .style("top", `${event.clientY - containerRect.top - 40}px`);
             })
-            .on("mouseout", () => {tooltip.style("display", "none");}),
+            .on("mouseout", () => {
+              tooltip
+                .style("display", "none")
+                .style("opacity", 0)
+                .style("visibility", "hidden");
+            }),
       );
     
     //legend

@@ -2,11 +2,11 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { barchartStyles, styleTooltip } from './barchartstyles';
 
-const BarChart = ({ barChartData, height, fileMappings }) => {
+const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
   const svgRef = useRef(null);
   const containerRef = useRef(null);
   const [containerWidth, setContainerWidth] = useState(0);
-  const [order, setOrder] = useState("group");
+  
   const [selectedGroups, setSelectedGroups] = useState([]);
 
 
