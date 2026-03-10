@@ -97,6 +97,7 @@ export default function useLoadData() {
       })
       .catch(err => {
         console.error('❌ Failed to load some files', err);
+        setLoading(false);
       });
   }, []);
 

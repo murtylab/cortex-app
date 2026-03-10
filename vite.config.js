@@ -2,15 +2,35 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 
-export default defineConfig({
+export default defineConfig(() => {
+  const hmrHost = process.env.VITE_HMR_HOST;
+  const hmrClientPort = process.env.VITE_HMR_CLIENT_PORT
+    ? Number(process.env.VITE_HMR_CLIENT_PORT)
+    : undefined;
+
+  const hmr = hmrHost
+    ? {
+        host: hmrHost,
+        clientPort: hmrClientPort ?? 443,
+      }
+    : undefined;
+
+  return {
   root: '.',
   plugins: [
     react(),
     viteStaticCopy({
       targets: [
         {
-          src: 'assets',
-          dest: '.'
+          // Only copy non-code static assets; JS/TS/TSX/JSX are handled by Vite.
+          // This avoids serving React source files (like the scoreboard) as raw text.
+          src: [
+            'assets/**/*.{png,jpg,jpeg,gif,webp,svg,ico}',
+            'assets/**/*.{css,scss}',
+            'assets/**/*.{json,txt,csv}',
+            'assets/**/*.{woff,woff2,ttf,eot,otf}'
+          ],
+          dest: '.',
         },
         {
           src: 'cortex-web-app/model-pages',
@@ -41,7 +61,7 @@ export default defineConfig({
     host: true,
     strictPort: true,
     port: 5173,
-    hmr: { host: 'sunny-weasel-grossly.ngrok-free.app', clientPort: 443 },
+    hmr,
   },
   resolve: {
     alias: {
@@ -49,4 +69,5 @@ export default defineConfig({
       '@assets': '/assets'
     },
   },
+};
 });

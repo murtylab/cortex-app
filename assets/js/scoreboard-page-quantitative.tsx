@@ -210,11 +210,29 @@ const ScoreboardPageQuantitative: React.FC = () => {
   }
 };
 
+  const hasData = Boolean(nsdData && murtyData);
 
-return (
+  if (loadingNew) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: 16 }}>
+        <div style={{ width: 40, height: 40, border: '3px solid #e0e0e0', borderTopColor: '#1890ff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        <span style={{ color: '#666' }}>Loading scoreboard data…</span>
+      </div>
+    );
+  }
+  if (!hasData) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: 12, padding: 24, textAlign: 'center' }}>
+        <span style={{ fontSize: 18, color: '#333' }}>Scoreboard data could not be loaded.</span>
+        <span style={{ color: '#666' }}>Check the browser console (F12) for errors and ensure JSON data files exist under <code>/assets/data/new/</code>.</span>
+      </div>
+    );
+  }
+
+  return (
     <div
       style={{
-        // 1. restrict to screen's height
         height: 'calc(100vh - var(--header-h, 0px))', 
         width: '100%',
         display: 'flex',
@@ -222,7 +240,7 @@ return (
         overflow: 'hidden', 
         padding: '2px 16px',    
         boxSizing: 'border-box',
-        background: 'var(--background-color)', 
+        background: 'var(--background-color, #f5f5f5)', 
       }}
     >
       {/* 2. SelectedFiltersBar */}

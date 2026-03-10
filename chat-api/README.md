@@ -49,7 +49,7 @@ Then open the web app; the widget in the lower-right calls `http://localhost:800
 - **Score** for a model in a region (e.g. “How does Nomic do in FFA?”).
 - Tolerates **spelling and capitalization** (fuzzy match on model names and ROIs).
 
-Scores use univariate data only; evaluation datasets exclude the training set (NSD or Murty185).
+Scores use univariate data only; “global score” averages over all available datasets excluding the training datasets (Murty185 and NSD1000), matching the Scoreboard’s “Global Score” column.
 
 ## Adding an LLM later
 
