@@ -28,7 +28,6 @@ type PreviewFile = {
 };
 
 
-
 type FileWithPath = File & { webkitRelativePath?: string };
 
 type VoxelsData = Record<
@@ -163,6 +162,9 @@ const Stepper: React.FC = () => {
   const [fileMappings, setFileMappings] = useState<PreviewFile[]>([]);
 
   const [predictionResult, setPredictionResult] = useState<any>(null);
+  const [predictionFFAResult, setPredictionFFAResult] = useState<any>(null);
+  const [predictionEBAResult, setPredictionEBAResult] = useState<any>(null);
+  const [predictionPPAResult, setPredictionPPAResult] = useState<any>(null);
 
   const [loading, setLoading] = useState(false);
   const [predictionLoading, setPredictionLoading] = useState(false); // new state
@@ -180,6 +182,12 @@ const Stepper: React.FC = () => {
   };
 
 type FileWithPath = File & { webkitRelativePath?: string };
+
+const clearRegionPredictionCache = () => {
+  setPredictionFFAResult(null);
+  setPredictionEBAResult(null);
+  setPredictionPPAResult(null);
+};
 
  
 const addIncomingFiles = (newFiles: File[]) => {
@@ -208,6 +216,7 @@ const addIncomingFiles = (newFiles: File[]) => {
     const next = [...prev, ...nextAdd];
     setFileMappings(next);
     setPredictionResult(null);
+    clearRegionPredictionCache();
     setPredictstep(1);
     return next;
   });
@@ -225,6 +234,7 @@ const removeOne = (uid: string) => {
 
     setFileMappings(next);
     setPredictionResult(null);
+    clearRegionPredictionCache();
     setPredictstep(1);
 
     if (next.length === 0) {
@@ -249,6 +259,7 @@ const clearGroup = (uidsToRemove: string[]) => {
 
     setFileMappings(next);
     setPredictionResult(null);
+    clearRegionPredictionCache();
     setPredictstep(1);
 
     if (next.length === 0) {
@@ -270,6 +281,7 @@ const clearAll = () => {
 
   setFileMappings([]);
   setPredictionResult(null);
+  clearRegionPredictionCache();
   setPredictstep(1);
   setUploaderKey((k) => k + 1); 
 };
@@ -289,16 +301,20 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
   useEffect(() => {
     setPredictionResult(null); // Clear previous results
     setPredictstep(1); // Reset button
-  }, [model, dataset, region, voxelOption, voxelNumber, paper, participantName]);
+  }, [ model, dataset, voxelOption, voxelNumber, paper, participantName]);
 
   useEffect(() => {
-    // Only auto-trigger prediction if we're on Step 3 (index 2)
-    if (current === 2) {
-      setPredictionResult(null);
-      setPredictstep(1);
-      handlePrediction();
-    }
-  }, [region]); // Only watch region
+    if (current !== 2) return;
+
+    const cached = getCachedResultByRegion(region);
+    console.log("region switched to:", region);
+    console.log("cached result found:", cached);
+    if (cached) return;
+
+    setPredictionResult(null);
+    setPredictstep(1);
+    handlePrediction();
+  }, [region, current, predictionFFAResult, predictionEBAResult, predictionPPAResult]);
 
   useEffect(() => {
     console.log("🔄 predictionResult updated:", predictionResult);
@@ -309,10 +325,83 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
     }
   }, [predictionResult]);
 
+  useEffect(() => {
+    console.log("😊FFA cache updated:", predictionFFAResult);
+  }, [predictionFFAResult]);
+
+  useEffect(() => {
+    console.log("😊EBA cache updated:", predictionEBAResult);
+  }, [predictionEBAResult]);
+
+  useEffect(() => {
+    console.log("😊PPA cache updated:", predictionPPAResult);
+  }, [predictionPPAResult]);
+
+  // useEffect(() => {
+  //   if (predictionResult == null) {
+  //     return;
+  //   }
+
+  //   if (region === "ffa") {
+  //     setPredictionFFAResult(predictionResult);
+  //   } else if (region === "eba") {
+  //     setPredictionEBAResult(predictionResult);
+  //   } else if (region === "ppa") {
+  //     setPredictionPPAResult(predictionResult);
+  //   }
+  // }, [predictionResult, region]);
+
+  const getCachedResultByRegion = (targetRegion: string) => {
+    if (targetRegion === "ffa") return predictionFFAResult;
+    if (targetRegion === "eba") return predictionEBAResult;
+    if (targetRegion === "ppa") return predictionPPAResult;
+    return null;
+  };
+
+  const currentRegionPredictionResult = useMemo(() => {
+    return getCachedResultByRegion(region) ?? predictionResult;
+  }, [region, predictionFFAResult, predictionEBAResult, predictionPPAResult, predictionResult]);
+
+  useEffect(() => {
+    const ffaCached = !!predictionFFAResult;
+    const ebaCached = !!predictionEBAResult;
+    const ppaCached = !!predictionPPAResult;
+
+    const selectedCache = getCachedResultByRegion(region);
+    const usingCache = selectedCache === currentRegionPredictionResult && !!selectedCache;
+    const usingLatestPrediction =
+      predictionResult === currentRegionPredictionResult && !usingCache;
+
+    let source = "none";
+    if (usingCache) source = `${region} cache`;
+    else if (usingLatestPrediction) source = "predictionResult fallback";
+
+    console.log("========== REGION DEBUG ==========");
+    console.log("current region:", region);
+    console.log("FFA cache exists:", ffaCached, predictionFFAResult);
+    console.log("EBA cache exists:", ebaCached, predictionEBAResult);
+    console.log("PPA cache exists:", ppaCached, predictionPPAResult);
+    console.log("selected cache for current region:", selectedCache);
+    console.log("predictionResult:", predictionResult);
+    console.log("currentRegionPredictionResult:", currentRegionPredictionResult);
+    console.log("currentRegionPredictionResult source:", source);
+    console.log("==================================");
+  }, [
+    region,
+    predictionResult,
+    predictionFFAResult,
+    predictionEBAResult,
+    predictionPPAResult,
+    currentRegionPredictionResult,
+  ]);
+
+
   // ✅ Ensure only the actual file is sent to Gradio
-  const handlePrediction = async () => {
+  const handlePrediction = async (targetRegion = region) => {
     console.log("📦 handlePrediction received files:");
     console.log(files);
+    console.log("🎯 request target region:", targetRegion);
+
     if (files.length === 0) {
       message.error("No files uploaded. Please upload files first.");
       return;
@@ -321,33 +410,43 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
     setPredictionLoading(true);
 
     try {
-      
       const uploadFiles = files.map((x) => {
         const ext = getExt(x.file.name);
-        const newName = `${safe(x.uid)}${ext}`;          
+        const newName = `${safe(x.uid)}${ext}`;
         return new File([x.file], newName, { type: x.file.type });
       });
 
       const serverKeys = uploadFiles.map((f) => f.name);
 
-    
       setFiles((prev) => prev.map((x, i) => ({ ...x, serverKey: serverKeys[i] })));
       setFileMappings((prev) => prev.map((x, i) => ({ ...x, serverKey: serverKeys[i] })));
 
-
       const paths: string[] = await uploadImages(uploadFiles);
 
-    
       const items = paths.map((path, i) => ({
         path,
         org_name: serverKeys[i],
       }));
 
       const result = await axios.post(`${SERVER_BASE_URL}/api/predict`, {
-        data: [items, region, dataset, model, true, true, true],
+        data: [items, targetRegion, dataset, model, true, true, true],
       });
 
-      setPredictionResult(result.data.data);
+      const resultData = result.data.data;
+
+      // 当前临时结果
+      setPredictionResult(resultData);
+
+      // 按请求发出时的 region 存 cache，不按当前界面的 region 存
+      if (targetRegion === "ffa") {
+        setPredictionFFAResult(resultData);
+      } else if (targetRegion === "eba") {
+        setPredictionEBAResult(resultData);
+      } else if (targetRegion === "ppa") {
+        setPredictionPPAResult(resultData);
+      }
+
+      console.log("✅ saved result into cache for:", targetRegion);
       message.success("Prediction complete!");
     } catch (e) {
       console.error(e);
@@ -359,11 +458,12 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
     }
   };
 
-  const barchartData = useBarchartData(predictionResult);
+  const barchartData = useBarchartData(currentRegionPredictionResult);
 
 
 
-  const { heatmapData, originalFilenames, sortedFilenames } = useHeatmapData(predictionResult);
+
+  const { heatmapData, originalFilenames, sortedFilenames } = useHeatmapData(currentRegionPredictionResult);
 
   const orderedFilenames = useMemo(() => {
   if (!barchartData || barchartData.length === 0) return [];
@@ -431,8 +531,8 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
 
   //support csv download
   const downloadData = () => {
-    if (predictionResult) {
-     const voxelsData = predictionResult?.[0]?.voxels as VoxelsData | undefined;
+    if (currentRegionPredictionResult) {
+     const voxelsData = currentRegionPredictionResult?.[0]?.voxels as VoxelsData | undefined;
 
     if (!voxelsData) {
       message.error("No voxels data available to download.");
@@ -640,7 +740,7 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
           <Button
             type="primary"
             onClick={() => {
-              predictstep === 1 ? handlePrediction() : next();
+              predictstep === 1 ? handlePrediction(region) : next();
             }}
             disabled={loading || files.length === 0}
           >
