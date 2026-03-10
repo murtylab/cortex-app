@@ -571,6 +571,7 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
             onClearGroup={(groupKey, uids) => clearGroup(uids)}
             onGroupOrderChange={(order: string[]) => console.log("Group order:", order)}
             foldable={true}
+            viewOnly={true}
           />
 
           {predictionLoading && <LinearIndeterminate />} {/* add progress bar when predictionLoading is true */}

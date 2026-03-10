@@ -21,13 +21,13 @@ type ImagePreviewGroupedDnDProps = {
   maxThumbsPerGroup?: number;
   showPathDebug?: boolean;
   foldable?: boolean;
+  viewOnly?: boolean;
 
   onRemove?: (uid: string) => void;
   onClear?: () => void;
   onClearGroup?: (groupKey: string, uidsToRemove: string[]) => void;
   onGroupOrderChange?: (order: string[]) => void;
   onRenameGroup?: (groupKey: string, newDisplayName: string) => void;
-
   onMoveItemToGroup?: (uid: string, toGroupKey: string) => void;
   onRenameGroupKey?: (oldKey: string, newKey: string) => void;
 };
@@ -46,6 +46,8 @@ export default function ImagePreviewGroupedDnD({
   maxThumbsPerGroup = 100,
   showPathDebug = false,
   foldable = false,
+  viewOnly = false,
+
 }: ImagePreviewGroupedDnDProps) {
   const getGroupKey = (file?: FileWithPath) => {
     const rel = file?.webkitRelativePath ?? "";
@@ -583,30 +585,31 @@ export default function ImagePreviewGroupedDnD({
                                 alt={it.file?.name || "image"}
                                 style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                               />
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  onRemove?.(it.id);
-                                }}
-                                style={{
-                                  position: "absolute",
-                                  top: 4,
-                                  right: 4,
-                                  border: "none",
-                                  borderRadius: 8,
-                                  padding: "4px 6px",
-                                  background: "rgba(0,0,0,0.55)",
-                                  color: "white",
-                                  cursor: "pointer",
-                                  fontSize: 10,
-                                  lineHeight: 1,
-                                }}
-                                title="Remove"
-                              >
-                                ✕
-                              </button>
+                                {!viewOnly && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    onRemove?.(it.id);
+                                  }}
+                                  style={{
+                                    position: "absolute",
+                                    top: 8,
+                                    right: 8,
+                                    border: "none",
+                                    borderRadius: 10,
+                                    padding: "6px 8px",
+                                    background: "rgba(0,0,0,0.55)",
+                                    color: "white",
+                                    cursor: "pointer",
+                                    fontSize: 12,
+                                  }}
+                                  title="Remove"
+                                >
+                                  ✕
+                                </button>
+                                )}
                             </div>
                           </div>
                         ))}
