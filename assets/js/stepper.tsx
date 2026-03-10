@@ -17,6 +17,7 @@ import ModelCard from './Lab/modelcard.jsx';
 import BarChart from './Lab/barchart.jsx';
 import Heatmap from './Lab/heatmap.jsx';
 import ImagePreviewGroupedDnD from './Lab/imagePreviewGrid.tsx';
+import BarChartAverage from './Lab/barchartaverage.jsx';
 
 type PreviewFile = {
   uid: string;       
@@ -167,8 +168,10 @@ const Stepper: React.FC = () => {
   const [predictionPPAResult, setPredictionPPAResult] = useState<any>(null);
 
   const [loading, setLoading] = useState(false);
-  const [predictionLoading, setPredictionLoading] = useState(false); // new state
+  const [predictionLoading, setPredictionLoading] = useState(false); 
 
+  const [showInsights, setShowInsights] = useState(false);
+  const [insightLoading, setInsightLoading] = useState(false);
 
   //visualization
   const [vizOrder, setVizOrder] = useState("group");
@@ -217,6 +220,7 @@ const addIncomingFiles = (newFiles: File[]) => {
     setFileMappings(next);
     setPredictionResult(null);
     clearRegionPredictionCache();
+    setShowInsights(false);
     setPredictstep(1);
     return next;
   });
@@ -236,6 +240,7 @@ const removeOne = (uid: string) => {
     setPredictionResult(null);
     clearRegionPredictionCache();
     setPredictstep(1);
+    setShowInsights(false);
 
     if (next.length === 0) {
       setUploaderKey((k) => k + 1); 
@@ -261,7 +266,7 @@ const clearGroup = (uidsToRemove: string[]) => {
     setPredictionResult(null);
     clearRegionPredictionCache();
     setPredictstep(1);
-
+    setShowInsights(false);
     if (next.length === 0) {
       setUploaderKey((k) => k + 1); 
     }
@@ -282,6 +287,7 @@ const clearAll = () => {
   setFileMappings([]);
   setPredictionResult(null);
   clearRegionPredictionCache();
+  setShowInsights(false);
   setPredictstep(1);
   setUploaderKey((k) => k + 1); 
 };
@@ -289,12 +295,13 @@ const clearAll = () => {
 const moveItemToGroup = (uid: string, toGroupKey: string) => {
   setFiles(prev => prev.map(f => (f.uid === uid ? { ...f, groupKey: toGroupKey } : f)));
   setFileMappings(prev => prev.map(f => (f.uid === uid ? { ...f, groupKey: toGroupKey } : f)));
+  
 };
 
 const renameGroupKey = (oldKey: string, newKey: string) => {
   setFiles(prev => prev.map(f => (f.groupKey === oldKey ? { ...f, groupKey: newKey } : f)));
   setFileMappings(prev => prev.map(f => (f.groupKey === oldKey ? { ...f, groupKey: newKey } : f)));
-};
+}
 
 
 
@@ -381,6 +388,36 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
     currentRegionPredictionResult,
   ]);
 
+
+  const handleGetInsights = async () => {
+    const missingRegions = ["ffa", "eba", "ppa"].filter(
+      (r) => !getCachedResultByRegion(r)
+    );
+
+    if (missingRegions.length === 0) {
+      setShowInsights(true);
+      return;
+    }
+
+    setInsightLoading(true);
+    try {
+      await Promise.all(missingRegions.map((r) => insightPrediction(r)));
+      setShowInsights(true);
+    } catch (e) {
+      console.error(e);
+      message.error("Failed to load advanced insights.");
+    } finally {
+      setInsightLoading(false);
+    }
+  };
+  const insightRegionDataMap = useMemo(() => {
+    return {
+      ffa: predictionFFAResult,
+      eba: predictionEBAResult,
+      ppa: predictionPPAResult,
+    };
+  }, [predictionFFAResult, predictionEBAResult, predictionPPAResult]);
+
   const handlePrediction = async (targetRegion = region) => {
     console.log("📦 handlePrediction received files:");
     console.log(files);
@@ -440,6 +477,47 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
       setPredictstep(2);
     }
   };
+
+  const insightPrediction = async (targetRegion: string) => {
+  const cached = getCachedResultByRegion(targetRegion);
+  if (cached) return cached;
+
+  setInsightLoading(true);
+  try {
+    const uploadFiles = files.map((x) => {
+      const ext = getExt(x.file.name);
+      const newName = `${safe(x.uid)}${ext}`;
+      return new File([x.file], newName, { type: x.file.type });
+    });
+
+    const serverKeys = uploadFiles.map((f) => f.name);
+
+    const paths: string[] = await uploadImages(uploadFiles);
+
+    const items = paths.map((path, i) => ({
+      path,
+      org_name: serverKeys[i],
+    }));
+
+    const result = await axios.post(`${SERVER_BASE_URL}/api/predict`, {
+      data: [items, targetRegion, dataset, model, true, true, true],
+    });
+
+    const resultData = result.data.data;
+
+    if (targetRegion === "ffa") {
+      setPredictionFFAResult(resultData);
+    } else if (targetRegion === "eba") {
+      setPredictionEBAResult(resultData);
+    } else if (targetRegion === "ppa") {
+      setPredictionPPAResult(resultData);
+    }
+
+    return resultData;
+  } finally {
+    setInsightLoading(false);
+  }
+};
 
   const barchartData = useBarchartData(currentRegionPredictionResult);
 
@@ -658,7 +736,15 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
             <h3 style={{ textAlign: "left", color:"black", fontSize: "18px", marginBottom: "10px", marginTop: "40px"}}>
             <b>Univariate Analysis:</b> Predicted voxel average responses
             </h3>
-          <BarChart barChartData={barchartData} height={600} fileMappings={fileMappings} order={vizOrder} setOrder={setVizOrder}/>
+            {barchartData.length > 0 && (
+              <BarChart
+                barChartData={barchartData}
+                height={600}
+                fileMappings={fileMappings}
+                order={vizOrder}
+                setOrder={setVizOrder}
+              />
+            )}
             <h3 style={{ textAlign: "left", color:"black", fontSize: "18px", marginBottom: "50px", marginTop: "40px"}}><b>Multivariate Analysis:</b> Respresentational dissimilarity matrix (RDM) from predicted voxel responses</h3>
           {/* <Heatmap heatmapData={heatmapData} originalFilenames={originalFilenames} sortedFilenames={sortedFilenames} width={800} height={800} fileMappings={fileMappings}/> */}
           {barchartData.length <= 1 ? (
@@ -668,6 +754,38 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
           ) : (
             <Heatmap heatmapData={heatmapData} originalFilenames={originalFilenames} sortedFilenames={orderedFilenames} width={800} height={800} fileMappings={fileMappings} order={vizOrder} 
             />
+          )}
+
+          <div style={{ marginTop: "20px",  display: "flex", justifyContent: "left", alignItems: "center", gap: "10px" }}>
+            <h3
+              style={{
+                textAlign: "left",
+                color: "black",
+                fontSize: "18px",
+                margin: 0,
+              }}
+            >
+              <b>Advanced Insights Across Regions</b>
+            </h3>
+
+            <Button
+              type="primary"
+              onClick={handleGetInsights}
+              loading={insightLoading}
+              disabled={files.length === 0}
+            >
+              Get Insights
+            </Button>
+          </div>
+
+          {showInsights && (
+            <div style={{ marginTop: "5px" }}>
+              <BarChartAverage
+                regionDataMap={insightRegionDataMap}
+                fileMappings={fileMappings}
+                height={560}
+              />
+            </div>
           )}
         </div>
       ),
@@ -684,9 +802,9 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
             colorPrimary: "var(--tungsten)", // Customize the primary color for Steps
           },
           Button: {
-            colorPrimary: "var(--tungsten)",                 // 正常状态
-            colorPrimaryHover: "var(--highlight-color-button)", // hover
-            colorPrimaryActive: "var(--highlight-color-button)", // 点击时
+            colorPrimary: "var(--tungsten)",                 
+            colorPrimaryHover: "var(--highlight-color-button)", 
+            colorPrimaryActive: "var(--highlight-color-button)", 
           },
            Progress: {
             colorPrimary: "var(--highlight-color-button)",
