@@ -337,20 +337,6 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
     console.log("😊PPA cache updated:", predictionPPAResult);
   }, [predictionPPAResult]);
 
-  // useEffect(() => {
-  //   if (predictionResult == null) {
-  //     return;
-  //   }
-
-  //   if (region === "ffa") {
-  //     setPredictionFFAResult(predictionResult);
-  //   } else if (region === "eba") {
-  //     setPredictionEBAResult(predictionResult);
-  //   } else if (region === "ppa") {
-  //     setPredictionPPAResult(predictionResult);
-  //   }
-  // }, [predictionResult, region]);
-
   const getCachedResultByRegion = (targetRegion: string) => {
     if (targetRegion === "ffa") return predictionFFAResult;
     if (targetRegion === "eba") return predictionEBAResult;
@@ -395,8 +381,6 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
     currentRegionPredictionResult,
   ]);
 
-
-  // ✅ Ensure only the actual file is sent to Gradio
   const handlePrediction = async (targetRegion = region) => {
     console.log("📦 handlePrediction received files:");
     console.log(files);
@@ -434,10 +418,9 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
 
       const resultData = result.data.data;
 
-      // 当前临时结果
+ 
       setPredictionResult(resultData);
 
-      // 按请求发出时的 region 存 cache，不按当前界面的 region 存
       if (targetRegion === "ffa") {
         setPredictionFFAResult(resultData);
       } else if (targetRegion === "eba") {
@@ -460,10 +443,7 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
 
   const barchartData = useBarchartData(currentRegionPredictionResult);
 
-
-
-
-  const { heatmapData, originalFilenames, sortedFilenames } = useHeatmapData(currentRegionPredictionResult);
+  const { heatmapData, originalFilenames } = useHeatmapData(currentRegionPredictionResult);
 
   const orderedFilenames = useMemo(() => {
   if (!barchartData || barchartData.length === 0) return [];
