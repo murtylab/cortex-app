@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as d3 from "d3";
 import { styleTooltip } from "./barchartstyles";
+import { Box } from "@mui/material";
 
 const REGION_ORDER = ["ffa", "eba", "ppa"];
 const GROUP_ORDER_FALLBACK = ["body", "face", "object", "scene"];
@@ -43,7 +44,7 @@ const stableJitter = (key, amplitude) => {
   return (normalized - 0.5) * amplitude;
 };
 
-const BarChartAverage = ({ regionDataMap, fileMappings, height = 560 }) => {
+const BoxPlot = ({ regionDataMap, fileMappings, height = 560 }) => {
   const svgRef = useRef(null);
   const containerRef = useRef(null);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -521,4 +522,4 @@ const BarChartAverage = ({ regionDataMap, fileMappings, height = 560 }) => {
   );
 };
 
-export default BarChartAverage;
+export default BoxPlot;

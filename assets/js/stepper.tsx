@@ -13,11 +13,17 @@ import RegionSelector from './Lab/regionselector.jsx';
 import Settings from './Lab/settings.jsx';
 import ModelCard from './Lab/modelcard.jsx';
 
+// image preview and grouping
+import ImagePreviewGroupedDnD from './Lab/imagePreviewGrid.tsx';
+
+
 // visualization graphics
 import BarChart from './Lab/barchart.jsx';
 import Heatmap from './Lab/heatmap.jsx';
-import ImagePreviewGroupedDnD from './Lab/imagePreviewGrid.tsx';
-import BarChartAverage from './Lab/barchartaverage.jsx';
+
+import BoxPlot from './Lab/boxplot.jsx';
+
+
 
 type PreviewFile = {
   uid: string;       
@@ -143,6 +149,9 @@ const Stepper: React.FC = () => {
   const [current, setCurrent] = useState(0);
   const [predictstep, setPredictstep] = useState(1);
 
+
+
+  //default settings
   const DEFAULT_REGION = "ffa";
   const DEFAULT_MODEL = "clip_rn50";
   const DEFAULT_DATASET = "nsd_1000";
@@ -167,14 +176,20 @@ const Stepper: React.FC = () => {
   const [predictionEBAResult, setPredictionEBAResult] = useState<any>(null);
   const [predictionPPAResult, setPredictionPPAResult] = useState<any>(null);
 
+
+  // basic visulization and prediction states
   const [loading, setLoading] = useState(false);
   const [predictionLoading, setPredictionLoading] = useState(false); 
 
+  // insight visulalization states
   const [showInsights, setShowInsights] = useState(false);
   const [insightLoading, setInsightLoading] = useState(false);
 
   //visualization
   const [vizOrder, setVizOrder] = useState("group");
+
+  // prestore dataset
+  const[prestoreDataset, setPrestoreDataset] = useState<string | null>(null);
 
   const next = () => setCurrent((prev) => prev + 1);
   const prev = () => setCurrent((prev) => prev - 1);
@@ -780,7 +795,7 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
 
           {showInsights && (
             <div style={{ marginTop: "5px" }}>
-              <BarChartAverage
+              <BoxPlot
                 regionDataMap={insightRegionDataMap}
                 fileMappings={fileMappings}
                 height={560}
