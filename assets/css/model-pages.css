@@ -1,0 +1,232 @@
+/* Model page styles — matches the Virtual Visual Cortex design language */
+
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:wght@400;700&display=swap');
+
+:root {
+  --bg:          #f7f7f4;
+  --text-main:   #3d3832;
+  --text-sub:    #6b6358;
+  --heading:     #2c2c2c;
+  --surface:     #ffffff;
+  --border:      #e5e1db;
+  --highlight:   linear-gradient(135deg, #c98d9a 0%, #b8a4bc 50%, #c4b4cc 100%);
+  --highlight-btn: linear-gradient(135deg, #d4a8b2 0%, #c9bcd0 50%, #d3c7da 100%);
+  --accent:      #a07aaa;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-main);
+  font-family: 'Lato', 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Neural network background canvas */
+#neuralCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.model-page {
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(61, 56, 50, 0.10);
+  margin: 2rem auto;
+  max-width: 1200px;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.model-header {
+  background: var(--highlight);
+  color: #fff;
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.model-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.model-header p {
+  font-size: 1.15rem;
+  opacity: 0.92;
+  margin-bottom: 2rem;
+}
+
+.back-button {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 0.8rem 2rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.32);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.model-content {
+  padding: 3rem 2rem;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.info-card {
+  background: var(--bg);
+  border-radius: 15px;
+  padding: 2rem;
+  border-left: 5px solid var(--accent);
+}
+
+.info-card h2 {
+  color: var(--heading);
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-family: 'Playfair Display', serif;
+}
+
+.info-item {
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-item strong {
+  color: var(--accent);
+  display: inline-block;
+  min-width: 120px;
+}
+
+.performance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.metric-card {
+  background: var(--highlight);
+  color: #fff;
+  padding: 2rem;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(135, 94, 143, 0.18);
+}
+
+.metric-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.metric-label {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.context-section {
+  background: var(--bg);
+  border-radius: 15px;
+  padding: 2rem;
+  margin-top: 2rem;
+}
+
+.context-section h2 {
+  color: var(--heading);
+  margin-bottom: 1.5rem;
+  font-family: 'Playfair Display', serif;
+}
+
+.context-section p {
+  color: var(--text-sub);
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.doc-link {
+  display: inline-block;
+  background: var(--highlight-btn);
+  color: #fff;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 600;
+  margin-top: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(135, 94, 143, 0.25);
+}
+
+.doc-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(135, 94, 143, 0.35);
+  color: #fff;
+}
+
+/* Navbar overrides */
+.navbar {
+  background: rgba(247, 247, 244, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 20px rgba(61, 56, 50, 0.08);
+}
+
+.navbar-brand {
+  font-weight: 700;
+  color: var(--accent) !important;
+}
+
+.navbar-nav .nav-link {
+  color: var(--text-main) !important;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+  color: var(--accent) !important;
+}
+
+/* Nav links (Home / The Lab / The Scoreboard) — match chatbot button gradient */
+.navmenu li:hover > a,
+.navmenu .active,
+.navmenu .active:focus {
+  background: linear-gradient(135deg, #c98d9a 0%, #b8a4bc 50%, #c4b4cc 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
+
+/* Sitename "Cortex" logo text — solid dark to match rest of site */
+.header .logo .sitename {
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: var(--heading);
+  color: var(--heading);
+}

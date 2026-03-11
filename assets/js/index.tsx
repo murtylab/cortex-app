@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import Stepper from './stepper.js';
+import Stepper from './stepper';
 
 function App() {
   return (

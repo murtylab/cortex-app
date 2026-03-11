@@ -1,0 +1,824 @@
+[
+  {
+    "value": "adversarial_inceptionv3",
+    "label": "Adv. Inception-v3",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://huggingface.co/docs/timm/en/models/adversarial-inception-v3"
+  },
+  {
+    "value": "aimv2",
+    "label": "Aimv2",
+    "type": "Multimodal Transformer",
+    "cardUrl": "https://huggingface.co/apple/aimv2-large-patch14-448/blob/main/README.md"
+  },
+  {
+    "value": "alexnet",
+    "label": "Alexnet",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://pytorch.org/vision/stable/models/generated/torchvision.models.alexnet.html"
+  },
+  {
+    "value": "alexnet_random",
+    "label": "Alexnet Random",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://dl.acm.org/doi/10.1145/3065386"
+  },
+  {
+    "value": "beit",
+    "label": "Beit",
+    "type": "Vision Transformer",
+    "cardUrl": "https://huggingface.co/microsoft/beit-base-patch16-224-pt22k-ft22k"
+  },
+  {
+    "value": "bit",
+    "label": "Bit",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://arxiv.org/abs/1912.11370"
+  },
+  {
+    "value": "blip2",
+    "label": "Blip2",
+    "type": "Vision-Language Model",
+    "cardUrl": "https://huggingface.co/Salesforce/blip2-itm-vit-g"
+  },
+  {
+    "value": "briaai",
+    "label": "Briaai",
+    "type": "Multimodal Transformer",
+    "cardUrl": "https://github.com/briaai"
+  },
+  {
+    "value": "clip_rn101",
+    "label": "CLIP-ResNet101",
+    "type": "Vision-Language Model",
+    "cardUrl": "https://github.com/murtylab/comparing-category-selectivity/blob/main/compcats/models/pretrained/resnet/resnet101_openaiclip.py"
+  },
+  {
+    "value": "clip_rn101_random",
+    "label": "Clip RN101 Random",
+    "type": "Vision-Language Model",
+    "cardUrl": "https://github.com/openai/clip/blob/main/model-card.md"
+  },
+  {
+    "value": "clip_rn50",
+    "label": "CLIP-ResNet50",
+    "type": "Vision-Language Model",
+    "cardUrl": "https://github.com/openai/clip/blob/main/model-card.md"
+  },
+  {
+    "value": "clip_rn50_random",
+    "label": "Clip RN50 Random",
+    "type": "Vision-Language Model",
+    "cardUrl": "https://github.com/openai/clip/blob/main/model-card.md"
+  },
+  {
+    "value": "clip_vit_b32",
+    "label": "CLIP-ViT-B/32",
+    "type": "Vision-Language Model",
+    "cardUrl": "https://github.com/openai/clip/blob/main/model-card.md"
+  },
+  {
+    "value": "clip_vit_b32_random",
+    "label": "Clip Vit B32 Random",
+    "type": "Vision-Language Model",
+    "cardUrl": "https://github.com/openai/clip/blob/main/model-card.md"
+  },
+  {
+    "value": "convnext",
+    "label": "ConvNeXt",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://arxiv.org/abs/2201.03545"
+  },
+  {
+    "value": "cornet_rt",
+    "label": "Cornet Rt",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://s3.amazonaws.com/cornet-models/cornet_rt-933c001c.pth"
+  },
+  {
+    "value": "cornet_s",
+    "label": "Cornet S",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://github.com/dicarlolab/CORnet"
+  },
+  {
+    "value": "cornet_z",
+    "label": "Cornet Z",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://github.com/dicarlolab/CORnet"
+  },
+  {
+    "value": "cross_vit",
+    "label": "Cross Vit",
+    "type": "Vision Transformer",
+    "cardUrl": "https://arxiv.org/abs/2103.14899"
+  },
+  {
+    "value": "densenet121",
+    "label": "Densenet121",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://pytorch.org/vision/stable/models/generated/torchvision.models.densenet121.html#torchvision.models.DenseNet121_Weights"
+  },
+  {
+    "value": "densenet161",
+    "label": "Densenet161",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://pytorch.org/vision/stable/models/generated/torchvision.models.densenet161.html#torchvision.models.DenseNet161_Weights"
+  },
+  {
+    "value": "densenet169",
+    "label": "Densenet169",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://pytorch.org/vision/stable/models/generated/torchvision.models.densenet169.html#torchvision.models.DenseNet169_Weights"
+  },
+  {
+    "value": "densenet201",
+    "label": "Densenet201",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://pytorch.org/vision/stable/models/generated/torchvision.models.densenet201.html#torchvision.models.DenseNet201_Weights"
+  },
+  {
+    "value": "dinov2",
+    "label": "DINOv2-B",
+    "type": "Self-Supervised Vision Transformer Model",
+    "cardUrl": "https://huggingface.co/docs/transformers/en/model_doc/dinov2"
+  },
+  {
+    "value": "dinov2_large",
+    "label": "DINOv2-L",
+    "type": "Self-Supervised Vision Transformer Model",
+    "cardUrl": "https://huggingface.co/facebook/dinov2-large"
+  },
+  {
+    "value": "dinov2_random",
+    "label": "Dinov2 Random",
+    "type": "Self-Supervised Vision Transformer Model",
+    "cardUrl": "https://github.com/facebookresearch/dinov2/blob/main/MODEL_CARD.md"
+  },
+  {
+    "value": "dreamsim_vitb16",
+    "label": "Dreamsim Vitb16",
+    "type": "Vision Transformer",
+    "cardUrl": "https://github.com/ssundaram21/dreamsim/blob/main/dreamsim/model.py"
+  },
+  {
+    "value": "dreamsim_vitb32",
+    "label": "Dreamsim Vitb32",
+    "type": "Vision Transformer",
+    "cardUrl": "https://github.com/murtylab/comparing-category-selectivity/blob/main/compcats/models/pretrained/vit/vitb32_dreamsim.py"
+  },
+  {
+    "value": "efficient_net",
+    "label": "Efficient Net",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://arxiv.org/abs/1905.11946"
+  },
+  {
+    "value": "ese_vovnet",
+    "label": "Ese Vovnet",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://huggingface.co/docs/timm/en/models/ese-vovnet"
+  },
+  {
+    "value": "eva2",
+    "label": "EVA-02",
+    "type": "Vision Transformer",
+    "cardUrl": "https://github.com/baaivision/EVA"
+  },
+  {
+    "value": "fbnet",
+    "label": "Fbnet",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://huggingface.co/docs/timm/en/models/fbnet"
+  },
+  {
+    "value": "ghost_net",
+    "label": "Ghost Net",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://arxiv.org/abs/1911.11907"
+  },
+  {
+    "value": "google_vit",
+    "label": "Google ViT",
+    "type": "Vision Transformer",
+    "cardUrl": "https://arxiv.org/abs/2010.11929"
+  },
+  {
+    "value": "hrnet",
+    "label": "HRNet",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://huggingface.co/docs/timm/en/models/hrnet"
+  },
+  {
+    "value": "inception_rn_v2",
+    "label": "Inception-ResNet-v2",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://arxiv.org/abs/1602.07261"
+  },
+  {
+    "value": "inceptionv3",
+    "label": "Inceptionv3",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://huggingface.co/docs/timm/en/models/inception-v3"
+  },
+  {
+    "value": "inceptionv4",
+    "label": "Inceptionv4",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://huggingface.co/docs/timm/en/models/inception-v4"
+  },
+  {
+    "value": "kosmos2",
+    "label": "Kosmos2",
+    "type": "Vision-Language Model",
+    "cardUrl": "https://huggingface.co/microsoft/kosmos-2-patch14-224"
+  },
+  {
+    "value": "mixnet",
+    "label": "Mixnet",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://huggingface.co/docs/timm/en/models/mixnet"
+  },
+  {
+    "value": "mnasnet",
+    "label": "Mnasnet",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://huggingface.co/docs/timm/en/models/mnasnet"
+  },
+  {
+    "value": "mobilenetv2",
+    "label": "Mobilenetv2",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://arxiv.org/abs/1801.04381"
+  },
+  {
+    "value": "nomic",
+    "label": "Nomic",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://blog.nomic.ai/posts/nomic-embed-text-v1"
+  },
+  {
+    "value": "resnet101",
+    "label": "ResNet-101",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://arxiv.org/abs/1512.03385"
+  },
+  {
+    "value": "resnet101_imagenet1kv1",
+    "label": "Resnet101 Imagenet1Kv1",
+    "type": "Convolutional Neural Network",
+    "cardUrl": ""
+  },
+  {
+    "value": "resnet101_random",
+    "label": "Resnet101 Random",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://arxiv.org/abs/1512.03385"
+  },
+  {
+    "value": "resnet18",
+    "label": "ResNet-18",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://arxiv.org/abs/1512.03385"
+  },
+  {
+    "value": "resnet18_random",
+    "label": "Resnet18 Random",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://arxiv.org/abs/1512.03385"
+  },
+  {
+    "value": "resnet50",
+    "label": "ResNet-50",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://arxiv.org/abs/1512.03385"
+  },
+  {
+    "value": "resnet50_places365",
+    "label": "Resnet50 Places365",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "http://places2.csail.mit.edu/models_places365/resnet50_places365.pth.tar"
+  },
+  {
+    "value": "resnet50_random",
+    "label": "Resnet50 Random",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://arxiv.org/abs/1512.03385"
+  },
+  {
+    "value": "resnet50_vggface2",
+    "label": "Resnet50 Vggface2",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://www.robots.ox.ac.uk/~vgg/data/vgg_face2/"
+  },
+  {
+    "value": "robust_densenet161_epsilon_3",
+    "label": "Robust Densenet161 Epsilon 3",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": ""
+  },
+  {
+    "value": "robust_mnasnet_epsilon_3",
+    "label": "Robust Mnasnet Epsilon 3",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": ""
+  },
+  {
+    "value": "robust_mobilenetv2_epsilon_3",
+    "label": "Robust Mobilenetv2 Epsilon 3",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": ""
+  },
+  {
+    "value": "robust_rn18_epsilon_003",
+    "label": "Robust RN18 Epsilon 003",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_rn18_epsilon_01",
+    "label": "Robust RN18 Epsilon 01",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_rn18_epsilon_025",
+    "label": "Robust RN18 Epsilon 025",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_rn18_epsilon_3",
+    "label": "Robust RN18 Epsilon 3",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_rn18_epsilon_5",
+    "label": "Robust RN18 Epsilon 5",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_rn50_blur_strong",
+    "label": "Robust RN50 Blur Strong",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_rn50_blur_weak",
+    "label": "Robust RN50 Blur Weak",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_rn50_epsilon_003",
+    "label": "Robust RN50 Epsilon 003",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_rn50_epsilon_01",
+    "label": "Robust RN50 Epsilon 01",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_rn50_epsilon_025",
+    "label": "Robust RN50 Epsilon 025",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_rn50_epsilon_3",
+    "label": "Robust RN50 Epsilon 3",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_rn50_epsilon_5",
+    "label": "Robust RN50 Epsilon 5",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_vgg16_blur_strong",
+    "label": "Robust Vgg16 Blur Strong",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_vgg16_blur_weak",
+    "label": "Robust Vgg16 Blur Weak",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_vgg16_bn_epsilon_3",
+    "label": "Robust Vgg16 Bn Epsilon 3",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_vgg19_blur_strong",
+    "label": "Robust Vgg19 Blur Strong",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_vgg19_blur_weak",
+    "label": "Robust Vgg19 Blur Weak",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_wideresnet50_epsilon_003",
+    "label": "Robust Wideresnet50 Epsilon 003",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_wideresnet50_epsilon_01",
+    "label": "Robust Wideresnet50 Epsilon 01",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_wideresnet50_epsilon_025",
+    "label": "Robust Wideresnet50 Epsilon 025",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_wideresnet50_epsilon_3",
+    "label": "Robust Wideresnet50 Epsilon 3",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_wideresnet50_epsilon_5",
+    "label": "Robust Wideresnet50 Epsilon 5",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "siglip",
+    "label": "SigLIP",
+    "type": "Vision-Language Model",
+    "cardUrl": "https://huggingface.co/google/siglip-base-patch16-224"
+  },
+  {
+    "value": "siglip2",
+    "label": "SigLIP2",
+    "type": "Vision-Language Model",
+    "cardUrl": "https://huggingface.co/docs/transformers/main/en/model_doc/siglip2"
+  },
+  {
+    "value": "taskonomy_autoencoding",
+    "label": "Taskonomy Autoencoding",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_class_object",
+    "label": "Taskonomy Class Object",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_class_scene",
+    "label": "Taskonomy Class Scene",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_colorization",
+    "label": "Taskonomy Colorization",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_curvature",
+    "label": "Taskonomy Curvature",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_denoising",
+    "label": "Taskonomy Denoising",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_depth_euclidean",
+    "label": "Taskonomy Depth Euclidean",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_depth_zbuffer",
+    "label": "Taskonomy Depth Zbuffer",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_edge_occlusion",
+    "label": "Taskonomy Edge Occlusion",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_edge_texture",
+    "label": "Taskonomy Edge Texture",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_ego_motion",
+    "label": "Taskonomy Ego Motion",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_inpainting",
+    "label": "Taskonomy Inpainting",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_jigsaw",
+    "label": "Taskonomy Jigsaw",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_keypoints2d",
+    "label": "Taskonomy Keypoints2D",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_keypoints3d",
+    "label": "Taskonomy Keypoints3D",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_non_fixated",
+    "label": "Taskonomy Non Fixated",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_normal",
+    "label": "Taskonomy Normal",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_point_matching",
+    "label": "Taskonomy Point Matching",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_reshading",
+    "label": "Taskonomy Reshading",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_rgb2depth",
+    "label": "Taskonomy Rgb2Depth",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_rgb2mist",
+    "label": "Taskonomy Rgb2Mist",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_rgb2sfnorm",
+    "label": "Taskonomy Rgb2Sfnorm",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_room_layout",
+    "label": "Taskonomy Room Layout",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_segment_semantic",
+    "label": "Taskonomy Segment Semantic",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_segment_unsup2d",
+    "label": "Taskonomy Segment Unsup2D",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_surface_normals",
+    "label": "Taskonomy Surface Normals",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "taskonomy_vanishing_points",
+    "label": "Taskonomy Vanishing Points",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "toponets_rn18",
+    "label": "Toponets RN18",
+    "type": "TopoNets (Topographic)",
+    "cardUrl": "https://arxiv.org/abs/2501.16396"
+  },
+  {
+    "value": "toponets_rn18_tau_0.5",
+    "label": "Toponets RN18 Tau 0.5",
+    "type": "TopoNets (Topographic)",
+    "cardUrl": "https://arxiv.org/abs/2501.16396"
+  },
+  {
+    "value": "toponets_rn18_tau_1",
+    "label": "Toponets RN18 Tau 1",
+    "type": "TopoNets (Topographic)",
+    "cardUrl": "https://arxiv.org/abs/2501.16396"
+  },
+  {
+    "value": "toponets_rn18_tau_20",
+    "label": "Toponets RN18 Tau 20",
+    "type": "TopoNets (Topographic)",
+    "cardUrl": "https://arxiv.org/abs/2501.16396"
+  },
+  {
+    "value": "toponets_rn18_tau_5",
+    "label": "Toponets RN18 Tau 5",
+    "type": "TopoNets (Topographic)",
+    "cardUrl": "https://arxiv.org/abs/2501.16396"
+  },
+  {
+    "value": "toponets_rn18_tau_50",
+    "label": "Toponets RN18 Tau 50",
+    "type": "TopoNets (Topographic)",
+    "cardUrl": "https://arxiv.org/abs/2501.16396"
+  },
+  {
+    "value": "toponets_rn50",
+    "label": "Toponets RN50",
+    "type": "TopoNets (Topographic)",
+    "cardUrl": "https://arxiv.org/abs/2501.16396"
+  },
+  {
+    "value": "toponets_vit",
+    "label": "Toponets Vit",
+    "type": "TopoNets (Topographic)",
+    "cardUrl": "https://github.com/toponets/toponets"
+  },
+  {
+    "value": "vgg16_imagenet1kv1",
+    "label": "VGG-16 (ImageNet v1)",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://arxiv.org/abs/1409.1556"
+  },
+  {
+    "value": "vgg16_imagenet1kv1_random",
+    "label": "Vgg16 Imagenet1Kv1 Random",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://arxiv.org/abs/1409.1556"
+  },
+  {
+    "value": "vgg19_imagenet1kv1",
+    "label": "VGG-19 (ImageNet v1)",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://arxiv.org/abs/1409.1556"
+  },
+  {
+    "value": "vgg19_imagenet1kv1_random",
+    "label": "Vgg19 Imagenet1Kv1 Random",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://arxiv.org/abs/1409.1556"
+  },
+  {
+    "value": "vone_alexnet",
+    "label": "VOne Alexnet",
+    "type": "VOneNet (Neuro-inspired)",
+    "cardUrl": "https://proceedings.neurips.cc/paper/2020/hash/98b17f068d5d9b7668e19fb8ae470841-Abstract.html"
+  },
+  {
+    "value": "vone_cornet_s",
+    "label": "VOne Cornet S",
+    "type": "VOneNet (Neuro-inspired)",
+    "cardUrl": "https://proceedings.neurips.cc/paper/2020/hash/98b17f068d5d9b7668e19fb8ae470841-Abstract.html"
+  },
+  {
+    "value": "vone_rn50",
+    "label": "VOne RN50",
+    "type": "VOneNet (Neuro-inspired)",
+    "cardUrl": "https://proceedings.neurips.cc/paper/2020/hash/98b17f068d5d9b7668e19fb8ae470841-Abstract.html"
+  },
+  {
+    "value": "webssl_dino300m",
+    "label": "WebSSL Dino300M",
+    "type": "Self-Supervised Vision Transformer Model",
+    "cardUrl": "https://arxiv.org/abs/2104.14294"
+  },
+  {
+    "value": "webssl_mae300m",
+    "label": "WebSSL Mae300M",
+    "type": "Self-Supervised Vision Transformer Model",
+    "cardUrl": "https://arxiv.org/abs/2111.06377"
+  },
+  {
+    "value": "wideresnet101",
+    "label": "WideResNet-101",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://huggingface.co/docs/timm/en/models/wide-resnet"
+  },
+  {
+    "value": "wideresnet50",
+    "label": "WideResNet-50",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://arxiv.org/abs/1605.07146"
+  },
+  {
+    "value": "xception",
+    "label": "Xception",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://huggingface.co/docs/timm/en/models/xception"
+  },
+  {
+    "value": "densenet161_random",
+    "label": "Densenet161 Random",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://arxiv.org/abs/1608.06993"
+  },
+  {
+    "value": "google_vit_random",
+    "label": "Google Vit Random",
+    "type": "Vision Transformer",
+    "cardUrl": "https://arxiv.org/abs/2010.11929"
+  },
+  {
+    "value": "nomic_random",
+    "label": "Nomic Random",
+    "type": "Convolutional Neural Network",
+    "cardUrl": "https://blog.nomic.ai/posts/nomic-embed-text-v1"
+  },
+  {
+    "value": "robust_rn18_blur_weak",
+    "label": "Robust RN18 Blur Weak",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "robust_rn18_blur_strong",
+    "label": "Robust RN18 Blur Strong",
+    "type": "Adversarial/Robust Variant",
+    "cardUrl": "https://github.com/MadryLab/robustness"
+  },
+  {
+    "value": "taskonomy_segment_unsup25d",
+    "label": "Taskonomy Segment Unsup25D",
+    "type": "Taskonomy (Task-Specific Vision)",
+    "cardUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  {
+    "value": "tdann_simclr",
+    "label": "TDANN Simclr",
+    "type": "TDANN (Brain-Optimized CNN)",
+    "cardUrl": "https://www.biorxiv.org/content/10.1101/2023.12.19.572460v2"
+  },
+  {
+    "value": "tdann_simclr_alpha_2",
+    "label": "TDANN Simclr Alpha 2",
+    "type": "TDANN (Brain-Optimized CNN)",
+    "cardUrl": "https://www.biorxiv.org/content/10.1101/2023.12.19.572460v2"
+  },
+  {
+    "value": "tdann_simclr_alpha_5",
+    "label": "TDANN Simclr Alpha 5",
+    "type": "TDANN (Brain-Optimized CNN)",
+    "cardUrl": "https://www.biorxiv.org/content/10.1101/2023.12.19.572460v2"
+  },
+  {
+    "value": "tdann_simclr_alpha_10",
+    "label": "TDANN Simclr Alpha 10",
+    "type": "TDANN (Brain-Optimized CNN)",
+    "cardUrl": "https://www.biorxiv.org/content/10.1101/2023.12.19.572460v2"
+  },
+  {
+    "value": "tdann_simclr_alpha_100",
+    "label": "TDANN Simclr Alpha 100",
+    "type": "TDANN (Brain-Optimized CNN)",
+    "cardUrl": "https://www.biorxiv.org/content/10.1101/2023.12.19.572460v2"
+  }
+]

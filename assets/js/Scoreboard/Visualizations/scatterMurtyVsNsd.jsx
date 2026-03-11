@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
-import uniIcon from "../../../img/scatterplot/uni.webp";
-import multiIcon from "../../../img/scatterplot/multi.webp";
+const uniIcon = '/assets/img/scatterplot/uni.webp';
+const multiIcon = '/assets/img/scatterplot/multi.webp';
 
 const ScatterMurtyVsNsd = ({ murtyData, nsdData, roi, dataset, chartType, showOverlay, onModelClick }) => {
   const containerRef = useRef();

@@ -30,6 +30,7 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:web": "cd cortex-web-app && npm run dev",
     "build": "vite build",
     "preview": "vite preview"
   }
