@@ -12,7 +12,7 @@ import DatasetSelect from './Scoreboard/Settings/datasetselect.jsx';
 
 
 import ChartSelect from './Scoreboard/Settings/chartselect.jsx';
-// import PageSelect from './Scoreboard/Settings/pageselect.jsx';
+import PageSelect from './Scoreboard/Settings/pageselect.jsx';
 import QuestionSelect from './Scoreboard/Settings/questionselect.jsx';
 
 
@@ -388,14 +388,19 @@ const ScoreboardPageQuantitative: React.FC = () => {
             />
           )}
 
+          {/* view toggle */}
+          <div style={{ flex: '0 0 auto' }}>
+            <PageSelect value={pageView} onChange={(val: string) => setPageView(val)} />
+          </div>
+
           {/* chart: horizontal*/}
         <div
           style={{
             flex: 1,
             minHeight: 0,
-            display: isDatasetDetailMode ? 'flex' : 'grid',
+            display: (isDatasetDetailMode || pageView === '2') ? 'flex' : 'grid',
             flexDirection: 'column',
-            gridTemplateColumns: pageView === '2' ? '1fr' : '1fr 6fr',
+            gridTemplateColumns: '1fr 6fr',
             gap: 16
           }}
         >
@@ -521,7 +526,7 @@ const ScoreboardPageQuantitative: React.FC = () => {
                 minWidth: 0,
 
                 overflow: 'hidden',
-                flex: isDatasetDetailMode ? 1 : 'none',
+                flex: (isDatasetDetailMode || pageView === '2') ? 1 : 'none',
                 overflowY: 'auto',
               }}
             >
@@ -554,12 +559,12 @@ const ScoreboardPageQuantitative: React.FC = () => {
               <div
                 style={{
                   flex: 1,
-                 overflowY: isDatasetDetailMode ? "auto" : "hidden",
-
+                  minHeight: 0,
+                  overflowY: isDatasetDetailMode ? "auto" : "hidden",
                   overflowX: isDatasetDetailMode ? "hidden" : "auto",
                   position: 'relative',
-                  display: 'flex', // 始终使用 flex 布局以支持多图横向排列
-                  flexDirection: isDatasetDetailMode ? 'column' : 'row',
+                  display: 'flex',
+                  flexDirection: (isDatasetDetailMode || pageView === '2') ? 'column' : 'row',
                   justifyContent: training === 'Murty185 VS NSD1000' ? 'center' : 'flex-start',
                   gap: isDatasetDetailMode ? 0 : 24,
                   paddingBottom: 10
