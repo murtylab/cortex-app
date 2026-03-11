@@ -22,10 +22,11 @@ export default defineConfig(() => {
     viteStaticCopy({
       targets: [
         // Copy entire subdirs so paths are preserved under dist/assets/
-        { src: 'assets/img',    dest: 'assets' },
-        { src: 'assets/data',   dest: 'assets' },
-        { src: 'assets/vendor', dest: 'assets' },
-        { src: 'assets/css',    dest: 'assets' },
+        { src: 'assets/img',        dest: 'assets' },
+        { src: 'assets/data',       dest: 'assets' },
+        { src: 'assets/vendor',     dest: 'assets' },
+        { src: 'assets/css',        dest: 'assets' },
+        { src: 'assets/brainModel', dest: 'assets' },
         // Chatbot widget (vanilla JS + CSS served at original paths)
         { src: 'assets/js/chatbot/chatbot-widget.js',  dest: 'assets/js/chatbot' },
         { src: 'assets/js/chatbot/chatbot-widget.css', dest: 'assets/js/chatbot' },
