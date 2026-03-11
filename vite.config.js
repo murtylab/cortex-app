@@ -29,11 +29,12 @@ export default defineConfig(() => {
             'assets/**/*.{css,scss}',
             'assets/**/*.{json,txt,csv}',
             'assets/**/*.{woff,woff2,ttf,eot,otf}',
-            'assets/js/chatbot/*.js',
-            'assets/js/main.js',
-            'assets/vendor/**/*.{js,css}',
           ],
           dest: '.',
+        },
+        {
+          src: 'assets/js/chatbot/chatbot-widget.js',
+          dest: 'assets/js/chatbot',
         },
         {
           src: 'cortex-web-app/model-pages',
