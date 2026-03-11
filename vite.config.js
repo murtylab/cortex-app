@@ -37,6 +37,14 @@ export default defineConfig(() => {
           dest: 'assets/js/chatbot',
         },
         {
+          src: 'assets/js/main.js',
+          dest: 'assets/js',
+        },
+        {
+          src: 'assets/vendor',
+          dest: 'assets',
+        },
+        {
           src: 'cortex-web-app/model-pages',
           dest: '.'
         }
