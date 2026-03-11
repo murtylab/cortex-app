@@ -58,6 +58,7 @@ class ModelMeta(BaseModel):
 class ChatRequest(BaseModel):
     """Incoming chat message."""
     message: str = Field(..., min_length=1, max_length=2000)
+    page_context: Optional[str] = None  # e.g. "model_page:resnet50", "scoreboard", "lab"
 
 
 class ChatResponse(BaseModel):

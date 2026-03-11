@@ -6,13 +6,19 @@
   // ---- Page detection -------------------------------------------------
   function getPageContext() {
     const path = window.location.pathname.toLowerCase();
+    if (path.includes("model-pages") || path.includes("model_pages")) {
+      // Extract model name from filename (e.g. "resnet50" from "resnet50.html")
+      const match = path.match(/\/([^/]+)\.html?$/);
+      const modelName = match ? match[1] : null;
+      return { type: "model_page", modelName };
+    }
     if (path.includes("lablanding") || path.includes("lab-page") || path.includes("lab-landing") || path.includes("lab.html")) {
-      return "lab";
+      return { type: "lab", modelName: null };
     }
     if (path.includes("scoreboard")) {
-      return "scoreboard";
+      return { type: "scoreboard", modelName: null };
     }
-    return "home";
+    return { type: "home", modelName: null };
   }
 
   const pageContext = getPageContext();
@@ -33,6 +39,11 @@
       "Which AI models best predict brain activity across datasets?",
       "What do the performance scores mean?",
       "Which datasets are hardest to explain?",
+    ],
+    model_page: [
+      "What is this model?",
+      "How does this model perform on brain prediction?",
+      "How does this model compare to others?",
     ],
   };
 
@@ -157,14 +168,111 @@
     normalizedAnswers[normalizeText(key)] = val;
   }
 
+  // ---- Model page links -----------------------------------------------
+  // Map model display names → their model-page HTML file.
+  // Order matters: more-specific / longer names must come before shorter prefixes
+  // so the single-pass regex prefers them (e.g. "CLIP-RN50" before "CLIP").
+  const MODEL_LINK_MAP = [
+    ["WebSSL-DINO300M", "webssl_dino300m.html"],
+    ["WebSSL-MAE300M",  "webssl_mae300m.html"],
+    ["CLIP-ViT-B/32",   "clip_vit_b32.html"],
+    ["CLIP ViT-B/32",   "clip_vit_b32.html"],
+    ["CLIP-RN101",      "clip_rn101.html"],
+    ["CLIP-RN50",       "clip_rn50.html"],
+    ["CLIP RN101",      "clip_rn101.html"],
+    ["CLIP RN50",       "clip_rn50.html"],
+    ["DINOv2-large",    "dinov2_large.html"],
+    ["Inception-v3",    "inceptionv3.html"],
+    ["WideResNet101",   "wideresnet101.html"],
+    ["WideResNet50",    "wideresnet50.html"],
+    ["WideResNet",      "wideresnet50.html"],
+    ["MobileNetV2",     "mobilenetv2.html"],
+    ["EfficientNet",    "efficient_net.html"],
+    ["CORnet-RT",       "cornet_rt.html"],
+    ["CORnet-S",        "cornet_s.html"],
+    ["CORnet-Z",        "cornet_z.html"],
+    ["VOneAlexNet",     "vone_alexnet.html"],
+    ["VOneNet",         "vone_rn50.html"],
+    ["ResNet101",       "resnet101.html"],
+    ["ResNet50",        "resnet50.html"],
+    ["ResNet18",        "resnet18.html"],
+    ["DenseNet",        "densenet121.html"],
+    ["EVA-02",          "eva2.html"],
+    ["DINOv2",          "dinov2.html"],
+    ["SigLIP2",         "siglip2.html"],
+    ["SigLIP",          "siglip.html"],
+    ["AIMv2",           "aimv2.html"],
+    ["Kosmos2",         "kosmos2.html"],
+    ["ConvNeXt",        "convnext.html"],
+    ["TDANN",           "tdann_simclr.html"],
+    ["BLIP2",           "blip2.html"],
+    ["TopoNets",        "toponets_rn18.html"],
+    ["Taskonomy",       "taskonomy_depth_euclidean.html"],
+    ["DreamSim",        "dreamsim_vitb16.html"],
+    ["CrossViT",        "cross_vit.html"],
+    ["AlexNet",         "alexnet.html"],
+    ["VGG16",           "vgg16_imagenet1kv1.html"],
+    ["VGG19",           "vgg19_imagenet1kv1.html"],
+    ["BEiT",            "beit.html"],
+    ["HRNet",           "hrnet.html"],
+    ["Nomic",           "nomic.html"],
+    ["Xception",        "xception.html"],
+    ["Inception",       "inceptionv3.html"],
+    ["ResNet",          "resnet50.html"],
+    ["VGG",             "vgg16_imagenet1kv1.html"],
+    ["CORnet",          "cornet_s.html"],
+    ["CLIP",            "clip_vit_b32.html"],
+    ["BiT",             "bit.html"],
+  ];
+
+  // Replace model name mentions in plain text with clickable links to their model pages.
+  // Single-pass replacement using one combined regex so specific variants (e.g. CLIP-RN50)
+  // are matched before their shorter prefixes (e.g. CLIP).
+  function linkifyModels(text) {
+    const pattern = MODEL_LINK_MAP
+      .map(([name]) => name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+      .join("|");
+    const re = new RegExp("(?<![a-zA-Z0-9])(" + pattern + ")(?![a-zA-Z0-9])", "gi");
+    return text.replace(re, match => {
+      const entry = MODEL_LINK_MAP.find(([name]) => name.toLowerCase() === match.toLowerCase());
+      if (!entry) return match;
+      return `<a href="/model-pages/${entry[1]}" target="_blank" rel="noopener" class="cortex-model-link">${match}</a>`;
+    });
+  }
+
   // ---- API -----------------------------------------------------------
-  const API_BASE = "https://cortex-api-backend.vercel.app";
+  const API_BASE = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    ? "http://localhost:8000"
+    : "https://cortex-api-backend.vercel.app";
+
+  function buildPageContextString() {
+    if (pageContext.modelName) {
+      return `model_page:${pageContext.modelName}`;
+    }
+    if (pageContext.type === "scoreboard") {
+      const state = window.cortexScoreboardState;
+      if (!state) return "scoreboard";
+      const parts = ["scoreboard"];
+      if (state.training) parts.push(`training:${state.training}`);
+      if (Array.isArray(state.region) && state.region.length) parts.push(`region:${state.region.join(",")}`);
+      if (Array.isArray(state.dataset) && state.dataset.length) parts.push(`dataset:${state.dataset.join(",")}`);
+      if (state.selectedModel) parts.push(`selected_model:${state.selectedModel}`);
+      if (state.chartType) parts.push(`chart:${state.chartType}`);
+      if (state.pageView && state.pageView !== "rank") parts.push(`view:${state.pageView}`);
+      return parts.join("|");
+    }
+    if (pageContext.type !== "home") return pageContext.type;
+    return null;
+  }
 
   async function fetchChatAnswer(userQuery) {
+    const body = { message: userQuery };
+    const ctx = buildPageContextString();
+    if (ctx) body.page_context = ctx;
     const res = await fetch(`${API_BASE}/api/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: userQuery }),
+      body: JSON.stringify(body),
     });
     if (!res.ok) throw new Error("API error");
     const data = await res.json();
@@ -330,10 +438,10 @@
         const bullet = line.match(/^\s*[\*\-]\s+(.+)/);
         if (bullet) {
           if (!inList) { out.push("<ul>"); inList = true; }
-          out.push(`<li>${bullet[1]}</li>`);
+          out.push(`<li>${linkifyModels(bullet[1])}</li>`);
         } else {
           if (inList) { out.push("</ul>"); inList = false; }
-          out.push(line);
+          out.push(linkifyModels(line));
         }
       }
       if (inList) out.push("</ul>");
@@ -374,16 +482,23 @@
     }
 
     // ---- Initial welcome & suggestions --------------------------------
-    addMessage(
-      "Hi! I can help you understand the Lab, Scoreboard, and visual brain regions like FFA and PPA.",
-      "bot"
-    );
+    const welcomeMsg = pageContext.type === "model_page" && pageContext.modelName
+      ? `Hi! I can answer questions about the ${pageContext.modelName.replace(/_/g, " ")} model, or anything else about Cortex.`
+      : "Hi! I can help you understand the Lab, Scoreboard, and visual brain regions like FFA and PPA.";
+    addMessage(welcomeMsg, "bot");
 
-    (presetQuestions[pageContext] || presetQuestions.home).forEach((q) => {
+    (presetQuestions[pageContext.type] || presetQuestions.home).forEach((q) => {
       const btn = document.createElement("button");
       btn.className = "cortex-chatbot-suggestion";
       btn.textContent = q;
-      btn.addEventListener("click", () => handleUserQuery(q));
+      btn.addEventListener("click", () => {
+        // Resolve "this model" to the actual model name for the API query
+        let query = q;
+        if (pageContext.modelName) {
+          query = q.replace("this model", pageContext.modelName.replace(/_/g, " "));
+        }
+        handleUserQuery(query);
+      });
       suggestionsEl.appendChild(btn);
     });
 

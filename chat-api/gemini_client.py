@@ -4,7 +4,7 @@ from __future__ import annotations
 import os
 
 
-def get_gemini_reply(user_message: str, rule_context: str | None = None) -> str | None:
+def get_gemini_reply(user_message: str, rule_context: str | None = None, page_context: str | None = None) -> str | None:
     """
     Call Gemini to answer the user message in the context of Virtual Visual Cortex.
     Returns the model reply text, or None if the API key is missing or the call fails.
@@ -22,10 +22,42 @@ def get_gemini_reply(user_message: str, rule_context: str | None = None) -> str 
         model_id = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
         print(f"[gemini] using key: {api_key[:8]}... model: {model_id}")
         client = genai.Client(api_key=api_key.strip())
+        # Build page context prefix so Gemini knows where the user is
+        page_ctx_str = ""
+        if page_context:
+            if page_context.startswith("model_page:"):
+                model_name = page_context.split(":", 1)[1].replace("_", " ")
+                page_ctx_str = (
+                    f"=== USER'S CURRENT PAGE ===\n"
+                    f"The user is on the model detail page for: {model_name}. "
+                    f"When they say 'this model' they mean {model_name}.\n\n"
+                )
+            elif page_context.startswith("scoreboard"):
+                # Parse rich scoreboard state: "scoreboard|training:NSD|region:PPA|selected_model:resnet50|..."
+                parts = dict(p.split(":", 1) for p in page_context.split("|") if ":" in p)
+                ctx_lines = ["The user is on the Scoreboard page."]
+                if parts.get("training"):
+                    ctx_lines.append(f"Current training filter: {parts['training']}.")
+                if parts.get("region"):
+                    ctx_lines.append(f"Selected brain region(s): {parts['region']}.")
+                if parts.get("dataset"):
+                    ctx_lines.append(f"Selected dataset(s): {parts['dataset']}.")
+                if parts.get("selected_model"):
+                    model = parts["selected_model"].replace("_", " ")
+                    ctx_lines.append(f"The user has selected / is looking at the model: {model}. When they say 'this model' they mean {model}.")
+                if parts.get("chart"):
+                    ctx_lines.append(f"Chart type: {'univariate' if parts['chart'] == 'uni' else 'multivariate'}.")
+                if parts.get("view") == "2":
+                    ctx_lines.append("The user is in the Advanced Insights view.")
+                page_ctx_str = "=== USER'S CURRENT PAGE ===\n" + " ".join(ctx_lines) + "\n\n"
+            elif page_context == "lab":
+                page_ctx_str = "=== USER'S CURRENT PAGE ===\nThe user is on the Lab page.\n\n"
+
         prompt = (
             "You are the friendly assistant for Virtual Visual Cortex, a platform that bridges neuroscience and AI. "
             "Answer any question about the platform clearly and conversationally.\n\n"
-            "=== PLATFORM OVERVIEW ===\n"
+            + page_ctx_str
+            + "=== PLATFORM OVERVIEW ===\n"
             "Three main sections:\n"
             "1. Home — introduction and overview.\n"
             "2. The Lab — upload images, pick an AI vision model + training dataset (NSD or Murty185), "

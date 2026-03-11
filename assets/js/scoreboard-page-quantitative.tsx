@@ -11,7 +11,7 @@ import ROISelect from './Scoreboard/Settings/roiselect.jsx';
 import DatasetSelect from './Scoreboard/Settings/datasetselect.jsx';
 
 
-import ChartSelect from './Scoreboard/Settings/chartselect.jsx'; 
+import ChartSelect from './Scoreboard/Settings/chartselect.jsx';
 // import PageSelect from './Scoreboard/Settings/pageselect.jsx';
 import QuestionSelect from './Scoreboard/Settings/questionselect.jsx';
 
@@ -21,7 +21,7 @@ import HeatmapOverview from './Scoreboard/Visualizations/heatmapOverview.jsx';
 import HeatmapDetail from './Scoreboard/Visualizations/heatmapDetail.jsx';
 
 //Barchart
-import BarChartDetail from './Scoreboard/Visualizations/barchartdetail.jsx'; 
+import BarChartDetail from './Scoreboard/Visualizations/barchartdetail.jsx';
 import BarChartOverview from './Scoreboard/Visualizations/barchartoverview.jsx';
 
 //advanced insights
@@ -37,8 +37,8 @@ const ScoreboardPageQuantitative: React.FC = () => {
   const [region, setRegion] = useState(['Across Regions']);
   const [dataset, setDataset] = useState([]);
 
-  const [chartType, setChartType] = useState('uni'); 
-  const [rank, setRank] = useState(''); 
+  const [chartType, setChartType] = useState('uni');
+  const [rank, setRank] = useState('');
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
   // interaction variable for overview and details
@@ -50,10 +50,10 @@ const ScoreboardPageQuantitative: React.FC = () => {
     return v === "2" ? "2" : "rank";
   })();
   const [pageView, setPageView] = useState(initialView);
- 
+
   const isDatasetDetailMode = pageView === 'rank' && dataset.length > 0 && !region.includes('Across Regions');
   const [activeQuestion, setActiveQuestion] = useState('q1');
-  
+
 
   const isVS = pageView === '2' && activeQuestion === 'q1';
   const isDatasetROI = pageView === '2' && activeQuestion === 'q2';
@@ -68,7 +68,17 @@ const ScoreboardPageQuantitative: React.FC = () => {
   console.log("Active Question:", activeQuestion);
   console.log("Page View:", pageView);
   console.log("===============================");
-}, [training, region, dataset, activeQuestion, pageView]);
+  // Expose current scoreboard state so the chatbot widget can read it
+  (window as any).cortexScoreboardState = {
+    training,
+    region,
+    dataset,
+    selectedModel,
+    chartType,
+    pageView,
+    activeQuestion,
+  };
+}, [training, region, dataset, activeQuestion, pageView, selectedModel, chartType]);
 
   const [expandedStates, setExpandedStates] = useState({
     training: false,
@@ -88,19 +98,19 @@ const ScoreboardPageQuantitative: React.FC = () => {
     global_score: "Global Score",
   };
 
-  
+
 
   const handleTogglePanel = (panelName: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
     setExpandedStates(prev => ({
       ...prev,
-      [panelName]: isExpanded 
+      [panelName]: isExpanded
     }));
   };
 
   const handleTagClick = (type:string) => {
   setExpandedStates(prev => ({
       ...prev,
-      [type]: true 
+      [type]: true
     }));
   };
 
@@ -111,7 +121,7 @@ const ScoreboardPageQuantitative: React.FC = () => {
   else if (isDatasetROI) {
     setTraining("")
   } else {
-    
+
     if (training === 'Murty185 VS NSD1000' || training === "") {
       setTraining('NSD');
     }
@@ -122,17 +132,17 @@ const ScoreboardPageQuantitative: React.FC = () => {
   useEffect(() => {
     if (pageView === 'rank') {
       // 1. rank (Scoreboard)
-      setTraining('NSD'); 
-    } 
+      setTraining('NSD');
+    }
     else if (isVS) {
       // 2.  2 (Comparison)
       // force to comparison
-      setTraining('Murty185 VS NSD1000'); 
-    } 
+      setTraining('Murty185 VS NSD1000');
+    }
     else if (isDatasetROI) {
-      // 3. 
- 
-      setTraining(''); 
+      // 3.
+
+      setTraining('');
     }
   }, [pageView]);
 
@@ -143,32 +153,32 @@ const ScoreboardPageQuantitative: React.FC = () => {
     nsd_uni?: Record<string, any>;
     murty_multi?: Record<string, any>;
     nsd_multi?: Record<string, any>;
-  
-    // 
+
+    //
     ceiling_uni?: Record<string, any>;
     ceiling_multi?: Record<string, any>;
-  
-      
+
+
     roi_dataset_Murty185_uni?: Record<string, any>;
     roi_dataset_Murty185_multi?: Record<string, any>;
     roi_dataset_NSD_uni?: Record<string, any>;
     roi_dataset_NSD_multi?: Record<string, any>;
   };
-  
+
     const { data: newData, loading: loadingNew } = useLoadData() as {
       data: newData;
       loading: boolean;
     };
-  
-  
+
+
     const murtyData = chartType === "uni" ? newData?.murty_uni : newData?.murty_multi;
     const nsdData   = chartType === "uni" ? newData?.nsd_uni   : newData?.nsd_multi;
     const ROI_DATASET_Murty = chartType === "uni" ? newData?.roi_dataset_Murty185_uni : newData?.roi_dataset_Murty185_multi;
     const ROI_DATASET_NSD = chartType === "uni" ? newData?.roi_dataset_NSD_uni : newData?.roi_dataset_NSD_multi;
     const Ceiling = chartType === "uni" ? newData?.ceiling_uni : newData?.ceiling_multi;
     const yLabel = chartType === "uni" ? "Pearson Correlation" : "Spearman Correlation";
-  
-  
+
+
 
 
   const hasFilters =
@@ -191,7 +201,7 @@ const ScoreboardPageQuantitative: React.FC = () => {
       setDataset([]);
 
     }
-    
+
   };
 
   const clearSingle = (key: string, value: string) => {
@@ -206,7 +216,7 @@ const ScoreboardPageQuantitative: React.FC = () => {
   } else if (training === "Murty185") {
     return murtyData;
   } else {
-    return {}; 
+    return {};
   }
 };
 
@@ -233,14 +243,14 @@ const ScoreboardPageQuantitative: React.FC = () => {
   return (
     <div
       style={{
-        height: 'calc(100vh - var(--header-h, 0px))', 
+        height: 'calc(100vh - var(--header-h, 0px))',
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
-        overflow: 'hidden', 
-        padding: '2px 16px',    
+        overflow: 'hidden',
+        padding: '2px 16px',
         boxSizing: 'border-box',
-        background: 'var(--background-color, #f5f5f5)', 
+        background: 'var(--background-color, #f5f5f5)',
       }}
     >
       {/* 2. SelectedFiltersBar */}
@@ -257,27 +267,27 @@ const ScoreboardPageQuantitative: React.FC = () => {
 
       {/* 3. body part（left: Filter + right: Charts） */}
       {/* flex: 1 fit all space */}
-   
-     
+
+
       <div
         style={{
           flex: 1,
-          minHeight: 0, 
+          minHeight: 0,
           display: 'grid',
           // gridTemplateColumns: '1.5fr 7fr', // ratio for overview and detail
           gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 7fr)',
           gap: 16,
         }}
       >
-        
+
         {/* --- left Filters --- */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             height: '100%',     // fill height
-            overflowY: 'auto',  // 
-            paddingRight: 4,    // 
+            overflowY: 'auto',  //
+            paddingRight: 4,    //
             scrollbarWidth: 'thin',
           }}
         >
@@ -287,7 +297,7 @@ const ScoreboardPageQuantitative: React.FC = () => {
               type="default"
               disabled={!hasFilters}
               onClick={clearFilters}
-              size="small" 
+              size="small"
               style={{
                 borderRadius: 6,
                 fontWeight: 500,
@@ -302,7 +312,7 @@ const ScoreboardPageQuantitative: React.FC = () => {
           {/* ChartSelect button group*/}
           <div
             style={{
-              flex: '0 0 auto', 
+              flex: '0 0 auto',
               background: '#f5f5f5',
               borderRadius: 8,
               padding: '4px',
@@ -316,18 +326,18 @@ const ScoreboardPageQuantitative: React.FC = () => {
               setChartType={setChartType}
               rank={rank}
               setRank={setRank}
-              enable={true} 
+              enable={true}
             />
           </div>
 
-          
+
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <TrainingSelect 
-              training={training} 
-              setTraining={setTraining} 
+            <TrainingSelect
+              training={training}
+              setTraining={setTraining}
               dataset={dataset}
-              vsOption = {isVS} 
+              vsOption = {isVS}
               expanded={expandedStates.training} //read property
               onToggle={handleTogglePanel('training')}
             />
@@ -352,10 +362,10 @@ const ScoreboardPageQuantitative: React.FC = () => {
               region={region}
               allowToggle={true}
               mode={1}
-              expanded={expandedStates.dataset} 
+              expanded={expandedStates.dataset}
               onToggle={handleTogglePanel('dataset')}
             />
-            
+
           </div>
         </div>
 
@@ -366,30 +376,30 @@ const ScoreboardPageQuantitative: React.FC = () => {
             flexDirection: 'column',
             height: '100%', // fill height
             gap: 16,
-            minHeight: 0, // 
+            minHeight: 0, //
             minWidth: 0,
           }}
 
         >
           {pageView === '2' && (
-            <QuestionSelect 
-              value={activeQuestion} 
-              onChange={(val: string) => setActiveQuestion(val)} 
+            <QuestionSelect
+              value={activeQuestion}
+              onChange={(val: string) => setActiveQuestion(val)}
             />
           )}
 
           {/* chart: horizontal*/}
-        <div 
-          style={{ 
-            flex: 1, 
-            minHeight: 0, 
-            display: isDatasetDetailMode ? 'flex' : 'grid', 
-            flexDirection: 'column',                        
-            gridTemplateColumns: pageView === '2' ? '1fr' : '1fr 6fr', 
-            gap: 16 
+        <div
+          style={{
+            flex: 1,
+            minHeight: 0,
+            display: isDatasetDetailMode ? 'flex' : 'grid',
+            flexDirection: 'column',
+            gridTemplateColumns: pageView === '2' ? '1fr' : '1fr 6fr',
+            gap: 16
           }}
         >
-            
+
         {/* --- Overview Section --- */}
         {pageView !== '2' && (
           <div style={{
@@ -401,8 +411,8 @@ const ScoreboardPageQuantitative: React.FC = () => {
             width: '100%',
             minHeight: 0, // 👈 关键：允许容器在 grid 内部正确缩放
             gap: 12,
-            overflowY: isDatasetDetailMode ? 'auto' : 'hidden', // rollable 
-            overflowX: isDatasetDetailMode ? 'hidden' : 'hidden', 
+            overflowY: isDatasetDetailMode ? 'auto' : 'hidden', // rollable
+            overflowX: isDatasetDetailMode ? 'hidden' : 'hidden',
             flexShrink: 0,
 
           }}>
@@ -431,39 +441,39 @@ const ScoreboardPageQuantitative: React.FC = () => {
 
             {/* 统一分支 2 和 3：Heatmap 模式 */}
             {(!isDatasetDetailMode) && (
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'row', 
-                flex: 1,          
-                gap: 12, 
-                height: '100%', 
+              <div style={{
+                display: 'flex',
+                flexDirection: 'row',
+                flex: 1,
+                gap: 12,
+                height: '100%',
                 minHeight: 0,
                 overflowX: 'auto',
-                
+
               }}>
-               
+
                 {(dataset.length === 0 ? region : dataset).map((item) => {
                   // 统一标题和参数逻辑
                   const isBranch2 = dataset.length === 0;
-                  const subtitle = isBranch2 
+                  const subtitle = isBranch2
                     ? (item === 'Across Regions' ? 'Overall' : item)
                     : (datasetLabelMap[item] || item);
-                  
-                  const currentRoi = isBranch2 
-                    ? (item === 'Across Regions' ? 'Overall' : item) 
+
+                  const currentRoi = isBranch2
+                    ? (item === 'Across Regions' ? 'Overall' : item)
                     : "Across Regions";
-                  
+
                   const currentDataset = isBranch2 ? null : item;
 
                   return (
-                    <div 
-                      key={item} 
-                      style={{ 
-                        flex: '1 0 60px', 
-                         
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        height: '100%', 
+                    <div
+                      key={item}
+                      style={{
+                        flex: '1 0 60px',
+
+                        display: 'flex',
+                        flexDirection: 'column',
+                        height: '100%',
                         minWidth: '60px',
                       }}
                     >
@@ -473,12 +483,12 @@ const ScoreboardPageQuantitative: React.FC = () => {
                       </div>
 
                       {/* 热图容器：增加 flex: 1 并强制 display: flex */}
-                      <div style={{ 
-                        flex: 1, 
-                        minHeight: 0, 
-                        display: 'flex', 
+                      <div style={{
+                        flex: 1,
+                        minHeight: 0,
+                        display: 'flex',
                         flexDirection: 'column'
-                        
+
                       }}>
                         <HeatmapOverview
                           data={getDataByTraining(training)}
@@ -497,10 +507,10 @@ const ScoreboardPageQuantitative: React.FC = () => {
             )}
           </div>
         )}
-         
-      
+
+
             {/* chart 2: Detail */}
-           
+
             <div
               style={{
                 background: '#fafafa',
@@ -508,8 +518,8 @@ const ScoreboardPageQuantitative: React.FC = () => {
                 padding: 16,
                 display: 'flex',
                 flexDirection: 'column',
-                minWidth: 0, 
-                
+                minWidth: 0,
+
                 overflow: 'hidden',
                 flex: isDatasetDetailMode ? 1 : 'none',
                 overflowY: 'auto',
@@ -522,20 +532,20 @@ const ScoreboardPageQuantitative: React.FC = () => {
                   fontSize: '18px',
                   fontWeight: 600,
                   color: '#333',
-                  textAlign: 'center', 
+                  textAlign: 'center',
                 }}
               >
-               
-                {isDatasetDetailMode 
+
+                {isDatasetDetailMode
                   ? `Performance On Specific Dataset Trained on ${training === 'NSD' ? 'NSD1000' : 'Murty185'} `
-                  : (training === 'Murty185 VS NSD1000' 
-                      ? 'Murty185 vs NSD1000 Performance Comparison' 
+                  : (training === 'Murty185 VS NSD1000'
+                      ? 'Murty185 vs NSD1000 Performance Comparison'
                   : (isDatasetROI)
                       ? `Model Performance Gap to Ceiling vs Ceiling (Trained on ${training === 'NSD' ? 'NSD1000' : 'Murty185'})`
-                  : (region.includes("Across Regions")) 
+                  : (region.includes("Across Regions"))
                       ? `${region[0]?.toUpperCase()} Performance (Trained on ${training === 'NSD' ? 'NSD1000' : 'Murty185'})`
-                  
-                
+
+
                   : `Performance  on Specific Region (Trained on ${training === 'NSD' ? 'NSD1000' : 'Murty185'})`)
                 }
               </h3>
@@ -545,15 +555,15 @@ const ScoreboardPageQuantitative: React.FC = () => {
                 style={{
                   flex: 1,
                  overflowY: isDatasetDetailMode ? "auto" : "hidden",
-                
+
                   overflowX: isDatasetDetailMode ? "hidden" : "auto",
                   position: 'relative',
                   display: 'flex', // 始终使用 flex 布局以支持多图横向排列
                   flexDirection: isDatasetDetailMode ? 'column' : 'row',
                   justifyContent: training === 'Murty185 VS NSD1000' ? 'center' : 'flex-start',
-                  gap: isDatasetDetailMode ? 0 : 24, 
+                  gap: isDatasetDetailMode ? 0 : 24,
                   paddingBottom: 10
-                  
+
                 }}
               >
                 {/* scatter plot */}
@@ -570,36 +580,36 @@ const ScoreboardPageQuantitative: React.FC = () => {
                 )}
 
                  {activeQuestion === "q2" && (
-                  <ScatterGapCeiling 
-                    nsdData={ROI_DATASET_NSD} 
-                    murtyData={ROI_DATASET_Murty} 
-                    ceilingData={Ceiling} 
-                    roi={region} 
-                    dataset={dataset} 
+                  <ScatterGapCeiling
+                    nsdData={ROI_DATASET_NSD}
+                    murtyData={ROI_DATASET_Murty}
+                    ceilingData={Ceiling}
+                    roi={region}
+                    dataset={dataset}
                     training={training}
                   />
                 )}
 
-                
+
 
               {isDatasetDetailMode && dataset.map((dsName) => (
                       <React.Fragment key={dsName}>
                         {region.map((roiValue) => (
-                          <div 
-                            key={`${dsName}-${roiValue}`} 
-                            style={{ 
-                              display: 'flex', 
-                              flexDirection: 'column', 
-                              width: '100%', 
-                              position: 'relative' 
+                          <div
+                            key={`${dsName}-${roiValue}`}
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              width: '100%',
+                              position: 'relative'
                             }}
                           >
                             {/* ✨ 纵向吸顶标题 */}
-                            <div style={{ 
+                            <div style={{
                               position: 'sticky',
                               top: 0,           // 向下滚动时固定在顶部
                               zIndex: 10,
-                              background: '#fafafa', 
+                              background: '#fafafa',
                               padding: '10px 0',
                               borderBottom: '2px solid #1890ff',
                               marginBottom: 15,
@@ -627,24 +637,24 @@ const ScoreboardPageQuantitative: React.FC = () => {
                         ))}
                       </React.Fragment>
                     ))}
-        
+
                  {/* heapmap for a fixed region comparing datasets */}
                 {pageView === "rank" &&  training !== 'Murty185 VS NSD1000' &&  dataset.length === 0 && region.map((roiValue, index) => (
-                <div 
-                  key={roiValue} 
-                  style={{ 
-                    display: 'flex', 
+                <div
+                  key={roiValue}
+                  style={{
+                    display: 'flex',
                     flexDirection: 'column',
-                    minWidth: index === 0 ? 450 : 350, 
-                    flexShrink: 0 
+                    minWidth: index === 0 ? 450 : 350,
+                    flexShrink: 0
                   }}
                 >
                   {/* subtilte*/}
-                  <div style={{ 
-                    textAlign: 'center', 
-                    fontWeight: 'bold', 
-                    marginBottom: 12, 
-                    fontSize: '14px', 
+                  <div style={{
+                    textAlign: 'center',
+                    fontWeight: 'bold',
+                    marginBottom: 12,
+                    fontSize: '14px',
                     color: '#555',
                     textTransform: 'uppercase',
                     background: '#b7afafff',
@@ -655,43 +665,43 @@ const ScoreboardPageQuantitative: React.FC = () => {
                   </div>
 
                   <HeatmapDetail
-                    data={getDataByTraining(training)} 
+                    data={getDataByTraining(training)}
                     roi={roiValue === 'Across Regions' ? 'Overall' : roiValue}
                     dataset={dataset[0] || ''}
                     rank={rank}
                     selectedModel={selectedModel}
                     onModelClick={(m: string) => setSelectedModel(m)}
                     onScrollUpdate={(range: {start: number, end: number}) => setVisibleRange(range)}
-                    showYAxis={index === 0} 
+                    showYAxis={index === 0}
                     isMultiRegion={region.length > 1}
                   />
                 </div>
               ))}
 
-            
+
               {/* heapmap for a fixed dataset comparing regions */}
               {pageView === "rank" && training !== 'Murty185 VS NSD1000' && dataset.length > 0 && region.includes('Across Regions') && (
                 <div style={{ display: 'flex', flexDirection: 'row', gap: 20, overflowX: 'auto', paddingBottom: 10 }}>
                   {dataset.map((datasetValue, index) => (
-                    <div 
-                      key={datasetValue} 
-                      style={{ 
-                        display: 'flex', 
+                    <div
+                      key={datasetValue}
+                      style={{
+                        display: 'flex',
                         flexDirection: 'column',
                         // bigger for first one as show for label
-                        minWidth: index === 0 ? 450 : 350, 
-                        flexShrink: 0 
+                        minWidth: index === 0 ? 450 : 350,
+                        flexShrink: 0
                       }}
                     >
                       {/* subtitle */}
-                      <div style={{ 
-                        textAlign: 'center', 
-                        fontWeight: 'bold', 
-                        marginBottom: 12, 
-                        fontSize: '13px', 
+                      <div style={{
+                        textAlign: 'center',
+                        fontWeight: 'bold',
+                        marginBottom: 12,
+                        fontSize: '13px',
                         color: '#555',
                         textTransform: 'uppercase',
-                        background: '#b7afafff', 
+                        background: '#b7afafff',
                         padding: '4px 0',
                         borderRadius: '4px'
                       }}>
@@ -699,15 +709,15 @@ const ScoreboardPageQuantitative: React.FC = () => {
                       </div>
 
                       <HeatmapDetail
-                        data={getDataByTraining(training)} 
-                        roi="Across Regions" 
+                        data={getDataByTraining(training)}
+                        roi="Across Regions"
                         dataset={datasetValue}
                         rank={rank}
                         selectedModel={selectedModel}
                         onModelClick={(m: string) => setSelectedModel(m)}
                         onScrollUpdate={(range: {start: number, end: number}) => setVisibleRange(range)}
-                       
-                        showYAxis={index === 0} 
+
+                        showYAxis={index === 0}
                       />
                     </div>
                   ))}
@@ -724,4 +734,3 @@ const ScoreboardPageQuantitative: React.FC = () => {
 export default ScoreboardPageQuantitative;
 
 
- 

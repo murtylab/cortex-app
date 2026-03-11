@@ -44,7 +44,7 @@ def rule_chat(body: ChatRequest) -> Any:
 @app.post("/api/gemini", response_model=ChatResponse)
 def gemini_chat(body: ChatRequest) -> Any:
     """Use Gemini for open-ended questions when rule-chat doesn't apply. Requires GEMINI_API_KEY."""
-    reply = get_gemini_reply(body.message)
+    reply = get_gemini_reply(body.message, page_context=body.page_context)
     if reply is None:
         raise HTTPException(
             status_code=503,
@@ -69,7 +69,7 @@ def smart_chat(body: ChatRequest) -> Any:
     if parsed.intent.value in EXPLAIN_INTENTS:
         rule_reply = build_reply(parsed, store)
         # Use rule data as Gemini context so it can explain with real numbers
-        gemini_reply = get_gemini_reply(body.message, rule_context=rule_reply.reply)
+        gemini_reply = get_gemini_reply(body.message, rule_context=rule_reply.reply, page_context=body.page_context)
         if gemini_reply:
             return ChatResponse(
                 reply=gemini_reply,
@@ -83,7 +83,7 @@ def smart_chat(body: ChatRequest) -> Any:
         return rule_reply
 
     # Unknown intent → pure Gemini (handles greetings, help, and any open-ended question)
-    gemini_reply = get_gemini_reply(body.message)
+    gemini_reply = get_gemini_reply(body.message, page_context=body.page_context)
     if gemini_reply:
         return ChatResponse(reply=gemini_reply)
 

@@ -174,3 +174,13 @@
     bottom: 12px;
   }
 }
+
+/* Model page links inside bot replies */
+.cortex-model-link {
+  color: #9b6fa8;
+  text-decoration: underline;
+  font-weight: 500;
+}
+.cortex-model-link:hover {
+  color: #7a4e8a;
+}
