@@ -28,7 +28,10 @@ export default defineConfig(() => {
             'assets/**/*.{png,jpg,jpeg,gif,webp,svg,ico}',
             'assets/**/*.{css,scss}',
             'assets/**/*.{json,txt,csv}',
-            'assets/**/*.{woff,woff2,ttf,eot,otf}'
+            'assets/**/*.{woff,woff2,ttf,eot,otf}',
+            'assets/js/chatbot/*.js',
+            'assets/js/main.js',
+            'assets/vendor/**/*.{js,css}',
           ],
           dest: '.',
         },
