@@ -389,9 +389,9 @@ const ScoreboardPageQuantitative: React.FC = () => {
           )}
 
           {/* view toggle */}
-          <div style={{ flex: '0 0 auto' }}>
+          {/* <div style={{ flex: '0 0 auto' }}>
             <PageSelect value={pageView} onChange={(val: string) => setPageView(val)} />
-          </div>
+          </div> */}
 
           {/* chart: horizontal*/}
         <div
