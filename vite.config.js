@@ -21,33 +21,18 @@ export default defineConfig(() => {
     react(),
     viteStaticCopy({
       targets: [
-        {
-          // Only copy non-code static assets; JS/TS/TSX/JSX are handled by Vite.
-          // This avoids serving React source files (like the scoreboard) as raw text.
-          src: [
-            'assets/**/*.{png,jpg,jpeg,gif,webp,svg,ico}',
-            'assets/**/*.{css,scss}',
-            'assets/**/*.{json,txt,csv}',
-            'assets/**/*.{woff,woff2,ttf,eot,otf}',
-          ],
-          dest: '.',
-        },
-        {
-          src: 'assets/js/chatbot/chatbot-widget.js',
-          dest: 'assets/js/chatbot',
-        },
-        {
-          src: 'assets/js/main.js',
-          dest: 'assets/js',
-        },
-        {
-          src: 'assets/vendor',
-          dest: 'assets',
-        },
-        {
-          src: 'cortex-web-app/model-pages',
-          dest: '.'
-        }
+        // Copy entire subdirs so paths are preserved under dist/assets/
+        { src: 'assets/img',    dest: 'assets' },
+        { src: 'assets/data',   dest: 'assets' },
+        { src: 'assets/vendor', dest: 'assets' },
+        { src: 'assets/css',    dest: 'assets' },
+        // Chatbot widget (vanilla JS + CSS served at original paths)
+        { src: 'assets/js/chatbot/chatbot-widget.js',  dest: 'assets/js/chatbot' },
+        { src: 'assets/js/chatbot/chatbot-widget.css', dest: 'assets/js/chatbot' },
+        // main.js (non-module, must be served at original path)
+        { src: 'assets/js/main.js', dest: 'assets/js' },
+        // Model pages
+        { src: 'cortex-web-app/model-pages', dest: '.' },
       ]
     })
   ],
