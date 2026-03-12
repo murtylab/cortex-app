@@ -323,6 +323,8 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
   useEffect(() => {
     setPredictionResult(null); // Clear previous results
     setPredictstep(1); // Reset button
+    clearRegionPredictionCache()
+    setShowInsights(false); // Hide insights when settings change
   }, [ model, dataset, voxelOption, voxelNumber, paper, participantName]);
 
   useEffect(() => {
