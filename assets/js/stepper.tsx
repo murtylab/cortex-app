@@ -836,6 +836,7 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
                 files={files}
                 title={inputMode === "preload" ? "Preloaded Images" : "Uploaded Images"}
                 groupDepth={1}
+                isPreload={isPreloadMode}
                 onMoveItemToGroup={moveItemToGroup}
                 onRenameGroupKey={renameGroupKey}
                 onRemove={(uid: string) => removeOne(uid)}
@@ -888,6 +889,7 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
             files={files}
             title="Uploaded Images Preview"
             groupDepth={1}
+            isPreload={isPreloadMode}
             onMoveItemToGroup={moveItemToGroup}
             onRenameGroupKey={renameGroupKey}
             onRemove={(uid: string) => removeOne(uid)}
