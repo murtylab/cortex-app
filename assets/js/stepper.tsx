@@ -15,6 +15,8 @@ import ModelCard from './Lab/modelcard.jsx';
 
 // image preview and grouping
 import ImagePreviewGroupedDnD from './Lab/imagePreviewGrid.tsx';
+import PreloadDatasetPicker from './Lab/preloadDatasetPicker.jsx';
+
 
 
 // visualization graphics
@@ -144,6 +146,15 @@ const useHeatmapData = (predictionResult: any) => {
   }, [predictionResult]);
 };
 
+
+const PRELOADED_IMAGE_MODULES = import.meta.glob(
+  "/assets/preload/**/*.{png,jpg,jpeg,webp}",
+  {
+    eager: true,
+    import: "default",
+  }
+) as Record<string, string>;
+
 const Stepper: React.FC = () => {
   const { token } = theme.useToken();
   const [current, setCurrent] = useState(0);
@@ -190,6 +201,8 @@ const Stepper: React.FC = () => {
 
   // prestore dataset
   const[prestoreDataset, setPrestoreDataset] = useState<string | null>(null);
+  const isPreloadMode = !!prestoreDataset;
+  const inputMode = isPreloadMode ? "preload" : "upload";
 
   const next = () => setCurrent((prev) => prev + 1);
   const prev = () => setCurrent((prev) => prev - 1);
@@ -199,7 +212,6 @@ const Stepper: React.FC = () => {
     setCurrent(value);
   };
 
-type FileWithPath = File & { webkitRelativePath?: string };
 
 const clearRegionPredictionCache = () => {
   setPredictionFFAResult(null);
@@ -207,36 +219,126 @@ const clearRegionPredictionCache = () => {
   setPredictionPPAResult(null);
 };
 
+
+const loadPrestoredDataset = async (datasetKey: string) => {
+  const matchedEntries = Object.entries(PRELOADED_IMAGE_MODULES)
+    .filter(([fullPath]) => {
+      const normalized = normalizePath(fullPath).replace(/\s+/g, "");
+      const match = normalized.match(/\/preload\/([^/]+)\/images\/(.+)$/i);
+      if (!match) return false;
+
+      const datasetFromPath = match[1].toLowerCase();
+      return datasetFromPath === datasetKey.toLowerCase();
+    })
+    .sort(([a], [b]) =>
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
+    );
+
+  console.log("datasetKey:", datasetKey);
+  console.log("matchedEntries.length:", matchedEntries.length);
+  console.log("matchedEntries sample:", matchedEntries.slice(0, 5));
+
+  if (matchedEntries.length === 0) {
+    message.warning(`No images found for ${datasetKey}`);
+    setPrestoreDataset(datasetKey);
+    setFiles([]);
+    setFileMappings([]);
+    return;
+  }
+
+  try {
+    const preloadFiles: PreviewFile[] = await Promise.all(
+      matchedEntries.map(async ([fullPath, url], index) => {
+        const normalized = normalizePath(fullPath).replace(/\s+/g, "");
+        const match = normalized.match(/\/images\/(.+)$/i);
+        const relativePath = match?.[1] || "";
+        const parts = relativePath.split("/").filter(Boolean);
+
+        const filename = parts[parts.length - 1] || `image_${index}.jpg`;
+        const groupKey = parts.length > 1 ? parts[0] : "Ungrouped";
+
+        const ext = getExt(filename).toLowerCase();
+        const mime =
+          ext === ".png"
+            ? "image/png"
+            : ext === ".webp"
+            ? "image/webp"
+            : "image/jpeg";
+
+        // 关键：把图片 URL 读成真实 blob
+        const blob = await fetch(url).then((r) => {
+          if (!r.ok) throw new Error(`Failed to fetch image: ${url}`);
+          return r.blob();
+        });
+
+        const realFile = new File([blob], filename, { type: blob.type || mime }) as FileWithPath;
+
+        Object.defineProperty(realFile, "webkitRelativePath", {
+          value: relativePath,
+          writable: false,
+          configurable: true,
+        });
+
+        return {
+          uid: `${datasetKey}__${relativePath.replaceAll("/", "__")}`,
+          blobURL: url,
+          file: realFile,
+          label: filename,
+          groupKey,
+          serverKey: filename,
+        };
+      })
+    );
+
+    setPrestoreDataset(datasetKey);
+    setFiles(preloadFiles);
+    setFileMappings(preloadFiles);
+
+    setPredictionResult(null);
+    clearRegionPredictionCache();
+    setShowInsights(false);
+    setPredictstep(1);
+
+    message.success(`${datasetKey} loaded`);
+  } catch (err) {
+    console.error(err);
+    message.error(`Failed to load dataset ${datasetKey}`);
+  }
+};
  
 const addIncomingFiles = (newFiles: File[]) => {
   if (!newFiles?.length) return;
 
+  const nextAdd: PreviewFile[] = newFiles
+    .filter((f) => f.type?.startsWith("image/"))
+    .map((f) => {
+      const ff = f as FileWithPath;
+      const uid = buildOrgName(ff);
+      const label = ff.webkitRelativePath?.split("/").pop() || ff.name;
+      const groupKey = buildGroupKey(ff, 1);
+
+      return {
+        uid,
+        label,
+        groupKey,
+        file: ff,
+        blobURL: URL.createObjectURL(ff),
+      };
+    });
+
   setFiles((prev) => {
-    const existing = new Set(prev.map((x) => x.uid));
+    const base = prestoreDataset ? [] : prev;
+    const existing = new Set(base.map((x) => x.uid));
+    const deduped = nextAdd.filter((x) => !existing.has(x.uid));
+    const next = [...base, ...deduped];
 
-    const nextAdd: PreviewFile[] = newFiles
-      .filter((f) => f.type?.startsWith("image/"))
-      .map((f) => {
-        const ff = f as FileWithPath;
-        const uid = buildOrgName(ff); 
-        const label =   ff.webkitRelativePath?.split("/").pop() || ff.name;
-        const groupKey = buildGroupKey(ff, 1);
-        return {
-          uid,
-          label,
-          groupKey,
-          file: ff,
-          blobURL: URL.createObjectURL(ff),
-        };
-      })
-      .filter((x) => !existing.has(x.uid));
-
-    const next = [...prev, ...nextAdd];
     setFileMappings(next);
     setPredictionResult(null);
     clearRegionPredictionCache();
     setShowInsights(false);
     setPredictstep(1);
+    setPrestoreDataset(null);
+
     return next;
   });
 };
@@ -256,6 +358,7 @@ const removeOne = (uid: string) => {
     clearRegionPredictionCache();
     setPredictstep(1);
     setShowInsights(false);
+    setPrestoreDataset(null);
 
     if (next.length === 0) {
       setUploaderKey((k) => k + 1); 
@@ -305,6 +408,7 @@ const clearAll = () => {
   setShowInsights(false);
   setPredictstep(1);
   setUploaderKey((k) => k + 1); 
+  setPrestoreDataset(null);
 };
 
 const moveItemToGroup = (uid: string, toGroupKey: string) => {
@@ -681,25 +785,70 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
       title: 'Upload Stimuli',
       // content: <Uploader onFilesUploaded={handleFilesUploaded} onFileMappingsUpdate={handleFileMappingsUpdate} />,
           content: (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <Uploader  key={uploaderKey} onAddFiles={(newFiles) => addIncomingFiles(newFiles)} />
-          <ImagePreviewGroupedDnD
-            files={files}
-            title="Uploaded Images"
-            groupDepth={1}
-            onMoveItemToGroup={moveItemToGroup}
-            onRenameGroupKey={renameGroupKey}
-            onRemove={(uid: string) => removeOne(uid)}
-            onClear={() => clearAll()}
-            onClearGroup={(groupKey, uids) => clearGroup(uids)}
-            onGroupOrderChange={(order: string[]) => console.log("Group order:", order)}
-          />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'minmax(0, 1.6fr) minmax(260px, 0.9fr)',
+                  gap: 16,
+                  alignItems: 'start',
+                }}
+              >
+                <Uploader
+                  key={uploaderKey}
+                  onAddFiles={(newFiles) => addIncomingFiles(newFiles)}
+                />
 
-          <div style={{ textAlign: 'right', color: 'black', fontWeight: 500 }}>
-            📸 {files.length} images uploaded
-          </div>
-        </div>
-      ),
+                <div
+                  style={{
+                    background: '#fafafa',
+                    border: '1px solid #ececec',
+                    borderRadius: 12,
+                    padding: 12,
+                  }}
+                >
+                  <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 10 }}>
+                    Preloaded Datasets
+                  </div>
+
+                 <PreloadDatasetPicker
+                  selectedKey={prestoreDataset}
+                  onSelectDataset={(key: string | null) => {
+                    if (!key) {
+                      // 取消选择
+                      setPrestoreDataset(null);
+                      setFiles([]);
+                      setFileMappings([]);
+                      setPredictionResult(null);
+                      clearRegionPredictionCache();
+                      setShowInsights(false);
+                      setPredictstep(1);
+                      return;
+                    }
+
+                    loadPrestoredDataset(key);
+                  }}
+                />
+                </div>
+              </div>
+
+              <ImagePreviewGroupedDnD
+                files={files}
+                title={inputMode === "preload" ? "Preloaded Images" : "Uploaded Images"}
+                groupDepth={1}
+                onMoveItemToGroup={moveItemToGroup}
+                onRenameGroupKey={renameGroupKey}
+                onRemove={(uid: string) => removeOne(uid)}
+                onClear={() => clearAll()}
+                onClearGroup={(groupKey, uids) => clearGroup(uids)}
+                onGroupOrderChange={(order: string[]) => console.log("Group order:", order)}
+              />
+
+              <div style={{ textAlign: 'right', color: 'black', fontWeight: 500 }}>
+                📸 {files.length} images loaded
+              </div>
+            </div>
+          ),
     },
     {
       title: 'Training Settings',

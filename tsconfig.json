@@ -13,7 +13,8 @@
       "resolveJsonModule": true,
       "outDir": "./dist",
       "allowImportingTsExtensions": true,
-      "noEmit": true
+      "noEmit": true,
+      "types": ["vite/client"]
     },
     "include": ["assets", "assets/js/Lab/barchart.jsx", "assets/js/barchartspecific.jsx", "assets/js/Lab/barchartstyles.jsx", "assets/js/components.jsx", "assets/js/constants-scoreboard.jsx", "assets/js/constants.jsx", "assets/js/Scoreboard/Settings/datasetselect.jsx", "assets/js/heatmap.jsx", "assets/js/Lab/heatmapstyles.jsx"],
     "exclude": ["node_modules", "dist"]

@@ -3899,4 +3899,22 @@ export const MODELCARD_INFO_LOOKUP = {
 };
 
 
-  
+
+// Preloaded datasets available for quick testing and demos
+export const PRELOAD_DATASETS = {
+  wardle2020: {
+    label: "Wardle 2020",
+    description: "Face / object / pareidolia style stimuli",
+    imageFolder: "/assets/preload/wardle2020/images",
+  },
+  nsd1000: {
+    label: "NSD1000",
+    description: "Natural scene dataset",
+    imageFolder: "/assets/preload/nsd1000/images",
+  },
+  bold5000: {
+    label: "BOLD5000v2",
+    description: "Large-scale image-fMRI benchmark",
+    imageFolder: "/assets/preload/bold5000/images",
+  },
+};
