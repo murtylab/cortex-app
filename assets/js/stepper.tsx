@@ -227,6 +227,25 @@ const clearRegionPredictionCache = () => {
   setPredictionPPAResult(null);
 };
 
+const getPreloadedPredictionByRegion = (
+  datasetKey: string,
+  targetRegion: string
+) => {
+  const path = `/assets/preload/${datasetKey}/data/${model}_${dataset}_${targetRegion}.json`;
+
+  const allKeys = Object.keys(PRELOADED_JSON_MODULES);
+
+  const matchedKey = allKeys.find(
+    (k) =>
+      normalizePath(k).replace(/\s+/g, "") ===
+      normalizePath(path).replace(/\s+/g, "")
+  );
+
+  if (!matchedKey) return null;
+
+  return PRELOADED_JSON_MODULES[matchedKey];
+};
+
 
 const loadPrestoredDataset = async (datasetKey: string) => {
   const matchedEntries = Object.entries(PRELOADED_IMAGE_MODULES)
@@ -241,10 +260,6 @@ const loadPrestoredDataset = async (datasetKey: string) => {
     .sort(([a], [b]) =>
       a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
     );
-
-  console.log("datasetKey:", datasetKey);
-  console.log("matchedEntries.length:", matchedEntries.length);
-  console.log("matchedEntries sample:", matchedEntries.slice(0, 5));
 
   if (matchedEntries.length === 0) {
     message.warning(`No images found for ${datasetKey}`);
@@ -308,42 +323,17 @@ const loadPrestoredDataset = async (datasetKey: string) => {
     setShowInsights(false);
     setPredictstep(1);
 
-    const regions = ["ffa", "eba", "ppa"];
+    const ffaJson = getPreloadedPredictionByRegion(datasetKey, "ffa");
+    const ebaJson = getPreloadedPredictionByRegion(datasetKey, "eba");
+    const ppaJson = getPreloadedPredictionByRegion(datasetKey, "ppa");
 
-    const jsonResults = regions.map((targetRegion) => {
-      const path = `/assets/preload/${datasetKey}/data/${model}_${dataset}_${targetRegion}.json`;
-      console.log(`Looking up preload JSON for region ${targetRegion}:`, path);
+    if (ffaJson) setPredictionFFAResult(ffaJson);
+    if (ebaJson) setPredictionEBAResult(ebaJson);
+    if (ppaJson) setPredictionPPAResult(ppaJson);
 
-      const allKeys = Object.keys(PRELOADED_JSON_MODULES);
-      console.log(allKeys.filter((k) => k.includes("wardle2020")));
-
-      const matchedKey = allKeys.find(
-        (k) => normalizePath(k).replace(/\s+/g, "") === normalizePath(path).replace(/\s+/g, "")
-      );
-
-      if (!matchedKey) {
-        console.warn(`No preload JSON found for ${targetRegion}:`, path);
-        return null;
-      }
-
-      const json = PRELOADED_JSON_MODULES[matchedKey];
-      console.log(`Matched key for ${targetRegion}:`, matchedKey);
-      console.log(`Loaded preload JSON for ${targetRegion}:`, json);
-
-      return { region: targetRegion, json };
-    });
-
-    jsonResults.forEach((item) => {
-      if (!item) return;
-
-      if (item.region === "ffa") setPredictionFFAResult(item.json);
-      if (item.region === "eba") setPredictionEBAResult(item.json);
-      if (item.region === "ppa") setPredictionPPAResult(item.json);
-    });
-
-    const selected = jsonResults.find((item) => item?.region === region);
-    if (selected) {
-      setPredictionResult(selected.json);
+    const selectedJson = getPreloadedPredictionByRegion(datasetKey, region);
+    if (selectedJson) {
+      setPredictionResult(selectedJson);
       setPredictstep(2);
     }
 
@@ -472,13 +462,37 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
 }
 
 
+useEffect(() => {
+  setPredictionResult(null);
+  setPredictstep(1);
+  clearRegionPredictionCache();
+  setShowInsights(false);
 
-  useEffect(() => {
-    setPredictionResult(null); // Clear previous results
-    setPredictstep(1); // Reset button
-    clearRegionPredictionCache()
-    setShowInsights(false); // Hide insights when settings change
-  }, [ model, dataset, voxelOption, voxelNumber, paper, participantName]);
+  if (!prestoreDataset) return;
+
+  const ffaJson = getPreloadedPredictionByRegion(prestoreDataset, "ffa");
+  const ebaJson = getPreloadedPredictionByRegion(prestoreDataset, "eba");
+  const ppaJson = getPreloadedPredictionByRegion(prestoreDataset, "ppa");
+
+  if (ffaJson) setPredictionFFAResult(ffaJson);
+  if (ebaJson) setPredictionEBAResult(ebaJson);
+  if (ppaJson) setPredictionPPAResult(ppaJson);
+
+  const selectedJson = getPreloadedPredictionByRegion(prestoreDataset, region);
+  if (selectedJson) {
+    // setPredictionResult(selectedJson);
+    setPredictstep(2);
+  }
+}, [
+  model,
+  dataset,
+  voxelOption,
+  voxelNumber,
+  paper,
+  participantName,
+  prestoreDataset,
+  region,
+]);
 
   useEffect(() => {
     if (current !== 2) return;
