@@ -155,6 +155,14 @@ const PRELOADED_IMAGE_MODULES = import.meta.glob(
   }
 ) as Record<string, string>;
 
+const PRELOADED_JSON_MODULES = import.meta.glob(
+  "/assets/preload/**/*.json",
+  {
+    eager: true,
+    import: "default",
+  }
+) as Record<string, any>;
+
 const Stepper: React.FC = () => {
   const { token } = theme.useToken();
   const [current, setCurrent] = useState(0);
@@ -265,13 +273,14 @@ const loadPrestoredDataset = async (datasetKey: string) => {
             ? "image/webp"
             : "image/jpeg";
 
-        // 关键：把图片 URL 读成真实 blob
         const blob = await fetch(url).then((r) => {
           if (!r.ok) throw new Error(`Failed to fetch image: ${url}`);
           return r.blob();
         });
 
-        const realFile = new File([blob], filename, { type: blob.type || mime }) as FileWithPath;
+        const realFile = new File([blob], filename, {
+          type: blob.type || mime,
+        }) as FileWithPath;
 
         Object.defineProperty(realFile, "webkitRelativePath", {
           value: relativePath,
@@ -299,12 +308,52 @@ const loadPrestoredDataset = async (datasetKey: string) => {
     setShowInsights(false);
     setPredictstep(1);
 
+    const regions = ["ffa", "eba", "ppa"];
+
+    const jsonResults = regions.map((targetRegion) => {
+      const path = `/assets/preload/${datasetKey}/data/${model}_${dataset}_${targetRegion}.json`;
+      console.log(`Looking up preload JSON for region ${targetRegion}:`, path);
+
+      const allKeys = Object.keys(PRELOADED_JSON_MODULES);
+      console.log(allKeys.filter((k) => k.includes("wardle2020")));
+
+      const matchedKey = allKeys.find(
+        (k) => normalizePath(k).replace(/\s+/g, "") === normalizePath(path).replace(/\s+/g, "")
+      );
+
+      if (!matchedKey) {
+        console.warn(`No preload JSON found for ${targetRegion}:`, path);
+        return null;
+      }
+
+      const json = PRELOADED_JSON_MODULES[matchedKey];
+      console.log(`Matched key for ${targetRegion}:`, matchedKey);
+      console.log(`Loaded preload JSON for ${targetRegion}:`, json);
+
+      return { region: targetRegion, json };
+    });
+
+    jsonResults.forEach((item) => {
+      if (!item) return;
+
+      if (item.region === "ffa") setPredictionFFAResult(item.json);
+      if (item.region === "eba") setPredictionEBAResult(item.json);
+      if (item.region === "ppa") setPredictionPPAResult(item.json);
+    });
+
+    const selected = jsonResults.find((item) => item?.region === region);
+    if (selected) {
+      setPredictionResult(selected.json);
+      setPredictstep(2);
+    }
+
     message.success(`${datasetKey} loaded`);
   } catch (err) {
     console.error(err);
     message.error(`Failed to load dataset ${datasetKey}`);
   }
 };
+
  
 const addIncomingFiles = (newFiles: File[]) => {
   if (!newFiles?.length) return;
@@ -1015,7 +1064,7 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
         )}
 
         {current === steps.length - 1 && (
-          <Button type="primary" onClick={downloadData} disabled={!predictionResult}>
+          <Button type="primary" onClick={downloadData} disabled={!currentRegionPredictionResult}>
             Download Data
           </Button>
         )}
