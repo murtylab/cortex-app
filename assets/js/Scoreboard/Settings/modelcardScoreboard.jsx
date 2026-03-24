@@ -5,10 +5,10 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import { Typography, Link } from '@mui/material';
-import { MODEL_OPTIONS } from './constants';
-import { MODELCARD_INFO_LOOKUP } from './constants-scoreboard';
+import { MODEL_OPTIONS } from '../../constants';
+import { MODELCARD_INFO_LOOKUP } from '../../constants-scoreboard';
 
-const ModelCardNew = ({ region, dataset, model, evalDataset }) => {
+const ModelCardScoreboard = ({ region, dataset, model, evalDataset }) => {
   console.log("ModelCard: model:", model, "region:", region, "dataset:", dataset);
 
   const getInfo = (dataset, region, model) => {
@@ -54,4 +54,4 @@ const ModelCardNew = ({ region, dataset, model, evalDataset }) => {
   );
 };
 
-export default ModelCardNew;
+export default ModelCardScoreboard;
