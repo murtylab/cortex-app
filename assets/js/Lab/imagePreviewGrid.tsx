@@ -312,12 +312,14 @@ export default function ImagePreviewGroupedDnD({
 
           <button
             type="button"
+            disabled={isPreload}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              if (isPreload) return;
               startAddGroup();
             }}
-            style={btnStyle()}
+            style={btnStyle(isPreload)}
           >
             Add Group
           </button>
