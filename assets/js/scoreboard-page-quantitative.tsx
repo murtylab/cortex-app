@@ -760,7 +760,7 @@ const ScoreboardPageQuantitative: React.FC = () => {
         {Array.isArray(region) && region.length > 0 && (
           <>
             {region.map((item, index) => (
-              <ROICard key={item ?? index} region={item} />
+               ((item !== "Across Regions") && <ROICard key={item ?? index} region={item}/>)
             ))}
           </>
         )}
@@ -777,7 +777,7 @@ const ScoreboardPageQuantitative: React.FC = () => {
         {Array.isArray(dataset) && dataset.length > 0 && (
           <>
             {dataset.map((item, index) => (
-              <DatasetCard key={item ?? index} dataset={item} />
+             <DatasetCard key={item ?? index} dataset={item} />
             ))}
           </>
         )}
