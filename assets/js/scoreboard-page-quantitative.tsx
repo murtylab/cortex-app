@@ -31,6 +31,7 @@ import ScatterMurtyVsNsd from './Scoreboard/Visualizations/scatterMurtyVsNsd.jsx
 //model / region /dataset card
 import ModelCardScoreboard from './Scoreboard/Settings/modelcardScoreboard.jsx';
 import DatasetCard from './Scoreboard/Settings/datasetcard.jsx';
+import ROICard from './Scoreboard/Settings/roicard.jsx';
 
 
 const { Title } = Typography;
@@ -754,6 +755,15 @@ const ScoreboardPageQuantitative: React.FC = () => {
             <ModelCardScoreboard  region={region} dataset={training} model={selectedModel} evalDataset={dataset}/>
         )
         }
+
+
+        {Array.isArray(region) && region.length > 0 && (
+          <>
+            {region.map((item, index) => (
+              <ROICard key={item ?? index} region={item} />
+            ))}
+          </>
+        )}
 
         {training === "Murty185" && (
             <DatasetCard dataset={"murty185"}/>
