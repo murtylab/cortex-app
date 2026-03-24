@@ -30,6 +30,7 @@ import ScatterMurtyVsNsd from './Scoreboard/Visualizations/scatterMurtyVsNsd.jsx
 
 //model / region /dataset card
 import ModelCardScoreboard from './Scoreboard/Settings/modelcardScoreboard.jsx';
+import DatasetCard from './Scoreboard/Settings/datasetcard.jsx';
 
 
 const { Title } = Typography;
@@ -753,6 +754,23 @@ const ScoreboardPageQuantitative: React.FC = () => {
             <ModelCardScoreboard  region={region} dataset={training} model={selectedModel} evalDataset={dataset}/>
         )
         }
+
+        {training === "Murty185" && (
+            <DatasetCard dataset={"murty185"}/>
+          )
+        }
+        {training === "NSD" && (
+          <DatasetCard dataset={"nsd_1000"}/>
+        )
+        }
+
+        {Array.isArray(dataset) && dataset.length > 0 && (
+          <>
+            {dataset.map((item, index) => (
+              <DatasetCard key={item ?? index} dataset={item} />
+            ))}
+          </>
+        )}
 
 
 
