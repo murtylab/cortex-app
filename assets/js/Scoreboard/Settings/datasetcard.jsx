@@ -18,20 +18,27 @@ const DatasetCard = ({ dataset }) => {
   const { category, size, subjects, description, cardUrl } = getInfo(dataset);
 
   return (
-    <Box sx={{ minWidth: 250, boxShadow: 3, borderRadius: 2, my: 2 }}>
-      <Card variant="outlined" sx={{ borderRadius: 2 }}>
-        <CardContent>
+    <Box sx={{ minWidth: 250, boxShadow: 3, borderRadius: 2, marginTop: 2 , marginBottom: 2 }}>
+      <Card variant="outlined" sx={{ borderRadius: 2, background: 'var(--background-color)' }}>
+        <CardContent  sx={{ textAlign: 'center' }}>
           <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
             Dataset Card
           </Typography>
           <Typography variant="h5" component="div">
-            <Link href={cardUrl} target="_blank" rel="noopener noreferrer" underline="hover">
+            <Link href={cardUrl} target="_blank" rel="noopener noreferrer" underline="hover"
+            
+              sx={{
+              background: "var(--highlight-color)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+            >
               {datasetName}
             </Link>
           </Typography>
-{/*           <Typography sx={{ mb: 1.5 }} color="text.secondary">
+          <Typography sx={{ mb: 1.5 }} color="text.secondary">
             Category: {category}  
-          </Typography> */}
+          </Typography>
           <Typography sx={{ mb: 1.5 }} color="text.secondary">
             Stimuli Num: {size} with {subjects} Subjects
           </Typography>
