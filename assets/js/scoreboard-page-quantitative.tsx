@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Typography, Button, Radio } from 'antd';
 
 // LoadData
@@ -48,6 +48,9 @@ const ScoreboardPageQuantitative: React.FC = () => {
 
   // interaction variable for overview and details
   const [visibleRange, setVisibleRange] = useState({ start: 0, end: 0 });
+
+  
+  const [overviewWidth, setOverviewWidth] = useState(0);
 
   // const [pageView, setPageView] = useState('rank');
   const initialView = (() => {
@@ -103,6 +106,17 @@ const ScoreboardPageQuantitative: React.FC = () => {
     global_score: "Global Score",
   };
 
+   const datasetLabelMapShort: Record<string, string> = {
+    murty185: "Murty",
+    nsd_1000: "NSD",
+    bold_5000: "BOLD",
+    bonner_2021: "Bonner",
+    bmd_2024: "BMD",
+    kingbaker_2019: "King",
+    wardle_2020: "Wardle",
+    nsd_syn: "NSD Syn",
+  };
+
 
 
   const handleTogglePanel = (panelName: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
@@ -132,6 +146,22 @@ const ScoreboardPageQuantitative: React.FC = () => {
     }
   }
 }, [isVS, isDatasetROI]);
+
+
+  const [overviewNode, setOverviewNode] = useState<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!overviewNode) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      if (!entries || entries.length === 0) return;
+      setOverviewWidth(entries[0].contentRect.width);
+    });
+
+    resizeObserver.observe(overviewNode);
+    return () => resizeObserver.disconnect();
+  }, [overviewNode]);
+
 
   // pageview logic
   useEffect(() => {
@@ -223,6 +253,52 @@ const ScoreboardPageQuantitative: React.FC = () => {
   } else {
     return {};
   }
+};
+
+const getOverviewColumnCount = (
+  dataSource: any,
+  roiValue: string | null,
+  datasetValue: string | null
+) => {
+  if (!dataSource) return 0;
+
+  // 固定 ROI，看不同 dataset
+  if (roiValue && !datasetValue) {
+    const roiKey = roiValue === "Across Regions" ? "Overall" : roiValue;
+    if (!dataSource[roiKey]) return 0;
+
+    const xLabels = new Set<string>();
+    const rawModels = Object.keys(dataSource[roiKey]).filter((m) => m !== "ceiling");
+
+    rawModels.forEach((model) => {
+      Object.entries(dataSource[roiKey][model] || {}).forEach(
+        ([x, vals]: [string, any]) => {
+          if (vals) xLabels.add(x);
+        }
+      );
+    });
+
+    return xLabels.size;
+  }
+
+  // 固定 dataset，看不同 ROI
+  if (datasetValue) {
+    const xLabels = new Set<string>();
+
+    Object.keys(dataSource)
+      .filter((r) => r !== "overall" && r !== "Across Regions")
+      .forEach((r) => {
+        const modelNames = Object.keys(dataSource[r] || {}).filter((m) => m !== "ceiling");
+        modelNames.forEach((model) => {
+          const vals = dataSource[r][model]?.[datasetValue];
+          if (vals) xLabels.add(r);
+        });
+      });
+
+    return xLabels.size;
+  }
+
+  return 0;
 };
 
   const hasData = Boolean(nsdData && murtyData);
@@ -413,20 +489,28 @@ const ScoreboardPageQuantitative: React.FC = () => {
 
             {/* --- Overview Section --- */}
             {pageView !== '2' && (
-              <div style={{
-                background: 'var(--background-color)',
-                // 如果是详情模式，占 25%，否则占满 100%
-                height: isDatasetDetailMode  ? '25%' : '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                width: '100%',
-                minHeight: 0, // 👈 关键：允许容器在 grid 内部正确缩放
-                gap: 12,
-                overflowY: isDatasetDetailMode ? 'auto' : 'hidden', // rollable
-                overflowX: isDatasetDetailMode ? 'hidden' : 'hidden',
-                flexShrink: 0,
+              <div
+                style={{
+                  background: 'var(--background-color)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  width: '100%',
+                  gap: 12,
 
-              }}>
+                  // 关键：不要再固定 25%
+                  height: 'auto',
+                  flex: isDatasetDetailMode ? '0 1 auto' : 1,
+                  flexShrink: 0,
+
+                  // 动态范围
+                  minHeight: isDatasetDetailMode ? 140 : 0,
+                  maxHeight: isDatasetDetailMode ? '45%' : '100%',
+
+                  // 超过最大高度再滚
+                  overflowY: isDatasetDetailMode ? 'auto' : 'hidden',
+                  overflowX: 'hidden',
+                }}
+              >
 
                 {/* 分支 1：BarChart 模式 (详情模式保持不变) */}
                 {isDatasetDetailMode && dataset.map((dsName) => (
@@ -454,56 +538,90 @@ const ScoreboardPageQuantitative: React.FC = () => {
                 }
 
                 {/* 统一分支 2 和 3：Heatmap 模式 */}
-                {(!isDatasetDetailMode) && (
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    flex: 1,
-                    gap: 12,
-                    height: '100%',
-                    minHeight: 0,
-                    overflowX: 'auto',
+                {(!isDatasetDetailMode) && (() => {
+                  const overviewItems = (dataset.length === 0 ? region : dataset).map((item) => {
+                    const isBranch2 = dataset.length === 0;
 
-                  }}>
+                    const subtitle = isBranch2
+                      ? (item === 'Across Regions' ? 'Overall' : item)
+                      : (datasetLabelMapShort[item] || item);
 
-                    {(dataset.length === 0 ? region : dataset).map((item) => {
-                      // 统一标题和参数逻辑
-                      const isBranch2 = dataset.length === 0;
-                      const subtitle = isBranch2
-                        ? (item === 'Across Regions' ? 'Overall' : item)
-                        : (datasetLabelMap[item] || item);
+                    const currentRoi = isBranch2
+                      ? (item === 'Across Regions' ? 'Overall' : item)
+                      : "Across Regions";
 
-                      const currentRoi = isBranch2
-                        ? (item === 'Across Regions' ? 'Overall' : item)
-                        : "Across Regions";
+                    const currentDataset = isBranch2 ? null : item;
 
-                      const currentDataset = isBranch2 ? null : item;
+                    const colCount = getOverviewColumnCount(
+                      getDataByTraining(training),
+                      currentRoi,
+                      currentDataset
+                    );
 
-                      return (
+                    return {
+                      key: item,
+                      subtitle,
+                      currentRoi,
+                      currentDataset,
+                      colCount,
+                    };
+                  });
+
+                  const panelGap = 5;
+                  const totalGap = panelGap * Math.max(overviewItems.length - 1, 0);
+                  const usableWidth = Math.max(0, overviewWidth - totalGap);
+                  const totalCols = overviewItems.reduce((sum, item) => sum + item.colCount, 0);
+
+                  const sharedColWidth =
+                  totalCols > 0 && usableWidth > 0
+                    ? Math.max(6, usableWidth / totalCols)
+                    : 20;
+
+                  return (
+                    <div
+                      ref={setOverviewNode}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        flex: 1,
+                        gap: panelGap,
+                        height: '100%',
+                        minHeight: 0,
+                        overflowX: 'hidden',
+                        alignItems: 'stretch',
+                      }}
+                    >
+                      {overviewItems.map(({ key, subtitle, currentRoi, currentDataset, colCount }) => (
                         <div
-                          key={item}
+                          key={key}
                           style={{
-                            flex: '1 0 60px',
-
+                            flex: '0 0 auto',
                             display: 'flex',
                             flexDirection: 'column',
                             height: '100%',
-                            minWidth: '60px',
+                            width: `${colCount * sharedColWidth}px`,
                           }}
                         >
-                          {/* 标题 */}
-                          <div style={{ textAlign: 'center', fontSize: '10px', fontWeight: 'bold', color: '#888', marginBottom: 4 }}>
+                          <div
+                            style={{
+                              textAlign: 'center',
+                              fontSize: '10px',
+                              fontWeight: 'bold',
+                              color: '#888',
+                              marginBottom: 4,
+                            }}
+                          >
                             {subtitle}
                           </div>
 
-                          {/* 热图容器：增加 flex: 1 并强制 display: flex */}
-                          <div style={{
-                            flex: 1,
-                            minHeight: 0,
-                            display: 'flex',
-                            flexDirection: 'column'
-
-                          }}>
+                          <div
+                            style={{
+                              flex: 1,
+                              minHeight: 0,
+                              display: 'flex',
+                              flexDirection: 'column'
+                            }}
+                          >
                             <HeatmapOverview
                               data={getDataByTraining(training)}
                               roi={currentRoi}
@@ -512,13 +630,14 @@ const ScoreboardPageQuantitative: React.FC = () => {
                               selectedModel={selectedModel}
                               onModelClick={setSelectedModel}
                               visibleRange={visibleRange}
+                              sharedColWidth={sharedColWidth}
                             />
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
             )}
 
