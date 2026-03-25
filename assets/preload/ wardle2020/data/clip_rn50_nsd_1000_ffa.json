@@ -1,200 +1,200 @@
 [
   {
     "mean": {
-      "wardle2020__Face__face01.jpeg.jpeg": 0.8291313543645197,
-      "wardle2020__Face__face02.jpeg.jpeg": 0.9676628394270909,
-      "wardle2020__Face__face03.jpeg.jpeg": 0.8555790865637737,
-      "wardle2020__Face__face04.jpeg.jpeg": 0.6667596844373552,
-      "wardle2020__Face__face05.jpeg.jpeg": 0.8438209952401549,
-      "wardle2020__Face__face06.jpeg.jpeg": 0.9363255387890106,
-      "wardle2020__Face__face07.jpeg.jpeg": 0.8253857492880282,
-      "wardle2020__Face__face08.jpeg.jpeg": 1.0431792848540584,
-      "wardle2020__Face__face09.jpeg.jpeg": 0.7295980879272121,
-      "wardle2020__Face__face10.jpeg.jpeg": 0.825168744853422,
-      "wardle2020__Face__face11.jpeg.jpeg": 0.754473802366934,
-      "wardle2020__Face__face12.jpeg.jpeg": 0.7634682902265028,
-      "wardle2020__Face__face13.jpeg.jpeg": 0.8261580799911795,
-      "wardle2020__Face__face14.jpeg.jpeg": 0.8405687435004632,
-      "wardle2020__Face__face15.jpeg.jpeg": 0.9672261207005498,
-      "wardle2020__Face__face16.jpeg.jpeg": 1.058177344136814,
-      "wardle2020__Face__face17.jpeg.jpeg": 0.9081856524103513,
-      "wardle2020__Face__face18.jpeg.jpeg": 0.9972126098328878,
-      "wardle2020__Face__face19.jpeg.jpeg": 0.7082245569187087,
-      "wardle2020__Face__face20.jpeg.jpeg": 1.0331565106402063,
-      "wardle2020__Face__face21.jpeg.jpeg": 0.9723046218362434,
-      "wardle2020__Face__face22.jpeg.jpeg": 0.7579376526598366,
-      "wardle2020__Face__face23.jpeg.jpeg": 0.8865611937453752,
-      "wardle2020__Face__face24.jpeg.jpeg": 0.8917309899382585,
-      "wardle2020__Face__face25.jpeg.jpeg": 0.7695235080884343,
-      "wardle2020__Face__face26.jpeg.jpeg": 0.7744627150826614,
-      "wardle2020__Face__face27.jpeg.jpeg": 0.6910721504509283,
-      "wardle2020__Face__face28.jpeg.jpeg": 0.8868692687077854,
-      "wardle2020__Face__face29.jpeg.jpeg": 0.9394690191721825,
-      "wardle2020__Face__face30.jpeg.jpeg": 0.759349256467761,
-      "wardle2020__Face__face31.jpeg.jpeg": 0.7476275382685741,
-      "wardle2020__Face__face32.jpeg.jpeg": 0.5644682010930999,
-      "wardle2020__Object__04_match.jpeg.jpeg": -0.20893625732232926,
-      "wardle2020__Object__06_match.jpeg.jpeg": -0.22859390157010853,
-      "wardle2020__Object__08_match.jpeg.jpeg": -0.4963473737533803,
-      "wardle2020__Object__10_match.jpeg.jpeg": -0.36405670853505984,
-      "wardle2020__Object__12_match.jpeg.jpeg": -0.09611694333754875,
-      "wardle2020__Object__13_match.jpeg.jpeg": -0.0065649919961084865,
-      "wardle2020__Object__15_match.jpeg.jpeg": -0.12271211267476277,
-      "wardle2020__Object__16_match.jpeg.jpeg": -0.36844034039405016,
-      "wardle2020__Object__17_match.jpeg.jpeg": -0.15617126326808997,
-      "wardle2020__Object__20_match.jpeg.jpeg": -0.19942586805883472,
-      "wardle2020__Object__22_match.jpeg.jpeg": -0.1989997222898632,
-      "wardle2020__Object__26_match.jpeg.jpeg": -0.2885372542041905,
-      "wardle2020__Object__34_match.jpeg.jpeg": -0.20014751215834287,
-      "wardle2020__Object__37_match.jpeg.jpeg": -0.03155224410298036,
-      "wardle2020__Object__39_match.jpeg.jpeg": -0.4229302214277783,
-      "wardle2020__Object__42_match.jpeg.jpeg": -0.45541822213898075,
-      "wardle2020__Object__43_match.jpeg.jpeg": -0.31108276987534184,
-      "wardle2020__Object__44_match.jpeg.jpeg": -0.3215581042907986,
-      "wardle2020__Object__46_match.jpeg.jpeg": -0.32941598233223146,
-      "wardle2020__Object__48_match.jpeg.jpeg": -0.38394194147965804,
-      "wardle2020__Object__53_match.jpeg.jpeg": -0.13389199501808796,
-      "wardle2020__Object__56_match.jpeg.jpeg": -0.3347102867845217,
-      "wardle2020__Object__57_match.jpeg.jpeg": -0.13368993559000264,
-      "wardle2020__Object__59_match.jpeg.jpeg": -0.43075311302360897,
-      "wardle2020__Object__64_match.jpeg.jpeg": -0.26695026620713913,
-      "wardle2020__Object__72_match.jpeg.jpeg": -0.14966964347784892,
-      "wardle2020__Object__74_match.jpeg.jpeg": -0.3684102277357298,
-      "wardle2020__Object__75_match.jpeg.jpeg": -0.5011412284633551,
-      "wardle2020__Object__78_match.jpeg.jpeg": -0.05083648143622337,
-      "wardle2020__Object__80_match.jpeg.jpeg": -0.24839877349346637,
-      "wardle2020__Object__81_match.jpeg.jpeg": -0.42076025851651006,
-      "wardle2020__Object__83_match.jpeg.jpeg": -0.17984735197062454,
-      "wardle2020__Scrambled__04.jpeg.jpeg": -0.16935378603623236,
-      "wardle2020__Scrambled__06.jpeg.jpeg": -0.12755651704709478,
-      "wardle2020__Scrambled__08.jpeg.jpeg": -0.34692947172323063,
-      "wardle2020__Scrambled__10.jpeg.jpeg": -0.09122406404339266,
-      "wardle2020__Scrambled__12.jpeg.jpeg": -0.17763670696486725,
-      "wardle2020__Scrambled__13.jpeg.jpeg": -0.029625000679434937,
-      "wardle2020__Scrambled__15.jpeg.jpeg": -0.2244136445100716,
-      "wardle2020__Scrambled__16.jpeg.jpeg": -0.16876679756964802,
-      "wardle2020__Scrambled__17.jpeg.jpeg": -0.31200757629742754,
-      "wardle2020__Scrambled__20.jpeg.jpeg": -0.132361479344688,
-      "wardle2020__Scrambled__22.jpeg.jpeg": -0.17896077043019812,
-      "wardle2020__Scrambled__26.jpeg.jpeg": -0.021536339818715902,
-      "wardle2020__Scrambled__34.jpeg.jpeg": 0.19139948550594824,
-      "wardle2020__Scrambled__37.jpeg.jpeg": 0.21619456549800734,
-      "wardle2020__Scrambled__39.jpeg.jpeg": -0.1575586927196859,
-      "wardle2020__Scrambled__42.jpeg.jpeg": -0.3510881284513256,
-      "wardle2020__Scrambled__43.jpeg.jpeg": 0.042246657362540754,
-      "wardle2020__Scrambled__44.jpeg.jpeg": -0.03695724777098194,
-      "wardle2020__Scrambled__46.jpeg.jpeg": -0.00022421513818069128,
-      "wardle2020__Scrambled__48.jpeg.jpeg": 0.04944460595113761,
-      "wardle2020__Scrambled__53.jpeg.jpeg": 0.08488568900882751,
-      "wardle2020__Scrambled__56.jpeg.jpeg": -0.2610526986999142,
-      "wardle2020__Scrambled__57.jpeg.jpeg": 0.11251829776013147,
-      "wardle2020__Scrambled__59.jpeg.jpeg": 0.3154470493918475,
-      "wardle2020__Scrambled__64.jpeg.jpeg": -0.2755131279606133,
-      "wardle2020__Scrambled__72.jpeg.jpeg": -0.23667411247525863,
-      "wardle2020__Scrambled__74.jpeg.jpeg": -0.14755232643248908,
-      "wardle2020__Scrambled__75.jpeg.jpeg": -0.2769138633758714,
-      "wardle2020__Scrambled__78.jpeg.jpeg": -0.02343581452726402,
-      "wardle2020__Scrambled__80.jpeg.jpeg": -0.03170090898232926,
-      "wardle2020__Scrambled__81.jpeg.jpeg": -0.281572236579013,
-      "wardle2020__Scrambled__83.jpeg.jpeg": -0.27958794027520084
+      "wardle2020__Face__face01.jpeg": 0.8291313543645197,
+      "wardle2020__Face__face02.jpeg": 0.9676628394270909,
+      "wardle2020__Face__face03.jpeg": 0.8555790865637737,
+      "wardle2020__Face__face04.jpeg": 0.6667596844373552,
+      "wardle2020__Face__face05.jpeg": 0.8438209952401549,
+      "wardle2020__Face__face06.jpeg": 0.9363255387890106,
+      "wardle2020__Face__face07.jpeg": 0.8253857492880282,
+      "wardle2020__Face__face08.jpeg": 1.0431792848540584,
+      "wardle2020__Face__face09.jpeg": 0.7295980879272121,
+      "wardle2020__Face__face10.jpeg": 0.825168744853422,
+      "wardle2020__Face__face11.jpeg": 0.754473802366934,
+      "wardle2020__Face__face12.jpeg": 0.7634682902265028,
+      "wardle2020__Face__face13.jpeg": 0.8261580799911795,
+      "wardle2020__Face__face14.jpeg": 0.8405687435004632,
+      "wardle2020__Face__face15.jpeg": 0.9672261207005498,
+      "wardle2020__Face__face16.jpeg": 1.058177344136814,
+      "wardle2020__Face__face17.jpeg": 0.9081856524103513,
+      "wardle2020__Face__face18.jpeg": 0.9972126098328878,
+      "wardle2020__Face__face19.jpeg": 0.7082245569187087,
+      "wardle2020__Face__face20.jpeg": 1.0331565106402063,
+      "wardle2020__Face__face21.jpeg": 0.9723046218362434,
+      "wardle2020__Face__face22.jpeg": 0.7579376526598366,
+      "wardle2020__Face__face23.jpeg": 0.8865611937453752,
+      "wardle2020__Face__face24.jpeg": 0.8917309899382585,
+      "wardle2020__Face__face25.jpeg": 0.7695235080884343,
+      "wardle2020__Face__face26.jpeg": 0.7744627150826614,
+      "wardle2020__Face__face27.jpeg": 0.6910721504509283,
+      "wardle2020__Face__face28.jpeg": 0.8868692687077854,
+      "wardle2020__Face__face29.jpeg": 0.9394690191721825,
+      "wardle2020__Face__face30.jpeg": 0.759349256467761,
+      "wardle2020__Face__face31.jpeg": 0.7476275382685741,
+      "wardle2020__Face__face32.jpeg": 0.5644682010930999,
+      "wardle2020__Object__04_match.jpeg": -0.20893625732232926,
+      "wardle2020__Object__06_match.jpeg": -0.22859390157010853,
+      "wardle2020__Object__08_match.jpeg": -0.4963473737533803,
+      "wardle2020__Object__10_match.jpeg": -0.36405670853505984,
+      "wardle2020__Object__12_match.jpeg": -0.09611694333754875,
+      "wardle2020__Object__13_match.jpeg": -0.0065649919961084865,
+      "wardle2020__Object__15_match.jpeg": -0.12271211267476277,
+      "wardle2020__Object__16_match.jpeg": -0.36844034039405016,
+      "wardle2020__Object__17_match.jpeg": -0.15617126326808997,
+      "wardle2020__Object__20_match.jpeg": -0.19942586805883472,
+      "wardle2020__Object__22_match.jpeg": -0.1989997222898632,
+      "wardle2020__Object__26_match.jpeg": -0.2885372542041905,
+      "wardle2020__Object__34_match.jpeg": -0.20014751215834287,
+      "wardle2020__Object__37_match.jpeg": -0.03155224410298036,
+      "wardle2020__Object__39_match.jpeg": -0.4229302214277783,
+      "wardle2020__Object__42_match.jpeg": -0.45541822213898075,
+      "wardle2020__Object__43_match.jpeg": -0.31108276987534184,
+      "wardle2020__Object__44_match.jpeg": -0.3215581042907986,
+      "wardle2020__Object__46_match.jpeg": -0.32941598233223146,
+      "wardle2020__Object__48_match.jpeg": -0.38394194147965804,
+      "wardle2020__Object__53_match.jpeg": -0.13389199501808796,
+      "wardle2020__Object__56_match.jpeg": -0.3347102867845217,
+      "wardle2020__Object__57_match.jpeg": -0.13368993559000264,
+      "wardle2020__Object__59_match.jpeg": -0.43075311302360897,
+      "wardle2020__Object__64_match.jpeg": -0.26695026620713913,
+      "wardle2020__Object__72_match.jpeg": -0.14966964347784892,
+      "wardle2020__Object__74_match.jpeg": -0.3684102277357298,
+      "wardle2020__Object__75_match.jpeg": -0.5011412284633551,
+      "wardle2020__Object__78_match.jpeg": -0.05083648143622337,
+      "wardle2020__Object__80_match.jpeg": -0.24839877349346637,
+      "wardle2020__Object__81_match.jpeg": -0.42076025851651006,
+      "wardle2020__Object__83_match.jpeg": -0.17984735197062454,
+      "wardle2020__Scrambled__04.jpeg": -0.16935378603623236,
+      "wardle2020__Scrambled__06.jpeg": -0.12755651704709478,
+      "wardle2020__Scrambled__08.jpeg": -0.34692947172323063,
+      "wardle2020__Scrambled__10.jpeg": -0.09122406404339266,
+      "wardle2020__Scrambled__12.jpeg": -0.17763670696486725,
+      "wardle2020__Scrambled__13.jpeg": -0.029625000679434937,
+      "wardle2020__Scrambled__15.jpeg": -0.2244136445100716,
+      "wardle2020__Scrambled__16.jpeg": -0.16876679756964802,
+      "wardle2020__Scrambled__17.jpeg": -0.31200757629742754,
+      "wardle2020__Scrambled__20.jpeg": -0.132361479344688,
+      "wardle2020__Scrambled__22.jpeg": -0.17896077043019812,
+      "wardle2020__Scrambled__26.jpeg": -0.021536339818715902,
+      "wardle2020__Scrambled__34.jpeg": 0.19139948550594824,
+      "wardle2020__Scrambled__37.jpeg": 0.21619456549800734,
+      "wardle2020__Scrambled__39.jpeg": -0.1575586927196859,
+      "wardle2020__Scrambled__42.jpeg": -0.3510881284513256,
+      "wardle2020__Scrambled__43.jpeg": 0.042246657362540754,
+      "wardle2020__Scrambled__44.jpeg": -0.03695724777098194,
+      "wardle2020__Scrambled__46.jpeg": -0.00022421513818069128,
+      "wardle2020__Scrambled__48.jpeg": 0.04944460595113761,
+      "wardle2020__Scrambled__53.jpeg": 0.08488568900882751,
+      "wardle2020__Scrambled__56.jpeg": -0.2610526986999142,
+      "wardle2020__Scrambled__57.jpeg": 0.11251829776013147,
+      "wardle2020__Scrambled__59.jpeg": 0.3154470493918475,
+      "wardle2020__Scrambled__64.jpeg": -0.2755131279606133,
+      "wardle2020__Scrambled__72.jpeg": -0.23667411247525863,
+      "wardle2020__Scrambled__74.jpeg": -0.14755232643248908,
+      "wardle2020__Scrambled__75.jpeg": -0.2769138633758714,
+      "wardle2020__Scrambled__78.jpeg": -0.02343581452726402,
+      "wardle2020__Scrambled__80.jpeg": -0.03170090898232926,
+      "wardle2020__Scrambled__81.jpeg": -0.281572236579013,
+      "wardle2020__Scrambled__83.jpeg": -0.27958794027520084
     },
     "sem": {
-      "wardle2020__Face__face01.jpeg.jpeg": 0.014126436285681781,
-      "wardle2020__Face__face02.jpeg.jpeg": 0.01625924506834961,
-      "wardle2020__Face__face03.jpeg.jpeg": 0.01521313857990436,
-      "wardle2020__Face__face04.jpeg.jpeg": 0.011814520181862959,
-      "wardle2020__Face__face05.jpeg.jpeg": 0.015210545317304104,
-      "wardle2020__Face__face06.jpeg.jpeg": 0.01586825385313336,
-      "wardle2020__Face__face07.jpeg.jpeg": 0.014256277087105631,
-      "wardle2020__Face__face08.jpeg.jpeg": 0.016904119818220275,
-      "wardle2020__Face__face09.jpeg.jpeg": 0.013170366897973915,
-      "wardle2020__Face__face10.jpeg.jpeg": 0.013882260834060424,
-      "wardle2020__Face__face11.jpeg.jpeg": 0.014746003063223294,
-      "wardle2020__Face__face12.jpeg.jpeg": 0.014651948232587954,
-      "wardle2020__Face__face13.jpeg.jpeg": 0.01466685214467928,
-      "wardle2020__Face__face14.jpeg.jpeg": 0.015499802012015146,
-      "wardle2020__Face__face15.jpeg.jpeg": 0.016627950470627893,
-      "wardle2020__Face__face16.jpeg.jpeg": 0.016984187136478843,
-      "wardle2020__Face__face17.jpeg.jpeg": 0.01693319832882159,
-      "wardle2020__Face__face18.jpeg.jpeg": 0.017092650216086913,
-      "wardle2020__Face__face19.jpeg.jpeg": 0.012432446428588264,
-      "wardle2020__Face__face20.jpeg.jpeg": 0.017011273981963042,
-      "wardle2020__Face__face21.jpeg.jpeg": 0.016971325487805597,
-      "wardle2020__Face__face22.jpeg.jpeg": 0.01350018827865593,
-      "wardle2020__Face__face23.jpeg.jpeg": 0.015615909782892215,
-      "wardle2020__Face__face24.jpeg.jpeg": 0.015605268909063103,
-      "wardle2020__Face__face25.jpeg.jpeg": 0.013411403675799178,
-      "wardle2020__Face__face26.jpeg.jpeg": 0.013624324679238334,
-      "wardle2020__Face__face27.jpeg.jpeg": 0.012107562606073936,
-      "wardle2020__Face__face28.jpeg.jpeg": 0.015287034743457556,
-      "wardle2020__Face__face29.jpeg.jpeg": 0.015794907737067935,
-      "wardle2020__Face__face30.jpeg.jpeg": 0.014541473376250402,
-      "wardle2020__Face__face31.jpeg.jpeg": 0.013101494593551977,
-      "wardle2020__Face__face32.jpeg.jpeg": 0.011279071324176052,
-      "wardle2020__Object__04_match.jpeg.jpeg": 0.0048323866621121075,
-      "wardle2020__Object__06_match.jpeg.jpeg": 0.00534029942752592,
-      "wardle2020__Object__08_match.jpeg.jpeg": 0.012067060010277863,
-      "wardle2020__Object__10_match.jpeg.jpeg": 0.00783522339409482,
-      "wardle2020__Object__12_match.jpeg.jpeg": 0.007565398541834578,
-      "wardle2020__Object__13_match.jpeg.jpeg": 0.0041742638759935,
-      "wardle2020__Object__15_match.jpeg.jpeg": 0.005932313981071188,
-      "wardle2020__Object__16_match.jpeg.jpeg": 0.008474895265919522,
-      "wardle2020__Object__17_match.jpeg.jpeg": 0.005458544902288048,
-      "wardle2020__Object__20_match.jpeg.jpeg": 0.009513195909867501,
-      "wardle2020__Object__22_match.jpeg.jpeg": 0.007532138069385464,
-      "wardle2020__Object__26_match.jpeg.jpeg": 0.010117572353805063,
-      "wardle2020__Object__34_match.jpeg.jpeg": 0.005909998666144349,
-      "wardle2020__Object__37_match.jpeg.jpeg": 0.005451581302036482,
-      "wardle2020__Object__39_match.jpeg.jpeg": 0.011336596643348502,
-      "wardle2020__Object__42_match.jpeg.jpeg": 0.006634261201518703,
-      "wardle2020__Object__43_match.jpeg.jpeg": 0.007461845347920186,
-      "wardle2020__Object__44_match.jpeg.jpeg": 0.011025838001007319,
-      "wardle2020__Object__46_match.jpeg.jpeg": 0.009685085017654133,
-      "wardle2020__Object__48_match.jpeg.jpeg": 0.009073841734418397,
-      "wardle2020__Object__53_match.jpeg.jpeg": 0.00516646321965615,
-      "wardle2020__Object__56_match.jpeg.jpeg": 0.006159351806632336,
-      "wardle2020__Object__57_match.jpeg.jpeg": 0.004058832028681773,
-      "wardle2020__Object__59_match.jpeg.jpeg": 0.007232380255935963,
-      "wardle2020__Object__64_match.jpeg.jpeg": 0.005353146457938416,
-      "wardle2020__Object__72_match.jpeg.jpeg": 0.007162561283127647,
-      "wardle2020__Object__74_match.jpeg.jpeg": 0.008301240445545066,
-      "wardle2020__Object__75_match.jpeg.jpeg": 0.010475234035854143,
-      "wardle2020__Object__78_match.jpeg.jpeg": 0.008199912775441172,
-      "wardle2020__Object__80_match.jpeg.jpeg": 0.005535606353867626,
-      "wardle2020__Object__81_match.jpeg.jpeg": 0.01208751349511921,
-      "wardle2020__Object__83_match.jpeg.jpeg": 0.008534882180412835,
-      "wardle2020__Scrambled__04.jpeg.jpeg": 0.006564776776275948,
-      "wardle2020__Scrambled__06.jpeg.jpeg": 0.00768158358701952,
-      "wardle2020__Scrambled__08.jpeg.jpeg": 0.008807608309492454,
-      "wardle2020__Scrambled__10.jpeg.jpeg": 0.0066632001709060855,
-      "wardle2020__Scrambled__12.jpeg.jpeg": 0.0074118864008161905,
-      "wardle2020__Scrambled__13.jpeg.jpeg": 0.004520956794146223,
-      "wardle2020__Scrambled__15.jpeg.jpeg": 0.0068682998693414665,
-      "wardle2020__Scrambled__16.jpeg.jpeg": 0.006619800424013961,
-      "wardle2020__Scrambled__17.jpeg.jpeg": 0.007571042346018949,
-      "wardle2020__Scrambled__20.jpeg.jpeg": 0.007473506041481454,
-      "wardle2020__Scrambled__22.jpeg.jpeg": 0.005185065825751656,
-      "wardle2020__Scrambled__26.jpeg.jpeg": 0.007932595648230829,
-      "wardle2020__Scrambled__34.jpeg.jpeg": 0.010185130136061158,
-      "wardle2020__Scrambled__37.jpeg.jpeg": 0.008359940230272419,
-      "wardle2020__Scrambled__39.jpeg.jpeg": 0.008525475140318739,
-      "wardle2020__Scrambled__42.jpeg.jpeg": 0.007552461147097329,
-      "wardle2020__Scrambled__43.jpeg.jpeg": 0.006834215095560186,
-      "wardle2020__Scrambled__44.jpeg.jpeg": 0.005516245150101299,
-      "wardle2020__Scrambled__46.jpeg.jpeg": 0.006785366886018023,
-      "wardle2020__Scrambled__48.jpeg.jpeg": 0.006630969556705969,
-      "wardle2020__Scrambled__53.jpeg.jpeg": 0.006211494672874359,
-      "wardle2020__Scrambled__56.jpeg.jpeg": 0.005989692054216007,
-      "wardle2020__Scrambled__57.jpeg.jpeg": 0.007721826604450681,
-      "wardle2020__Scrambled__59.jpeg.jpeg": 0.007209553387566736,
-      "wardle2020__Scrambled__64.jpeg.jpeg": 0.006114937986888811,
-      "wardle2020__Scrambled__72.jpeg.jpeg": 0.008478276897043313,
-      "wardle2020__Scrambled__74.jpeg.jpeg": 0.005610910758306983,
-      "wardle2020__Scrambled__75.jpeg.jpeg": 0.007153981983808484,
-      "wardle2020__Scrambled__78.jpeg.jpeg": 0.008169429994922898,
-      "wardle2020__Scrambled__80.jpeg.jpeg": 0.006133172426724862,
-      "wardle2020__Scrambled__81.jpeg.jpeg": 0.011338528478658502,
-      "wardle2020__Scrambled__83.jpeg.jpeg": 0.00983471806553859
+      "wardle2020__Face__face01.jpeg": 0.014126436285681781,
+      "wardle2020__Face__face02.jpeg": 0.01625924506834961,
+      "wardle2020__Face__face03.jpeg": 0.01521313857990436,
+      "wardle2020__Face__face04.jpeg": 0.011814520181862959,
+      "wardle2020__Face__face05.jpeg": 0.015210545317304104,
+      "wardle2020__Face__face06.jpeg": 0.01586825385313336,
+      "wardle2020__Face__face07.jpeg": 0.014256277087105631,
+      "wardle2020__Face__face08.jpeg": 0.016904119818220275,
+      "wardle2020__Face__face09.jpeg": 0.013170366897973915,
+      "wardle2020__Face__face10.jpeg": 0.013882260834060424,
+      "wardle2020__Face__face11.jpeg": 0.014746003063223294,
+      "wardle2020__Face__face12.jpeg": 0.014651948232587954,
+      "wardle2020__Face__face13.jpeg": 0.01466685214467928,
+      "wardle2020__Face__face14.jpeg": 0.015499802012015146,
+      "wardle2020__Face__face15.jpeg": 0.016627950470627893,
+      "wardle2020__Face__face16.jpeg": 0.016984187136478843,
+      "wardle2020__Face__face17.jpeg": 0.01693319832882159,
+      "wardle2020__Face__face18.jpeg": 0.017092650216086913,
+      "wardle2020__Face__face19.jpeg": 0.012432446428588264,
+      "wardle2020__Face__face20.jpeg": 0.017011273981963042,
+      "wardle2020__Face__face21.jpeg": 0.016971325487805597,
+      "wardle2020__Face__face22.jpeg": 0.01350018827865593,
+      "wardle2020__Face__face23.jpeg": 0.015615909782892215,
+      "wardle2020__Face__face24.jpeg": 0.015605268909063103,
+      "wardle2020__Face__face25.jpeg": 0.013411403675799178,
+      "wardle2020__Face__face26.jpeg": 0.013624324679238334,
+      "wardle2020__Face__face27.jpeg": 0.012107562606073936,
+      "wardle2020__Face__face28.jpeg": 0.015287034743457556,
+      "wardle2020__Face__face29.jpeg": 0.015794907737067935,
+      "wardle2020__Face__face30.jpeg": 0.014541473376250402,
+      "wardle2020__Face__face31.jpeg": 0.013101494593551977,
+      "wardle2020__Face__face32.jpeg": 0.011279071324176052,
+      "wardle2020__Object__04_match.jpeg": 0.0048323866621121075,
+      "wardle2020__Object__06_match.jpeg": 0.00534029942752592,
+      "wardle2020__Object__08_match.jpeg": 0.012067060010277863,
+      "wardle2020__Object__10_match.jpeg": 0.00783522339409482,
+      "wardle2020__Object__12_match.jpeg": 0.007565398541834578,
+      "wardle2020__Object__13_match.jpeg": 0.0041742638759935,
+      "wardle2020__Object__15_match.jpeg": 0.005932313981071188,
+      "wardle2020__Object__16_match.jpeg": 0.008474895265919522,
+      "wardle2020__Object__17_match.jpeg": 0.005458544902288048,
+      "wardle2020__Object__20_match.jpeg": 0.009513195909867501,
+      "wardle2020__Object__22_match.jpeg": 0.007532138069385464,
+      "wardle2020__Object__26_match.jpeg": 0.010117572353805063,
+      "wardle2020__Object__34_match.jpeg": 0.005909998666144349,
+      "wardle2020__Object__37_match.jpeg": 0.005451581302036482,
+      "wardle2020__Object__39_match.jpeg": 0.011336596643348502,
+      "wardle2020__Object__42_match.jpeg": 0.006634261201518703,
+      "wardle2020__Object__43_match.jpeg": 0.007461845347920186,
+      "wardle2020__Object__44_match.jpeg": 0.011025838001007319,
+      "wardle2020__Object__46_match.jpeg": 0.009685085017654133,
+      "wardle2020__Object__48_match.jpeg": 0.009073841734418397,
+      "wardle2020__Object__53_match.jpeg": 0.00516646321965615,
+      "wardle2020__Object__56_match.jpeg": 0.006159351806632336,
+      "wardle2020__Object__57_match.jpeg": 0.004058832028681773,
+      "wardle2020__Object__59_match.jpeg": 0.007232380255935963,
+      "wardle2020__Object__64_match.jpeg": 0.005353146457938416,
+      "wardle2020__Object__72_match.jpeg": 0.007162561283127647,
+      "wardle2020__Object__74_match.jpeg": 0.008301240445545066,
+      "wardle2020__Object__75_match.jpeg": 0.010475234035854143,
+      "wardle2020__Object__78_match.jpeg": 0.008199912775441172,
+      "wardle2020__Object__80_match.jpeg": 0.005535606353867626,
+      "wardle2020__Object__81_match.jpeg": 0.01208751349511921,
+      "wardle2020__Object__83_match.jpeg": 0.008534882180412835,
+      "wardle2020__Scrambled__04.jpeg": 0.006564776776275948,
+      "wardle2020__Scrambled__06.jpeg": 0.00768158358701952,
+      "wardle2020__Scrambled__08.jpeg": 0.008807608309492454,
+      "wardle2020__Scrambled__10.jpeg": 0.0066632001709060855,
+      "wardle2020__Scrambled__12.jpeg": 0.0074118864008161905,
+      "wardle2020__Scrambled__13.jpeg": 0.004520956794146223,
+      "wardle2020__Scrambled__15.jpeg": 0.0068682998693414665,
+      "wardle2020__Scrambled__16.jpeg": 0.006619800424013961,
+      "wardle2020__Scrambled__17.jpeg": 0.007571042346018949,
+      "wardle2020__Scrambled__20.jpeg": 0.007473506041481454,
+      "wardle2020__Scrambled__22.jpeg": 0.005185065825751656,
+      "wardle2020__Scrambled__26.jpeg": 0.007932595648230829,
+      "wardle2020__Scrambled__34.jpeg": 0.010185130136061158,
+      "wardle2020__Scrambled__37.jpeg": 0.008359940230272419,
+      "wardle2020__Scrambled__39.jpeg": 0.008525475140318739,
+      "wardle2020__Scrambled__42.jpeg": 0.007552461147097329,
+      "wardle2020__Scrambled__43.jpeg": 0.006834215095560186,
+      "wardle2020__Scrambled__44.jpeg": 0.005516245150101299,
+      "wardle2020__Scrambled__46.jpeg": 0.006785366886018023,
+      "wardle2020__Scrambled__48.jpeg": 0.006630969556705969,
+      "wardle2020__Scrambled__53.jpeg": 0.006211494672874359,
+      "wardle2020__Scrambled__56.jpeg": 0.005989692054216007,
+      "wardle2020__Scrambled__57.jpeg": 0.007721826604450681,
+      "wardle2020__Scrambled__59.jpeg": 0.007209553387566736,
+      "wardle2020__Scrambled__64.jpeg": 0.006114937986888811,
+      "wardle2020__Scrambled__72.jpeg": 0.008478276897043313,
+      "wardle2020__Scrambled__74.jpeg": 0.005610910758306983,
+      "wardle2020__Scrambled__75.jpeg": 0.007153981983808484,
+      "wardle2020__Scrambled__78.jpeg": 0.008169429994922898,
+      "wardle2020__Scrambled__80.jpeg": 0.006133172426724862,
+      "wardle2020__Scrambled__81.jpeg": 0.011338528478658502,
+      "wardle2020__Scrambled__83.jpeg": 0.00983471806553859
     },
     "rdm": [
       [
@@ -9607,7 +9607,7 @@
       ]
     ],
     "voxels": {
-      "wardle2020__Face__face01.jpeg.jpeg": {
+      "wardle2020__Face__face01.jpeg": {
         "s1": {
           "ffa": [
             0.556759238243103,
@@ -10341,7 +10341,7 @@
           ]
         }
       },
-      "wardle2020__Face__face02.jpeg.jpeg": {
+      "wardle2020__Face__face02.jpeg": {
         "s1": {
           "ffa": [
             0.6077483296394348,
@@ -11075,7 +11075,7 @@
           ]
         }
       },
-      "wardle2020__Face__face03.jpeg.jpeg": {
+      "wardle2020__Face__face03.jpeg": {
         "s1": {
           "ffa": [
             0.5464730262756348,
@@ -11809,7 +11809,7 @@
           ]
         }
       },
-      "wardle2020__Face__face04.jpeg.jpeg": {
+      "wardle2020__Face__face04.jpeg": {
         "s1": {
           "ffa": [
             0.4170328378677368,
@@ -12543,7 +12543,7 @@
           ]
         }
       },
-      "wardle2020__Face__face05.jpeg.jpeg": {
+      "wardle2020__Face__face05.jpeg": {
         "s1": {
           "ffa": [
             0.34317559003829956,
@@ -13277,7 +13277,7 @@
           ]
         }
       },
-      "wardle2020__Face__face06.jpeg.jpeg": {
+      "wardle2020__Face__face06.jpeg": {
         "s1": {
           "ffa": [
             0.6178836822509766,
@@ -14011,7 +14011,7 @@
           ]
         }
       },
-      "wardle2020__Face__face07.jpeg.jpeg": {
+      "wardle2020__Face__face07.jpeg": {
         "s1": {
           "ffa": [
             0.5542378425598145,
@@ -14745,7 +14745,7 @@
           ]
         }
       },
-      "wardle2020__Face__face08.jpeg.jpeg": {
+      "wardle2020__Face__face08.jpeg": {
         "s1": {
           "ffa": [
             0.7381851673126221,
@@ -15479,7 +15479,7 @@
           ]
         }
       },
-      "wardle2020__Face__face09.jpeg.jpeg": {
+      "wardle2020__Face__face09.jpeg": {
         "s1": {
           "ffa": [
             0.5627912878990173,
@@ -16213,7 +16213,7 @@
           ]
         }
       },
-      "wardle2020__Face__face10.jpeg.jpeg": {
+      "wardle2020__Face__face10.jpeg": {
         "s1": {
           "ffa": [
             0.5788217782974243,
@@ -16947,7 +16947,7 @@
           ]
         }
       },
-      "wardle2020__Face__face11.jpeg.jpeg": {
+      "wardle2020__Face__face11.jpeg": {
         "s1": {
           "ffa": [
             0.46619081497192383,
@@ -17681,7 +17681,7 @@
           ]
         }
       },
-      "wardle2020__Face__face12.jpeg.jpeg": {
+      "wardle2020__Face__face12.jpeg": {
         "s1": {
           "ffa": [
             0.4304748773574829,
@@ -18415,7 +18415,7 @@
           ]
         }
       },
-      "wardle2020__Face__face13.jpeg.jpeg": {
+      "wardle2020__Face__face13.jpeg": {
         "s1": {
           "ffa": [
             0.5880264043807983,
@@ -19149,7 +19149,7 @@
           ]
         }
       },
-      "wardle2020__Face__face14.jpeg.jpeg": {
+      "wardle2020__Face__face14.jpeg": {
         "s1": {
           "ffa": [
             0.5964082479476929,
@@ -19883,7 +19883,7 @@
           ]
         }
       },
-      "wardle2020__Face__face15.jpeg.jpeg": {
+      "wardle2020__Face__face15.jpeg": {
         "s1": {
           "ffa": [
             0.6969884037971497,
@@ -20617,7 +20617,7 @@
           ]
         }
       },
-      "wardle2020__Face__face16.jpeg.jpeg": {
+      "wardle2020__Face__face16.jpeg": {
         "s1": {
           "ffa": [
             0.720168948173523,
@@ -21351,7 +21351,7 @@
           ]
         }
       },
-      "wardle2020__Face__face17.jpeg.jpeg": {
+      "wardle2020__Face__face17.jpeg": {
         "s1": {
           "ffa": [
             0.4425663352012634,
@@ -22085,7 +22085,7 @@
           ]
         }
       },
-      "wardle2020__Face__face18.jpeg.jpeg": {
+      "wardle2020__Face__face18.jpeg": {
         "s1": {
           "ffa": [
             0.6704123020172119,
@@ -22819,7 +22819,7 @@
           ]
         }
       },
-      "wardle2020__Face__face19.jpeg.jpeg": {
+      "wardle2020__Face__face19.jpeg": {
         "s1": {
           "ffa": [
             0.45342445373535156,
@@ -23553,7 +23553,7 @@
           ]
         }
       },
-      "wardle2020__Face__face20.jpeg.jpeg": {
+      "wardle2020__Face__face20.jpeg": {
         "s1": {
           "ffa": [
             0.7387697100639343,
@@ -24287,7 +24287,7 @@
           ]
         }
       },
-      "wardle2020__Face__face21.jpeg.jpeg": {
+      "wardle2020__Face__face21.jpeg": {
         "s1": {
           "ffa": [
             0.6450871825218201,
@@ -25021,7 +25021,7 @@
           ]
         }
       },
-      "wardle2020__Face__face22.jpeg.jpeg": {
+      "wardle2020__Face__face22.jpeg": {
         "s1": {
           "ffa": [
             0.43375363945961,
@@ -25755,7 +25755,7 @@
           ]
         }
       },
-      "wardle2020__Face__face23.jpeg.jpeg": {
+      "wardle2020__Face__face23.jpeg": {
         "s1": {
           "ffa": [
             0.6003167629241943,
@@ -26489,7 +26489,7 @@
           ]
         }
       },
-      "wardle2020__Face__face24.jpeg.jpeg": {
+      "wardle2020__Face__face24.jpeg": {
         "s1": {
           "ffa": [
             0.5599743127822876,
@@ -27223,7 +27223,7 @@
           ]
         }
       },
-      "wardle2020__Face__face25.jpeg.jpeg": {
+      "wardle2020__Face__face25.jpeg": {
         "s1": {
           "ffa": [
             0.5410516858100891,
@@ -27957,7 +27957,7 @@
           ]
         }
       },
-      "wardle2020__Face__face26.jpeg.jpeg": {
+      "wardle2020__Face__face26.jpeg": {
         "s1": {
           "ffa": [
             0.5496367812156677,
@@ -28691,7 +28691,7 @@
           ]
         }
       },
-      "wardle2020__Face__face27.jpeg.jpeg": {
+      "wardle2020__Face__face27.jpeg": {
         "s1": {
           "ffa": [
             0.44716590642929077,
@@ -29425,7 +29425,7 @@
           ]
         }
       },
-      "wardle2020__Face__face28.jpeg.jpeg": {
+      "wardle2020__Face__face28.jpeg": {
         "s1": {
           "ffa": [
             0.7582095861434937,
@@ -30159,7 +30159,7 @@
           ]
         }
       },
-      "wardle2020__Face__face29.jpeg.jpeg": {
+      "wardle2020__Face__face29.jpeg": {
         "s1": {
           "ffa": [
             0.8100430965423584,
@@ -30893,7 +30893,7 @@
           ]
         }
       },
-      "wardle2020__Face__face30.jpeg.jpeg": {
+      "wardle2020__Face__face30.jpeg": {
         "s1": {
           "ffa": [
             0.4502350687980652,
@@ -31627,7 +31627,7 @@
           ]
         }
       },
-      "wardle2020__Face__face31.jpeg.jpeg": {
+      "wardle2020__Face__face31.jpeg": {
         "s1": {
           "ffa": [
             0.5319669842720032,
@@ -32361,7 +32361,7 @@
           ]
         }
       },
-      "wardle2020__Face__face32.jpeg.jpeg": {
+      "wardle2020__Face__face32.jpeg": {
         "s1": {
           "ffa": [
             0.3821668028831482,
@@ -33095,7 +33095,7 @@
           ]
         }
       },
-      "wardle2020__Object__04_match.jpeg.jpeg": {
+      "wardle2020__Object__04_match.jpeg": {
         "s1": {
           "ffa": [
             -0.2782636880874634,
@@ -33829,7 +33829,7 @@
           ]
         }
       },
-      "wardle2020__Object__06_match.jpeg.jpeg": {
+      "wardle2020__Object__06_match.jpeg": {
         "s1": {
           "ffa": [
             -0.3005845546722412,
@@ -34563,7 +34563,7 @@
           ]
         }
       },
-      "wardle2020__Object__08_match.jpeg.jpeg": {
+      "wardle2020__Object__08_match.jpeg": {
         "s1": {
           "ffa": [
             -0.7357571721076965,
@@ -35297,7 +35297,7 @@
           ]
         }
       },
-      "wardle2020__Object__10_match.jpeg.jpeg": {
+      "wardle2020__Object__10_match.jpeg": {
         "s1": {
           "ffa": [
             -0.4737386405467987,
@@ -36031,7 +36031,7 @@
           ]
         }
       },
-      "wardle2020__Object__12_match.jpeg.jpeg": {
+      "wardle2020__Object__12_match.jpeg": {
         "s1": {
           "ffa": [
             -0.35646510124206543,
@@ -36765,7 +36765,7 @@
           ]
         }
       },
-      "wardle2020__Object__13_match.jpeg.jpeg": {
+      "wardle2020__Object__13_match.jpeg": {
         "s1": {
           "ffa": [
             -0.18995317816734314,
@@ -37499,7 +37499,7 @@
           ]
         }
       },
-      "wardle2020__Object__15_match.jpeg.jpeg": {
+      "wardle2020__Object__15_match.jpeg": {
         "s1": {
           "ffa": [
             -0.29113680124282837,
@@ -38233,7 +38233,7 @@
           ]
         }
       },
-      "wardle2020__Object__16_match.jpeg.jpeg": {
+      "wardle2020__Object__16_match.jpeg": {
         "s1": {
           "ffa": [
             -0.5097382664680481,
@@ -38967,7 +38967,7 @@
           ]
         }
       },
-      "wardle2020__Object__17_match.jpeg.jpeg": {
+      "wardle2020__Object__17_match.jpeg": {
         "s1": {
           "ffa": [
             -0.27007851004600525,
@@ -39701,7 +39701,7 @@
           ]
         }
       },
-      "wardle2020__Object__20_match.jpeg.jpeg": {
+      "wardle2020__Object__20_match.jpeg": {
         "s1": {
           "ffa": [
             -0.5501218438148499,
@@ -40435,7 +40435,7 @@
           ]
         }
       },
-      "wardle2020__Object__22_match.jpeg.jpeg": {
+      "wardle2020__Object__22_match.jpeg": {
         "s1": {
           "ffa": [
             -0.3865649104118347,
@@ -41169,7 +41169,7 @@
           ]
         }
       },
-      "wardle2020__Object__26_match.jpeg.jpeg": {
+      "wardle2020__Object__26_match.jpeg": {
         "s1": {
           "ffa": [
             -0.5984909534454346,
@@ -41903,7 +41903,7 @@
           ]
         }
       },
-      "wardle2020__Object__34_match.jpeg.jpeg": {
+      "wardle2020__Object__34_match.jpeg": {
         "s1": {
           "ffa": [
             -0.3417823612689972,
@@ -42637,7 +42637,7 @@
           ]
         }
       },
-      "wardle2020__Object__37_match.jpeg.jpeg": {
+      "wardle2020__Object__37_match.jpeg": {
         "s1": {
           "ffa": [
             -0.15110884606838226,
@@ -43371,7 +43371,7 @@
           ]
         }
       },
-      "wardle2020__Object__39_match.jpeg.jpeg": {
+      "wardle2020__Object__39_match.jpeg": {
         "s1": {
           "ffa": [
             -0.696469247341156,
@@ -44105,7 +44105,7 @@
           ]
         }
       },
-      "wardle2020__Object__42_match.jpeg.jpeg": {
+      "wardle2020__Object__42_match.jpeg": {
         "s1": {
           "ffa": [
             -0.25428956747055054,
@@ -44839,7 +44839,7 @@
           ]
         }
       },
-      "wardle2020__Object__43_match.jpeg.jpeg": {
+      "wardle2020__Object__43_match.jpeg": {
         "s1": {
           "ffa": [
             -0.45013266801834106,
@@ -45573,7 +45573,7 @@
           ]
         }
       },
-      "wardle2020__Object__44_match.jpeg.jpeg": {
+      "wardle2020__Object__44_match.jpeg": {
         "s1": {
           "ffa": [
             -0.5774422287940979,
@@ -46307,7 +46307,7 @@
           ]
         }
       },
-      "wardle2020__Object__46_match.jpeg.jpeg": {
+      "wardle2020__Object__46_match.jpeg": {
         "s1": {
           "ffa": [
             -0.5815104842185974,
@@ -47041,7 +47041,7 @@
           ]
         }
       },
-      "wardle2020__Object__48_match.jpeg.jpeg": {
+      "wardle2020__Object__48_match.jpeg": {
         "s1": {
           "ffa": [
             -0.5378992557525635,
@@ -47775,7 +47775,7 @@
           ]
         }
       },
-      "wardle2020__Object__53_match.jpeg.jpeg": {
+      "wardle2020__Object__53_match.jpeg": {
         "s1": {
           "ffa": [
             -0.23577424883842468,
@@ -48509,7 +48509,7 @@
           ]
         }
       },
-      "wardle2020__Object__56_match.jpeg.jpeg": {
+      "wardle2020__Object__56_match.jpeg": {
         "s1": {
           "ffa": [
             -0.34161216020584106,
@@ -49243,7 +49243,7 @@
           ]
         }
       },
-      "wardle2020__Object__57_match.jpeg.jpeg": {
+      "wardle2020__Object__57_match.jpeg": {
         "s1": {
           "ffa": [
             -0.15485963225364685,
@@ -49977,7 +49977,7 @@
           ]
         }
       },
-      "wardle2020__Object__59_match.jpeg.jpeg": {
+      "wardle2020__Object__59_match.jpeg": {
         "s1": {
           "ffa": [
             -0.4224483370780945,
@@ -50711,7 +50711,7 @@
           ]
         }
       },
-      "wardle2020__Object__64_match.jpeg.jpeg": {
+      "wardle2020__Object__64_match.jpeg": {
         "s1": {
           "ffa": [
             -0.29545801877975464,
@@ -51445,7 +51445,7 @@
           ]
         }
       },
-      "wardle2020__Object__72_match.jpeg.jpeg": {
+      "wardle2020__Object__72_match.jpeg": {
         "s1": {
           "ffa": [
             -0.35501497983932495,
@@ -52179,7 +52179,7 @@
           ]
         }
       },
-      "wardle2020__Object__74_match.jpeg.jpeg": {
+      "wardle2020__Object__74_match.jpeg": {
         "s1": {
           "ffa": [
             -0.5064637660980225,
@@ -52913,7 +52913,7 @@
           ]
         }
       },
-      "wardle2020__Object__75_match.jpeg.jpeg": {
+      "wardle2020__Object__75_match.jpeg": {
         "s1": {
           "ffa": [
             -0.609444260597229,
@@ -53647,7 +53647,7 @@
           ]
         }
       },
-      "wardle2020__Object__78_match.jpeg.jpeg": {
+      "wardle2020__Object__78_match.jpeg": {
         "s1": {
           "ffa": [
             -0.3355441391468048,
@@ -54381,7 +54381,7 @@
           ]
         }
       },
-      "wardle2020__Object__80_match.jpeg.jpeg": {
+      "wardle2020__Object__80_match.jpeg": {
         "s1": {
           "ffa": [
             -0.2890976071357727,
@@ -55115,7 +55115,7 @@
           ]
         }
       },
-      "wardle2020__Object__81_match.jpeg.jpeg": {
+      "wardle2020__Object__81_match.jpeg": {
         "s1": {
           "ffa": [
             -0.7217261791229248,
@@ -55849,7 +55849,7 @@
           ]
         }
       },
-      "wardle2020__Object__83_match.jpeg.jpeg": {
+      "wardle2020__Object__83_match.jpeg": {
         "s1": {
           "ffa": [
             -0.44828513264656067,
@@ -56583,7 +56583,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__04.jpeg.jpeg": {
+      "wardle2020__Scrambled__04.jpeg": {
         "s1": {
           "ffa": [
             -0.3669462502002716,
@@ -57317,7 +57317,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__06.jpeg.jpeg": {
+      "wardle2020__Scrambled__06.jpeg": {
         "s1": {
           "ffa": [
             -0.3655780851840973,
@@ -58051,7 +58051,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__08.jpeg.jpeg": {
+      "wardle2020__Scrambled__08.jpeg": {
         "s1": {
           "ffa": [
             -0.5373473763465881,
@@ -58785,7 +58785,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__10.jpeg.jpeg": {
+      "wardle2020__Scrambled__10.jpeg": {
         "s1": {
           "ffa": [
             -0.2812090516090393,
@@ -59519,7 +59519,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__12.jpeg.jpeg": {
+      "wardle2020__Scrambled__12.jpeg": {
         "s1": {
           "ffa": [
             -0.4049425423145294,
@@ -60253,7 +60253,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__13.jpeg.jpeg": {
+      "wardle2020__Scrambled__13.jpeg": {
         "s1": {
           "ffa": [
             -0.19493888318538666,
@@ -60987,7 +60987,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__15.jpeg.jpeg": {
+      "wardle2020__Scrambled__15.jpeg": {
         "s1": {
           "ffa": [
             -0.37515178322792053,
@@ -61721,7 +61721,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__16.jpeg.jpeg": {
+      "wardle2020__Scrambled__16.jpeg": {
         "s1": {
           "ffa": [
             -0.35240912437438965,
@@ -62455,7 +62455,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__17.jpeg.jpeg": {
+      "wardle2020__Scrambled__17.jpeg": {
         "s1": {
           "ffa": [
             -0.4574710726737976,
@@ -63189,7 +63189,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__20.jpeg.jpeg": {
+      "wardle2020__Scrambled__20.jpeg": {
         "s1": {
           "ffa": [
             -0.4154821038246155,
@@ -63923,7 +63923,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__22.jpeg.jpeg": {
+      "wardle2020__Scrambled__22.jpeg": {
         "s1": {
           "ffa": [
             -0.2668711841106415,
@@ -64657,7 +64657,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__26.jpeg.jpeg": {
+      "wardle2020__Scrambled__26.jpeg": {
         "s1": {
           "ffa": [
             -0.3549347519874573,
@@ -65391,7 +65391,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__34.jpeg.jpeg": {
+      "wardle2020__Scrambled__34.jpeg": {
         "s1": {
           "ffa": [
             -0.21286477148532867,
@@ -66125,7 +66125,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__37.jpeg.jpeg": {
+      "wardle2020__Scrambled__37.jpeg": {
         "s1": {
           "ffa": [
             -0.13311350345611572,
@@ -66859,7 +66859,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__39.jpeg.jpeg": {
+      "wardle2020__Scrambled__39.jpeg": {
         "s1": {
           "ffa": [
             -0.45766007900238037,
@@ -67593,7 +67593,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__42.jpeg.jpeg": {
+      "wardle2020__Scrambled__42.jpeg": {
         "s1": {
           "ffa": [
             -0.4241737723350525,
@@ -68327,7 +68327,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__43.jpeg.jpeg": {
+      "wardle2020__Scrambled__43.jpeg": {
         "s1": {
           "ffa": [
             -0.26117512583732605,
@@ -69061,7 +69061,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__44.jpeg.jpeg": {
+      "wardle2020__Scrambled__44.jpeg": {
         "s1": {
           "ffa": [
             -0.28240692615509033,
@@ -69795,7 +69795,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__46.jpeg.jpeg": {
+      "wardle2020__Scrambled__46.jpeg": {
         "s1": {
           "ffa": [
             -0.28927940130233765,
@@ -70529,7 +70529,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__48.jpeg.jpeg": {
+      "wardle2020__Scrambled__48.jpeg": {
         "s1": {
           "ffa": [
             -0.19484466314315796,
@@ -71263,7 +71263,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__53.jpeg.jpeg": {
+      "wardle2020__Scrambled__53.jpeg": {
         "s1": {
           "ffa": [
             -0.13145563006401062,
@@ -71997,7 +71997,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__56.jpeg.jpeg": {
+      "wardle2020__Scrambled__56.jpeg": {
         "s1": {
           "ffa": [
             -0.33913174271583557,
@@ -72731,7 +72731,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__57.jpeg.jpeg": {
+      "wardle2020__Scrambled__57.jpeg": {
         "s1": {
           "ffa": [
             -0.19641229510307312,
@@ -73465,7 +73465,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__59.jpeg.jpeg": {
+      "wardle2020__Scrambled__59.jpeg": {
         "s1": {
           "ffa": [
             0.008096997626125813,
@@ -74199,7 +74199,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__64.jpeg.jpeg": {
+      "wardle2020__Scrambled__64.jpeg": {
         "s1": {
           "ffa": [
             -0.35453033447265625,
@@ -74933,7 +74933,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__72.jpeg.jpeg": {
+      "wardle2020__Scrambled__72.jpeg": {
         "s1": {
           "ffa": [
             -0.48338645696640015,
@@ -75667,7 +75667,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__74.jpeg.jpeg": {
+      "wardle2020__Scrambled__74.jpeg": {
         "s1": {
           "ffa": [
             -0.3080240488052368,
@@ -76401,7 +76401,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__75.jpeg.jpeg": {
+      "wardle2020__Scrambled__75.jpeg": {
         "s1": {
           "ffa": [
             -0.4024425148963928,
@@ -77135,7 +77135,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__78.jpeg.jpeg": {
+      "wardle2020__Scrambled__78.jpeg": {
         "s1": {
           "ffa": [
             -0.31501394510269165,
@@ -77869,7 +77869,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__80.jpeg.jpeg": {
+      "wardle2020__Scrambled__80.jpeg": {
         "s1": {
           "ffa": [
             -0.26103395223617554,
@@ -78603,7 +78603,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__81.jpeg.jpeg": {
+      "wardle2020__Scrambled__81.jpeg": {
         "s1": {
           "ffa": [
             -0.6425920128822327,
@@ -79337,7 +79337,7 @@
           ]
         }
       },
-      "wardle2020__Scrambled__83.jpeg.jpeg": {
+      "wardle2020__Scrambled__83.jpeg": {
         "s1": {
           "ffa": [
             -0.5619445443153381,
@@ -80070,6 +80070,584 @@
             -0.03942720219492912
           ]
         }
+      }
+    },
+    "image_meta": {
+      "wardle2020__Face__face01.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face01.jpeg",
+        "raw": "wardle2020__Face__face01.jpeg.jpeg"
+      },
+      "wardle2020__Face__face02.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face02.jpeg",
+        "raw": "wardle2020__Face__face02.jpeg.jpeg"
+      },
+      "wardle2020__Face__face03.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face03.jpeg",
+        "raw": "wardle2020__Face__face03.jpeg.jpeg"
+      },
+      "wardle2020__Face__face04.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face04.jpeg",
+        "raw": "wardle2020__Face__face04.jpeg.jpeg"
+      },
+      "wardle2020__Face__face05.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face05.jpeg",
+        "raw": "wardle2020__Face__face05.jpeg.jpeg"
+      },
+      "wardle2020__Face__face06.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face06.jpeg",
+        "raw": "wardle2020__Face__face06.jpeg.jpeg"
+      },
+      "wardle2020__Face__face07.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face07.jpeg",
+        "raw": "wardle2020__Face__face07.jpeg.jpeg"
+      },
+      "wardle2020__Face__face08.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face08.jpeg",
+        "raw": "wardle2020__Face__face08.jpeg.jpeg"
+      },
+      "wardle2020__Face__face09.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face09.jpeg",
+        "raw": "wardle2020__Face__face09.jpeg.jpeg"
+      },
+      "wardle2020__Face__face10.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face10.jpeg",
+        "raw": "wardle2020__Face__face10.jpeg.jpeg"
+      },
+      "wardle2020__Face__face11.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face11.jpeg",
+        "raw": "wardle2020__Face__face11.jpeg.jpeg"
+      },
+      "wardle2020__Face__face12.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face12.jpeg",
+        "raw": "wardle2020__Face__face12.jpeg.jpeg"
+      },
+      "wardle2020__Face__face13.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face13.jpeg",
+        "raw": "wardle2020__Face__face13.jpeg.jpeg"
+      },
+      "wardle2020__Face__face14.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face14.jpeg",
+        "raw": "wardle2020__Face__face14.jpeg.jpeg"
+      },
+      "wardle2020__Face__face15.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face15.jpeg",
+        "raw": "wardle2020__Face__face15.jpeg.jpeg"
+      },
+      "wardle2020__Face__face16.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face16.jpeg",
+        "raw": "wardle2020__Face__face16.jpeg.jpeg"
+      },
+      "wardle2020__Face__face17.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face17.jpeg",
+        "raw": "wardle2020__Face__face17.jpeg.jpeg"
+      },
+      "wardle2020__Face__face18.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face18.jpeg",
+        "raw": "wardle2020__Face__face18.jpeg.jpeg"
+      },
+      "wardle2020__Face__face19.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face19.jpeg",
+        "raw": "wardle2020__Face__face19.jpeg.jpeg"
+      },
+      "wardle2020__Face__face20.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face20.jpeg",
+        "raw": "wardle2020__Face__face20.jpeg.jpeg"
+      },
+      "wardle2020__Face__face21.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face21.jpeg",
+        "raw": "wardle2020__Face__face21.jpeg.jpeg"
+      },
+      "wardle2020__Face__face22.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face22.jpeg",
+        "raw": "wardle2020__Face__face22.jpeg.jpeg"
+      },
+      "wardle2020__Face__face23.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face23.jpeg",
+        "raw": "wardle2020__Face__face23.jpeg.jpeg"
+      },
+      "wardle2020__Face__face24.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face24.jpeg",
+        "raw": "wardle2020__Face__face24.jpeg.jpeg"
+      },
+      "wardle2020__Face__face25.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face25.jpeg",
+        "raw": "wardle2020__Face__face25.jpeg.jpeg"
+      },
+      "wardle2020__Face__face26.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face26.jpeg",
+        "raw": "wardle2020__Face__face26.jpeg.jpeg"
+      },
+      "wardle2020__Face__face27.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face27.jpeg",
+        "raw": "wardle2020__Face__face27.jpeg.jpeg"
+      },
+      "wardle2020__Face__face28.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face28.jpeg",
+        "raw": "wardle2020__Face__face28.jpeg.jpeg"
+      },
+      "wardle2020__Face__face29.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face29.jpeg",
+        "raw": "wardle2020__Face__face29.jpeg.jpeg"
+      },
+      "wardle2020__Face__face30.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face30.jpeg",
+        "raw": "wardle2020__Face__face30.jpeg.jpeg"
+      },
+      "wardle2020__Face__face31.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face31.jpeg",
+        "raw": "wardle2020__Face__face31.jpeg.jpeg"
+      },
+      "wardle2020__Face__face32.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Face",
+        "filename": "face32.jpeg",
+        "raw": "wardle2020__Face__face32.jpeg.jpeg"
+      },
+      "wardle2020__Object__04_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "04_match.jpeg",
+        "raw": "wardle2020__Object__04_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__06_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "06_match.jpeg",
+        "raw": "wardle2020__Object__06_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__08_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "08_match.jpeg",
+        "raw": "wardle2020__Object__08_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__10_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "10_match.jpeg",
+        "raw": "wardle2020__Object__10_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__12_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "12_match.jpeg",
+        "raw": "wardle2020__Object__12_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__13_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "13_match.jpeg",
+        "raw": "wardle2020__Object__13_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__15_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "15_match.jpeg",
+        "raw": "wardle2020__Object__15_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__16_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "16_match.jpeg",
+        "raw": "wardle2020__Object__16_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__17_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "17_match.jpeg",
+        "raw": "wardle2020__Object__17_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__20_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "20_match.jpeg",
+        "raw": "wardle2020__Object__20_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__22_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "22_match.jpeg",
+        "raw": "wardle2020__Object__22_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__26_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "26_match.jpeg",
+        "raw": "wardle2020__Object__26_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__34_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "34_match.jpeg",
+        "raw": "wardle2020__Object__34_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__37_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "37_match.jpeg",
+        "raw": "wardle2020__Object__37_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__39_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "39_match.jpeg",
+        "raw": "wardle2020__Object__39_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__42_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "42_match.jpeg",
+        "raw": "wardle2020__Object__42_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__43_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "43_match.jpeg",
+        "raw": "wardle2020__Object__43_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__44_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "44_match.jpeg",
+        "raw": "wardle2020__Object__44_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__46_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "46_match.jpeg",
+        "raw": "wardle2020__Object__46_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__48_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "48_match.jpeg",
+        "raw": "wardle2020__Object__48_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__53_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "53_match.jpeg",
+        "raw": "wardle2020__Object__53_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__56_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "56_match.jpeg",
+        "raw": "wardle2020__Object__56_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__57_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "57_match.jpeg",
+        "raw": "wardle2020__Object__57_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__59_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "59_match.jpeg",
+        "raw": "wardle2020__Object__59_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__64_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "64_match.jpeg",
+        "raw": "wardle2020__Object__64_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__72_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "72_match.jpeg",
+        "raw": "wardle2020__Object__72_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__74_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "74_match.jpeg",
+        "raw": "wardle2020__Object__74_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__75_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "75_match.jpeg",
+        "raw": "wardle2020__Object__75_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__78_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "78_match.jpeg",
+        "raw": "wardle2020__Object__78_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__80_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "80_match.jpeg",
+        "raw": "wardle2020__Object__80_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__81_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "81_match.jpeg",
+        "raw": "wardle2020__Object__81_match.jpeg.jpeg"
+      },
+      "wardle2020__Object__83_match.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Object",
+        "filename": "83_match.jpeg",
+        "raw": "wardle2020__Object__83_match.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__04.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "04.jpeg",
+        "raw": "wardle2020__Scrambled__04.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__06.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "06.jpeg",
+        "raw": "wardle2020__Scrambled__06.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__08.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "08.jpeg",
+        "raw": "wardle2020__Scrambled__08.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__10.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "10.jpeg",
+        "raw": "wardle2020__Scrambled__10.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__12.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "12.jpeg",
+        "raw": "wardle2020__Scrambled__12.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__13.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "13.jpeg",
+        "raw": "wardle2020__Scrambled__13.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__15.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "15.jpeg",
+        "raw": "wardle2020__Scrambled__15.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__16.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "16.jpeg",
+        "raw": "wardle2020__Scrambled__16.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__17.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "17.jpeg",
+        "raw": "wardle2020__Scrambled__17.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__20.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "20.jpeg",
+        "raw": "wardle2020__Scrambled__20.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__22.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "22.jpeg",
+        "raw": "wardle2020__Scrambled__22.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__26.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "26.jpeg",
+        "raw": "wardle2020__Scrambled__26.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__34.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "34.jpeg",
+        "raw": "wardle2020__Scrambled__34.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__37.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "37.jpeg",
+        "raw": "wardle2020__Scrambled__37.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__39.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "39.jpeg",
+        "raw": "wardle2020__Scrambled__39.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__42.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "42.jpeg",
+        "raw": "wardle2020__Scrambled__42.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__43.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "43.jpeg",
+        "raw": "wardle2020__Scrambled__43.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__44.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "44.jpeg",
+        "raw": "wardle2020__Scrambled__44.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__46.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "46.jpeg",
+        "raw": "wardle2020__Scrambled__46.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__48.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "48.jpeg",
+        "raw": "wardle2020__Scrambled__48.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__53.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "53.jpeg",
+        "raw": "wardle2020__Scrambled__53.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__56.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "56.jpeg",
+        "raw": "wardle2020__Scrambled__56.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__57.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "57.jpeg",
+        "raw": "wardle2020__Scrambled__57.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__59.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "59.jpeg",
+        "raw": "wardle2020__Scrambled__59.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__64.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "64.jpeg",
+        "raw": "wardle2020__Scrambled__64.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__72.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "72.jpeg",
+        "raw": "wardle2020__Scrambled__72.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__74.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "74.jpeg",
+        "raw": "wardle2020__Scrambled__74.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__75.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "75.jpeg",
+        "raw": "wardle2020__Scrambled__75.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__78.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "78.jpeg",
+        "raw": "wardle2020__Scrambled__78.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__80.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "80.jpeg",
+        "raw": "wardle2020__Scrambled__80.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__81.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "81.jpeg",
+        "raw": "wardle2020__Scrambled__81.jpeg.jpeg"
+      },
+      "wardle2020__Scrambled__83.jpeg": {
+        "dataset": "wardle2020",
+        "group": "Scrambled",
+        "filename": "83.jpeg",
+        "raw": "wardle2020__Scrambled__83.jpeg.jpeg"
       }
     }
   }

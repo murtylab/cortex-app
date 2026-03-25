@@ -280,6 +280,9 @@ const loadPrestoredDataset = async (datasetKey: string) => {
         const filename = parts[parts.length - 1] || `image_${index}.jpg`;
         const groupKey = parts.length > 1 ? parts[0] : "Ungrouped";
 
+        // 关键：和 preload json 的 key 保持完全一致
+        const canonicalKey = `${datasetKey}__${groupKey}__${filename}`;
+
         const ext = getExt(filename).toLowerCase();
         const mime =
           ext === ".png"
@@ -304,12 +307,12 @@ const loadPrestoredDataset = async (datasetKey: string) => {
         });
 
         return {
-          uid: `${datasetKey}__${relativePath.replaceAll("/", "__")}`,
+          uid: canonicalKey,
           blobURL: url,
           file: realFile,
           label: filename,
           groupKey,
-          serverKey: filename,
+          serverKey: canonicalKey,
         };
       })
     );
