@@ -808,7 +808,7 @@ const getOverviewColumnCount = (
                         selectedModel={selectedModel}
                         onModelClick={(m: string) => setSelectedModel(m)}
                         onScrollUpdate={(range: {start: number, end: number}) => setVisibleRange(range)}
-                        showYAxis={index === 0}
+                        showYAxis={true}
                         isMultiRegion={region.length > 1}
                       />
                     </div>

@@ -3917,46 +3917,46 @@ export const PRELOAD_DATASETS = {
     description: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/brandman/images",
   },
-  josephs_e1: {
+  "josephs-e1": {
     label: "Josephs Experiment 1",
     description: "Face / object / pareidolia style stimuli",
-    imageFolder: "/assets/preload/josephs_e1/images",
+    imageFolder: "/assets/preload/josephs-e1/images",
   },
-   josephs_e1loc: {
+   "josephs-e1loc": {
     label: "Josephs Experiment 1 Localizer",
     description: "Face / object / pareidolia style stimuli",
-    imageFolder: "/assets/preload/josephs_e1loc/images",
+    imageFolder: "/assets/preload/josephs-e1loc/images",
   },
-    josephs_e2cont: {
+    "josephs-e2cont": {
     label: "Josephs Experiment 2 Cont",
     description: "Face / object / pareidolia style stimuli",
-    imageFolder: "/assets/preload/josephs_e2cont/images",
+    imageFolder: "/assets/preload/josephs-e2cont/images",
   },
-    josephs_e2rsloc: {
+    "josephs-e2rsloc": {
     label: "Josephs Experiment 2 RS Localizer",
     description: "Face / object / pareidolia style stimuli",
-    imageFolder: "/assets/preload/josephs_e2rsloc/images",
+    imageFolder: "/assets/preload/josephs-e2rsloc/images",
   },
 
-    josephs_e2seta: {
+    "josephs-e2seta": {
     label: "Josephs Experiment 2 Set A",
     description: "Face / object / pareidolia style stimuli",
-    imageFolder: "/assets/preload/josephs_e2seta/images",
+    imageFolder: "/assets/preload/josephs-e2seta/images",
   },
-    josephs_e2setb: {
+    "josephs-e2setb": {
     label: "Josephs Experiment 2 Set B",
     description: "Face / object / pareidolia style stimuli",
-    imageFolder: "/assets/preload/josephs_e2setb/images",
+    imageFolder: "/assets/preload/josephs-e2setb/images",
   },
-   josephs_e3: {
+   "josephs-e3": {
     label: "Josephs Experiment 3",
     description: "Face / object / pareidolia style stimuli",
-    imageFolder: "/assets/preload/josephs_e3/images",
+    imageFolder: "/assets/preload/josephs- e3/images",
   },
-   kamps_2019: {
+   kamps2019: {
     label: "Kamps 2019",
     description: "Face / object / pareidolia style stimuli",
-    imageFolder: "/assets/preload/kamps_2019/images",
+    imageFolder: "/assets/preload/kamps2019/images",
   },
 
 

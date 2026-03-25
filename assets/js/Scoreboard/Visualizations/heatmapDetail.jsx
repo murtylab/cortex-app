@@ -84,7 +84,10 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
     const columnWidth = 75;
     const columnGap = 5;
 
-    const colorScale = d3.scaleLinear().domain([0, 1]).range(["#D3D3D3", "#9CC9FF"]);
+    // const colorScale = d3.scaleLinear().domain([0, 1]).range(["#D3D3D3", "#9CC9FF"]);
+    const colorScale = d3
+      .scaleSequential(d3.interpolateBrBG)
+      .domain([1, 0]); 
 
     let xLabels = [];
     let models = [];
