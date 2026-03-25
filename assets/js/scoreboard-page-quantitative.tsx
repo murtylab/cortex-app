@@ -414,7 +414,7 @@ const ScoreboardPageQuantitative: React.FC = () => {
             {/* --- Overview Section --- */}
             {pageView !== '2' && (
               <div style={{
-                background: 'transparent',
+                background: 'var(--background-color)',
                 // 如果是详情模式，占 25%，否则占满 100%
                 height: isDatasetDetailMode  ? '25%' : '100%',
                 display: 'flex',
@@ -431,7 +431,7 @@ const ScoreboardPageQuantitative: React.FC = () => {
                 {/* 分支 1：BarChart 模式 (详情模式保持不变) */}
                 {isDatasetDetailMode && dataset.map((dsName) => (
                   region.map((roiValue) => (
-                    <div key={`${dsName}-${roiValue}`} style={{ flex: 1, minHeight: '80px', background: '#fafafa', padding: '6px', borderRadius: 6, display: 'flex', flexDirection: 'column' }}>
+                    <div key={`${dsName}-${roiValue}`} style={{ flex: 1, minHeight: '80px', background: 'var(--background-color)', padding: '6px', borderRadius: 6, display: 'flex', flexDirection: 'column' }}>
                       <div style={{ textAlign: 'center', fontSize: '10px', fontWeight: 'bold', color: '#888' }}>
                         {roiValue === 'Across Regions' ? 'Overall' : roiValue} ({dsName})
                       </div>
@@ -527,7 +527,7 @@ const ScoreboardPageQuantitative: React.FC = () => {
 
                 <div
                   style={{
-                    background: '#fafafa',
+                    background: '#var(--background-color)',
                     borderRadius: 8,
                     padding: 16,
                     display: 'flex',
@@ -625,7 +625,7 @@ const ScoreboardPageQuantitative: React.FC = () => {
                                   position: 'sticky',
                                   top: 0,           // 向下滚动时固定在顶部
                                   zIndex: 10,
-                                  background: '#fafafa',
+                                  background: 'var(--background-color)',
                                   padding: '10px 0',
                                   borderBottom: '2px solid #1890ff',
                                   marginBottom: 15,
@@ -646,6 +646,7 @@ const ScoreboardPageQuantitative: React.FC = () => {
                                     ceiling={Ceiling}
                                     rank={rank}
                                     yLabel={yLabel}
+                                    selectedModel={selectedModel}
                                     onModelClick={(m: string | null) => setSelectedModel(m)}
                                   />
                                 </div>
@@ -673,7 +674,7 @@ const ScoreboardPageQuantitative: React.FC = () => {
                         fontSize: '14px',
                         color: '#555',
                         textTransform: 'uppercase',
-                        background: '#b7afafff',
+                        background: 'var(--background-color)',
                         padding: '4px 0',
                         borderRadius: '4px'
                       }}>
@@ -717,7 +718,7 @@ const ScoreboardPageQuantitative: React.FC = () => {
                             fontSize: '13px',
                             color: '#555',
                             textTransform: 'uppercase',
-                            background: '#b7afafff',
+                            background: 'var(--background-color)',
                             padding: '4px 0',
                             borderRadius: '4px'
                           }}>

@@ -1,34 +1,36 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import * as d3 from "d3";
 
-const BarChartDetail = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClick }) => {
+const BarChartDetail = ({
+  data,
+  roi,
+  dataset,
+  ceiling,
+  rank,
+  yLabel,
+  selectedModel,
+  onModelClick,
+}) => {
   const ceilingRef = useRef();
   const barsRef = useRef();
-  const [selectedModel, setSelectedModel] = useState(null);
+  const scrollContainerRef = useRef(null);
+
   const [stats, setStats] = useState({ max: null, mean: null });
   const [scaleY, setScaleY] = useState(null);
 
-   useEffect(() => {
-      setSelectedModel(null);
-      if (onModelClick) onModelClick(null); 
-    }, [data, roi, dataset]);
-
-  useEffect(() => {
-    console.log("🔍 RoiBarChart props:", { roi, dataset, ceiling, data });
-
-    if (!data || !roi || !data[roi]) return;
-    if (!ceiling || !ceiling[roi] || !ceiling[roi][dataset]) return;
+  const processed = useMemo(() => {
+    if (!data || !roi || !data[roi]) return null;
+    if (!ceiling || !ceiling[roi] || !ceiling[roi][dataset]) return null;
 
     const roiData = data[roi];
-
-    // ==== data preprocessing ====
     const models = Object.keys(roiData).filter((m) => m !== "ceiling");
+
     let results = models
-      .map((model) => {
-        const val = roiData[model]?.[dataset]?.[0];
-        return { model, val };
-      })
-      .filter((d) => d.val !== undefined);
+      .map((model) => ({
+        model,
+        val: roiData[model]?.[dataset]?.[0],
+      }))
+      .filter((d) => d.val !== undefined && d.val !== null);
 
     if (rank && rank !== "") {
       results = [...results].sort((a, b) => d3.descending(a.val, b.val));
@@ -37,12 +39,47 @@ const BarChartDetail = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClic
     const ceilingMean = ceiling[roi][dataset]?.ceiling_mean ?? null;
     const ceilingMax = ceiling[roi][dataset]?.ceiling_max ?? null;
 
-    setStats({ max: ceilingMax, mean: ceilingMean });
-
-    // ====scale ====
     const barWidth = 20;
     const margin = { top: 30, right: 20, bottom: 180, left: 60 };
     const height = 350;
+    const width = results.length * (barWidth + 10) + margin.right;
+
+    return {
+      results,
+      ceilingMean,
+      ceilingMax,
+      barWidth,
+      margin,
+      height,
+      width,
+    };
+  }, [data, roi, dataset, ceiling, rank]);
+
+  const noData = !processed || processed.results.length === 0;
+
+  useEffect(() => {
+    const ceilingSvg = d3.select(ceilingRef.current);
+    const barsSvg = d3.select(barsRef.current);
+    ceilingSvg.selectAll("*").remove();
+    barsSvg.selectAll("*").remove();
+
+    if (!processed || processed.results.length === 0) {
+      setStats({ max: null, mean: null });
+      setScaleY(null);
+      return;
+    }
+
+    const {
+      results,
+      ceilingMean,
+      ceilingMax,
+      barWidth,
+      margin,
+      height,
+      width,
+    } = processed;
+
+    setStats({ max: ceilingMax, mean: ceilingMean });
 
     const y = d3
       .scaleLinear()
@@ -51,14 +88,9 @@ const BarChartDetail = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClic
 
     setScaleY(() => y);
 
-    // ================= left ceiling SVG =================
-    const ceilingSvg = d3.select(ceilingRef.current);
-    ceilingSvg.selectAll("*").remove();
     const ceilingWidth = margin.left + 50;
-
     ceilingSvg.attr("width", ceilingWidth).attr("height", height);
 
-    // dot lines
     if (ceilingMax != null) {
       ceilingSvg
         .append("line")
@@ -71,7 +103,6 @@ const BarChartDetail = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClic
         .attr("stroke-width", 1);
     }
 
-    // ceiling bar
     if (ceilingMean != null) {
       const rect = ceilingSvg
         .append("rect")
@@ -82,7 +113,6 @@ const BarChartDetail = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClic
         .attr("fill", "#d3d3d3")
         .attr("stroke", "black");
 
-      // 👉 hover tooltip when roi !== "Overall"
       if (roi !== "Overall") {
         rect
           .on("mouseover", (event) => {
@@ -102,7 +132,6 @@ const BarChartDetail = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClic
           });
       }
 
-      // ceiling label fixed at 0.95
       ceilingSvg
         .append("text")
         .attr("x", margin.left + 15 + barWidth / 2)
@@ -112,7 +141,6 @@ const BarChartDetail = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClic
         .attr("fill", "black")
         .text(ceilingMean.toFixed(2));
 
-      // correlation_points
       const points = ceiling[roi][dataset]?.correlation_points || [];
       if (points.length > 0) {
         const jitter = d3
@@ -135,7 +163,6 @@ const BarChartDetail = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClic
       }
     }
 
-    // y axis
     ceilingSvg
       .append("g")
       .attr("transform", `translate(${margin.left},0)`)
@@ -146,7 +173,6 @@ const BarChartDetail = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClic
         g.selectAll("text").attr("fill", "black");
       });
 
-    // y  label
     const centerY = (height - margin.bottom) / 2;
     ceilingSvg
       .append("text")
@@ -159,7 +185,6 @@ const BarChartDetail = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClic
       )
       .text(yLabel);
 
-    // x label for ceiling
     ceilingSvg
       .append("text")
       .attr("x", margin.left + barWidth / 2 + 15)
@@ -175,11 +200,6 @@ const BarChartDetail = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClic
       )
       .text("Ceiling");
 
-    // ================= right bars SVG =================
-    const barsSvg = d3.select(barsRef.current);
-    barsSvg.selectAll("*").remove();
-
-    const width = results.length * (barWidth + 10) + margin.right;
     barsSvg.attr("width", width).attr("height", height);
 
     const x = d3
@@ -188,7 +208,6 @@ const BarChartDetail = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClic
       .range([10, width - margin.right])
       .padding(0.2);
 
-    // dot line
     barsSvg
       .append("g")
       .selectAll("line.value-dash")
@@ -203,21 +222,26 @@ const BarChartDetail = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClic
       .attr("stroke-dasharray", "3 3")
       .attr("stroke-width", 1);
 
-    // bars
     barsSvg
       .append("g")
-      .selectAll("rect")
+      .selectAll("rect.model-bar")
       .data(results)
       .enter()
       .append("rect")
+      .attr("class", "model-bar")
       .attr("x", (d) => x(d.model))
       .attr("y", (d) => Math.min(y(0), y(d.val)))
       .attr("height", (d) => Math.abs(y(0) - y(d.val)))
       .attr("width", x.bandwidth())
-      .attr("fill", "#d3d3d3")
-      .attr("stroke", "black");
+      .attr("fill", (d) => (d.model === selectedModel ? "#ff7a45" : "#d3d3d3"))
+      .attr("stroke", (d) => (d.model === selectedModel ? "#d4380d" : "black"))
+      .attr("stroke-width", (d) => (d.model === selectedModel ? 2 : 1))
+      .style("cursor", "pointer")
+      .on("click", (_, d) => {
+        const newSelection = selectedModel === d.model ? null : d.model;
+        onModelClick?.(newSelection);
+      });
 
-    // bar label
     barsSvg
       .append("g")
       .selectAll("text.value-label")
@@ -228,10 +252,10 @@ const BarChartDetail = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClic
       .attr("y", y(0.95))
       .attr("text-anchor", "middle")
       .attr("font-size", "12px")
-      .attr("fill", "black")
+      .attr("fill", (d) => (d.model === selectedModel ? "#d4380d" : "black"))
+      .attr("font-weight", (d) => (d.model === selectedModel ? "700" : "400"))
       .text((d) => d.val.toFixed(2));
 
-    // X labels
     barsSvg
       .append("g")
       .selectAll("text.model-label")
@@ -242,7 +266,8 @@ const BarChartDetail = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClic
       .attr("y", height - margin.bottom + 10)
       .attr("text-anchor", "start")
       .attr("font-size", "9px")
-      .attr("fill", "black")
+      .attr("fill", (d) => (d.model === selectedModel ? "#d4380d" : "black"))
+      .attr("font-weight", (d) => (d.model === selectedModel ? "700" : "400"))
       .attr(
         "transform",
         (d) =>
@@ -250,15 +275,11 @@ const BarChartDetail = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClic
             height - margin.bottom
           })`
       )
-      //model cards
       .text((d) => d.model)
-      .style("cursor", "pointer") 
-      .on("click", (event, d) => {
-        const newSelection = selectedModel === d.model ? null : d.model; 
-        setSelectedModel(newSelection);
-        if (onModelClick) {
-          onModelClick(newSelection);
-        }
+      .style("cursor", "pointer")
+      .on("click", (_, d) => {
+        const newSelection = selectedModel === d.model ? null : d.model;
+        onModelClick?.(newSelection);
       });
 
     function drawLine(svg, value, color, svgWidth, offsetX = 0) {
@@ -276,26 +297,74 @@ const BarChartDetail = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClic
         .attr("stroke-width", 1);
     }
 
-    // ceiling mean/max
     drawLine(ceilingSvg, ceilingMax, "red", ceilingWidth, margin.left);
     drawLine(ceilingSvg, ceilingMean, "blue", ceilingWidth, margin.left);
     drawLine(barsSvg, ceilingMax, "red", width, 0);
     drawLine(barsSvg, ceilingMean, "blue", width, 0);
-  }, [data, roi, dataset, ceiling, rank, yLabel, onModelClick]);
+  }, [processed, ceiling, roi, dataset, yLabel, selectedModel, onModelClick]);
+
+  useEffect(() => {
+    if (!processed || processed.results.length === 0 || !selectedModel || !scrollContainerRef.current) return;
+
+    const { results, margin, width } = processed;
+
+    const x = d3
+      .scaleBand()
+      .domain(results.map((d) => d.model))
+      .range([10, width - margin.right])
+      .padding(0.2);
+
+    const selectedX = x(selectedModel);
+    if (selectedX == null) return;
+
+    const modelCenter = selectedX + x.bandwidth() / 2;
+    const container = scrollContainerRef.current;
+
+    const maxScrollLeft = container.scrollWidth - container.clientWidth;
+    const targetScrollLeft = Math.min(
+      Math.max(0, modelCenter - container.clientWidth / 2),
+      maxScrollLeft
+    );
+
+    container.scrollTo({
+      left: targetScrollLeft,
+      behavior: "smooth",
+    });
+  }, [processed, selectedModel]);
+
+  if (noData) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          minHeight: 120,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#999",
+          fontSize: "14px",
+          fontStyle: "italic",
+          background: "transparent",
+        }}
+      >
+         No data available for this region under the selected evaluation dataset.
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "row", position: "relative" }}>
-      {/* left ceiling + y axis */}
       <div>
         <svg ref={ceilingRef}></svg>
       </div>
 
-      {/* right bars */}
-      <div style={{ overflowX: "auto" }}>
+      <div
+        ref={scrollContainerRef}
+        style={{ overflowX: "auto", scrollBehavior: "smooth" }}
+      >
         <svg ref={barsRef}></svg>
       </div>
 
-      {/* fixed mean/max label */}
       {scaleY && (
         <div
           style={{
@@ -335,7 +404,6 @@ const BarChartDetail = ({ data, roi, dataset, ceiling, rank, yLabel, onModelClic
         </div>
       )}
 
-      {/* Tooltip */}
       <div
         id="roi-tooltip"
         style={{
