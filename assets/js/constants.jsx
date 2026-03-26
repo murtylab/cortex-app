@@ -3904,120 +3904,118 @@ export const MODELCARD_INFO_LOOKUP = {
 export const PRELOAD_DATASETS = {
   reza: {
     label: "Reza",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Cubes and spheres (smooth, textured, bumpy) with matched size, lighting, and position.",
+    expectation: "Cubes > spheres (higher spatial frequency → stronger PPA response)",
     imageFolder: "/assets/preload/reza/images",
+    paperLink: "https://pmc.ncbi.nlm.nih.gov/articles/PMC3071373/",
+    papername: "The “Parahippocampal Place Area” Responds Preferentially to High Spatial Frequencies in Humans and Monkeys"
   },
-  // berman: {
-  //   label: "Berman",
-  //   description: "Face / object / pareidolia style stimuli",
-  //   imageFolder: "/assets/preload/berman/images",
-  // },
   brandman: {
     label: "Brandman",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/brandman/images",
   },
   "josephs-e1": {
     label: "Josephs Experiment 1",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/josephs-e1/images",
   },
    "josephs-e1loc": {
     label: "Josephs Experiment 1 Localizer",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/josephs-e1loc/images",
   },
     "josephs-e2cont": {
     label: "Josephs Experiment 2 Cont",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/josephs-e2cont/images",
   },
     "josephs-e2rsloc": {
     label: "Josephs Experiment 2 RS Localizer",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/josephs-e2rsloc/images",
   },
 
     "josephs-e2seta": {
     label: "Josephs Experiment 2 Set A",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/josephs-e2seta/images",
   },
     "josephs-e2setb": {
     label: "Josephs Experiment 2 Set B",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/josephs-e2setb/images",
   },
    "josephs-e3": {
     label: "Josephs Experiment 3",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/josephs- e3/images",
   },
    kamps2019: {
     label: "Kamps 2019",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/kamps2019/images",
   },
 
    kamps2016: {
     label: "Kamps 2016",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/kamps2016/images",
   },
    'kamps2016-e1': {
     label: "Kamps 2016 e1",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/kamps2016/images",
   },
 
 KonkleCaramazza: {
     label: "Konkle and Caramazza",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/KonkleCaramazza/images",
   },
 
   KonkleOliva: {
     label: "Konkle and Oliva",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/KonkleOliva/images",
   },
 
   "park.size.clutter": {
     label: "park.size.clutter",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/park.size.clutter/images",
   },
 
   "park.size": {
     label: "park.size",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/park.size/images",
   },
 
    "Bryan.exp1": {
     label: "Bryan experiemnt1",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/Bryan.exp1/images",
   },
      "Bryan.exp2": {
     label: "Bryan experiemnt2",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/Bryan.exp2/images",
   },
      "Bryan.exp3": {
     label: "Bryan experiemnt3 ",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/Bryan.exp3/images",
   },
    cohen2016: {
     label: "cohen2016",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/cohen2016/images",
   },
 
   wardle2020: {
     label: "Wardle 2020",
-    description: "Face / object / pareidolia style stimuli",
+    stimuli: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/wardle2020/images",
   }
 

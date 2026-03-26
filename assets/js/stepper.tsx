@@ -25,6 +25,8 @@ import Heatmap from './Lab/heatmap.jsx';
 
 import BoxPlot from './Lab/boxplot.jsx';
 
+import DatasetCardLab from './Lab/datasetcard-lab.jsx';
+
 
 
 type PreviewFile = {
@@ -897,6 +899,8 @@ useEffect(() => {
                 />
                 </div>
               </div>
+
+              {isPreloadMode && <DatasetCardLab dataset={prestoreDataset} />}
 
               <ImagePreviewGroupedDnD
                 files={files}
