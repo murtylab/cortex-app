@@ -3959,22 +3959,67 @@ export const PRELOAD_DATASETS = {
     imageFolder: "/assets/preload/kamps2019/images",
   },
 
+   kamps2016: {
+    label: "Kamps 2016",
+    description: "Face / object / pareidolia style stimuli",
+    imageFolder: "/assets/preload/kamps2016/images",
+  },
+   'kamps2016-e1': {
+    label: "Kamps 2016 e1",
+    description: "Face / object / pareidolia style stimuli",
+    imageFolder: "/assets/preload/kamps2016/images",
+  },
 
+KonkleCaramazza: {
+    label: "Konkle and Caramazza",
+    description: "Face / object / pareidolia style stimuli",
+    imageFolder: "/assets/preload/KonkleCaramazza/images",
+  },
 
+  KonkleOliva: {
+    label: "Konkle and Oliva",
+    description: "Face / object / pareidolia style stimuli",
+    imageFolder: "/assets/preload/KonkleOliva/images",
+  },
+
+  "park.size.clutter": {
+    label: "park.size.clutter",
+    description: "Face / object / pareidolia style stimuli",
+    imageFolder: "/assets/preload/park.size.clutter/images",
+  },
+
+  "park.size": {
+    label: "park.size",
+    description: "Face / object / pareidolia style stimuli",
+    imageFolder: "/assets/preload/park.size/images",
+  },
+
+   "Bryan.exp1": {
+    label: "Bryan experiemnt1",
+    description: "Face / object / pareidolia style stimuli",
+    imageFolder: "/assets/preload/Bryan.exp1/images",
+  },
+     "Bryan.exp2": {
+    label: "Bryan experiemnt2",
+    description: "Face / object / pareidolia style stimuli",
+    imageFolder: "/assets/preload/Bryan.exp2/images",
+  },
+     "Bryan.exp3": {
+    label: "Bryan experiemnt3 ",
+    description: "Face / object / pareidolia style stimuli",
+    imageFolder: "/assets/preload/Bryan.exp3/images",
+  },
+   cohen2016: {
+    label: "cohen2016",
+    description: "Face / object / pareidolia style stimuli",
+    imageFolder: "/assets/preload/cohen2016/images",
+  },
 
   wardle2020: {
     label: "Wardle 2020",
     description: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/wardle2020/images",
-  },
-  nsd1000: {
-    label: "NSD1000",
-    description: "Natural scene dataset",
-    imageFolder: "/assets/preload/nsd1000/images",
-  },
-  bold5000: {
-    label: "BOLD5000v2",
-    description: "Large-scale image-fMRI benchmark",
-    imageFolder: "/assets/preload/bold5000/images",
-  },
+  }
+
 };
+

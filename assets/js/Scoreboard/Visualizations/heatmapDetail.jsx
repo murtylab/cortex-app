@@ -86,7 +86,7 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
 
     // const colorScale = d3.scaleLinear().domain([0, 1]).range(["#D3D3D3", "#9CC9FF"]);
     const colorScale = d3
-      .scaleSequential(d3.interpolateBrBG)
+      .scaleSequential(d3.interpolateGnBu)
       .domain([1, 0]); 
 
     let xLabels = [];
@@ -468,8 +468,11 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
         const svgLegend = d3.select(legendRef.current).append("svg").attr("width", 60).attr("height", legendHeight + 40);
         const defs = svgLegend.append("defs");
         const gradient = defs.append("linearGradient").attr("id", "grad").attr("x1", "0%").attr("y1", "100%").attr("x2", "0%").attr("y2", "0%");
-        gradient.append("stop").attr("offset", "0%").attr("stop-color", "#D3D3D3");
-        gradient.append("stop").attr("offset", "100%").attr("stop-color", "#9CC9FF");
+        // gradient.append("stop").attr("offset", "0%").attr("stop-color", "#D3D3D3");
+        // gradient.append("stop").attr("offset", "100%").attr("stop-color", "#9CC9FF");
+        gradient.append("stop").attr("offset", "0%").attr("stop-color", d3.interpolateGnBu(1));
+        gradient.append("stop").attr("offset", "50%").attr("stop-color", d3.interpolateGnBu(0.5));
+        gradient.append("stop").attr("offset", "100%").attr("stop-color", d3.interpolateGnBu(0));
         svgLegend.append("rect").attr("x", 10).attr("y", 20).attr("width", 10).attr("height", legendHeight).style("fill", "url(#grad)");
         const legScale = d3.scaleLinear().domain([0, 1]).range([legendHeight + 20, 20]);
         svgLegend.append("g").attr("transform", "translate(20,0)").call(d3.axisRight(legScale).ticks(5));
