@@ -855,7 +855,7 @@ useEffect(() => {
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'minmax(0, 1.6fr) minmax(260px, 0.9fr)',
+                  gridTemplateColumns: ' 420px minmax(0, 1fr)',
                   gap: 16,
                   alignItems: 'start',
                 }}
@@ -867,7 +867,7 @@ useEffect(() => {
 
                 <div
                   style={{
-                    background: '#fafafa',
+                    background: 'var(--background-color)',
                     border: '1px solid #ececec',
                     borderRadius: 12,
                     padding: 12,

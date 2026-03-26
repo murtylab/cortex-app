@@ -3907,11 +3907,11 @@ export const PRELOAD_DATASETS = {
     description: "Face / object / pareidolia style stimuli",
     imageFolder: "/assets/preload/reza/images",
   },
-  berman: {
-    label: "Berman",
-    description: "Face / object / pareidolia style stimuli",
-    imageFolder: "/assets/preload/berman/images",
-  },
+  // berman: {
+  //   label: "Berman",
+  //   description: "Face / object / pareidolia style stimuli",
+  //   imageFolder: "/assets/preload/berman/images",
+  // },
   brandman: {
     label: "Brandman",
     description: "Face / object / pareidolia style stimuli",
