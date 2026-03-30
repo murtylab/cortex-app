@@ -1,11 +1,11 @@
 import React from 'react';
 import { Tag } from 'antd';
 
-const SelectedFiltersBar = ({ training, region, dataset, clearSingle, onTagClick }) => {
+const SelectedFiltersBar = ({ training, region, dataset, modelType, clearSingle, onTagClick }) => {
   const selected = [];
 
   // order: training region dataset
-  if (training) selected.push({ key: 'training', label: training, color: 'rgb(118, 128, 145)' });
+  if (training) selected.push({ key: 'training', label: training, color: 'rgb(45, 53, 67)' });
 
   if (Array.isArray(region) && region.length > 0) {
     region.forEach((r) => {
@@ -18,8 +18,12 @@ const SelectedFiltersBar = ({ training, region, dataset, clearSingle, onTagClick
       selected.push({ key: `dataset-${r}`, label: r.toUpperCase(), color: 'rgb(111, 126, 121)' });
     });
   }
- 
 
+  if (Array.isArray(modelType) && modelType.length > 0) {
+    modelType.forEach((m) => {
+      selected.push({ key: `modelType-${m}`, label: m.toUpperCase(), color: 'rgb(129, 95, 117)' });
+    });
+  }
 
   return (
     <div

@@ -9,6 +9,8 @@ import SelectedFiltersBar from './Scoreboard/Settings/selectFiltersBar.jsx';
 import TrainingSelect from './Scoreboard/Settings/trainingselect.jsx';
 import ROISelect from './Scoreboard/Settings/roiselect.jsx';
 import DatasetSelect from './Scoreboard/Settings/datasetselect.jsx';
+import ModelTypeSelect from './Scoreboard/Settings/modeltypeselect.jsx';
+
 
 
 import ChartSelect from './Scoreboard/Settings/chartselect.jsx';
@@ -34,23 +36,39 @@ import DatasetCard from './Scoreboard/Settings/datasetcard.jsx';
 import ROICard from './Scoreboard/Settings/roicard.jsx';
 
 
+
+// constants
+import {
+  DATASET_OPTIONS,
+  DATASET_OPTIONS_LESS,
+  MURTY185_DATASET,
+  NSD_DATASET,
+  MODEL_OPTIONS,
+} from './constants-scoreboard.jsx';
+
+
+
+
 const { Title } = Typography;
 
 
 const ScoreboardPageQuantitative: React.FC = () => {
   const [training, setTraining] = useState('NSD');
-  const [region, setRegion] = useState(['Across Regions']);
-  const [dataset, setDataset] = useState([]);
+  const [region, setRegion] = useState<string[]>(['Across Regions']);
+  const [dataset, setDataset] = useState<string[]>([]);
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
   const [chartType, setChartType] = useState('uni');
   const [rank, setRank] = useState('');
-  const [selectedModel, setSelectedModel] = useState<string | null>(null);
+ 
 
   // interaction variable for overview and details
   const [visibleRange, setVisibleRange] = useState({ start: 0, end: 0 });
 
   
   const [overviewWidth, setOverviewWidth] = useState(0);
+
+  const [modelType, setModelType] = useState<string[]>([]);
 
   // const [pageView, setPageView] = useState('rank');
   const initialView = (() => {
@@ -92,6 +110,7 @@ const ScoreboardPageQuantitative: React.FC = () => {
     training: false,
     region: false,
     dataset: false,
+    modelType: false,
   });
 
   const datasetLabelMap: Record<string, string> = {
@@ -116,6 +135,41 @@ const ScoreboardPageQuantitative: React.FC = () => {
     wardle_2020: "Wardle",
     nsd_syn: "NSD Syn",
   };
+
+  const allowedModelValues = React.useMemo(() => {
+    if (!Array.isArray(modelType) || modelType.length === 0) return null;
+
+    return new Set(
+      MODEL_OPTIONS
+        .filter((m: any) => modelType.includes(m.type))
+        .map((m: any) => m.value)
+    );
+  }, [modelType]);
+
+  const filterDataByModelType = React.useCallback(
+    (dataSource: Record<string, any> | undefined) => {
+      if (!dataSource || !allowedModelValues) return dataSource;
+
+      const filtered: Record<string, any> = {};
+
+      Object.keys(dataSource).forEach((roiKey) => {
+        filtered[roiKey] = {};
+
+        Object.keys(dataSource[roiKey] || {}).forEach((modelKey) => {
+          if (modelKey === 'ceiling' || allowedModelValues.has(modelKey)) {
+            filtered[roiKey][modelKey] = dataSource[roiKey][modelKey];
+          }
+        });
+      });
+
+      return filtered;
+    },
+    [allowedModelValues]
+  );
+
+  
+
+
 
 
 
@@ -181,6 +235,14 @@ const ScoreboardPageQuantitative: React.FC = () => {
     }
   }, [pageView]);
 
+  useEffect(() => {
+    if (!selectedModel || !allowedModelValues) return;
+
+    if (!allowedModelValues.has(selectedModel)) {
+      setSelectedModel(null);
+    }
+  }, [allowedModelValues, selectedModel]);
+
 
   type newData = {
     //group by ppa
@@ -243,17 +305,22 @@ const ScoreboardPageQuantitative: React.FC = () => {
     if (key === 'training') setTraining('');
     if (key === 'dataset') setDataset((prev) => prev.filter((r) => r !== value));
     if (key === 'region') setRegion((prev) => prev.filter((r) => r !== value));
+    if (key === 'modelType') setModelType((prev) => prev.filter((r) => r !== value));
   };
 
   const getDataByTraining = (training: string) => {
-  if (training === "NSD") {
-    return  nsdData;
-  } else if (training === "Murty185") {
-    return murtyData;
-  } else {
-    return {};
-  }
-};
+    let baseData: Record<string, any> | undefined;
+
+    if (training === "NSD") {
+      baseData = nsdData;
+    } else if (training === "Murty185") {
+      baseData = murtyData;
+    } else {
+      baseData = {};
+    }
+
+    return filterDataByModelType(baseData);
+  };
 
 const getOverviewColumnCount = (
   dataSource: any,
@@ -342,6 +409,7 @@ const getOverviewColumnCount = (
               training={training}
                 region={region}
                 dataset={dataset}
+                modelType={modelType}
                 clearSingle={clearSingle}
                 onTagClick={handleTagClick}
             />
@@ -447,6 +515,16 @@ const getOverviewColumnCount = (
                   expanded={expandedStates.dataset}
                   onToggle={handleTogglePanel('dataset')}
                 />
+
+                <ModelTypeSelect
+                  modelType={modelType}
+                  setModelType={setModelType}
+                  allowToggle={true}
+                  mode={1}
+                  expanded={expandedStates.modelType}
+                  onToggle={handleTogglePanel('modelType')}
+                />
+
 
               </div>
             </div>
@@ -704,12 +782,14 @@ const getOverviewColumnCount = (
                     {/* scatter plot */}
                     {(training === 'Murty185 VS NSD1000') &&  activeQuestion === "q1" && (
                       <ScatterMurtyVsNsd
-                        murtyData={murtyData}
-                        nsdData={nsdData}
+                        murtyData={filterDataByModelType(murtyData)}
+                        nsdData={filterDataByModelType(nsdData)}
+                        murtyDataFull = {murtyData}
+                        nsdDataFull = {nsdData}
                         roi={region[0] === 'Across Regions' ? 'Overall' : region[0]}
                         dataset={dataset} // dataset list filter
                         chartType={chartType}
-                        showOverlay={true}
+                        showOverlay={false}
                         onModelClick={(m: string) => setSelectedModel(m)}
                       />
                     )}

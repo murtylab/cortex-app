@@ -9,7 +9,7 @@ const DatasetCardLab = ({ dataset }) => {
   console.log("DatasetCardLab: dataset:", dataset);
 
   const getInfo = (datasetKey) => {
-    return PRELOAD_DATASETS[datasetKey?.toLowerCase()] || {
+    return PRELOAD_DATASETS[datasetKey] || {
       label: datasetKey || 'Unknown Dataset',
       stimuli: 'No stimuli information available.',
       expectation: 'No expected outcome available.',
