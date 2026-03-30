@@ -70,6 +70,14 @@ const safe = (s: string) =>
 
 const { Step } = Steps;
 const SERVER_BASE_URL = SERVER_URL;
+const LAB_TASK_ID = "lab_prediction";
+
+const analytics = (window as Window & {
+  CortexAnalytics?: {
+    trackEvent: (eventName: string, params?: Record<string, string | number | boolean | undefined>) => void;
+    trackUiClick: (component: string, ctaName: string, params?: Record<string, string | number | boolean | undefined>) => void;
+  };
+}).CortexAnalytics;
 
 const useBarchartData = (predictionResult: any) => {
   console.log("📊 Prediction Result for Bar Chart:", predictionResult);
@@ -170,8 +178,27 @@ const Stepper: React.FC = () => {
   const next = () => setCurrent((prev) => prev + 1);
   const prev = () => setCurrent((prev) => prev - 1);
 
+  const getStudyParams = () => ({
+    task_id: LAB_TASK_ID,
+    model,
+    dataset,
+    region,
+    voxel_option: voxelOption,
+    participant_id:
+      voxelOption === "specify-a-participant" && participantName.trim().length > 0
+        ? participantName.trim()
+        : undefined,
+  });
+
   const onChange = (value: number) => {
     console.log("Step changed:", value);
+    analytics?.trackUiClick("lab_stepper", "step_indicator", {
+      step_index: value,
+    });
+    analytics?.trackEvent("study_task_step", {
+      ...getStudyParams(),
+      step_id: value === 0 ? "upload_stimuli" : value === 1 ? "training_settings" : "prediction_results",
+    });
     setCurrent(value);
   };
 
@@ -312,7 +339,12 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
       return;
     }
 
+    const startedAt = Date.now();
     setPredictionLoading(true);
+    analytics?.trackEvent("study_task_start", {
+      ...getStudyParams(),
+      file_count: files.length,
+    });
 
     try {
       
@@ -342,9 +374,39 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
       });
 
       setPredictionResult(result.data.data);
+      analytics?.trackEvent("form_submit", {
+        ...getStudyParams(),
+        form_id: "lab_prediction_settings",
+        success: true,
+        file_count: files.length,
+      });
+      analytics?.trackEvent("study_task_complete", {
+        ...getStudyParams(),
+        success: true,
+        file_count: files.length,
+        ms_total: Date.now() - startedAt,
+      });
       message.success("Prediction complete!");
     } catch (e) {
       console.error(e);
+      const statusCode = axios.isAxiosError(e) ? e.response?.status : undefined;
+      analytics?.trackEvent("form_submit", {
+        ...getStudyParams(),
+        form_id: "lab_prediction_settings",
+        success: false,
+        file_count: files.length,
+      });
+      analytics?.trackEvent("api_error", {
+        ...getStudyParams(),
+        endpoint_name: "predict",
+        status_code: statusCode,
+      });
+      analytics?.trackEvent("study_task_complete", {
+        ...getStudyParams(),
+        success: false,
+        file_count: files.length,
+        ms_total: Date.now() - startedAt,
+      });
       message.error("Prediction failed. Check server connection.");
     } finally {
       setPredictionLoading(false);
@@ -553,6 +615,13 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
           <Button
             type="primary"
             onClick={() => {
+              analytics?.trackEvent("form_submit", {
+                ...getStudyParams(),
+                form_id: "stimuli_upload",
+                success: true,
+                file_count: files.length,
+              });
+              analytics?.trackUiClick("lab_stepper", "proceed_to_settings", { file_count: files.length });
               message.success("Image Upload complete!");
               next();
             }}
@@ -566,6 +635,7 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
           <Button
             type="primary"
             onClick={() => {
+              analytics?.trackUiClick("lab_stepper", predictstep === 1 ? "run_prediction" : "next_to_results");
               predictstep === 1 ? handlePrediction() : next();
             }}
             disabled={loading || files.length === 0}
@@ -575,7 +645,14 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
         )}
 
         {current === steps.length - 1 && (
-          <Button type="primary" onClick={downloadData} disabled={!predictionResult}>
+          <Button type="primary" onClick={() => {
+            analytics?.trackUiClick("lab_results", "download_data");
+            analytics?.trackEvent("download_file", {
+              ...getStudyParams(),
+              file_type: "csv",
+            });
+            downloadData();
+          }} disabled={!predictionResult}>
             Download Data
           </Button>
         )}
