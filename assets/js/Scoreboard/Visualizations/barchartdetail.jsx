@@ -355,14 +355,14 @@ const BarChartDetail = ({
   return (
     <div style={{ display: "flex", flexDirection: "row", position: "relative" }}>
       <div>
-        <svg ref={ceilingRef}></svg>
+        <svg ref={ceilingRef} style={{ fontFamily: "'Lato', sans-serif" }}></svg>
       </div>
 
       <div
         ref={scrollContainerRef}
         style={{ overflowX: "auto", scrollBehavior: "smooth" }}
       >
-        <svg ref={barsRef}></svg>
+        <svg ref={barsRef} style={{ fontFamily: "'Lato', sans-serif" }}></svg>
       </div>
 
       {scaleY && (

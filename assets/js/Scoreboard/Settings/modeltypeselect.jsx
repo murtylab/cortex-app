@@ -52,7 +52,7 @@ const ModelTypeSelect = ({
           px: 1.5,
         }}
       >
-        <Typography sx={{ fontWeight: 'bold', color: 'black' }}>
+        <Typography sx={{ fontWeight: 500, fontSize: '13px', color: 'var(--tungsten)' }}>
           Model Type
         </Typography>
       </AccordionSummary>
@@ -63,16 +63,7 @@ const ModelTypeSelect = ({
             {options.map((option) => (
               <FormControlLabel
                 key={option.value}
-                sx={{
-                  alignItems: 'flex-start',
-                  margin: 0,
-                  '& .MuiFormControlLabel-label': {
-                    fontSize: 14,
-                    lineHeight: 1.3,
-                    marginTop: '2px',
-                    color: 'black',
-                  },
-                }}
+                sx={{ alignItems: 'flex-start', margin: 0 }}
                 control={
                   <Checkbox
                     checked={Array.isArray(modelType) && modelType.includes(option.value)}
@@ -87,7 +78,7 @@ const ModelTypeSelect = ({
                     }}
                   />
                 }
-                label={option.label}
+                label={<span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '12px', fontWeight: 400, lineHeight: 1.3, marginTop: '2px', color: 'var(--tungsten)', display: 'inline-block' }}>{option.label}</span>}
               />
             ))}
           </FormGroup>

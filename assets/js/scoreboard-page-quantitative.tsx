@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Typography, Button, Radio } from 'antd';
+import { Typography, Button, Radio, ConfigProvider } from 'antd';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import MuiButton from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
 
 // LoadData
 import useLoadData from './DataProcess/loadData.jsx';
@@ -51,6 +54,11 @@ import {
 
 const { Title } = Typography;
 
+const muiTheme = createTheme({
+  typography: {
+    fontFamily: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif",
+  },
+});
 
 const ScoreboardPageQuantitative: React.FC = () => {
   const [training, setTraining] = useState('NSD');
@@ -389,6 +397,8 @@ const getOverviewColumnCount = (
   }
 
   return (
+    <ConfigProvider theme={{ token: { fontFamily: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif" } }}>
+    <ThemeProvider theme={muiTheme}>
     <div>
         <div
           style={{
@@ -441,22 +451,30 @@ const getOverviewColumnCount = (
                 scrollbarWidth: 'thin',
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <Title level={4} style={{ margin: 0 }}>Filters</Title>
-                <Button
-                  type="default"
-                  disabled={!hasFilters}
-                  onClick={clearFilters}
-                  size="small"
-                  style={{
-                    borderRadius: 6,
-                    fontWeight: 500,
-                    color: hasFilters ? 'var(--tungsten)' : '#aaa',
-                    borderColor: hasFilters ? 'var(--tungsten)' : '#ccc',
-                  }}
-                >
-                  Default
-                </Button>
+              {/* view toggle: Leaderboard / Advanced Insights */}
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: '11px', color: '#888', marginLeft: 2, marginBottom: 4, fontFamily: "'Inter', system-ui, sans-serif" }}>VIEW</div>
+                <ButtonGroup size="small" fullWidth variant="outlined">
+                  {[{ value: 'rank', label: 'Leaderboard' }, { value: '2', label: 'Advanced Insights' }].map((opt) => (
+                    <MuiButton
+                      key={opt.value}
+                      onClick={() => setPageView(opt.value)}
+                      variant={pageView === opt.value ? 'contained' : 'outlined'}
+                      sx={{
+                        fontSize: '12px',
+                        padding: '4px 2px',
+                        textTransform: 'none',
+                        fontFamily: "'Inter', system-ui, sans-serif",
+                        borderColor: 'var(--tungsten)',
+                        color: pageView === opt.value ? 'white' : 'var(--tungsten)',
+                        backgroundColor: pageView === opt.value ? 'var(--tungsten)' : 'transparent',
+                        '&:hover': { borderColor: 'var(--tungsten)', backgroundColor: pageView === opt.value ? 'var(--tungsten)' : 'rgba(66,66,66,0.06)' },
+                      }}
+                    >
+                      {opt.label}
+                    </MuiButton>
+                  ))}
+                </ButtonGroup>
               </div>
 
               {/* ChartSelect button group*/}
@@ -480,7 +498,27 @@ const getOverviewColumnCount = (
                 />
               </div>
 
-
+              {/* reset filters */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+                <Button
+                  type="text"
+                  disabled={!hasFilters}
+                  onClick={clearFilters}
+                  size="small"
+                  style={{
+                    padding: '2px 8px',
+                    fontSize: '11px',
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                    color: hasFilters ? 'var(--tungsten)' : '#bbb',
+                    border: `1px solid ${hasFilters ? 'var(--tungsten)' : '#ddd'}`,
+                    borderRadius: 6,
+                    height: 'auto',
+                    lineHeight: '18px',
+                  }}
+                >
+                  Reset filters
+                </Button>
+              </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <TrainingSelect
@@ -595,7 +633,7 @@ const getOverviewColumnCount = (
                   region.map((roiValue) => (
                     <div key={`${dsName}-${roiValue}`} style={{ flex: 1, minHeight: '80px', background: 'var(--background-color)', padding: '6px', borderRadius: 6, display: 'flex', flexDirection: 'column' }}>
                       <div style={{ textAlign: 'center', fontSize: '10px', fontWeight: 'bold', color: '#888' }}>
-                        {roiValue === 'Across Regions' ? 'Overall' : roiValue} ({dsName})
+                        {roiValue === 'Across Regions' ? 'Across Regions' : roiValue} ({dsName})
                       </div>
                       <div style={{ flex: 1, minHeight: 0 }}>
                         <BarChartOverview
@@ -621,7 +659,7 @@ const getOverviewColumnCount = (
                     const isBranch2 = dataset.length === 0;
 
                     const subtitle = isBranch2
-                      ? (item === 'Across Regions' ? 'Overall' : item)
+                      ? (item === 'Across Regions' ? 'Across Regions' : item)
                       : (datasetLabelMapShort[item] || item);
 
                     const currentRoi = isBranch2
@@ -740,25 +778,37 @@ const getOverviewColumnCount = (
                     style={{
                       flex: '0 0 auto',
                       marginBottom: 8,
-                      fontSize: '18px',
-                      fontWeight: 600,
-                      color: '#333',
                       textAlign: 'center',
+                      fontFamily: "'Inter', system-ui, sans-serif",
+                      lineHeight: 1.5,
                     }}
                   >
+                    {(() => {
+                      const trainingLabel = training === 'NSD' ? 'NSD1000' : 'Murty185';
+                      const regionLabel = region
+                        .map((r: string) => r === 'Across Regions' ? 'Across Regions' : r.toUpperCase())
+                        .join(' / ');
+                      const datasetLabel = dataset.length > 0
+                        ? dataset.map((d: string) => datasetLabelMap[d] || d).join(' · ')
+                        : null;
 
-                    {isDatasetDetailMode
-                      ? `Performance On Specific Dataset Trained on ${training === 'NSD' ? 'NSD1000' : 'Murty185'} `
-                      : (training === 'Murty185 VS NSD1000'
-                          ? 'Murty185 vs NSD1000 Performance Comparison'
-                      : (isDatasetROI)
-                          ? `Model Performance Gap to Ceiling vs Ceiling (Trained on ${training === 'NSD' ? 'NSD1000' : 'Murty185'})`
-                      : (region.includes("Across Regions"))
-                          ? `${region[0]?.toUpperCase()} Performance (Trained on ${training === 'NSD' ? 'NSD1000' : 'Murty185'})`
-
-
-                      : `Performance  on Specific Region (Trained on ${training === 'NSD' ? 'NSD1000' : 'Murty185'})`)
-                    }
+                      if (training === 'Murty185 VS NSD1000') {
+                        return <span style={{ fontSize: '16px', fontWeight: 600, color: '#333' }}>Murty185 vs NSD1000 Performance Comparison</span>;
+                      }
+                      if (isDatasetROI) {
+                        return <span style={{ fontSize: '16px', fontWeight: 600, color: '#333' }}>Model Performance Gap to Ceiling (Trained on {trainingLabel})</span>;
+                      }
+                      return (
+                        <>
+                          <span style={{ display: 'block', fontSize: '16px', fontWeight: 600, color: '#333' }}>
+                            {regionLabel} Performance
+                          </span>
+                          <span style={{ display: 'block', fontSize: '12px', fontWeight: 400, color: '#999', marginTop: 2 }}>
+                            Trained on {trainingLabel}{datasetLabel ? ` · Evaluated on ${datasetLabel}` : ''}
+                          </span>
+                        </>
+                      );
+                    })()}
                   </h3>
 
                 
@@ -865,21 +915,6 @@ const getOverviewColumnCount = (
                         flexShrink: 0
                       }}
                     >
-                      {/* subtilte*/}
-                      <div style={{
-                        textAlign: 'center',
-                        fontWeight: 'bold',
-                        marginBottom: 12,
-                        fontSize: '14px',
-                        color: '#555',
-                        textTransform: 'uppercase',
-                        background: 'var(--background-color)',
-                        padding: '4px 0',
-                        borderRadius: '4px'
-                      }}>
-                        {roiValue === 'Across Regions' ? 'Across Regions' : roiValue}
-                      </div>
-
                       <HeatmapDetail
                         data={getDataByTraining(training)}
                         roi={roiValue === 'Across Regions' ? 'Overall' : roiValue}
@@ -987,7 +1022,8 @@ const getOverviewColumnCount = (
 
 
     </div>
-
+    </ThemeProvider>
+    </ConfigProvider>
   );
 };
 export default ScoreboardPageQuantitative;

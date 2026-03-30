@@ -21,9 +21,9 @@ const TrainingSelect = ({ training, setTraining, dataset, vsOption, expanded, on
   const options = isVSMode ?  TRAINING_OPTIONS_VS :TRAINING_OPTIONS ;
 
   const handleChange = (value) => {
-    // if vs option, not allowed to modified
     if (isVSMode) return;
-    setTraining((prev) => (prev === value ? '' : value));
+    // must keep at least one selected
+    setTraining((prev) => (prev === value ? prev : value));
   };
 
   return (
@@ -39,7 +39,7 @@ const TrainingSelect = ({ training, setTraining, dataset, vsOption, expanded, on
           px: 1.5,
         }}
       >
-        <Typography sx={{ fontWeight: 'bold', color: 'black' }}>Training Dataset</Typography>
+        <Typography sx={{ fontWeight: 500, fontSize: '13px', color: 'var(--tungsten)' }}>Training Dataset</Typography>
       </AccordionSummary>
 
       <AccordionDetails sx={{ pl: 2 }}>
@@ -64,7 +64,7 @@ const TrainingSelect = ({ training, setTraining, dataset, vsOption, expanded, on
                     }}
                   />
                 }
-                label={option.label}
+                label={<span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '12px', fontWeight: 400, color: 'var(--tungsten)' }}>{option.label}</span>}
               />
             ))}
           </FormGroup>

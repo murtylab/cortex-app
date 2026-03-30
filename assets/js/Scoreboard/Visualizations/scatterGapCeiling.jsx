@@ -98,7 +98,7 @@ const ScatterGapCeiling = ({ murtyData, nsdData, ceilingData, roi, dataset, trai
     const container = d3.select(containerRef.current);
     let svg = container.select("svg");
     if (svg.empty()) svg = container.append("svg");
-    svg.attr("width", dimensions.width).attr("height", dimensions.height);
+    svg.attr("width", dimensions.width).attr("height", dimensions.height).style("font-family", "'Lato', sans-serif");
     svg.selectAll("*").remove();
 
     const { width, height } = dimensions;

@@ -169,7 +169,7 @@ const BarChartOverview = ({ data, roi, dataset, ceiling, rank, onModelClick, sel
             ref={svgRef}
             width={dimensions.width}
             height={dimensions.height}
-            style={{ display: "block" }}
+            style={{ display: "block", fontFamily: "'Lato', sans-serif" }}
           />
         )}
       </div>

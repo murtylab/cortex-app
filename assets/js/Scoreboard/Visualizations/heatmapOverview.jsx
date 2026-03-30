@@ -91,15 +91,16 @@ const HeatmapOverview = ({
 
     const colorScale = d3
       .scaleLinear()
-      .domain([0, 1])
-      .range(["#D3D3D3", "#9CC9FF"]);
+      .domain([0, 0.5, 1])
+      .range(["#ede9d8", "#c4b4cc", "#8966a3"]);
 
     const svg = container
       .append("svg")
       .attr("width", totalWidth)
       .attr("height", totalHeight)
       .style("background", "transparent")
-      .style("display", "block");
+      .style("display", "block")
+      .style("font-family", "'Lato', sans-serif");
 
     svg
       .selectAll("rect.cell")
@@ -112,12 +113,25 @@ const HeatmapOverview = ({
       .attr("width", colWidth)
       .attr("height", rowHeight)
       .attr("fill", (d) => colorScale(d.norm ?? 0))
-      .attr("stroke", (d) => (d.model === selectedModel ? "black" : "white"))
-      .attr("stroke-width", (d) => (d.model === selectedModel ? 1 : 0.3))
+      .attr("stroke", "white")
+      .attr("stroke-width", 0.3)
+      .style("opacity", (d) => selectedModel ? (d.model === selectedModel ? 1 : 0.25) : 1)
       .style("cursor", "pointer")
       .on("click", (_, d) => {
         onModelClick?.(d.model === selectedModel ? null : d.model);
       });
+
+    // selected row indicator bar on the left edge
+    if (selectedModel && models.includes(selectedModel)) {
+      const selIndex = models.indexOf(selectedModel);
+      svg.append("rect")
+        .attr("x", 0)
+        .attr("y", selIndex * rowHeight)
+        .attr("width", 2)
+        .attr("height", rowHeight)
+        .attr("fill", "#7050a0")
+        .style("pointer-events", "none");
+    }
 
     if (visibleRange && models.length > 0) {
       const { start, end } = visibleRange;
@@ -132,9 +146,9 @@ const HeatmapOverview = ({
           .attr("y", boxY)
           .attr("width", totalWidth)
           .attr("height", boxHeight)
-          .attr("fill", "rgba(255, 69, 0, 0.1)")
-          .attr("stroke", "#FF4500")
-          .attr("stroke-width", 2)
+          .attr("fill", "rgba(137, 102, 163, 0.15)")
+          .attr("stroke", "#7050a0")
+          .attr("stroke-width", 1.5)
           .style("pointer-events", "none");
       }
     }
