@@ -149,7 +149,7 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
                   background: transparent;
                   border-radius: 12px;
                   min-width: 280px;
-                  font-family: Inter, sans-serif;
+                  font-family: 'Lato', sans-serif;
                 ">
 
                   <div style="
@@ -294,7 +294,7 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
           <option value="group">Group</option>
         </select>
       </div> */}
-      <svg ref={svgRef}></svg>
+      <svg ref={svgRef} style={{ fontFamily: "'Lato', sans-serif" }}></svg>
     </div>
   );
 };

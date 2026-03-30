@@ -68,6 +68,37 @@
         visibility: visible;
       }
     }
+
+    /* Override MUI default Roboto with Inter */
+    .MuiTypography-root,
+    .MuiButtonBase-root,
+    .MuiButton-root,
+    .MuiFormControlLabel-label,
+    .MuiInputBase-root,
+    .MuiInputLabel-root,
+    .MuiMenuItem-root,
+    .MuiSelect-root,
+    .MuiFormLabel-root,
+    .MuiAccordionSummary-content {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+    }
+
+    /* Override Ant Design default font with Inter */
+    .ant-typography,
+    .ant-btn,
+    .ant-steps-item-title,
+    .ant-steps-item-description,
+    .ant-upload-text,
+    .ant-upload-hint,
+    .ant-progress-text {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+    }
+
+    /* Fallback: all antd elements inside #container */
+    #container button,
+    #container [class*="ant-"] {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+    }
   </style>
 
 </head>

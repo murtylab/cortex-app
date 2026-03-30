@@ -4,7 +4,8 @@ import { Button, message, Steps, theme } from 'antd';
 import { SmileOutlined } from '@ant-design/icons';
 import { uploadImages } from './services/imageUploader.js';
 import { SERVER_URL } from './services/config';
-import { ConfigProvider } from 'antd'; 
+import { ConfigProvider } from 'antd';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 //main component
 import LinearIndeterminate from './Lab/linearprogessor.jsx';
@@ -164,6 +165,12 @@ const PRELOADED_JSON_MODULES = import.meta.glob(
     import: "default",
   }
 ) as Record<string, any>;
+
+const muiLabTheme = createTheme({
+  typography: {
+    fontFamily: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif",
+  },
+});
 
 const Stepper: React.FC = () => {
   const { token } = theme.useToken();
@@ -1035,6 +1042,9 @@ useEffect(() => {
   <>
     <ConfigProvider
       theme={{
+        token: {
+          fontFamily: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif",
+        },
         components: {
           Steps: {
             colorPrimary: "var(--tungsten)", // Customize the primary color for Steps
@@ -1050,6 +1060,7 @@ useEffect(() => {
         },
       }}
     >
+    <ThemeProvider theme={muiLabTheme}>
       <Steps current={current} onChange={onChange}>
         {steps.map((item) => (
           <Step key={item.title} title={item.title} icon={item.icon} />
@@ -1090,6 +1101,7 @@ useEffect(() => {
           </Button>
         )}
       </div>
+    </ThemeProvider>
     </ConfigProvider>
   </>
 );

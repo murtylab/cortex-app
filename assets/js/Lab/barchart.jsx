@@ -548,7 +548,7 @@ const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
         )}
       </div>
 
-      <svg ref={svgRef} style={{ marginTop: '10px', width: '100%' }} />
+      <svg ref={svgRef} style={{ marginTop: '10px', width: '100%', fontFamily: "'Lato', sans-serif" }} />
     </div>
   );
 };

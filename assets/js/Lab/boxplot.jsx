@@ -517,7 +517,7 @@ const BoxPlot = ({ regionDataMap, fileMappings, height = 560 }) => {
         paddingTop: "10px",
       }}
     >
-      <svg ref={svgRef} style={{ marginTop: "10px", width: "100%" }} />
+      <svg ref={svgRef} style={{ marginTop: "10px", width: "100%", fontFamily: "'Lato', sans-serif" }} />
     </div>
   );
 };
