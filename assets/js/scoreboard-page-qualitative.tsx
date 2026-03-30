@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Typography, Button, Radio } from 'antd';
+import { Button } from 'antd';
 
 // LoadData
 import useLoadData from './DataProcess/loadData.jsx';
@@ -8,7 +8,7 @@ import useLoadData from './DataProcess/loadData.jsx';
 import SelectedFiltersBar from './Scoreboard/Settings/selectFiltersBar.jsx';
 import TrainingSelect from './Scoreboard/Settings/trainingselect.jsx';
 import ROISelect from './Scoreboard/Settings/roiselect.jsx';
-import DatasetSelect from './Scoreboard/Settings/datasetselect.jsx';
+import ExperimentSelect from './Scoreboard/Settings/experimentselect.jsx';
 import ModelTypeSelect from './Scoreboard/Settings/modeltypeselect.jsx';
 
 
@@ -35,8 +35,7 @@ import ModelCardScoreboard from './Scoreboard/Settings/modelcardScoreboard.jsx';
 import DatasetCard from './Scoreboard/Settings/datasetcard.jsx';
 import ROICard from './Scoreboard/Settings/roicard.jsx';
 
-import murtyBubbleImg from '../img/qualitative/bubble_heatmap_rankedBoth_train-murty185.png';
-import nsdBubbleImg from '../img/qualitative/bubble_heatmap_rankedBoth_train-nsd_1000.png';
+import BubbleHeatmap from './Scoreboard/Visualizations/bubbleHeatmap.jsx';
 
 
 
@@ -52,13 +51,12 @@ import {
 
 
 
-const { Title } = Typography;
-
 
 const ScoreboardPageQualitative: React.FC = () => {
   const [training, setTraining] = useState('NSD');
   const [region, setRegion] = useState<string[]>(['Across Regions']);
   const [dataset, setDataset] = useState<string[]>([]);
+  const [selectedExperiments, setSelectedExperiments] = useState<string[]>([]);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
   const [chartType, setChartType] = useState('uni');
@@ -89,12 +87,15 @@ const ScoreboardPageQualitative: React.FC = () => {
 
 
 
-  const qualitativeImage =
-  training === 'Murty185'
-    ? murtyBubbleImg
-    : training === 'NSD'
-    ? nsdBubbleImg
-    : null;
+  const qualiTrainKey = training === 'Murty185' ? 'murty185' : training === 'NSD' ? 'nsd_1000' : null;
+
+  const [qualiChartData, setQualiChartData] = React.useState<any>(null);
+  useEffect(() => {
+    fetch('/assets/data/qualitative_chart_data.json')
+      .then(r => r.json())
+      .then(setQualiChartData)
+      .catch(e => console.error('[quali] failed to load chart data', e));
+  }, []);
 
     
   console.log("Parent - pageView:", pageView, "activeQuestion:", activeQuestion, "isVS:", isVS);
@@ -123,7 +124,7 @@ const ScoreboardPageQualitative: React.FC = () => {
   const [expandedStates, setExpandedStates] = useState({
     training: false,
     region: false,
-    dataset: false,
+    experiment: false,
     modelType: false,
   });
 
@@ -310,6 +311,7 @@ const ScoreboardPageQualitative: React.FC = () => {
       setTraining('NSD');
       setRegion(['Across Regions']);
       setDataset([]);
+      setSelectedExperiments([]);
 
     }
 
@@ -320,6 +322,7 @@ const ScoreboardPageQualitative: React.FC = () => {
     if (key === 'dataset') setDataset((prev) => prev.filter((r) => r !== value));
     if (key === 'region') setRegion((prev) => prev.filter((r) => r !== value));
     if (key === 'modelType') setModelType((prev) => prev.filter((r) => r !== value));
+    if (key === 'experiment') setSelectedExperiments((prev) => prev.filter((r) => r !== value));
   };
 
   const getDataByTraining = (training: string) => {
@@ -455,21 +458,24 @@ const getOverviewColumnCount = (
                 scrollbarWidth: 'thin',
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <Title level={4} style={{ margin: 0 }}>Filters</Title>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
                 <Button
-                  type="default"
+                  type="text"
                   disabled={!hasFilters}
                   onClick={clearFilters}
                   size="small"
                   style={{
+                    padding: '2px 8px',
+                    fontSize: '11px',
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                    color: hasFilters ? 'var(--tungsten)' : '#bbb',
+                    border: `1px solid ${hasFilters ? 'var(--tungsten)' : '#ddd'}`,
                     borderRadius: 6,
-                    fontWeight: 500,
-                    color: hasFilters ? 'var(--tungsten)' : '#aaa',
-                    borderColor: hasFilters ? 'var(--tungsten)' : '#ccc',
+                    height: 'auto',
+                    lineHeight: '18px',
                   }}
                 >
-                  Default
+                  Reset filters
                 </Button>
               </div>
 
@@ -491,6 +497,7 @@ const getOverviewColumnCount = (
                   rank={rank}
                   setRank={setRank}
                   enable={true}
+                  showType={false}
                 />
               </div>
 
@@ -519,15 +526,12 @@ const getOverviewColumnCount = (
                   isVS = {isVS}
                 />
 
-                <DatasetSelect
-                  dataset={dataset}
-                  setDataset={setDataset}
-                  training={training}
-                  region={region}
-                  allowToggle={true}
-                  mode={1}
-                  expanded={expandedStates.dataset}
-                  onToggle={handleTogglePanel('dataset')}
+                <ExperimentSelect
+                  experiments={qualiTrainKey && qualiChartData ? qualiChartData[qualiTrainKey]?.experiments ?? [] : []}
+                  selectedExperiments={selectedExperiments}
+                  setSelectedExperiments={setSelectedExperiments}
+                  expanded={expandedStates.experiment}
+                  onToggle={handleTogglePanel('experiment')}
                 />
 
                 <ModelTypeSelect
@@ -560,28 +564,11 @@ const getOverviewColumnCount = (
             >
               <div
                 style={{
-                  flex: '0 0 auto',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  marginBottom: 12,
-                }}
-              >
-                <ChartSelect
-                  chartType={chartType}
-                  setChartType={setChartType}
-                  rank={rank}
-                  setRank={setRank}
-                  enable={true}
-                />
-              </div>
-
-              <div
-                style={{
                   flex: 1,
                   minHeight: 0,
                   minWidth: 0,
                   borderRadius: 8,
-                  background: '#fff',
+                  background: 'var(--background-color, #f7f7f4)',
                   padding: 12,
                   overflow: 'hidden',
                   display: 'flex',
@@ -589,45 +576,18 @@ const getOverviewColumnCount = (
                   alignItems: 'stretch',
                 }}
               >
-                {qualitativeImage ? (
-                  <div
-                    style={{
-                      height: '100%',
-                      width: '100%',
-                      overflowY: 'auto',
-                      overflowX: 'auto',
-                      display: 'flex',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <div
-                      style={{
-                        minHeight: 'max-content',
-                        minWidth: 'max-content',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        padding: '8px 24px',
-                      }}
-                    >
-                      <img
-                        src={qualitativeImage}
-                        alt={
-                          training === 'Murty185'
-                            ? 'Murty185 qualitative result'
-                            : 'NSD qualitative result'
-                        }
-                        style={{
-                          display: 'block',
-                          width: 'auto',
-                          height: 'auto',
-                          maxWidth: 'none',
-                          maxHeight: 'none',
-                          minWidth: '900px',
-                          objectFit: 'contain',
-                        }}
-                      />
-                    </div>
-                  </div>
+                {qualiTrainKey ? (
+                  <BubbleHeatmap
+                    data={qualiChartData}
+                    trainSource={qualiTrainKey}
+                    region={region}
+                    modelType={modelType}
+                    allowedModelValues={allowedModelValues}
+                    rank={rank}
+                    selectedExperiments={selectedExperiments}
+                    selectedModel={selectedModel}
+                    onModelClick={(m: string | null) => setSelectedModel(m)}
+                  />
                 ) : (
                   <div
                     style={{
