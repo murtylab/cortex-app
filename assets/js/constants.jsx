@@ -3904,6 +3904,14 @@ export const MODELCARD_INFO_LOOKUP = {
 
 // Preloaded datasets available for quick testing and demos
 export const PRELOAD_DATASETS = {
+  murty185 : {
+    label: "Murty 185",
+    stimuli: "Human fMRI dataset with brain responses to 185 natural images.",
+    expectation: "Scene-selective regions prefer high spatial frequency scenes, while object-selective regions prefer low spatial frequency objects.",
+    imageFolder: "/assets/preload/murty185/images",
+    paperLink: "https://www.pnas.org/doi/10.1073/pnas.1912333117",
+    papername: "Large-scale dissociations between views of objects, scenes, and reachable-scale environments in visual cortex"
+  },
   reza: {
     label: "Reza",
     stimuli: "Cubes and spheres (smooth, textured, bumpy) with matched size, lighting, and position.",
