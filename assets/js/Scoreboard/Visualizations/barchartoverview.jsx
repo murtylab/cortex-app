@@ -71,7 +71,7 @@ const BarChartOverview = ({ data, roi, dataset, ceiling, rank, onModelClick, sel
     svg.append("path")
       .datum(results)
       .attr("fill", "none")
-      .attr("stroke", "#1890ff")
+      .attr("stroke", "#8966a3")
       .attr("stroke-width", 1.5)
       .attr("d", lineGenerator);
 
@@ -82,7 +82,7 @@ const BarChartOverview = ({ data, roi, dataset, ceiling, rank, onModelClick, sel
       .attr("cx", d => xScale(d.model))
       .attr("cy", d => yScale(d.val))
       .attr("r", d => d.model === selectedModel ? 4 : 2)
-      .attr("fill", d => d.model === selectedModel ? "#ff4500" : "#1890ff")
+      .attr("fill", d => d.model === selectedModel ? "#6b4a8c" : "#8966a3")
       .style("cursor", "pointer")
       .on("click", (event, d) => {
         onModelClick?.(d.model === selectedModel ? null : d.model);
@@ -99,7 +99,7 @@ const BarChartOverview = ({ data, roi, dataset, ceiling, rank, onModelClick, sel
         .attr("y", py - 6)
         .attr("text-anchor", placeLeft ? "end" : "start")
         .attr("font-size", "10px")
-        .attr("fill", "#ff4500")
+        .attr("fill", "#6b4a8c")
         .attr("font-weight", 500)
         .text(selectedPoint.model);
     }
@@ -109,7 +109,8 @@ const BarChartOverview = ({ data, roi, dataset, ceiling, rank, onModelClick, sel
         .attr("x", 5)
         .attr("y", yScale(tick) - 2)
         .attr("font-size", "9px")
-        .attr("fill", "#ccc")
+        .attr("fill", "#bbb")
+        .attr("font-family", "'Inter', system-ui, sans-serif")
         .text(tick);
     });
   }, [data, roi, dataset, rank, dimensions, selectedModel, results, onModelClick]);
@@ -131,15 +132,16 @@ const BarChartOverview = ({ data, roi, dataset, ceiling, rank, onModelClick, sel
           width: "50px",
           paddingRight: "10px",
           fontSize: "10px",
-          color: "#999",
+          color: "#888",
+          fontFamily: "'Inter', system-ui, sans-serif",
           textAlign: "right",
           flexShrink: 0,
           lineHeight: "1.1",
           fontWeight: 500
         }}
       >
-        <div style={{ color: "#666" }}>{dataset}</div>
-        <div style={{ fontWeight: "bold" }}>{roi}</div>
+          <div style={{ color: "#aaa" }}>{dataset}</div>
+          <div style={{ fontWeight: 600, color: "#6b4a8c" }}>{roi}</div>
       </div>
 
       <div
@@ -169,7 +171,7 @@ const BarChartOverview = ({ data, roi, dataset, ceiling, rank, onModelClick, sel
             ref={svgRef}
             width={dimensions.width}
             height={dimensions.height}
-            style={{ display: "block", fontFamily: "'Lato', sans-serif" }}
+            style={{ display: "block", fontFamily: "'Inter', system-ui, sans-serif" }}
           />
         )}
       </div>

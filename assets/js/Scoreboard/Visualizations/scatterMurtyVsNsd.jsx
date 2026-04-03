@@ -371,7 +371,7 @@ const ScatterMurtyVsNsd = ({ murtyData, nsdData, murtyDataFull, nsdDataFull,roi,
     : [];
 
   return (
-    <div style={{ display: "flex", width: "100%", height: "100%", background: "#fafafa", overflow: "hidden" }}>
+    <div style={{ display: "flex", width: "100%", height: "100%", background: "var(--background-color, #f7f7f4)", overflow: "hidden" }}>
       
       {/* left：graph*/}
       <div 
@@ -385,7 +385,7 @@ const ScatterMurtyVsNsd = ({ murtyData, nsdData, murtyDataFull, nsdDataFull,roi,
         width: "250px", 
         borderLeft: "1px solid #eee", 
         padding: "20px", 
-        backgroundColor: "#fafafa",
+        backgroundColor: "var(--background-color, #f7f7f4)",
         display: "flex",
         flexDirection: "column",
         gap: "10px",
@@ -400,7 +400,7 @@ const ScatterMurtyVsNsd = ({ murtyData, nsdData, murtyDataFull, nsdDataFull,roi,
         {activeModelName ? (
           <div style={{ fontSize: "12px", lineHeight: "1.4" }}>
             {/* 1. model's name */}
-            <div style={{ fontWeight: "bold", color: "#1890ff", fontSize: "12px", marginBottom: "12px", wordBreak: "break-all" }}>
+            <div style={{ fontWeight: "bold", color: "#6b4a8c", fontSize: "12px", marginBottom: "12px", wordBreak: "break-all" }}>
               {activeModelName}
             </div>
 
@@ -411,9 +411,9 @@ const ScatterMurtyVsNsd = ({ murtyData, nsdData, murtyDataFull, nsdDataFull,roi,
                   key={entry.dataset} 
                   style={{ 
                     padding: "10px", 
-                    background: (hoveredData?.dataset === entry.dataset) ? "#e6f7ff" : "#fff", 
+                    background: (hoveredData?.dataset === entry.dataset) ? "rgba(137,102,163,0.08)" : "rgba(0,0,0,0.03)", 
                     borderRadius: "6px", 
-                    border: (hoveredData?.dataset === entry.dataset) ? "1.5px solid #1890ff" : "1px solid #eee",
+                    border: (hoveredData?.dataset === entry.dataset) ? "1.5px solid #8966a3" : "1px solid #e0ddd8",
                     boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
                     transition: "all 0.2s"
                   }}

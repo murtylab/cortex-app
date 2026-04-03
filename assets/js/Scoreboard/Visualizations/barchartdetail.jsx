@@ -110,8 +110,8 @@ const BarChartDetail = ({
         .attr("y", Math.min(y(0), y(ceilingMean)))
         .attr("width", barWidth)
         .attr("height", Math.abs(y(0) - y(ceilingMean)))
-        .attr("fill", "#d3d3d3")
-        .attr("stroke", "black");
+        .attr("fill", "#e8e2ee")
+        .attr("stroke", "#bbb");
 
       if (roi !== "Overall") {
         rect
@@ -132,14 +132,14 @@ const BarChartDetail = ({
           });
       }
 
-      ceilingSvg
-        .append("text")
-        .attr("x", margin.left + 15 + barWidth / 2)
-        .attr("y", y(0.95))
-        .attr("text-anchor", "middle")
-        .attr("font-size", "12px")
-        .attr("fill", "black")
-        .text(ceilingMean.toFixed(2));
+    ceilingSvg
+      .append("text")
+      .attr("x", margin.left + 15 + barWidth / 2)
+      .attr("y", y(0.95))
+      .attr("text-anchor", "middle")
+      .attr("font-size", "12px")
+      .attr("fill", "#555")
+      .text(ceilingMean.toFixed(2));
 
       const points = ceiling[roi][dataset]?.correlation_points || [];
       if (points.length > 0) {
@@ -157,8 +157,8 @@ const BarChartDetail = ({
           .attr("cx", (_, i) => margin.left + 15 + barWidth / 2 + jitter(i))
           .attr("cy", (d) => y(d))
           .attr("r", 5)
-          .attr("fill", "#74C5F7")
-          .attr("stroke", "black")
+          .attr("fill", "#c4b4cc")
+          .attr("stroke", "rgba(0,0,0,0.3)")
           .attr("stroke-width", 0.6);
       }
     }
@@ -168,17 +168,18 @@ const BarChartDetail = ({
       .attr("transform", `translate(${margin.left},0)`)
       .call(d3.axisLeft(y).ticks(5))
       .call((g) => {
-        g.select(".domain").attr("stroke", "black");
+        g.select(".domain").attr("stroke", "#bbb");
         g.selectAll("line").remove();
-        g.selectAll("text").attr("fill", "black");
+        g.selectAll("text").attr("fill", "#555").style("font-family", "'Inter', system-ui, sans-serif").style("font-size", "11px");
       });
 
     const centerY = (height - margin.bottom) / 2;
     ceilingSvg
       .append("text")
       .attr("text-anchor", "middle")
-      .style("font-size", "14px")
-      .attr("fill", "black")
+      .style("font-size", "13px")
+      .style("font-family", "'Inter', system-ui, sans-serif")
+      .attr("fill", "#555")
       .attr(
         "transform",
         `translate(${margin.left - 45}, ${centerY}) rotate(-90)`
@@ -191,7 +192,7 @@ const BarChartDetail = ({
       .attr("y", height - margin.bottom + 10)
       .attr("text-anchor", "start")
       .attr("font-size", "9px")
-      .attr("fill", "black")
+      .attr("fill", "#888")
       .attr(
         "transform",
         `rotate(60, ${margin.left + barWidth / 2 + 15}, ${
@@ -233,9 +234,9 @@ const BarChartDetail = ({
       .attr("y", (d) => Math.min(y(0), y(d.val)))
       .attr("height", (d) => Math.abs(y(0) - y(d.val)))
       .attr("width", x.bandwidth())
-      .attr("fill", (d) => (d.model === selectedModel ? "#ff7a45" : "#d3d3d3"))
-      .attr("stroke", (d) => (d.model === selectedModel ? "#d4380d" : "black"))
-      .attr("stroke-width", (d) => (d.model === selectedModel ? 2 : 1))
+      .attr("fill", (d) => (d.model === selectedModel ? "#8966a3" : "#d6cfe0"))
+      .attr("stroke", (d) => (d.model === selectedModel ? "#6b4a8c" : "rgba(0,0,0,0.2)"))
+      .attr("stroke-width", (d) => (d.model === selectedModel ? 2 : 0.5))
       .style("cursor", "pointer")
       .on("click", (_, d) => {
         const newSelection = selectedModel === d.model ? null : d.model;
@@ -252,7 +253,7 @@ const BarChartDetail = ({
       .attr("y", y(0.95))
       .attr("text-anchor", "middle")
       .attr("font-size", "12px")
-      .attr("fill", (d) => (d.model === selectedModel ? "#d4380d" : "black"))
+      .attr("fill", (d) => (d.model === selectedModel ? "#6b4a8c" : "#555"))
       .attr("font-weight", (d) => (d.model === selectedModel ? "700" : "400"))
       .text((d) => d.val.toFixed(2));
 
@@ -266,7 +267,7 @@ const BarChartDetail = ({
       .attr("y", height - margin.bottom + 10)
       .attr("text-anchor", "start")
       .attr("font-size", "9px")
-      .attr("fill", (d) => (d.model === selectedModel ? "#d4380d" : "black"))
+      .attr("fill", (d) => (d.model === selectedModel ? "#6b4a8c" : "#555"))
       .attr("font-weight", (d) => (d.model === selectedModel ? "700" : "400"))
       .attr(
         "transform",
@@ -297,10 +298,10 @@ const BarChartDetail = ({
         .attr("stroke-width", 1);
     }
 
-    drawLine(ceilingSvg, ceilingMax, "red", ceilingWidth, margin.left);
-    drawLine(ceilingSvg, ceilingMean, "blue", ceilingWidth, margin.left);
-    drawLine(barsSvg, ceilingMax, "red", width, 0);
-    drawLine(barsSvg, ceilingMean, "blue", width, 0);
+    drawLine(ceilingSvg, ceilingMax, "#c47a8a", ceilingWidth, margin.left);
+    drawLine(ceilingSvg, ceilingMean, "#8966a3", ceilingWidth, margin.left);
+    drawLine(barsSvg, ceilingMax, "#c47a8a", width, 0);
+    drawLine(barsSvg, ceilingMean, "#8966a3", width, 0);
   }, [processed, ceiling, roi, dataset, yLabel, selectedModel, onModelClick]);
 
   useEffect(() => {
@@ -355,14 +356,14 @@ const BarChartDetail = ({
   return (
     <div style={{ display: "flex", flexDirection: "row", position: "relative" }}>
       <div>
-        <svg ref={ceilingRef} style={{ fontFamily: "'Lato', sans-serif" }}></svg>
+        <svg ref={ceilingRef} style={{ fontFamily: "'Inter', system-ui, sans-serif" }}></svg>
       </div>
 
       <div
         ref={scrollContainerRef}
         style={{ overflowX: "auto", scrollBehavior: "smooth" }}
       >
-        <svg ref={barsRef} style={{ fontFamily: "'Lato', sans-serif" }}></svg>
+        <svg ref={barsRef} style={{ fontFamily: "'Inter', system-ui, sans-serif" }}></svg>
       </div>
 
       {scaleY && (
@@ -381,8 +382,9 @@ const BarChartDetail = ({
                 position: "absolute",
                 top: scaleY(stats.max) - 17,
                 right: 0,
-                color: "red",
-                fontSize: "12px",
+                color: "#c47a8a",
+                fontSize: "11px",
+                fontFamily: "'Inter', system-ui, sans-serif",
               }}
             >
               Ceiling Max: {stats.max.toFixed(2)}
@@ -394,8 +396,9 @@ const BarChartDetail = ({
                 position: "absolute",
                 top: scaleY(stats.mean),
                 right: 0,
-                color: "blue",
-                fontSize: "12px",
+                color: "#8966a3",
+                fontSize: "11px",
+                fontFamily: "'Inter', system-ui, sans-serif",
               }}
             >
               Ceiling Mean: {stats.mean.toFixed(2)}
@@ -409,8 +412,8 @@ const BarChartDetail = ({
         style={{
           position: "fixed",
           pointerEvents: "none",
-          background: "white",
-          border: "1px solid black",
+          background: "var(--background-color, #f7f7f4)",
+          border: "1px solid #d6cfe0",
           padding: "4px 6px",
           fontSize: "12px",
           borderRadius: "4px",

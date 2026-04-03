@@ -762,7 +762,7 @@ const getOverviewColumnCount = (
 
                 <div
                   style={{
-                    background: '#var(--background-color)',
+                    background: 'var(--background-color)',
                     borderRadius: 8,
                     padding: 16,
                     display: 'flex',
@@ -876,11 +876,13 @@ const getOverviewColumnCount = (
                                   zIndex: 10,
                                   background: 'var(--background-color)',
                                   padding: '10px 0',
-                                  borderBottom: '2px solid #1890ff',
+                                  borderBottom: '1px solid #c4b4cc',
                                   marginBottom: 15,
-                                  fontWeight: 'bold',
-                                  color: '#1890ff',
-                                  fontSize: '14px',
+                                  fontWeight: 600,
+                                  color: '#6b4a8c',
+                                  fontSize: '13px',
+                                  fontFamily: "'Inter', system-ui, sans-serif",
+                                  letterSpacing: '0.04em',
                                   textTransform: 'uppercase'
                                 }}>
                                   {dsName} —— {roiValue === 'Across Regions' ? 'Overall' : roiValue}
