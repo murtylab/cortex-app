@@ -170,3 +170,28 @@
     margin-top: 5px;
     text-align: center;
 }
+
+/* ── Ant Design Select: override default blue with theme purple ── */
+.ant-select-focused .ant-select-selector,
+.ant-select-selector:hover {
+    border-color: #c4b4cc !important;
+    box-shadow: none !important;
+}
+.ant-select:not(.ant-select-disabled):hover .ant-select-selector {
+    border-color: #c4b4cc !important;
+}
+.ant-select-focused:not(.ant-select-disabled).ant-select:not(.ant-select-customize-input) .ant-select-selector {
+    border-color: #8966a3 !important;
+    box-shadow: 0 0 0 2px rgba(137, 102, 163, 0.15) !important;
+}
+.ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+    background-color: rgba(137, 102, 163, 0.1) !important;
+    color: #6b4a8c !important;
+    font-weight: 500 !important;
+}
+.ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+    background-color: rgba(137, 102, 163, 0.06) !important;
+}
+.ant-select-dropdown .ant-select-item-option-selected .ant-select-item-option-state {
+    color: #8966a3 !important;
+}
