@@ -569,10 +569,9 @@ const getOverviewColumnCount = (
                   minWidth: 0,
                   borderRadius: 8,
                   background: 'var(--background-color, #f7f7f4)',
-                  padding: 12,
+                  padding: '8px 8px 10px',
                   overflow: 'hidden',
                   display: 'flex',
-                  justifyContent: 'center',
                   alignItems: 'stretch',
                 }}
               >
