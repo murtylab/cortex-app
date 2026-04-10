@@ -580,7 +580,6 @@ const getOverviewColumnCount = (
                     data={qualiChartData}
                     trainSource={qualiTrainKey}
                     region={region}
-                    modelType={modelType}
                     allowedModelValues={allowedModelValues}
                     rank={rank}
                     selectedExperiments={selectedExperiments}
