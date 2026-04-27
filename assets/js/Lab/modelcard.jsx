@@ -23,7 +23,7 @@ const ModelCard = ({ region, dataset, model }) => {
   const { bestLayer, corrScore } = getInfo(dataset, region, model);
 
   return (
-    <Box sx={{ minWidth: 250, boxShadow: 3, borderRadius: 2, marginTop: 2 }}>
+    <Box sx={{ minWidth: 250, boxShadow: 3, borderRadius: 2, marginTop: 2 , marginBottom: 2}}>
       <Card variant="outlined" sx={{ borderRadius: 2, background: 'var(--background-color)'}}>
         <CardContent>
           <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>

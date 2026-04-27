@@ -1,17 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-
 type FileWithPath = File & { webkitRelativePath?: string };
 
 type PreviewFile = {
-  uid: string;       
+  uid: string;
   blobURL: string;
   file: FileWithPath;
-
-  label: string;     
-  groupKey: string;  
-  serverKey?: string; 
-
+  label: string;
+  groupKey: string;
+  serverKey?: string;
 };
 
 type GroupedItem = PreviewFile & { idx: number; id: string };
@@ -23,20 +20,22 @@ type ImagePreviewGroupedDnDProps = {
   groupDepth?: number;
   maxThumbsPerGroup?: number;
   showPathDebug?: boolean;
+  foldable?: boolean;
+  viewOnly?: boolean;
+  isPreload?: boolean;
 
   onRemove?: (uid: string) => void;
   onClear?: () => void;
   onClearGroup?: (groupKey: string, uidsToRemove: string[]) => void;
   onGroupOrderChange?: (order: string[]) => void;
   onRenameGroup?: (groupKey: string, newDisplayName: string) => void;
-
   onMoveItemToGroup?: (uid: string, toGroupKey: string) => void;
   onRenameGroupKey?: (oldKey: string, newKey: string) => void;
 };
 
 export default function ImagePreviewGroupedDnD({
   files = [],
-  title = "Uploaded Images Preview",
+  title = "Uploaded Images",
   onRemove,
   onClear,
   onClearGroup,
@@ -47,6 +46,9 @@ export default function ImagePreviewGroupedDnD({
   groupDepth = 1,
   maxThumbsPerGroup = 100,
   showPathDebug = false,
+  foldable = false,
+  viewOnly = false,
+  isPreload = false,
 }: ImagePreviewGroupedDnDProps) {
   const getGroupKey = (file?: FileWithPath) => {
     const rel = file?.webkitRelativePath ?? "";
@@ -57,8 +59,16 @@ export default function ImagePreviewGroupedDnD({
     return parts[groupDepth] || parts[0] || "Ungrouped";
   };
 
-  const [itemGroupMap, setItemGroupMap] = useState<Record<string, string>>({}); // { [uid]: groupKey }
+  const [itemGroupMap, setItemGroupMap] = useState<Record<string, string>>({});
   const [dragItem, setDragItem] = useState<{ uid: string; fromKey: string } | null>(null);
+
+
+  const [isPanelCollapsed, setIsPanelCollapsed] = useState<boolean>(foldable);
+
+
+  useEffect(() => {
+    setIsPanelCollapsed(foldable);
+  }, [foldable]);
 
   useEffect(() => {
     setItemGroupMap((prev) => {
@@ -67,7 +77,7 @@ export default function ImagePreviewGroupedDnD({
       files.forEach((item) => {
         const uid = item.uid;
         if (!(uid in next)) {
-          next[uid] = getGroupKey(item.file);
+          next[uid] = item.groupKey || getGroupKey(item.file);
         }
       });
 
@@ -83,7 +93,7 @@ export default function ImagePreviewGroupedDnD({
     const map = new Map<string, GroupedItem[]>();
 
     files.forEach((item, idx) => {
-      const key = item.groupKey || "Ungrouped";
+      const key = item.groupKey || itemGroupMap[item.uid] || "Ungrouped";
       if (!map.has(key)) map.set(key, []);
 
       map.get(key)!.push({
@@ -96,7 +106,7 @@ export default function ImagePreviewGroupedDnD({
     const obj: GroupedMap = {};
     for (const [k, v] of map.entries()) obj[k] = v;
     return obj;
-  }, [files, groupDepth, itemGroupMap]);
+  }, [files, itemGroupMap]);
 
   const [groupOrder, setGroupOrder] = useState<string[]>([]);
   const [customGroups, setCustomGroups] = useState<string[]>([]);
@@ -128,6 +138,7 @@ export default function ImagePreviewGroupedDnD({
   }, [allGroupKeys, onGroupOrderChange]);
 
   const [groupNameMap, setGroupNameMap] = useState<Record<string, string>>({});
+
   useEffect(() => {
     const keys = allGroupKeys;
 
@@ -142,6 +153,8 @@ export default function ImagePreviewGroupedDnD({
       return next;
     });
   }, [allGroupKeys]);
+
+
 
   const displayName = (k: string) => groupNameMap[k] ?? k;
 
@@ -223,9 +236,18 @@ export default function ImagePreviewGroupedDnD({
 
     setCustomGroups((prev) => prev.map((g) => (g === k ? name : g)));
     setGroupOrder((prev) => prev.map((g) => (g === k ? name : g)));
+    setGroupNameMap((prev) => {
+      const next = { ...prev };
+      delete next[k];
+      next[name] = name;
+      return next;
+    });
 
+    onRenameGroup?.(k, name);
     onRenameGroupKey?.(k, name);
     setEditingKey(null);
+    setDraftName("");
+    setGroupError("");
   };
 
   const cancelRename = () => {
@@ -233,9 +255,26 @@ export default function ImagePreviewGroupedDnD({
     setDraftName("");
   };
 
+  function btnStyle(disabled = false): React.CSSProperties {
+    return {
+      border: "1px solid rgba(0,0,0,0.15)",
+      background: disabled ? "rgba(0,0,0,0.04)" : "white",
+      color: disabled ? "rgba(0,0,0,0.35)" : "black",
+      borderRadius: 10,
+      padding: "6px 10px",
+      cursor: disabled ? "not-allowed" : "pointer",
+      fontWeight: 700,
+      fontSize: 12,
+      whiteSpace: "nowrap",
+      opacity: disabled ? 0.8 : 1,
+    };
+  }
+
+
+
   if (!files.length) {
     return (
-      <div style={{ border: "1px dashed rgba(0,0,0,0.25)", borderRadius: 12, padding: 16 }}>
+      <div style={{ border: "1px dashed rgba(0,0,0,0.25)", borderRadius: 12, padding: 12 }}>
         <div style={{ fontWeight: 700, color: "black" }}>{title}</div>
         <div style={{ marginTop: 6, color: "rgba(0,0,0,0.55)" }}>No images yet.</div>
       </div>
@@ -243,336 +282,400 @@ export default function ImagePreviewGroupedDnD({
   }
 
   return (
-    <div style={{ border: "1px solid rgba(0,0,0,0.12)", borderRadius: 12, padding: 12, background: "rgba(0,0,0,0.02)" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-        <div style={{ fontWeight: 800, color: "black" }}>
-          {title} <span style={{ fontWeight: 500, color: "rgba(0,0,0,0.55)" }}>({files.length})</span>
+    <div
+      style={{
+        border: "1px solid rgba(0,0,0,0.12)",
+        borderRadius: 10,
+        padding: 10,
+        background: "rgba(0,0,0,0.02)",
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+        <div style={{ fontWeight: 700, color: "black" }}>
+          {title} <span style={{ fontWeight: 450, color: "rgba(0,0,0,0.55)" }}>({files.length})</span>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          {foldable && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsPanelCollapsed((prev) => !prev);
+              }}
+              style={btnStyle()}
+            >
+              {isPanelCollapsed ? "▸ Unfold" : "▾ Fold"}
+            </button>
+          )}
+
           <button
             type="button"
+            disabled={isPreload}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              if (isPreload) return;
               startAddGroup();
             }}
-            style={btnStyle()}
+            style={btnStyle(isPreload)}
           >
             Add Group
           </button>
 
           <button
             type="button"
+            disabled={isPreload}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              if (isPreload) return;
               onClear?.();
               setCustomGroups([]);
             }}
-            style={btnStyle()}
+            style={btnStyle(isPreload)}
           >
             Clear All
           </button>
         </div>
       </div>
 
-      {isAddingGroup && (
+      {foldable && isPanelCollapsed && (
         <div
           style={{
             marginTop: 10,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            flexWrap: "wrap",
+            padding: "10px 12px",
+            borderRadius: 8,
+            background: "rgba(255,255,255,0.7)",
+            border: "1px dashed rgba(0,0,0,0.14)",
+            color: "rgba(0,0,0,0.62)",
+            fontSize: 12,
+            fontWeight: 600,
           }}
         >
-          <input
-            autoFocus
-            value={newGroupName}
-            onChange={(e) => {
-              setNewGroupName(e.target.value);
-              if (groupError) setGroupError("");
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") confirmAddGroup();
-              if (e.key === "Escape") cancelAddGroup();
-            }}
-            placeholder="New group name"
-            style={{
-              width: 260,
-              maxWidth: "100%",
-              borderRadius: 10,
-              border: "1px solid rgba(0,0,0,0.25)",
-              padding: "6px 10px",
-              fontWeight: 600,
-              outline: "none",
-              background: "white",
-            }}
-          />
-
-          <button type="button" onClick={confirmAddGroup} style={btnStyle()}>
-            Confirm
-          </button>
-          <button type="button" onClick={cancelAddGroup} style={btnStyle()}>
-            Cancel
-          </button>
+          Unfold to see and rearrange
         </div>
       )}
 
-      {groupError && (
-        <div style={{ marginTop: 8, color: "#b42318", fontSize: 12, fontWeight: 600 }}>
-          {groupError}
-        </div>
-      )}
-
-      {showPathDebug && (
-        <div style={{ marginTop: 10, padding: 10, borderRadius: 10, background: "white", color: "black", fontSize: 12 }}>
-          <div style={{ fontWeight: 700, marginBottom: 6 }}>DEBUG webkitRelativePath (first 5)</div>
-          {files.slice(0, 5).map((f, i) => (
-            <div key={i} style={{ opacity: 0.85 }}>
-              {f.file?.webkitRelativePath || "(no webkitRelativePath)"}
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div style={{ height: 12 }} />
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: orderedKeys.length <= 1 ? "minmax(0, 1fr)" : "repeat(2, minmax(0, 1fr))",
-          gap: 12,
-          alignItems: "start",
-        }}
-      >
-        {orderedKeys.map((k) => {
-          const items = grouped[k] || [];
-
-          const isOver = overKey === k && dragKey && dragKey !== k;
-
-          return (
+      {!isPanelCollapsed && (
+        <>
+          {isAddingGroup && (
             <div
-              key={`${k}::${displayName(k)}`}
-              onDragOver={(e: React.DragEvent<HTMLDivElement>) => {
-                if (dragItem) e.preventDefault();
-              }}
-              onDrop={(e: React.DragEvent<HTMLDivElement>) => {
-                e.preventDefault();
-                if (!dragItem?.uid) return;
-
-                // setItemGroupMap((prev) => ({ ...prev, [dragItem.uid]: k }));
-                onMoveItemToGroup?.(dragItem.uid, k);
-
-                setDragItem(null);
-                setOverKey(null);
-              }}
               style={{
-                border: isOver ? "2px solid var(--highlight-color-button, #7aa7ff)" : "1px solid rgba(0,0,0,0.10)",
-                borderRadius: 12,
-                padding: 10,
-                background: "var(--background-color)",
+                marginTop: 10,
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                flexWrap: "wrap",
               }}
             >
-                          <div
-                draggable
-                onDragStart={(e) => {
-                  setDragKey(k);
-                  e.dataTransfer.effectAllowed = "move";
+              <input
+                autoFocus
+                disabled={isPreload}
+                value={newGroupName}
+                onChange={(e) => {
+                  setNewGroupName(e.target.value);
+                  if (groupError) setGroupError("");
                 }}
-                onDragEnd={() => {
-                  setDragKey(null);
-                  setOverKey(null);
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") confirmAddGroup();
+                  if (e.key === "Escape") cancelAddGroup();
                 }}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  setOverKey(k);
-                  e.dataTransfer.dropEffect = "move";
-                }}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  move(dragKey, k);
-                  setOverKey(null);
-                }}
+                placeholder="New group name"
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 12,
-                  padding: "6px 8px",
+                  width: 260,
+                  maxWidth: "100%",
                   borderRadius: 10,
-                  cursor: "grab",
-                  userSelect: "none",
-                  background: dragKey === k ? "rgba(0,0,0,0.05)" : "transparent",
-                  color: "black",
+                  border: "1px solid rgba(0,0,0,0.25)",
+                  padding: "6px 10px",
+                  fontWeight: 600,
+                  outline: "none",
+                  background: "white",
                 }}
-                title="Drag this header to reorder groups"
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-                  <span style={{ opacity: 0.7 }}>⋮⋮</span>
+              />
 
-                  {editingKey === k ? (
-                    <input
-                      value={draftName}
-                      autoFocus
-                      onChange={(e) => setDraftName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") commitRename(k);
-                        if (e.key === "Escape") cancelRename();
-                      }}
-                      onBlur={() => commitRename(k)}
-                      style={{
-                        width: 240,
-                        maxWidth: "60vw",
-                        borderRadius: 10,
-                        border: "1px solid rgba(0,0,0,0.25)",
-                        padding: "6px 10px",
-                        fontWeight: 800,
-                        outline: "none",
-                      }}
-                    />
-                  ) : (
-                    <div style={{ fontWeight: 800, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {displayName(k)} <span style={{ fontWeight: 500, opacity: 0.6 }}>{items.length}</span>
-                    </div>
-                  )}
+              <button type="button" onClick={confirmAddGroup} disabled={isPreload} style={btnStyle(isPreload)}>
+                Confirm
+              </button>
+              <button type="button" onClick={cancelAddGroup} disabled={isPreload} style={btnStyle(isPreload)}>
+                Cancel
+              </button>
+            </div>
+          )}
+
+          {groupError && (
+            <div style={{ marginTop: 8, color: "#b42318", fontSize: 12, fontWeight: 600 }}>
+              {groupError}
+            </div>
+          )}
+
+          {showPathDebug && (
+            <div
+              style={{
+                marginTop: 10,
+                padding: 10,
+                borderRadius: 10,
+                background: "white",
+                color: "black",
+                fontSize: 12,
+              }}
+            >
+              <div style={{ fontWeight: 700, marginBottom: 6 }}>DEBUG webkitRelativePath (first 5)</div>
+              {files.slice(0, 5).map((f, i) => (
+                <div key={i} style={{ opacity: 0.85 }}>
+                  {f.file?.webkitRelativePath || "(no webkitRelativePath)"}
                 </div>
+              ))}
+            </div>
+          )}
 
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  {editingKey !== k && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        startRename(k);
-                      }}
-                      style={btnStyle()}
-                      title="Rename group"
-                    >
-                      ✏️ Rename
-                    </button>
-                  )}
+          <div style={{ height: 12 }} />
 
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: orderedKeys.length <= 1 ? "minmax(0, 1fr)" : "repeat(2, minmax(0, 1fr))",
+              gap: 12,
+              alignItems: "start",
+            }}
+          >
+            {orderedKeys.map((k) => {
+              const items = grouped[k] || [];
+              const isOver = overKey === k && dragKey && dragKey !== k;
+    
 
-                 
-                      const uidsToRemove = items.map((it) => it.id); // it.id 就是 item.uid
-                    onClearGroup?.(k, uidsToRemove);
-                    setCustomGroups((prev) => prev.filter((g) => g !== k));
-                    }}
-                    style={btnStyle()}
-                  >
-                    Clear Group
-                  </button>
-                </div>
-              </div>
+              return (
+                <div
+                  key={`${k}::${displayName(k)}`}
+                  onDragOver={(e: React.DragEvent<HTMLDivElement>) => {
+                    if(isPreload) return;
+                    if (dragItem) e.preventDefault();
+                  }}
+                  onDrop={(e: React.DragEvent<HTMLDivElement>) => {
+                    if(isPreload) return;
+                    e.preventDefault();
+                    if (!dragItem?.uid) return;
 
-              <div style={{ height: 10 }} />
+                    onMoveItemToGroup?.(dragItem.uid, k);
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(80px, 1fr))",
-                  gap: 10,
-                }}
-              >
-                {items.slice(0, maxThumbsPerGroup).map((it) => (
-                 <div
-                    key={`${k}::${it.id}::${it.idx}`}
-                    draggable
+                    setDragItem(null);
+                    setOverKey(null);
+                  }}
+                  style={{
+                    border: isOver ? "2px solid var(--highlight-color-button, #7aa7ff)" : "1px solid rgba(0,0,0,0.10)",
+                    borderRadius: 10,
+                    padding: 8,
+                    background: "var(--background-color)",
+                  }}
+                >
+                  <div
+                    draggable = {!isPreload}
                     onDragStart={(e) => {
-                        setDragItem({ uid: it.id, fromKey: k });
-                        e.dataTransfer.effectAllowed = "move";
+                      if(isPreload) return;
+                      setDragKey(k);
+                      e.dataTransfer.effectAllowed = "move";
                     }}
                     onDragEnd={() => {
-                        setDragItem(null);
+                      if(isPreload) return;
+                      setDragKey(null);
+                      setOverKey(null);
+                    }}
+                    onDragOver={(e) => {
+                      if(isPreload) return;
+                      e.preventDefault();
+                      setOverKey(k);
+                      e.dataTransfer.dropEffect = "move";
+                    }}
+                    onDrop={(e) => {
+                      if(isPreload) return;
+                      e.preventDefault();
+                      move(dragKey, k);
+                      setOverKey(null);
                     }}
                     style={{
-                        border: "1px solid rgba(0,0,0,0.12)",
-                        borderRadius: 12,
-                        overflow: "hidden",
-                        background: "rgba(0,0,0,0.02)",
-                        cursor: "grab",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 10,
+                      padding: "4px 6px",
+                      borderRadius: 8,
+                      cursor: "grab",
+                      userSelect: "none",
+                      background: dragKey === k ? "rgba(0,0,0,0.05)" : "transparent",
+                      color: "black",
                     }}
-                    >
-                    <div style={{ aspectRatio: "1 / 1", position: "relative" }}>
-                      <img
-                        src={it.blobURL}
-                        alt={it.file?.name || "image"}
-                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                      />
+                    title="Drag this header to reorder groups"
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+                      <span style={{ opacity: 0.7 }}>⋮⋮</span>
+
+                      {editingKey === k ? (
+                        <input
+                          value={draftName}
+                          autoFocus
+                          disabled={isPreload}
+                          onChange={(e) => setDraftName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") commitRename(k);
+                            if (e.key === "Escape") cancelRename();
+                          }}
+                          onBlur={() => commitRename(k)}
+                          style={{
+                            width: 240,
+                            maxWidth: "60vw",
+                            borderRadius: 10,
+                            border: "1px solid rgba(0,0,0,0.25)",
+                            padding: "6px 10px",
+                            fontWeight: 800,
+                            outline: "none",
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            fontWeight: 800,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {displayName(k)} <span style={{ fontWeight: 500, opacity: 0.6 }}>{items.length}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                      {editingKey !== k && (
+                        <button
+                          type="button"
+                          disabled={isPreload}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if(isPreload) return;
+                            startRename(k);
+                          }}
+                          style={btnStyle(isPreload)}
+                          title="Rename group"
+                        >
+                          ✏️ Rename
+                        </button>
+                      )}
+
                       <button
                         type="button"
+                        disabled={isPreload}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          onRemove?.(it.id);
+                          if(isPreload) return;
+
+                          const uidsToRemove = items.map((it) => it.id);
+                          onClearGroup?.(k, uidsToRemove);
+                          setCustomGroups((prev) => prev.filter((g) => g !== k));
                         }}
-                        style={{
-                          position: "absolute",
-                          top: 8,
-                          right: 8,
-                          border: "none",
-                          borderRadius: 10,
-                          padding: "6px 8px",
-                          background: "rgba(0,0,0,0.55)",
-                          color: "white",
-                          cursor: "pointer",
-                          fontSize: 12,
-                        }}
-                        title="Remove"
+                        style={btnStyle(isPreload)}
                       >
-                        ✕
+                        Clear Group
                       </button>
                     </div>
+                  </div>
 
-                    {/* <div style={{ padding: "6px 8px" }}>
+                  { (
+                    <>
+                      <div style={{ height: 8 }} />
+
                       <div
                         style={{
-                          fontSize: 12,
-                          color: "rgba(0,0,0,0.75)",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
+                          display: "grid",
+                          gridTemplateColumns: "repeat(auto-fill, minmax(68px, 1fr))",
+                          gap: 8,
                         }}
-                        title={it.file?.webkitRelativePath || it.file?.name}
                       >
-                        {it.file?.name}
+                        {items.slice(0, maxThumbsPerGroup).map((it) => (
+                          <div
+                            key={`${k}::${it.id}::${it.idx}`}
+                            draggable = {!isPreload}
+                            onDragStart={(e) => {
+                              if(isPreload) return; 
+                              setDragItem({ uid: it.id, fromKey: k });
+                              e.dataTransfer.effectAllowed = "move";
+                            }}
+                            onDragEnd={() => {
+                              setDragItem(null);
+                            }}
+                            style={{
+                              border: "1px solid rgba(0,0,0,0.10)",
+                              borderRadius: 10,
+                              overflow: "hidden",
+                              background: "rgba(0,0,0,0.02)",
+                              cursor: "grab",
+                            }}
+                          >
+                            <div style={{ aspectRatio: "1 / 1", position: "relative" }}>
+                              <img
+                                src={it.blobURL}
+                                alt={it.file?.name || "image"}
+                                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                              />
+                                {(!viewOnly && !isPreload)  && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    onRemove?.(it.id);
+                                  }}
+                                  style={{
+                                    position: "absolute",
+                                    top: 8,
+                                    right: 8,
+                                    border: "none",
+                                    borderRadius: 10,
+                                    padding: "6px 8px",
+                                    background: "rgba(0,0,0,0.55)",
+                                    color: "white",
+                                    cursor: "pointer",
+                                    fontSize: 12,
+                                  }}
+                                  title="Remove"
+                                >
+                                  ✕
+                                </button>
+                                )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div> */}
-                  </div>
-                ))}
-              </div>
 
-              {!items.length && (
-                <div
-                  style={{
-                    border: "1px dashed rgba(0,0,0,0.18)",
-                    borderRadius: 10,
-                    padding: 12,
-                    color: "rgba(0,0,0,0.55)",
-                    fontSize: 12,
-                  }}
-                >
-                  Empty group. Drag images here.
-                </div>
-              )}
+                      {!items.length && (
+                        <div
+                          style={{
+                            border: "1px dashed rgba(0,0,0,0.16)",
+                            borderRadius: 8,
+                            padding: 8,
+                            color: "rgba(0,0,0,0.55)",
+                            fontSize: 11,
+                          }}
+                        >
+                            {isPreload ? "Empty group." : "Empty group. Drag images here."}
+                        </div>
+                      )}
 
-              {items.length > maxThumbsPerGroup && (
-                <div style={{ marginTop: 8, color: "rgba(0,0,0,0.55)", fontSize: 12 }}>
-                  Showing first {maxThumbsPerGroup} thumbnails…
+                      {items.length > maxThumbsPerGroup && (
+                        <div style={{ marginTop: 6, color: "rgba(0,0,0,0.55)", fontSize: 11 }}>
+                          Showing first {maxThumbsPerGroup} thumbnails…
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -582,17 +685,14 @@ function btnStyle(): React.CSSProperties {
     border: "1px solid rgba(0,0,0,0.15)",
     background: "white",
     color: "black",
-    borderRadius: 10,
-    padding: "6px 10px",
+    borderRadius: 8,
+    padding: "6px 8px",
     cursor: "pointer",
     fontWeight: 700,
     fontSize: 12,
     whiteSpace: "nowrap",
   };
 }
-
-
-
 
 
 
