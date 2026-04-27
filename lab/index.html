@@ -15,8 +15,7 @@
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
 
   <!-- Vendor CSS Files -->
   <link href="/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -69,12 +68,42 @@
         visibility: visible;
       }
     }
+
+    /* Override MUI default Roboto with Inter */
+    .MuiTypography-root,
+    .MuiButtonBase-root,
+    .MuiButton-root,
+    .MuiFormControlLabel-label,
+    .MuiInputBase-root,
+    .MuiInputLabel-root,
+    .MuiMenuItem-root,
+    .MuiSelect-root,
+    .MuiFormLabel-root,
+    .MuiAccordionSummary-content {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+    }
+
+    /* Override Ant Design default font with Inter */
+    .ant-typography,
+    .ant-btn,
+    .ant-steps-item-title,
+    .ant-steps-item-description,
+    .ant-upload-text,
+    .ant-upload-hint,
+    .ant-progress-text {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+    }
+
+    /* Fallback: all antd elements inside #container */
+    #container button,
+    #container [class*="ant-"] {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+    }
   </style>
 
 </head>
 
 <body class="lab-page">
-  <script type="module" src="/assets/js/analytics.js"></script>
 
   <header id="header" class="header d-flex align-items-center sticky-top">
     <div class="container-fluid container-xl position-relative d-flex align-items-center">
@@ -87,9 +116,9 @@
       <nav id="navmenu" class="navmenu">
         <ul>
           <li><a href="/">Home<br></a></li>
-          <li><a href="/labLanding/">The Lab</a></li>
+          <li><a href="/labLanding/" class="active">The Lab</a></li>
           <li class="dropdown">
-            <a href="/scoreboardLanding/" class="active">
+            <a href="/scoreboardLanding/" >
               <span>The Scoreboard</span>
               <i class="bi bi-chevron-down toggle-dropdown"></i>
             </a>
@@ -152,7 +181,11 @@
   <!-- Main JS File -->
   <script src="/assets/js/main.js"></script>
 
+  <link rel="stylesheet" href="/assets/js/chatbot/chatbot-widget.css">
+  <script src="/assets/js/chatbot/chatbot-widget.js"></script>
+
   <script type="module" src="/assets/js/index.tsx"></script>
+
 </body>
 
 </html>
