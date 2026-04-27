@@ -4,7 +4,8 @@ import { Button, message, Steps, theme } from 'antd';
 import { SmileOutlined } from '@ant-design/icons';
 import { uploadImages } from './services/imageUploader.js';
 import { SERVER_URL } from './services/config';
-import { ConfigProvider } from 'antd'; 
+import { ConfigProvider } from 'antd';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 //main component
 import LinearIndeterminate from './Lab/linearprogessor.jsx';
@@ -13,10 +14,21 @@ import RegionSelector from './Lab/regionselector.jsx';
 import Settings from './Lab/settings.jsx';
 import ModelCard from './Lab/modelcard.jsx';
 
+// image preview and grouping
+import ImagePreviewGroupedDnD from './Lab/imagePreviewGrid.tsx';
+import PreloadDatasetPicker from './Lab/preloadDatasetPicker.jsx';
+
+
+
 // visualization graphics
 import BarChart from './Lab/barchart.jsx';
 import Heatmap from './Lab/heatmap.jsx';
-import ImagePreviewGroupedDnD from './Lab/imagePreviewGrid.tsx';
+
+import BoxPlot from './Lab/boxplot.jsx';
+
+import DatasetCardLab from './Lab/datasetcard-lab.jsx';
+
+
 
 type PreviewFile = {
   uid: string;       
@@ -26,7 +38,6 @@ type PreviewFile = {
   groupKey: string;  
   serverKey?: string; 
 };
-
 
 
 type FileWithPath = File & { webkitRelativePath?: string };
@@ -70,14 +81,6 @@ const safe = (s: string) =>
 
 const { Step } = Steps;
 const SERVER_BASE_URL = SERVER_URL;
-const LAB_TASK_ID = "lab_prediction";
-
-const analytics = (window as Window & {
-  CortexAnalytics?: {
-    trackEvent: (eventName: string, params?: Record<string, string | number | boolean | undefined>) => void;
-    trackUiClick: (component: string, ctaName: string, params?: Record<string, string | number | boolean | undefined>) => void;
-  };
-}).CortexAnalytics;
 
 const useBarchartData = (predictionResult: any) => {
   console.log("📊 Prediction Result for Bar Chart:", predictionResult);
@@ -146,11 +149,37 @@ const useHeatmapData = (predictionResult: any) => {
   }, [predictionResult]);
 };
 
+
+const PRELOADED_IMAGE_MODULES = import.meta.glob(
+  "/assets/preload/**/*.{png,jpg,jpeg,webp}",
+  {
+    eager: true,
+    import: "default",
+  }
+) as Record<string, string>;
+
+const PRELOADED_JSON_MODULES = import.meta.glob(
+  "/assets/preload/**/*.json",
+  {
+    eager: true,
+    import: "default",
+  }
+) as Record<string, any>;
+
+const muiLabTheme = createTheme({
+  typography: {
+    fontFamily: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif",
+  },
+});
+
 const Stepper: React.FC = () => {
   const { token } = theme.useToken();
   const [current, setCurrent] = useState(0);
   const [predictstep, setPredictstep] = useState(1);
 
+
+
+  //default settings
   const DEFAULT_REGION = "ffa";
   const DEFAULT_MODEL = "clip_rn50";
   const DEFAULT_DATASET = "nsd_1000";
@@ -171,67 +200,196 @@ const Stepper: React.FC = () => {
   const [fileMappings, setFileMappings] = useState<PreviewFile[]>([]);
 
   const [predictionResult, setPredictionResult] = useState<any>(null);
+  const [predictionFFAResult, setPredictionFFAResult] = useState<any>(null);
+  const [predictionEBAResult, setPredictionEBAResult] = useState<any>(null);
+  const [predictionPPAResult, setPredictionPPAResult] = useState<any>(null);
 
+
+  // basic visulization and prediction states
   const [loading, setLoading] = useState(false);
-  const [predictionLoading, setPredictionLoading] = useState(false); // new state
+  const [predictionLoading, setPredictionLoading] = useState(false); 
+
+  // insight visulalization states
+  const [showInsights, setShowInsights] = useState(false);
+  const [insightLoading, setInsightLoading] = useState(false);
+
+  //visualization
+  const [vizOrder, setVizOrder] = useState("group");
+
+  // prestore dataset
+  const[prestoreDataset, setPrestoreDataset] = useState<string | null>(null);
+  const isPreloadMode = !!prestoreDataset;
+  const inputMode = isPreloadMode ? "preload" : "upload";
 
   const next = () => setCurrent((prev) => prev + 1);
   const prev = () => setCurrent((prev) => prev - 1);
 
-  const getStudyParams = () => ({
-    task_id: LAB_TASK_ID,
-    model,
-    dataset,
-    region,
-    voxel_option: voxelOption,
-    participant_id:
-      voxelOption === "specify-a-participant" && participantName.trim().length > 0
-        ? participantName.trim()
-        : undefined,
-  });
-
   const onChange = (value: number) => {
     console.log("Step changed:", value);
-    analytics?.trackUiClick("lab_stepper", "step_indicator", {
-      step_index: value,
-    });
-    analytics?.trackEvent("study_task_step", {
-      ...getStudyParams(),
-      step_id: value === 0 ? "upload_stimuli" : value === 1 ? "training_settings" : "prediction_results",
-    });
     setCurrent(value);
   };
 
-type FileWithPath = File & { webkitRelativePath?: string };
+
+const clearRegionPredictionCache = () => {
+  setPredictionFFAResult(null);
+  setPredictionEBAResult(null);
+  setPredictionPPAResult(null);
+};
+
+const getPreloadedPredictionByRegion = (
+  datasetKey: string,
+  targetRegion: string
+) => {
+  const path = `/assets/preload/${datasetKey}/data/${model}_${dataset}_${targetRegion}.json`;
+
+  const allKeys = Object.keys(PRELOADED_JSON_MODULES);
+
+  const matchedKey = allKeys.find(
+    (k) =>
+      normalizePath(k).replace(/\s+/g, "") ===
+      normalizePath(path).replace(/\s+/g, "")
+  );
+
+  if (!matchedKey) return null;
+
+  return PRELOADED_JSON_MODULES[matchedKey];
+};
+
+
+const loadPrestoredDataset = async (datasetKey: string) => {
+  const matchedEntries = Object.entries(PRELOADED_IMAGE_MODULES)
+    .filter(([fullPath]) => {
+      const normalized = normalizePath(fullPath).replace(/\s+/g, "");
+      const match = normalized.match(/\/preload\/([^/]+)\/images\/(.+)$/i);
+      if (!match) return false;
+
+      const datasetFromPath = match[1].toLowerCase();
+      return datasetFromPath === datasetKey.toLowerCase();
+    })
+    .sort(([a], [b]) =>
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
+    );
+
+  if (matchedEntries.length === 0) {
+    message.warning(`No images found for ${datasetKey}`);
+    setPrestoreDataset(datasetKey);
+    setFiles([]);
+    setFileMappings([]);
+    return;
+  }
+
+  try {
+    const preloadFiles: PreviewFile[] = await Promise.all(
+      matchedEntries.map(async ([fullPath, url], index) => {
+        const normalized = normalizePath(fullPath).replace(/\s+/g, "");
+        const match = normalized.match(/\/images\/(.+)$/i);
+        const relativePath = match?.[1] || "";
+        const parts = relativePath.split("/").filter(Boolean);
+
+        const filename = parts[parts.length - 1] || `image_${index}.jpg`;
+        const groupKey = parts.length > 1 ? parts[0] : "Ungrouped";
+
+        // 关键：和 preload json 的 key 保持完全一致
+        const canonicalKey = `${datasetKey}__${groupKey}__${filename}`;
+
+        const ext = getExt(filename).toLowerCase();
+        const mime =
+          ext === ".png"
+            ? "image/png"
+            : ext === ".webp"
+            ? "image/webp"
+            : "image/jpeg";
+
+        const blob = await fetch(url).then((r) => {
+          if (!r.ok) throw new Error(`Failed to fetch image: ${url}`);
+          return r.blob();
+        });
+
+        const realFile = new File([blob], filename, {
+          type: blob.type || mime,
+        }) as FileWithPath;
+
+        Object.defineProperty(realFile, "webkitRelativePath", {
+          value: relativePath,
+          writable: false,
+          configurable: true,
+        });
+
+        return {
+          uid: canonicalKey,
+          blobURL: url,
+          file: realFile,
+          label: filename,
+          groupKey,
+          serverKey: canonicalKey,
+        };
+      })
+    );
+
+    setPrestoreDataset(datasetKey);
+    setFiles(preloadFiles);
+    setFileMappings(preloadFiles);
+
+    setPredictionResult(null);
+    clearRegionPredictionCache();
+    setShowInsights(false);
+    setPredictstep(1);
+
+    const ffaJson = getPreloadedPredictionByRegion(datasetKey, "ffa");
+    const ebaJson = getPreloadedPredictionByRegion(datasetKey, "eba");
+    const ppaJson = getPreloadedPredictionByRegion(datasetKey, "ppa");
+
+    if (ffaJson) setPredictionFFAResult(ffaJson);
+    if (ebaJson) setPredictionEBAResult(ebaJson);
+    if (ppaJson) setPredictionPPAResult(ppaJson);
+
+    const selectedJson = getPreloadedPredictionByRegion(datasetKey, region);
+    if (selectedJson) {
+      setPredictionResult(selectedJson);
+      setPredictstep(2);
+    }
+
+    message.success(`${datasetKey} loaded`);
+  } catch (err) {
+    console.error(err);
+    message.error(`Failed to load dataset ${datasetKey}`);
+  }
+};
 
  
 const addIncomingFiles = (newFiles: File[]) => {
   if (!newFiles?.length) return;
 
+  const nextAdd: PreviewFile[] = newFiles
+    .filter((f) => f.type?.startsWith("image/"))
+    .map((f) => {
+      const ff = f as FileWithPath;
+      const uid = buildOrgName(ff);
+      const label = ff.webkitRelativePath?.split("/").pop() || ff.name;
+      const groupKey = buildGroupKey(ff, 1);
+
+      return {
+        uid,
+        label,
+        groupKey,
+        file: ff,
+        blobURL: URL.createObjectURL(ff),
+      };
+    });
+
   setFiles((prev) => {
-    const existing = new Set(prev.map((x) => x.uid));
+    const base = prestoreDataset ? [] : prev;
+    const existing = new Set(base.map((x) => x.uid));
+    const deduped = nextAdd.filter((x) => !existing.has(x.uid));
+    const next = [...base, ...deduped];
 
-    const nextAdd: PreviewFile[] = newFiles
-      .filter((f) => f.type?.startsWith("image/"))
-      .map((f) => {
-        const ff = f as FileWithPath;
-        const uid = buildOrgName(ff); 
-        const label = ff.webkitRelativePath || ff.name;
-        const groupKey = buildGroupKey(ff, 1);
-        return {
-          uid,
-          label,
-          groupKey,
-          file: ff,
-          blobURL: URL.createObjectURL(ff),
-        };
-      })
-      .filter((x) => !existing.has(x.uid));
-
-    const next = [...prev, ...nextAdd];
     setFileMappings(next);
     setPredictionResult(null);
+    clearRegionPredictionCache();
+    setShowInsights(false);
     setPredictstep(1);
+    setPrestoreDataset(null);
+
     return next;
   });
 };
@@ -248,7 +406,10 @@ const removeOne = (uid: string) => {
 
     setFileMappings(next);
     setPredictionResult(null);
+    clearRegionPredictionCache();
     setPredictstep(1);
+    setShowInsights(false);
+    setPrestoreDataset(null);
 
     if (next.length === 0) {
       setUploaderKey((k) => k + 1); 
@@ -272,8 +433,9 @@ const clearGroup = (uidsToRemove: string[]) => {
 
     setFileMappings(next);
     setPredictionResult(null);
+    clearRegionPredictionCache();
     setPredictstep(1);
-
+    setShowInsights(false);
     if (next.length === 0) {
       setUploaderKey((k) => k + 1); 
     }
@@ -293,33 +455,69 @@ const clearAll = () => {
 
   setFileMappings([]);
   setPredictionResult(null);
+  clearRegionPredictionCache();
+  setShowInsights(false);
   setPredictstep(1);
   setUploaderKey((k) => k + 1); 
+  setPrestoreDataset(null);
 };
 
 const moveItemToGroup = (uid: string, toGroupKey: string) => {
   setFiles(prev => prev.map(f => (f.uid === uid ? { ...f, groupKey: toGroupKey } : f)));
   setFileMappings(prev => prev.map(f => (f.uid === uid ? { ...f, groupKey: toGroupKey } : f)));
+  
 };
 
 const renameGroupKey = (oldKey: string, newKey: string) => {
   setFiles(prev => prev.map(f => (f.groupKey === oldKey ? { ...f, groupKey: newKey } : f)));
   setFileMappings(prev => prev.map(f => (f.groupKey === oldKey ? { ...f, groupKey: newKey } : f)));
-};
+}
+
+
+useEffect(() => {
+  setPredictionResult(null);
+  setPredictstep(1);
+  clearRegionPredictionCache();
+  setShowInsights(false);
+
+  if (!prestoreDataset) return;
+
+  const ffaJson = getPreloadedPredictionByRegion(prestoreDataset, "ffa");
+  const ebaJson = getPreloadedPredictionByRegion(prestoreDataset, "eba");
+  const ppaJson = getPreloadedPredictionByRegion(prestoreDataset, "ppa");
+
+  if (ffaJson) setPredictionFFAResult(ffaJson);
+  if (ebaJson) setPredictionEBAResult(ebaJson);
+  if (ppaJson) setPredictionPPAResult(ppaJson);
+
+  const selectedJson = getPreloadedPredictionByRegion(prestoreDataset, region);
+  if (selectedJson) {
+    // setPredictionResult(selectedJson);
+    setPredictstep(2);
+  }
+}, [
+  model,
+  dataset,
+  voxelOption,
+  voxelNumber,
+  paper,
+  participantName,
+  prestoreDataset,
+  region,
+]);
 
   useEffect(() => {
-    setPredictionResult(null); // Clear previous results
-    setPredictstep(1); // Reset button
-  }, [model, dataset, region, voxelOption, voxelNumber, paper, participantName]);
+    if (current !== 2) return;
 
-  useEffect(() => {
-    // Only auto-trigger prediction if we're on Step 3 (index 2)
-    if (current === 2) {
-      setPredictionResult(null);
-      setPredictstep(1);
-      handlePrediction();
-    }
-  }, [region]); // Only watch region
+    const cached = getCachedResultByRegion(region);
+    console.log("region switched to:", region);
+    console.log("cached result found:", cached);
+    if (cached) return;
+
+    setPredictionResult(null);
+    setPredictstep(1);
+    handlePrediction();
+  }, [region, current, predictionFFAResult, predictionEBAResult, predictionPPAResult]);
 
   useEffect(() => {
     console.log("🔄 predictionResult updated:", predictionResult);
@@ -330,83 +528,144 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
     }
   }, [predictionResult]);
 
-  // ✅ Ensure only the actual file is sent to Gradio
-  const handlePrediction = async () => {
+  useEffect(() => {
+    console.log("😊FFA cache updated:", predictionFFAResult);
+  }, [predictionFFAResult]);
+
+  useEffect(() => {
+    console.log("😊EBA cache updated:", predictionEBAResult);
+  }, [predictionEBAResult]);
+
+  useEffect(() => {
+    console.log("😊PPA cache updated:", predictionPPAResult);
+  }, [predictionPPAResult]);
+
+  const getCachedResultByRegion = (targetRegion: string) => {
+    if (targetRegion === "ffa") return predictionFFAResult;
+    if (targetRegion === "eba") return predictionEBAResult;
+    if (targetRegion === "ppa") return predictionPPAResult;
+    return null;
+  };
+
+  const currentRegionPredictionResult = useMemo(() => {
+    return getCachedResultByRegion(region) ?? predictionResult;
+  }, [region, predictionFFAResult, predictionEBAResult, predictionPPAResult, predictionResult]);
+
+  useEffect(() => {
+    const ffaCached = !!predictionFFAResult;
+    const ebaCached = !!predictionEBAResult;
+    const ppaCached = !!predictionPPAResult;
+
+    const selectedCache = getCachedResultByRegion(region);
+    const usingCache = selectedCache === currentRegionPredictionResult && !!selectedCache;
+    const usingLatestPrediction =
+      predictionResult === currentRegionPredictionResult && !usingCache;
+
+    let source = "none";
+    if (usingCache) source = `${region} cache`;
+    else if (usingLatestPrediction) source = "predictionResult fallback";
+
+    console.log("========== REGION DEBUG ==========");
+    console.log("current region:", region);
+    console.log("FFA cache exists:", ffaCached, predictionFFAResult);
+    console.log("EBA cache exists:", ebaCached, predictionEBAResult);
+    console.log("PPA cache exists:", ppaCached, predictionPPAResult);
+    console.log("selected cache for current region:", selectedCache);
+    console.log("predictionResult:", predictionResult);
+    console.log("currentRegionPredictionResult:", currentRegionPredictionResult);
+    console.log("currentRegionPredictionResult source:", source);
+    console.log("==================================");
+  }, [
+    region,
+    predictionResult,
+    predictionFFAResult,
+    predictionEBAResult,
+    predictionPPAResult,
+    currentRegionPredictionResult,
+  ]);
+
+
+  const handleGetInsights = async () => {
+    const missingRegions = ["ffa", "eba", "ppa"].filter(
+      (r) => !getCachedResultByRegion(r)
+    );
+
+    if (missingRegions.length === 0) {
+      setShowInsights(true);
+      return;
+    }
+
+    setInsightLoading(true);
+    try {
+      await Promise.all(missingRegions.map((r) => insightPrediction(r)));
+      setShowInsights(true);
+    } catch (e) {
+      console.error(e);
+      message.error("Failed to load advanced insights.");
+    } finally {
+      setInsightLoading(false);
+    }
+  };
+  const insightRegionDataMap = useMemo(() => {
+    return {
+      ffa: predictionFFAResult,
+      eba: predictionEBAResult,
+      ppa: predictionPPAResult,
+    };
+  }, [predictionFFAResult, predictionEBAResult, predictionPPAResult]);
+
+  const handlePrediction = async (targetRegion = region) => {
     console.log("📦 handlePrediction received files:");
     console.log(files);
+    console.log("🎯 request target region:", targetRegion);
+
     if (files.length === 0) {
       message.error("No files uploaded. Please upload files first.");
       return;
     }
 
-    const startedAt = Date.now();
     setPredictionLoading(true);
-    analytics?.trackEvent("study_task_start", {
-      ...getStudyParams(),
-      file_count: files.length,
-    });
 
     try {
-      
       const uploadFiles = files.map((x) => {
         const ext = getExt(x.file.name);
-        const newName = `${safe(x.uid)}${ext}`;          
+        const newName = `${safe(x.uid)}${ext}`;
         return new File([x.file], newName, { type: x.file.type });
       });
 
       const serverKeys = uploadFiles.map((f) => f.name);
 
-    
       setFiles((prev) => prev.map((x, i) => ({ ...x, serverKey: serverKeys[i] })));
       setFileMappings((prev) => prev.map((x, i) => ({ ...x, serverKey: serverKeys[i] })));
 
-
       const paths: string[] = await uploadImages(uploadFiles);
 
-    
       const items = paths.map((path, i) => ({
         path,
         org_name: serverKeys[i],
       }));
 
       const result = await axios.post(`${SERVER_BASE_URL}/api/predict`, {
-        data: [items, region, dataset, model, true, true, true],
+        data: [items, targetRegion, dataset, model, true, true, true],
       });
 
-      setPredictionResult(result.data.data);
-      analytics?.trackEvent("form_submit", {
-        ...getStudyParams(),
-        form_id: "lab_prediction_settings",
-        success: true,
-        file_count: files.length,
-      });
-      analytics?.trackEvent("study_task_complete", {
-        ...getStudyParams(),
-        success: true,
-        file_count: files.length,
-        ms_total: Date.now() - startedAt,
-      });
+      const resultData = result.data.data;
+
+ 
+      setPredictionResult(resultData);
+
+      if (targetRegion === "ffa") {
+        setPredictionFFAResult(resultData);
+      } else if (targetRegion === "eba") {
+        setPredictionEBAResult(resultData);
+      } else if (targetRegion === "ppa") {
+        setPredictionPPAResult(resultData);
+      }
+
+      console.log("✅ saved result into cache for:", targetRegion);
       message.success("Prediction complete!");
     } catch (e) {
       console.error(e);
-      const statusCode = axios.isAxiosError(e) ? e.response?.status : undefined;
-      analytics?.trackEvent("form_submit", {
-        ...getStudyParams(),
-        form_id: "lab_prediction_settings",
-        success: false,
-        file_count: files.length,
-      });
-      analytics?.trackEvent("api_error", {
-        ...getStudyParams(),
-        endpoint_name: "predict",
-        status_code: statusCode,
-      });
-      analytics?.trackEvent("study_task_complete", {
-        ...getStudyParams(),
-        success: false,
-        file_count: files.length,
-        ms_total: Date.now() - startedAt,
-      });
       message.error("Prediction failed. Check server connection.");
     } finally {
       setPredictionLoading(false);
@@ -415,9 +674,102 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
     }
   };
 
-  const barchartData = useBarchartData(predictionResult);
+  const insightPrediction = async (targetRegion: string) => {
+  const cached = getCachedResultByRegion(targetRegion);
+  if (cached) return cached;
 
-  const { heatmapData, originalFilenames, sortedFilenames } = useHeatmapData(predictionResult);
+  setInsightLoading(true);
+  try {
+    const uploadFiles = files.map((x) => {
+      const ext = getExt(x.file.name);
+      const newName = `${safe(x.uid)}${ext}`;
+      return new File([x.file], newName, { type: x.file.type });
+    });
+
+    const serverKeys = uploadFiles.map((f) => f.name);
+
+    const paths: string[] = await uploadImages(uploadFiles);
+
+    const items = paths.map((path, i) => ({
+      path,
+      org_name: serverKeys[i],
+    }));
+
+    const result = await axios.post(`${SERVER_BASE_URL}/api/predict`, {
+      data: [items, targetRegion, dataset, model, true, true, true],
+    });
+
+    const resultData = result.data.data;
+
+    if (targetRegion === "ffa") {
+      setPredictionFFAResult(resultData);
+    } else if (targetRegion === "eba") {
+      setPredictionEBAResult(resultData);
+    } else if (targetRegion === "ppa") {
+      setPredictionPPAResult(resultData);
+    }
+
+    return resultData;
+  } finally {
+    setInsightLoading(false);
+  }
+};
+
+  const barchartData = useBarchartData(currentRegionPredictionResult);
+
+  const { heatmapData, originalFilenames } = useHeatmapData(currentRegionPredictionResult);
+
+  const orderedFilenames = useMemo(() => {
+  if (!barchartData || barchartData.length === 0) return [];
+
+  const fileMap = new Map();
+  (fileMappings || []).forEach((f) => {
+    if (f.serverKey) fileMap.set(f.serverKey, f);
+    if (f.uid) fileMap.set(f.uid, f);
+    if (f.file?.name) fileMap.set(f.file.name, f);
+  });
+
+  const getGroupForFilename = (filename: string) => {
+    const m = fileMap.get(filename);
+    return m?.groupKey || "Ungrouped";
+  };
+
+  const getDisplayLabel = (filename: string) => {
+    const m = fileMap.get(filename);
+    return m?.label || filename;
+  };
+
+  if (vizOrder === "ranking") {
+    return [...barchartData]
+      .sort((a, b) => b.mean - a.mean)
+      .map((d) => d.filename);
+  }
+
+  if (vizOrder === "group") {
+    return [...barchartData]
+      .sort((a, b) => {
+        const groupA = getGroupForFilename(a.filename);
+        const groupB = getGroupForFilename(b.filename);
+
+        if (groupA === groupB) {
+          const labelA = getDisplayLabel(a.filename);
+          const labelB = getDisplayLabel(b.filename);
+          return labelA.localeCompare(labelB, undefined, {
+            numeric: true,
+            sensitivity: "base",
+          });
+        }
+
+        return groupA.localeCompare(groupB, undefined, {
+          numeric: true,
+          sensitivity: "base",
+        });
+      })
+      .map((d) => d.filename);
+  }
+
+  return barchartData.map((d) => d.filename);
+}, [barchartData, fileMappings, vizOrder]);
 
   console.log("Extract Heatmap Data from predictionResult:", heatmapData);
 
@@ -433,8 +785,8 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
 
   //support csv download
   const downloadData = () => {
-    if (predictionResult) {
-     const voxelsData = predictionResult?.[0]?.voxels as VoxelsData | undefined;
+    if (currentRegionPredictionResult) {
+     const voxelsData = currentRegionPredictionResult?.[0]?.voxels as VoxelsData | undefined;
 
     if (!voxelsData) {
       message.error("No voxels data available to download.");
@@ -508,28 +860,73 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
       title: 'Upload Stimuli',
       // content: <Uploader onFilesUploaded={handleFilesUploaded} onFileMappingsUpdate={handleFileMappingsUpdate} />,
           content: (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <Uploader  key={uploaderKey} onAddFiles={(newFiles) => addIncomingFiles(newFiles)} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: ' 420px minmax(0, 1fr)',
+                  gap: 16,
+                  alignItems: 'start',
+                }}
+              >
+                <Uploader
+                  key={uploaderKey}
+                  onAddFiles={(newFiles) => addIncomingFiles(newFiles)}
+                />
 
-        
+                <div
+                  style={{
+                    background: 'var(--background-color)',
+                    border: '1px solid #ececec',
+                    borderRadius: 12,
+                    padding: 12,
+                  }}
+                >
+                  <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 10 }}>
+                    Preloaded Datasets
+                  </div>
 
-          <ImagePreviewGroupedDnD
-            files={files}
-            title="Uploaded Images Preview"
-            groupDepth={1}
-            onMoveItemToGroup={moveItemToGroup}
-            onRenameGroupKey={renameGroupKey}
-            onRemove={(uid: string) => removeOne(uid)}
-            onClear={() => clearAll()}
-            onClearGroup={(groupKey, uids) => clearGroup(uids)}
-            onGroupOrderChange={(order: string[]) => console.log("Group order:", order)}
-          />
+                 <PreloadDatasetPicker
+                  selectedKey={prestoreDataset}
+                  onSelectDataset={(key: string | null) => {
+                    if (!key) {
+                      // 取消选择
+                      setPrestoreDataset(null);
+                      setFiles([]);
+                      setFileMappings([]);
+                      setPredictionResult(null);
+                      clearRegionPredictionCache();
+                      setShowInsights(false);
+                      setPredictstep(1);
+                      return;
+                    }
 
-          <div style={{ textAlign: 'right', color: 'black', fontWeight: 500 }}>
-            📸 {files.length} images uploaded
-          </div>
-        </div>
-      ),
+                    loadPrestoredDataset(key);
+                  }}
+                />
+                </div>
+              </div>
+
+              {isPreloadMode && <DatasetCardLab dataset={prestoreDataset} />}
+
+              <ImagePreviewGroupedDnD
+                files={files}
+                title={inputMode === "preload" ? "Preloaded Images" : "Uploaded Images"}
+                groupDepth={1}
+                isPreload={isPreloadMode}
+                onMoveItemToGroup={moveItemToGroup}
+                onRenameGroupKey={renameGroupKey}
+                onRemove={(uid: string) => removeOne(uid)}
+                onClear={() => clearAll()}
+                onClearGroup={(groupKey, uids) => clearGroup(uids)}
+                onGroupOrderChange={(order: string[]) => console.log("Group order:", order)}
+              />
+
+              <div style={{ textAlign: 'right', color: 'black', fontWeight: 500 }}>
+                📸 {files.length} images loaded
+              </div>
+            </div>
+          ),
     },
     {
       title: 'Training Settings',
@@ -557,16 +954,42 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
       content: (
         <div style={{ display: 'flex', flexDirection: 'column'}}>
           <RegionSelector region={region} setRegion={setRegion} dataset={dataset} />
+          
+
           <ModelCard
             region={region}
             dataset={dataset}
             model={model}
           />
+
+           <ImagePreviewGroupedDnD
+            files={files}
+            title="Uploaded Images Preview"
+            groupDepth={1}
+            isPreload={isPreloadMode}
+            onMoveItemToGroup={moveItemToGroup}
+            onRenameGroupKey={renameGroupKey}
+            onRemove={(uid: string) => removeOne(uid)}
+            onClear={() => clearAll()}
+            onClearGroup={(groupKey, uids) => clearGroup(uids)}
+            onGroupOrderChange={(order: string[]) => console.log("Group order:", order)}
+            foldable={true}
+            viewOnly={true}
+          />
+
           {predictionLoading && <LinearIndeterminate />} {/* add progress bar when predictionLoading is true */}
-            <h3 style={{ textAlign: "left", color:"black", fontSize: "18px", marginBottom: "50px", marginTop: "40px"}}>
+            <h3 style={{ textAlign: "left", color:"black", fontSize: "18px", marginBottom: "10px", marginTop: "40px"}}>
             <b>Univariate Analysis:</b> Predicted voxel average responses
             </h3>
-          <BarChart barChartData={barchartData} height={600} fileMappings={fileMappings}/>
+            {barchartData.length > 0 && (
+              <BarChart
+                barChartData={barchartData}
+                height={600}
+                fileMappings={fileMappings}
+                order={vizOrder}
+                setOrder={setVizOrder}
+              />
+            )}
             <h3 style={{ textAlign: "left", color:"black", fontSize: "18px", marginBottom: "50px", marginTop: "40px"}}><b>Multivariate Analysis:</b> Respresentational dissimilarity matrix (RDM) from predicted voxel responses</h3>
           {/* <Heatmap heatmapData={heatmapData} originalFilenames={originalFilenames} sortedFilenames={sortedFilenames} width={800} height={800} fileMappings={fileMappings}/> */}
           {barchartData.length <= 1 ? (
@@ -574,8 +997,40 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
               RDM unavailable for one image. Please upload more than 2 images to see the visualization.
             </div>
           ) : (
-            <Heatmap heatmapData={heatmapData} originalFilenames={originalFilenames} sortedFilenames={sortedFilenames} width={800} height={800} fileMappings={fileMappings}
+            <Heatmap heatmapData={heatmapData} originalFilenames={originalFilenames} sortedFilenames={orderedFilenames} width={800} height={800} fileMappings={fileMappings} order={vizOrder} 
             />
+          )}
+
+          <div style={{ marginTop: "20px",  display: "flex", justifyContent: "left", alignItems: "center", gap: "10px" }}>
+            <h3
+              style={{
+                textAlign: "left",
+                color: "black",
+                fontSize: "18px",
+                margin: 0,
+              }}
+            >
+              <b>Advanced Insights Across Regions</b>
+            </h3>
+
+            <Button
+              type="primary"
+              onClick={handleGetInsights}
+              loading={insightLoading}
+              disabled={files.length === 0}
+            >
+              Get Insights
+            </Button>
+          </div>
+
+          {showInsights && (
+            <div style={{ marginTop: "5px" }}>
+              <BoxPlot
+                regionDataMap={insightRegionDataMap}
+                fileMappings={fileMappings}
+                height={560}
+              />
+            </div>
           )}
         </div>
       ),
@@ -587,14 +1042,17 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
   <>
     <ConfigProvider
       theme={{
+        token: {
+          fontFamily: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif",
+        },
         components: {
           Steps: {
             colorPrimary: "var(--tungsten)", // Customize the primary color for Steps
           },
           Button: {
-            colorPrimary: "var(--tungsten)",                 // 正常状态
-            colorPrimaryHover: "var(--highlight-color-button)", // hover
-            colorPrimaryActive: "var(--highlight-color-button)", // 点击时
+            colorPrimary: "var(--tungsten)",                 
+            colorPrimaryHover: "var(--highlight-color-button)", 
+            colorPrimaryActive: "var(--highlight-color-button)", 
           },
            Progress: {
             colorPrimary: "var(--highlight-color-button)",
@@ -602,6 +1060,7 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
         },
       }}
     >
+    <ThemeProvider theme={muiLabTheme}>
       <Steps current={current} onChange={onChange}>
         {steps.map((item) => (
           <Step key={item.title} title={item.title} icon={item.icon} />
@@ -615,13 +1074,6 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
           <Button
             type="primary"
             onClick={() => {
-              analytics?.trackEvent("form_submit", {
-                ...getStudyParams(),
-                form_id: "stimuli_upload",
-                success: true,
-                file_count: files.length,
-              });
-              analytics?.trackUiClick("lab_stepper", "proceed_to_settings", { file_count: files.length });
               message.success("Image Upload complete!");
               next();
             }}
@@ -635,8 +1087,7 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
           <Button
             type="primary"
             onClick={() => {
-              analytics?.trackUiClick("lab_stepper", predictstep === 1 ? "run_prediction" : "next_to_results");
-              predictstep === 1 ? handlePrediction() : next();
+              predictstep === 1 ? handlePrediction(region) : next();
             }}
             disabled={loading || files.length === 0}
           >
@@ -645,18 +1096,12 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
         )}
 
         {current === steps.length - 1 && (
-          <Button type="primary" onClick={() => {
-            analytics?.trackUiClick("lab_results", "download_data");
-            analytics?.trackEvent("download_file", {
-              ...getStudyParams(),
-              file_type: "csv",
-            });
-            downloadData();
-          }} disabled={!predictionResult}>
+          <Button type="primary" onClick={downloadData} disabled={!currentRegionPredictionResult}>
             Download Data
           </Button>
         )}
       </div>
+    </ThemeProvider>
     </ConfigProvider>
   </>
 );
