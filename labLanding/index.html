@@ -17,7 +17,7 @@
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Poppins:wght@400;600&family=Nunito:wght@400;600&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
 
   <!-- Vendor CSS Files -->
   <link href="/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -154,23 +154,22 @@
 </head>
 
 <body class="lab-page">
-  <script type="module" src="/assets/js/analytics.js"></script>
 
   <!-- ======= Header ======= -->
   <header id="header" class="header d-flex align-items-center sticky-top">
     <div class="container-fluid container-xl position-relative d-flex align-items-center">
 
       <a href="/" class="logo d-flex align-items-center me-auto">
-        <img src="assets/img/logo.svg" alt="">
+        <img src="/assets/img/logo.svg" alt="">
         <h1 class="sitename">Cortex</h1>
       </a>
 
         <nav id="navmenu" class="navmenu">
           <ul>
             <li><a href="/">Home<br></a></li>
-            <li><a href="/labLanding/">The Lab</a></li>
+            <li><a href="/labLanding/" class="active">The Lab </a></li>
             <li class="dropdown">
-              <a href="/scoreboardLanding/" class="active">
+              <a href="/scoreboardLanding/" >
                 <span>The Scoreboard</span>
                 <i class="bi bi-chevron-down toggle-dropdown"></i>
               </a>
@@ -269,5 +268,9 @@
 
   <!-- Main JS File -->
   <script src="/assets/js/main.js"></script>
+
+  <link rel="stylesheet" href="/assets/js/chatbot/chatbot-widget.css">
+  <script src="/assets/js/chatbot/chatbot-widget.js"></script>
+
 </body>
 </html>
