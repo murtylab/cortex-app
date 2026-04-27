@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Accordion,
   AccordionSummary,
@@ -106,7 +107,7 @@ const ROISelect = ({ region, setRegion, dataset, setDataset, allowToggle, mode, 
           px: 1.5,
         }}
       >
-        <Typography sx={{ fontWeight: 'bold', color: 'black' }}>Region of Interest</Typography>
+        <Typography sx={{ fontWeight: 500, fontSize: '13px', color: 'var(--tungsten)' }}>Region of Interest</Typography>
       </AccordionSummary>
 
       <AccordionDetails sx={{ pl: 2 }}>
@@ -126,7 +127,7 @@ const ROISelect = ({ region, setRegion, dataset, setDataset, allowToggle, mode, 
                     }}
                   />
                 }
-                label={option.label}
+                label={<span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '12px', fontWeight: 400, color: 'var(--tungsten)' }}>{option.label}</span>}
               />
             ))}
           </FormGroup>

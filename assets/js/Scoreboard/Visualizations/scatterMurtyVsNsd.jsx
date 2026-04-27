@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
-import uniIcon from "../../../img/scatterplot/uni.webp";
-import multiIcon from "../../../img/scatterplot/multi.webp";
+const uniIcon = '/assets/img/scatterplot/uni.webp';
+const multiIcon = '/assets/img/scatterplot/multi.webp';
 
-const ScatterMurtyVsNsd = ({ murtyData, nsdData, roi, dataset, chartType, showOverlay, onModelClick }) => {
+const ScatterMurtyVsNsd = ({ murtyData, nsdData, murtyDataFull, nsdDataFull,roi, dataset, chartType, showOverlay, onModelClick }) => {
   const containerRef = useRef();
-  const [selectedModel, setSelectedModel] = useState(null);
+  const [activeModel, setactiveModel] = useState(null);
 
   // for hover interaction
   const [hoveredData, setHoveredData] = useState(null);
@@ -70,12 +70,20 @@ const ScatterMurtyVsNsd = ({ murtyData, nsdData, roi, dataset, chartType, showOv
   }, []);
 
   useEffect(() => {
-    setSelectedModel(null);
+    setactiveModel(null);
+    setHoveredData(null);
     if (onModelClick) onModelClick(null);
-  }, [murtyData, nsdData, roi, dataset]);
+  }, [roi, chartType, datasetArray.join("|")]);
 
   useEffect(() => {
-    if (!murtyData || !nsdData || dimensions.width === 0 || dimensions.height === 0) return;
+    if (
+  !murtyData ||
+  !nsdData ||
+  !murtyDataFull ||
+  !nsdDataFull ||
+  dimensions.width === 0 ||
+  dimensions.height === 0
+) return;
 
     const container = d3.select(containerRef.current);
     container.select("svg").remove();
@@ -106,19 +114,20 @@ const ScatterMurtyVsNsd = ({ murtyData, nsdData, roi, dataset, chartType, showOv
     const svg = container
       .append("svg")
       .attr("width", width)
-      .attr("height", height);
+      .attr("height", height)
+      .style("font-family", "'Lato', sans-serif");
       
 
 
 
     // =====  Scale =====
     let allVals = [];
-    Object.keys(murtyData || {}).forEach(r => {
-      Object.keys(murtyData[r] || {}).forEach(m => {
+    Object.keys(murtyDataFull || {}).forEach(r => {
+      Object.keys(murtyDataFull[r] || {}).forEach(m => {
         if (m === "ceiling") return;
         ["murty_uni", "nsd_uni"].forEach(key => { /* for all values*/ });
-        const mv = murtyData[r][m];
-        const nv = nsdData[r][m];
+        const mv = murtyDataFull[r][m];
+        const nv = nsdDataFull[r][m];
         if(mv && nv) {
            Object.keys(mv).forEach(ds => {
              if (!["murty185", "nsd_1000", "ceiling"].includes(ds)) {
@@ -183,16 +192,16 @@ const ScatterMurtyVsNsd = ({ murtyData, nsdData, roi, dataset, chartType, showOv
       .attr("cx", d => xScale(d.x))
       .attr("cy", d => yScale(d.y))
       //  bigger radius for selected dot
-      .attr("r", d => d.model === selectedModel ? 7 : 5) 
+      .attr("r", d => d.model === activeModel ? 7 : 5) 
       .attr("fill", d => color_map[d.dataset])
       // style for selected dot
-      .attr("opacity", d => (d.model === selectedModel || d.model === hoveredData?.model) ? 1 : 0.5)
-      .attr("stroke", d => d.model === selectedModel ? "#000" : "#fff") 
-      .attr("stroke-width", d => d.model === selectedModel ? 2.5 : 1)
+      .attr("opacity", d => (d.model === activeModel || d.model === hoveredData?.model) ? 1 : 0.5)
+      .attr("stroke", d => d.model === activeModel ? "#000" : "#fff") 
+      .attr("stroke-width", d => d.model === activeModel ? 2.5 : 1)
       .style("cursor", "pointer")
       .on("click", (event, d) => {
-        const newSelection = selectedModel === d.model ? null : d.model;
-        setSelectedModel(newSelection);
+        const newSelection = activeModel === d.model ? null : d.model;
+        setactiveModel(newSelection);
         if (onModelClick) onModelClick(newSelection);
       })
       // tooltip design: setHoveredData
@@ -203,7 +212,7 @@ const ScatterMurtyVsNsd = ({ murtyData, nsdData, roi, dataset, chartType, showOv
       .on("mouseout", () => {
         setHoveredData(null);
       });
-    dots.filter(d => d.model === selectedModel).raise();
+    dots.filter(d => d.model === activeModel).raise();
 
     // == old tooltip design
     // const tooltip = container
@@ -338,7 +347,7 @@ const ScatterMurtyVsNsd = ({ murtyData, nsdData, roi, dataset, chartType, showOv
       lg.append("text").attr("x", 15).attr("y", 5).style("font-size", "13px").text(datasetLabelMap[ds]);
     });
 
-  }, [murtyData, nsdData, roi, datasetArray, onModelClick, dimensions, chartType, showOverlay,selectedModel, points]);
+  }, [murtyData, nsdData, murtyDataFull, nsdDataFull, roi, datasetArray, onModelClick, dimensions, chartType, showOverlay,activeModel, points]);
 
   // return (
   //   <div 
@@ -353,8 +362,8 @@ const ScatterMurtyVsNsd = ({ murtyData, nsdData, roi, dataset, chartType, showOv
   //   ></div>
   // );
   // priorty: hover then clicked 
-  const displayInfo = hoveredData || (selectedModel ? points.find(p => p.model === selectedModel) : null);
-  const activeModelName = hoveredData?.model || selectedModel;
+  const displayInfo = hoveredData || (activeModel ? points.find(p => p.model === activeModel) : null);
+  const activeModelName = hoveredData?.model || activeModel;
   
  
   const modelEntries = activeModelName 
@@ -362,7 +371,7 @@ const ScatterMurtyVsNsd = ({ murtyData, nsdData, roi, dataset, chartType, showOv
     : [];
 
   return (
-    <div style={{ display: "flex", width: "100%", height: "100%", background: "#fafafa", overflow: "hidden" }}>
+    <div style={{ display: "flex", width: "100%", height: "100%", background: "var(--background-color, #f7f7f4)", overflow: "hidden" }}>
       
       {/* left：graph*/}
       <div 
@@ -376,7 +385,7 @@ const ScatterMurtyVsNsd = ({ murtyData, nsdData, roi, dataset, chartType, showOv
         width: "250px", 
         borderLeft: "1px solid #eee", 
         padding: "20px", 
-        backgroundColor: "#fafafa",
+        backgroundColor: "var(--background-color, #f7f7f4)",
         display: "flex",
         flexDirection: "column",
         gap: "10px",
@@ -391,7 +400,7 @@ const ScatterMurtyVsNsd = ({ murtyData, nsdData, roi, dataset, chartType, showOv
         {activeModelName ? (
           <div style={{ fontSize: "12px", lineHeight: "1.4" }}>
             {/* 1. model's name */}
-            <div style={{ fontWeight: "bold", color: "#1890ff", fontSize: "12px", marginBottom: "12px", wordBreak: "break-all" }}>
+            <div style={{ fontWeight: "bold", color: "#6b4a8c", fontSize: "12px", marginBottom: "12px", wordBreak: "break-all" }}>
               {activeModelName}
             </div>
 
@@ -402,9 +411,9 @@ const ScatterMurtyVsNsd = ({ murtyData, nsdData, roi, dataset, chartType, showOv
                   key={entry.dataset} 
                   style={{ 
                     padding: "10px", 
-                    background: (hoveredData?.dataset === entry.dataset) ? "#e6f7ff" : "#fff", 
+                    background: (hoveredData?.dataset === entry.dataset) ? "rgba(137,102,163,0.08)" : "rgba(0,0,0,0.03)", 
                     borderRadius: "6px", 
-                    border: (hoveredData?.dataset === entry.dataset) ? "1.5px solid #1890ff" : "1px solid #eee",
+                    border: (hoveredData?.dataset === entry.dataset) ? "1.5px solid #8966a3" : "1px solid #e0ddd8",
                     boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
                     transition: "all 0.2s"
                   }}

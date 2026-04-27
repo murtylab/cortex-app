@@ -75,7 +75,7 @@ const DatasetSelect = ({ dataset, setDataset, training, region, allowToggle, mod
           px: 1.5,
         }}
       >
-        <Typography sx={{ fontWeight: 'bold', color: 'black' }}>Evaluation Dataset</Typography>
+        <Typography sx={{ fontWeight: 500, fontSize: '13px', color: 'var(--tungsten)' }}>Evaluation Dataset</Typography>
       </AccordionSummary>
 
       <AccordionDetails sx={{ pl: 2 }}>
@@ -95,7 +95,7 @@ const DatasetSelect = ({ dataset, setDataset, training, region, allowToggle, mod
                     }}
                   />
                 }
-                label={option.label}
+                label={<span style={{ fontFamily: "'Inter', system-ui, sans-serif", fontSize: '12px', fontWeight: 400, color: 'var(--tungsten)' }}>{option.label}</span>}
               />
             ))}
           </FormGroup>

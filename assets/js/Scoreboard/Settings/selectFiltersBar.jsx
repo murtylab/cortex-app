@@ -1,25 +1,29 @@
 import React from 'react';
 import { Tag } from 'antd';
 
-const SelectedFiltersBar = ({ training, region, dataset, clearSingle, onTagClick }) => {
+const SelectedFiltersBar = ({ training, region, dataset, modelType, clearSingle, onTagClick }) => {
   const selected = [];
 
   // order: training region dataset
-  if (training) selected.push({ key: 'training', label: training, color: 'rgb(118, 128, 145)' });
+  if (training) selected.push({ key: 'training', label: training });
 
   if (Array.isArray(region) && region.length > 0) {
     region.forEach((r) => {
-      selected.push({ key: `region-${r}`, label: r.toUpperCase(), color: '#615841' });
+      selected.push({ key: `region-${r}`, label: r.toUpperCase() });
     });
   }
 
   if (Array.isArray(dataset) && dataset.length > 0) {
     dataset.forEach((r) => {
-      selected.push({ key: `dataset-${r}`, label: r.toUpperCase(), color: 'rgb(111, 126, 121)' });
+      selected.push({ key: `dataset-${r}`, label: r.toUpperCase() });
     });
   }
- 
 
+  if (Array.isArray(modelType) && modelType.length > 0) {
+    modelType.forEach((m) => {
+      selected.push({ key: `modelType-${m}`, label: m.toUpperCase() });
+    });
+  }
 
   return (
     <div
@@ -35,7 +39,6 @@ const SelectedFiltersBar = ({ training, region, dataset, clearSingle, onTagClick
       {selected.map((item) => (
         <Tag
           key={item.key}
-          color={item.color}
           closable
           // 点击 Tag 主体时，根据 key 的前缀判断展开哪个面板
           onClick={() => {
@@ -59,11 +62,16 @@ const SelectedFiltersBar = ({ training, region, dataset, clearSingle, onTagClick
           }}
           style={{
             borderRadius: 20,
-            padding: '4px 12px',
+            padding: '3px 10px',
             cursor: 'pointer',
-            fontWeight: 500,
-            fontSize: '0.95em',
+            fontWeight: 400,
+            fontSize: '0.78em',
+            background: 'linear-gradient(135deg, #c98d9a 0%, #b8a4bc 50%, #c4b4cc 100%)',
+            color: '#fff',
+            border: 'none',
+            fontFamily: "'Inter', system-ui, sans-serif",
           }}
+          closeIcon={<span style={{ color: '#fff', opacity: 0.85, fontSize: '10px' }}>×</span>}
         >
           {item.label}
         </Tag>

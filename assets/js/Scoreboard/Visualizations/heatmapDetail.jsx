@@ -84,7 +84,10 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
     const columnWidth = 75;
     const columnGap = 5;
 
-    const colorScale = d3.scaleLinear().domain([0, 1]).range(["#D3D3D3", "#9CC9FF"]);
+    const colorScale = d3
+      .scaleLinear()
+      .domain([0, 0.5, 1])
+      .range(["#ede9d8", "#c4b4cc", "#8966a3"]);
 
     let xLabels = [];
     let models = [];
@@ -285,6 +288,12 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
     // 4. sorted rank store in Ref
     sortedModelsRef.current = models;
 
+    // normalize global_score raw values to [0,1] for colorScale
+    const gsVals = cellData.filter(d => d.x === "global_score" && d.raw != null).map(d => d.raw);
+    const gsMin = d3.min(gsVals) ?? 0;
+    const gsMax = d3.max(gsVals) ?? 1;
+    const gsNorm = (v) => gsMax === gsMin ? 0.5 : (v - gsMin) / (gsMax - gsMin);
+
     // ======= Dimensions =======
     const chartWidth = xLabels.length * (columnWidth + columnGap);
     const headerHeight = headerMargin.top + rowHeight;
@@ -292,7 +301,7 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
     const width = chartWidth + headerMargin.left + headerMargin.right;
 
     // ======= Header =======
-    const svgHeader = d3.select(headerRef.current).append("svg").attr("width", width).attr("height", headerHeight);
+    const svgHeader = d3.select(headerRef.current).append("svg").attr("width", width).attr("height", headerHeight).style("font-family", "'Lato', sans-serif");
 
     svgHeader
       .append("g")
@@ -317,8 +326,8 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
       .attr("width", columnWidth)
       .attr("height", rowHeight)
       .attr("fill", (d) => {
-        if (d.x === "global_score") return "rgba(158, 117, 214, 0.5)";
-        if (d.norm == null) return "#f0f0f0";
+        if (d.norm == null && d.x === "global_score" && d.raw != null) return colorScale(gsNorm(d.raw));
+        if (d.norm == null) return "#f0ece0";
         return colorScale(d.norm > 1 ? 1 : d.norm < 0 ? 0 : d.norm);
       });
 
@@ -350,7 +359,7 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
         .call((g) => { g.select(".domain").remove(); g.selectAll("text").style("font-size", "12px").style("font-weight", "bold"); });
     }
     // ======= Body =======
-    const svgBody = d3.select(bodyRef.current).append("svg").attr("width", width).attr("height", bodyHeight);
+    const svgBody = d3.select(bodyRef.current).append("svg").attr("width", width).attr("height", bodyHeight).style("font-family", "'Lato', sans-serif");
 
     // highlight logic
     if (selectedModel) {
@@ -363,14 +372,15 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
             
             svgBody.append("rect")
                 .attr("class", "highlight-border")
-                .attr("x", 0) // 从最左侧开始，包含 Y 轴标签区域
-                .attr("y", highlightY - rowGap / 2) // 稍微向上一点，包住行间距
-                .attr("width", width) // 使用整个 SVG 的宽度
-                .attr("height", rowHeight + rowGap) // 高度包含一个行间距
-                .attr("fill", "none") // 内部透明
-                .attr("stroke", "#FF4500") // ✨ 边框颜色：橙红色，非常显眼
-                .attr("stroke-width", 3) // ✨ 边框宽度：加粗
-                .style("pointer-events", "none"); // 让鼠标事件穿透，不影响下方单元格的点击
+                .attr("x", 0)
+                .attr("y", highlightY - rowGap / 2)
+                .attr("width", width)
+                .attr("height", rowHeight + rowGap)
+                .attr("fill", "rgba(137, 102, 163, 0.14)")
+                .attr("stroke", "#7050a0")
+                .attr("stroke-width", 2)
+                .attr("rx", 3)
+                .style("pointer-events", "none");
         }
     }
 
@@ -384,8 +394,8 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
       .attr("width", columnWidth)
       .attr("height", rowHeight)
       .attr("fill", (d) => {
-        if (d.x === "global_score") return "rgba(158, 117, 214, 0.5)";
-        if (d.norm == null) return "#f0f0f0";
+        if (d.norm == null && d.x === "global_score" && d.raw != null) return colorScale(gsNorm(d.raw));
+        if (d.norm == null) return "#f0ece0";
         return colorScale(d.norm > 1 ? 1 : d.norm < 0 ? 0 : d.norm);
       })
       .style("cursor", "pointer")
@@ -440,8 +450,8 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
           g.select(".domain").remove();
           g.selectAll("text")
             .style("font-size", "11px")
-            .style("fill", (d) => (d === selectedModel ? "#FF4500" : "black"))
-            .style("font-weight", (d) => (d === selectedModel ? "bold" : "normal"))
+            .style("fill", (d) => (d === selectedModel ? "#6b4a8c" : "black"))
+            .style("font-weight", (d) => (d === selectedModel ? "600" : "normal"))
             .style("cursor", "pointer")
             .on("click", (_, d) => onModelClick && onModelClick(d === selectedModel ? null : d));
         });
@@ -462,11 +472,12 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
     // svgLegend.append("g").attr("transform", `translate(42,0)`).call(d3.axisRight(legendScale).ticks(5));
     if (showYAxis && !isMultiRegion) {
         const legendHeight = 200;
-        const svgLegend = d3.select(legendRef.current).append("svg").attr("width", 60).attr("height", legendHeight + 40);
+        const svgLegend = d3.select(legendRef.current).append("svg").attr("width", 60).attr("height", legendHeight + 40).style("font-family", "'Lato', sans-serif");
         const defs = svgLegend.append("defs");
         const gradient = defs.append("linearGradient").attr("id", "grad").attr("x1", "0%").attr("y1", "100%").attr("x2", "0%").attr("y2", "0%");
-        gradient.append("stop").attr("offset", "0%").attr("stop-color", "#D3D3D3");
-        gradient.append("stop").attr("offset", "100%").attr("stop-color", "#9CC9FF");
+        gradient.append("stop").attr("offset", "0%").attr("stop-color", "#ede9d8");
+        gradient.append("stop").attr("offset", "50%").attr("stop-color", "#c4b4cc");
+        gradient.append("stop").attr("offset", "100%").attr("stop-color", "#8966a3");
         svgLegend.append("rect").attr("x", 10).attr("y", 20).attr("width", 10).attr("height", legendHeight).style("fill", "url(#grad)");
         const legScale = d3.scaleLinear().domain([0, 1]).range([legendHeight + 20, 20]);
         svgLegend.append("g").attr("transform", "translate(20,0)").call(d3.axisRight(legScale).ticks(5));

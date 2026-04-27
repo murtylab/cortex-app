@@ -4,7 +4,7 @@ import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import { CHART_TYPE_OPTIONS, RANK } from '../../constants-scoreboard';
 
-const ChartSelect = ({ chartType, setChartType, rank, setRank, enable }) => {
+const ChartSelect = ({ chartType, setChartType, rank, setRank, enable, showType = true }) => {
   return (
     <div style={{ 
       display: "flex", 
@@ -14,7 +14,7 @@ const ChartSelect = ({ chartType, setChartType, rank, setRank, enable }) => {
     }}>
       
       {/* first group：Univariate vs Multivariate */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      {showType && <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
         <div style={{ fontSize: '11px', color: '#888', marginLeft: 2 }}>TYPE</div>
         <ButtonGroup size="small" fullWidth variant="outlined">
           {CHART_TYPE_OPTIONS.map((option) => (
@@ -46,7 +46,7 @@ const ChartSelect = ({ chartType, setChartType, rank, setRank, enable }) => {
               </Button>
           ))}
         </ButtonGroup>
-      </div>
+      </div>}
 
       {/* second group：rank */}
       {enable && (
