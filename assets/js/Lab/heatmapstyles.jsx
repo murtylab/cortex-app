@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 
 export const heatmapStyles = {
-  margin: { top: 20, right: 20, bottom: 100, left: 150 },
+  margin: { top: 30, right: 20, bottom: 100, left: 150 },
   colorScheme: d3.interpolateBlues, // Change to your preferred D3 color scheme
   strokeColor: "#fff",
   strokeWidth: 1,

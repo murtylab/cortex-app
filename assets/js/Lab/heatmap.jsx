@@ -78,16 +78,34 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
 
     const currentOrder = sortedFilenames?.length ? sortedFilenames : originalFilenames;
 
-    const xScale = d3.scaleBand().domain(currentOrder).range([0, innerWidth]).padding(0);
-    const yScale = d3.scaleBand().domain(currentOrder).range([0, innerHeight]).padding(0);
+    // Compute group spans (used for labels when order === "group")
+    const groupSpans = [];
+    if (order === "group" && currentOrder.length > 0) {
+      let si = 0;
+      while (si < currentOrder.length) {
+        const grp = getGroupForFilename(currentOrder[si]);
+        let ei = si;
+        while (ei + 1 < currentOrder.length && getGroupForFilename(currentOrder[ei + 1]) === grp) ei++;
+        groupSpans.push({ group: grp, startFilename: currentOrder[si], endFilename: currentOrder[ei] });
+        si = ei + 1;
+      }
+    }
+
+    const n = currentOrder.length;
+    const extraRight = order === "group" && groupSpans.length > 0 ? 70 : 0;
+    const cellSize = Math.min((innerWidth - extraRight) / n, innerHeight / n);
+    const actualInner = cellSize * n;
+
+    const xScale = d3.scaleBand().domain(currentOrder).range([0, actualInner]).padding(0);
+    const yScale = d3.scaleBand().domain(currentOrder).range([0, actualInner]).padding(0);
 
     // Set up color scale
     const colorScale = d3.scaleSequential(d3.interpolatePlasma)
       .domain([d3.min(heatmapData, d => d.value), d3.max(heatmapData, d => d.value)]);
 
-    // Adjust SVG size
-    svg.attr("width", Math.max(width, 500))
-       .attr("height", Math.max(height, 500));
+    // Adjust SVG size to fit the square grid exactly
+    svg.attr("width", actualInner + margin.left + margin.right + extraRight)
+       .attr("height", actualInner + margin.top + margin.bottom);
 
     // Clear previous SVG elements
     svg.selectAll("*").remove();
@@ -109,8 +127,8 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
           enter.append("rect")
             .attr("x", d => xScale(d.x))
             .attr("y", d => yScale(d.y))
-            .attr("width", Math.min(xScale.bandwidth(), yScale.bandwidth()))
-            .attr("height", Math.min(xScale.bandwidth(), yScale.bandwidth()))
+            .attr("width", cellSize)
+            .attr("height", cellSize)
             .attr("fill", d => colorScale(d.value))
             .on("mouseover", (event, d) => {
               const fx = getFileInfo(d.x);
@@ -232,12 +250,12 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
     //legend
     // Add legend
     const legend = g.append("g")
-      .attr("transform", `translate(-50, 50)`); // Move legend to the left of the heatmap
+      .attr("transform", `translate(-50, 0)`); // Move legend to the left of the heatmap
     
     const legendColorScale = d3.scaleSequential(d3.interpolatePlasma)
       .domain([d3.min(heatmapData, d => d.value), d3.max(heatmapData, d => d.value)]);
     
-    const legendHeight = 600;
+    const legendHeight = actualInner;
     const legendWidth = 20;
     
     const legendScale = d3.scaleLinear()
@@ -266,18 +284,80 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
       .attr("fill", d => legendColorScale(legendScale.invert(d)));
     
     legend.append("text")
-      .attr("x", legendWidth / 2) // Center the text
-      .attr("y", 630) // Adjust y position for the first line
-      .attr("text-anchor", "middle") // Center align the text
+      .attr("x", legendWidth / 2)
+      .attr("y", legendHeight + 20)
+      .attr("text-anchor", "middle")
       .style("font-size", "15px")
       .text("euclidean");
 
     legend.append("text")
-      .attr("x", legendWidth / 2) // Center the text
-      .attr("y", 650) // Adjust y position for the second line
-      .attr("text-anchor", "middle") // Center align the text
+      .attr("x", legendWidth / 2)
+      .attr("y", legendHeight + 38)
+      .attr("text-anchor", "middle")
       .style("font-size", "15px")
       .text("distance");
+
+    // Group bracket labels (top + right) when order === "group"
+    if (order === "group" && groupSpans.length > 0) {
+      const TICK = 6;
+
+      // ── Top labels (for columns) ──
+      const topG = g.append("g").attr("class", "group-labels-top");
+      const TOP_Y = -10;
+
+      groupSpans.forEach(({ group, startFilename, endFilename }) => {
+        const x1 = xScale(startFilename);
+        const x2 = xScale(endFilename) + cellSize;
+        const cx = (x1 + x2) / 2;
+
+        topG.append("line")
+          .attr("x1", x1).attr("x2", x2)
+          .attr("y1", TOP_Y).attr("y2", TOP_Y)
+          .attr("stroke", "#888").attr("stroke-width", 1.2);
+        topG.append("line")
+          .attr("x1", x1).attr("x2", x1)
+          .attr("y1", TOP_Y).attr("y2", TOP_Y + TICK)
+          .attr("stroke", "#888").attr("stroke-width", 1.2);
+        topG.append("line")
+          .attr("x1", x2).attr("x2", x2)
+          .attr("y1", TOP_Y).attr("y2", TOP_Y + TICK)
+          .attr("stroke", "#888").attr("stroke-width", 1.2);
+        topG.append("text")
+          .attr("x", cx).attr("y", TOP_Y - 3)
+          .attr("text-anchor", "middle")
+          .style("font-size", "11px").style("fill", "#666")
+          .text(group);
+      });
+
+      // ── Right labels (for rows) ──
+      const rightG = g.append("g").attr("class", "group-labels-right");
+      const RIGHT_X = actualInner + 10;
+
+      groupSpans.forEach(({ group, startFilename, endFilename }) => {
+        const y1 = yScale(startFilename);
+        const y2 = yScale(endFilename) + cellSize;
+        const cy = (y1 + y2) / 2;
+
+        rightG.append("line")
+          .attr("x1", RIGHT_X).attr("x2", RIGHT_X)
+          .attr("y1", y1).attr("y2", y2)
+          .attr("stroke", "#888").attr("stroke-width", 1.2);
+        rightG.append("line")
+          .attr("x1", RIGHT_X - TICK).attr("x2", RIGHT_X)
+          .attr("y1", y1).attr("y2", y1)
+          .attr("stroke", "#888").attr("stroke-width", 1.2);
+        rightG.append("line")
+          .attr("x1", RIGHT_X - TICK).attr("x2", RIGHT_X)
+          .attr("y1", y2).attr("y2", y2)
+          .attr("stroke", "#888").attr("stroke-width", 1.2);
+        rightG.append("text")
+          .attr("x", RIGHT_X + 4).attr("y", cy)
+          .attr("text-anchor", "start")
+          .attr("dominant-baseline", "middle")
+          .style("font-size", "11px").style("fill", "#666")
+          .text(group);
+      });
+    }
 
     return () => {
         d3.select(".tooltip").remove(); // Cleanup tooltip on component unmount
