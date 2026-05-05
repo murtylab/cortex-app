@@ -4090,3 +4090,9 @@ export const PRELOAD_DATASETS = {
 
 };
   
+
+export const WHOLE_BRAIN_OPTIONS = [
+  { value: 'wholebrain', label: 'Whole Brain' },
+ 
+];
+

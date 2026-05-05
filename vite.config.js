@@ -25,6 +25,7 @@ export default defineConfig({
       input: {
         main: 'index.html',
         lab: 'lab/index.html',
+        labWholeBrain: 'lab-whole-brain/index.html',
         scoreboardQuantitative: 'scoreboardQuantitative/index.html',
         scoredboardQuality: 'scoreboardQualitative/index.html',
         scoreboardLanding: 'scoreboardLanding/index.html',
