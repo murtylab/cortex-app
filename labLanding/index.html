@@ -103,6 +103,17 @@
       transition: all 0.2s ease-in-out;
     }
 
+    .landing-cta-group {
+      margin-top: 2rem;
+      display: flex;
+      gap: 0.9rem;
+      flex-wrap: wrap;
+    }
+
+    .landing-cta-group .try-btn {
+      margin-top: 0;
+    }
+
 .try-btn:hover {
   background: linear-gradient(135deg, #c98d9a 0%, #b8a4bc 50%, #c4b4cc 100%); 
   /* linear-gradient(to bottom, #2d367f, #2d367f); */
@@ -214,7 +225,10 @@
           across different regions of interest. Generate and test hypotheses, visualize responses, 
           and link your findings back to model performance.
         </p>
-        <a href="/lab/" class="try-btn">Try it now</a>
+        <div class="landing-cta-group">
+          <a href="/lab/" class="try-btn">Category-Selective Regions</a>
+          <a href="/lab/?mode=whole-brain" class="try-btn">Whole Brain</a>
+        </div>
       </div>
 
       <!-- Right Side -->
