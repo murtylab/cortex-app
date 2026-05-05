@@ -153,54 +153,27 @@ const Settings = ({
         </Select>
       </FormControl>
 
-      {/* Voxel Selection */}
-      <FormControl sx={{ m: 1, minWidth: 120, textAlign: 'left'}} fullWidth size="small">
-        <InputLabel
-          sx={sharedLabelSx}
-          id="voxel-select-label"
-        >
+      {/* Voxel Selection — fixed display */}
+      <FormControl sx={{ m: 1, minWidth: 120, textAlign: 'left' }} fullWidth size="small">
+        <InputLabel shrink sx={sharedLabelSx} id="voxel-select-label">
           Select Voxels
         </InputLabel>
         <Select
           labelId="voxel-select-label"
-          id="voxel-select"
-          value={voxelOption}
-          onChange={(e) => setVoxelOption(e.target.value)}
-          sx={sharedSelectSx}
-          MenuProps={sharedMenuProps}
+          value="all-participants"
+          disabled
+          sx={{
+            ...sharedSelectSx,
+            '& .MuiInputBase-input.Mui-disabled': {
+              WebkitTextFillColor: 'var(--text-main)',
+              opacity: 1,
+            },
+          }}
         >
-          <MenuItem value="">
-            <em>None</em>
-          </MenuItem>
-          {VOXEL_OPTIONS.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
-            </MenuItem>
-          ))}
+          <MenuItem value="all-participants">All Participants</MenuItem>
         </Select>
-
-        {voxelOption === 'random-voxels' && (
-          <TextField
-            variant="outlined"
-            size="small"
-            placeholder="Enter number of voxels"
-            value={voxelNumber}
-            onChange={(e) => setVoxelNumber(e.target.value)}
-            sx={sharedTextFieldSx}
-          />
-        )}
-
-        {voxelOption === 'specify-a-participant' && (
-          <TextField
-            variant="outlined"
-            size="small"
-            placeholder="Enter participant name (e.g., p1)"
-            value={participantName}
-            onChange={(e) => setParticipantName(e.target.value)}
-            sx={sharedTextFieldSx}
-          />
-        )}
       </FormControl>
+
     </FormGroup>
   );
 };
