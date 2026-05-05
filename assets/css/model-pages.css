@@ -2,6 +2,10 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:wght@400;700&display=swap');
 
+/* Per-Dataset Breakdown table: center all data cells except first column */
+.context-section table tbody td:not(:first-child) {
+  text-align: center;
+}
 :root {
   --bg:          #f7f7f4;
   --text-main:   #3d3832;
