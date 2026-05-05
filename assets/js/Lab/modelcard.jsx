@@ -18,7 +18,7 @@ const ModelCard = ({ region, dataset, model }) => {
   const modelMeta = MODEL_OPTIONS.find(option => option.value === model);
   const modelName = modelMeta?.label || model;
   const modelType = modelMeta?.type || 'Unknown Model Type';
-  const cardUrl = `/model-pages/${model}.html`;
+  const cardUrl = `/model-pages/${model}/`;
 
   const { bestLayer, corrScore } = getInfo(dataset, region, model);
 

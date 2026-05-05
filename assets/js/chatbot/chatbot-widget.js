@@ -236,7 +236,7 @@
     return text.replace(re, match => {
       const entry = MODEL_LINK_MAP.find(([name]) => name.toLowerCase() === match.toLowerCase());
       if (!entry) return match;
-      return `<a href="/model-pages/${entry[1]}" target="_blank" rel="noopener" class="cortex-model-link">${match}</a>`;
+      return `<a href="/model-pages/${entry[1]}/" target="_blank" rel="noopener" class="cortex-model-link">${match}</a>`;
     });
   }
 
