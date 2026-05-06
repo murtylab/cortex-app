@@ -283,15 +283,19 @@
             border-bottom: 1px solid rgba(107, 99, 88, 0.12);
             padding: 20px 0;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: border-color 0.3s;
         }
 
         .faq-item:hover {
             border-bottom-color: var(--accent-color);
-            transform: translateX(5px);
+        }
+
+        .faq-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .faq-question {
@@ -303,7 +307,32 @@
         .faq-arrow {
             color: var(--accent-color);
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .faq-item.open .faq-arrow {
+            transform: rotate(90deg);
+        }
+
+        .faq-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.3s ease;
+            padding: 0;
+        }
+
+        .faq-item.open .faq-content {
+            max-height: 300px;
+            padding-top: 12px;
+        }
+
+        .faq-content p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            line-height: 1.7;
         }
 
         /* --- 6. Team Section --- */
@@ -424,57 +453,60 @@
                 <h2 class="section-title">Frequently Asked Questions</h2>
             </div>
             
-            <div class="faq-grid">
+                        <div class="faq-grid">
                 <div class="faq-item">
+                  <div class="faq-item-header">
                     <span class="faq-question">Why work with Cortex?</span>
                     <span class="faq-arrow">›</span>
-                    <div class="faq-content">
-                      <p>
-                        Cortex is a unique platform that makes it simple to run neuroscience experiments and explore how AI models predict brain activity. With pre-trained models and neuroscience datasets already built in, you can skip the heavy setup and immediately start testing hypotheses, benchmarking models, and uncovering insights that connect AI and the human brain.
-                      </p>
-                    </div>
+                  </div>
+                  <div class="faq-content">
+                    <p>Cortex is a unique platform that makes it simple to run neuroscience experiments and explore how AI models predict brain activity. With pre-trained models and neuroscience datasets already built in, you can skip the heavy setup and immediately start testing hypotheses, benchmarking models, and uncovering insights that connect AI and the human brain.</p>
+                  </div>
                 </div>
                 <div class="faq-item">
+                  <div class="faq-item-header">
                     <span class="faq-question">How do I get involved?</span>
                     <span class="faq-arrow">›</span>
-                    <div class="faq-content">
-                      <p>There are many ways to join the Cortex community: as a contributor, researcher, or developer. You can add datasets, collaborate on experiments, or help enhance platform features. Every contribution helps advance the science of brain–AI alignment.
-                      </p>
-                </div>
-
+                  </div>
+                  <div class="faq-content">
+                    <p>There are many ways to join the Cortex community: as a contributor, researcher, or developer. You can add datasets, collaborate on experiments, or help enhance platform features. Every contribution helps advance the science of brain–AI alignment.</p>
+                  </div>
                 </div>
                 <div class="faq-item">
+                  <div class="faq-item-header">
                     <span class="faq-question">How can I use this platform?</span>
                     <span class="faq-arrow">›</span>
-                    <div class="faq-content">
-                      <p>
-                        Cortex offers two main ways to dive in: the Lab, where you can upload your own stimuli and run experiments with different models and brain regions, and the Scoreboard, where you can compare models across datasets and see which ones best explain neural responses. Both are fully interactive, designed to help you explore predictions and evaluate how models generalize across brain regions and datasets.
-                      </p>
-                    </div>
+                  </div>
+                  <div class="faq-content">
+                    <p>Cortex offers two main ways to dive in: the Lab, where you can upload your own stimuli and run experiments with different models and brain regions, and the Scoreboard, where you can compare models across datasets and see which ones best explain neural responses.</p>
+                  </div>
                 </div>
                 <div class="faq-item">
+                  <div class="faq-item-header">
                     <span class="faq-question">Does Cortex store my data?</span>
                     <span class="faq-arrow">›</span>
-                    <div class="faq-content">
-                      <p>Cortex only processes the stimuli you upload for the purpose of running experiments. Any temporary files are used only to generate predictions and results during your session.
-                      </p>
-                </div>
+                  </div>
+                  <div class="faq-content">
+                    <p>Cortex only processes the stimuli you upload for the purpose of running experiments. Any temporary files are used only to generate predictions and results during your session.</p>
+                  </div>
                 </div>
                 <div class="faq-item">
+                  <div class="faq-item-header">
                     <span class="faq-question">How do I contribute data?</span>
                     <span class="faq-arrow">›</span>
-                    <div class="faq-content">
-                      <p>You can share new datasets by reaching out to the Cortex team. Contributed datasets should include paired image stimuli and brain response data and follow ethical and reproducibility standards. Once validated, your dataset becomes part of the platform, expanding the community’s ability to test and discover.
-                      </p>
-                </div>
+                  </div>
+                  <div class="faq-content">
+                    <p>You can share new datasets by reaching out to the Cortex team. Contributed datasets should include paired image stimuli and brain response data and follow ethical and reproducibility standards. Once validated, your dataset becomes part of the platform.</p>
+                  </div>
                 </div>
                 <div class="faq-item">
+                  <div class="faq-item-header">
                     <span class="faq-question">What regions are supported?</span>
                     <span class="faq-arrow">›</span>
-                    <div class="faq-content">
-                      <p>Cortex currently includes core visual neuroscience regions of interest (ROIs), such as the Fusiform Face Area (FFA) for face recognition, the Parahippocampal Place Area (PPA) for scene and place processing, and the Extrastriate Body Area (EBA) for body recognition. More regions will be added as new datasets become available, expanding the possibilities for exploration.
-                      </p>
-                </div>
+                  </div>
+                  <div class="faq-content">
+                    <p>Cortex currently includes core visual neuroscience regions such as the Fusiform Face Area (FFA), the Parahippocampal Place Area (PPA), and the Extrastriate Body Area (EBA). More regions will be added as new datasets become available.</p>
+                  </div>
                 </div>
             </div>
         </div>
@@ -552,6 +584,14 @@
         }
 
         document.addEventListener('DOMContentLoaded', type);
+    </script>
+
+    <script>
+        document.querySelectorAll('.faq-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+                item.classList.toggle('open');
+            });
+        });
     </script>
 
     <script>
