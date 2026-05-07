@@ -557,7 +557,7 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
       </div>
 
       {/* Legend: right side, no gap — only rendered when showLegend=true */}
-      {showLegend && <div ref={legendRef} style={{ flex: "0 0 60px", width: "60px", marginTop: "100px", marginLeft: "-5px" }}></div>}
+      {showLegend && <div ref={legendRef} style={{ flex: "0 0 60px", width: "60px", marginTop: "100px", marginLeft: "25px" }}></div>}
     </div>
   );
 };

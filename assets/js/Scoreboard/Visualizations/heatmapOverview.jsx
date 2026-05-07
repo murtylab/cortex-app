@@ -43,7 +43,7 @@ const HeatmapOverview = ({
       const rawModels = Object.keys(data[roi]).filter((m) => m !== "ceiling");
       rawModels.forEach((model) => {
         Object.entries(data[roi][model] || {}).forEach(([x, vals]) => {
-          if (vals) {
+          if (vals && !["murty185", "nsd_1000"].includes(x)) {
             cellData.push({ model, x, raw: vals[0], norm: vals[1] });
             modelsSet.add(model);
             xLabelsSet.add(x);
@@ -81,6 +81,8 @@ const HeatmapOverview = ({
         avg[m] = d3.mean(vals);
       });
       models.sort((a, b) => (avg[b] || 0) - (avg[a] || 0));
+    } else {
+      models.sort();
     }
 
     const totalHeight = dimensions.height;
@@ -113,27 +115,12 @@ const HeatmapOverview = ({
       .attr("width", colWidth)
       .attr("height", rowHeight)
       .attr("fill", (d) => colorScale(d.norm ?? 0))
-      .attr("stroke", "white")
-      .attr("stroke-width", 0.3)
+      .attr("stroke", "none")
       .style("opacity", (d) => selectedModel ? (d.model === selectedModel ? 1 : 0.25) : 1)
       .style("cursor", "pointer")
       .on("click", (_, d) => {
         onModelClick?.(d.model === selectedModel ? null : d.model);
       });
-
-    // selected row indicator bar centered in the first cell
-    if (selectedModel && models.includes(selectedModel)) {
-      const selIndex = models.indexOf(selectedModel);
-      const indicatorWidth = Math.min(2, Math.max(1, colWidth));
-      const indicatorX = Math.max(0, (colWidth - indicatorWidth) / 2);
-      svg.append("rect")
-        .attr("x", indicatorX)
-        .attr("y", selIndex * rowHeight)
-        .attr("width", indicatorWidth)
-        .attr("height", rowHeight)
-        .attr("fill", "#7050a0")
-        .style("pointer-events", "none");
-    }
 
     if (visibleRange && models.length > 0) {
       const { start, end } = visibleRange;
