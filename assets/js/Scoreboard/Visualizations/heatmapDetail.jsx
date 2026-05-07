@@ -2,10 +2,11 @@
 import React, { useEffect, useRef } from "react"; 
 import * as d3 from "d3";
 
-const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, onScrollUpdate,showYAxis = true,isMultiRegion = false }) => {
+const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, onScrollUpdate, showYAxis = true, isMultiRegion = false, defaultScrollToRight = false, showLegend = true }) => {
   const headerRef = useRef();
   const bodyRef = useRef();
   const legendRef = useRef();
+  const initializedHorizontalScrollKeyRef = useRef("");
 
   // sorted model for relocate the selected model
   const sortedModelsRef = useRef([]);
@@ -51,6 +52,7 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
     if (index !== -1) {
       const rowHeight = 25; // keep it the same number as below
       const rowGap = 2;
+      const currentScrollLeft = bodyRef.current.scrollLeft;
       
       // calculate the y axis of the target selected row
       const targetY = index * (rowHeight + rowGap);
@@ -62,9 +64,14 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
       const scrollTo = targetY - (containerHeight / 2) + (rowHeight / 2);
 
       bodyRef.current.scrollTo({
+        left: currentScrollLeft,
         top: scrollTo,
         behavior: "smooth",
       });
+
+      if (headerRef.current) {
+        headerRef.current.scrollLeft = currentScrollLeft;
+      }
     }
   }, [selectedModel]);
 
@@ -75,10 +82,10 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
 
     d3.select(headerRef.current).selectAll("*").remove();
     d3.select(bodyRef.current).selectAll("*").remove();
-    d3.select(legendRef.current).selectAll("*").remove();
+    if (legendRef.current) d3.select(legendRef.current).selectAll("*").remove();
     const LEFT_MARGIN = showYAxis ? 200 : 10;
-    const headerMargin = { top: 80, right: 40, bottom: 10, left: LEFT_MARGIN };
-    const bodyMargin = { top: 10, right: 40, bottom: 0, left: LEFT_MARGIN };
+    const headerMargin = { top: 80, right: 5, bottom: 10, left: LEFT_MARGIN };
+    const bodyMargin = { top: 10, right: 5, bottom: 0, left: LEFT_MARGIN };
     const rowHeight = 25;
     const rowGap = 2;
     const columnWidth = 75;
@@ -470,7 +477,7 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
     // svgLegend.append("rect").attr("x", 30).attr("y", 20).attr("width", legendWidth).attr("height", legendHeight).style("fill", "url(#legend-gradient-vertical)");
     // const legendScale = d3.scaleLinear().domain([0, 1]).range([legendHeight + 20, 20]);
     // svgLegend.append("g").attr("transform", `translate(42,0)`).call(d3.axisRight(legendScale).ticks(5));
-    if (showYAxis && !isMultiRegion) {
+    if (showYAxis && showLegend) {
         const legendHeight = 200;
         const svgLegend = d3.select(legendRef.current).append("svg").attr("width", 60).attr("height", legendHeight + 40).style("font-family", "'Lato', sans-serif");
         const defs = svgLegend.append("defs");
@@ -482,48 +489,75 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
         const legScale = d3.scaleLinear().domain([0, 1]).range([legendHeight + 20, 20]);
         svgLegend.append("g").attr("transform", "translate(20,0)").call(d3.axisRight(legScale).ticks(5));
     }
+    if (!defaultScrollToRight) {
+      initializedHorizontalScrollKeyRef.current = "";
+      if (bodyRef.current) {
+        bodyRef.current.scrollLeft = 0;
+      }
+      if (headerRef.current) {
+        headerRef.current.scrollLeft = 0;
+      }
+    } else {
+      const scrollKey = `${roi || ""}::${dataset || ""}`;
+      if (initializedHorizontalScrollKeyRef.current !== scrollKey) {
+        let frameCount = 0;
 
+        const syncToRightEdge = () => {
+          const currentBody = bodyRef.current;
+          if (!currentBody) return;
+
+          const maxScrollLeft = Math.max(0, currentBody.scrollWidth - currentBody.clientWidth);
+          currentBody.scrollLeft = maxScrollLeft;
+          if (headerRef.current) {
+            headerRef.current.scrollLeft = maxScrollLeft;
+          }
+
+          frameCount += 1;
+          if (frameCount < 4) {
+            requestAnimationFrame(syncToRightEdge);
+            return;
+          }
+
+          initializedHorizontalScrollKeyRef.current = scrollKey;
+        };
+
+        requestAnimationFrame(syncToRightEdge);
+      }
+    }
     
    
 
 
 
-  }, [data, roi, dataset, rank, onModelClick, selectedModel]); // 
+  }, [data, roi, dataset, rank, onModelClick, selectedModel, defaultScrollToRight, showYAxis, isMultiRegion, showLegend]); // 
 
   // 8. layout
   return (
-    <div style={{ display: "flex", flexDirection: "row", justifyContent: "flex-start", width: "100%", height: "100%", overflow: "hidden" }}>
-      {/* left: Header + Body */}
-      <div style={{ display: "flex", flexDirection: "column", flex: "1 1 auto", height: "100%", overflow: "hidden" }}>
-        
-        {/* fixed head */}
-        <div ref={headerRef} 
-             style={{ 
-              flex: "0 0 auto", 
+    <div style={{ display: "flex", flexDirection: "row", width: "100%", height: "100%", overflow: "hidden" }}>
+      {/* Header + Body: scrollable */}
+      <div style={{ display: "flex", flexDirection: "column", flex: "1 1 auto", height: "100%", overflow: "hidden", minWidth: 0 }}>
+        <div ref={headerRef}
+             style={{
+              flex: "0 0 auto",
               lineHeight: "0",
               overflowX: "hidden",
-              width: "100%" 
-              }}>
-
+             }}>
         </div>
-        
-        {/* rollable body */}
-        <div 
-          ref={bodyRef} 
+        <div
+          ref={bodyRef}
           onScroll={handleScroll}
-          style={{ 
-            flex: "1 1 auto",  // auto fill
-            overflowY: "auto", // flowY
-            overflowX: "auto", // flowX
+          style={{
+            flex: "1 1 auto",
+            overflowY: "auto",
+            overflowX: "auto",
             marginTop: "0px",
-            minHeight: 0,      // 
-            scrollBehavior: "smooth" 
+            minHeight: 0
           }}
         ></div>
       </div>
-      
-      {/* 右侧 Legend */}
-      <div ref={legendRef} style={{ flex: "0 0 auto", marginLeft: "0px", marginTop: "100px", width: "80px" }}></div>
+
+      {/* Legend: right side, no gap — only rendered when showLegend=true */}
+      {showLegend && <div ref={legendRef} style={{ flex: "0 0 60px", width: "60px", marginTop: "100px", marginLeft: "-5px" }}></div>}
     </div>
   );
 };

@@ -72,6 +72,7 @@ const ScoreboardPageQuantitative: React.FC = () => {
 
   // interaction variable for overview and details
   const [visibleRange, setVisibleRange] = useState({ start: 0, end: 0 });
+  const detailScrollRef = useRef<HTMLDivElement>(null);
 
   
   const [overviewWidth, setOverviewWidth] = useState(0);
@@ -250,6 +251,8 @@ const ScoreboardPageQuantitative: React.FC = () => {
       setSelectedModel(null);
     }
   }, [allowedModelValues, selectedModel]);
+
+
 
 
   type newData = {
@@ -815,6 +818,7 @@ const getOverviewColumnCount = (
 
                   {/* content */}
                   <div
+                    ref={detailScrollRef}
                     style={{
                       flex: 1,
                       minHeight: 0,
@@ -927,6 +931,8 @@ const getOverviewColumnCount = (
                         onScrollUpdate={(range: {start: number, end: number}) => setVisibleRange(range)}
                         showYAxis={true}
                         isMultiRegion={region.length > 1}
+                        defaultScrollToRight={region.length === 1}
+                        showLegend={index === region.length - 1}
                       />
                     </div>
                   ))}

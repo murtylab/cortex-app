@@ -121,13 +121,15 @@ const HeatmapOverview = ({
         onModelClick?.(d.model === selectedModel ? null : d.model);
       });
 
-    // selected row indicator bar on the left edge
+    // selected row indicator bar centered in the first cell
     if (selectedModel && models.includes(selectedModel)) {
       const selIndex = models.indexOf(selectedModel);
+      const indicatorWidth = Math.min(2, Math.max(1, colWidth));
+      const indicatorX = Math.max(0, (colWidth - indicatorWidth) / 2);
       svg.append("rect")
-        .attr("x", 0)
+        .attr("x", indicatorX)
         .attr("y", selIndex * rowHeight)
-        .attr("width", 2)
+        .attr("width", indicatorWidth)
         .attr("height", rowHeight)
         .attr("fill", "#7050a0")
         .style("pointer-events", "none");
