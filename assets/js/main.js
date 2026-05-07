@@ -202,6 +202,32 @@
    */
   let navmenulinks = document.querySelectorAll('.navmenu a');
 
+  /**
+   * Set active nav link based on current URL path (for sub-pages without hash anchors)
+   */
+  function setNavActiveByPath() {
+    const path = window.location.pathname;
+    const labPaths    = ['/lab/', '/lab-whole-brain/', '/labLanding/'];
+    const boardPaths  = ['/scoreboardLanding/', '/scoreboardQuantitative/', '/scoreboardQualitative/'];
+
+    let targetHref = null;
+    if (labPaths.some(p => path.startsWith(p))) {
+      targetHref = '/labLanding/';
+    } else if (boardPaths.some(p => path.startsWith(p))) {
+      targetHref = '/scoreboardLanding/';
+    }
+
+    if (targetHref) {
+      navmenulinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === targetHref) {
+          link.classList.add('active');
+        }
+      });
+    }
+  }
+  window.addEventListener('load', setNavActiveByPath);
+
   function navmenuScrollspy() {
     navmenulinks.forEach(navmenulink => {
       if (!navmenulink.hash) return;
