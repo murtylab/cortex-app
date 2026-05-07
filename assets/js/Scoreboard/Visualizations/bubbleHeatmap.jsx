@@ -42,7 +42,23 @@ function getQualiSlice(data, trainSource, region, allowedModelValues, rank, sele
   let models = (allowedModelValues && allowedModelValues.size > 0)
     ? allModels.filter(m => allowedModelValues.has(m))
     : [...allModels];
-  if (!isRanked) models = [...models].sort((a, b) => a.localeCompare(b));
+  if (!isRanked) {
+    models = [...models].sort((a, b) => a.localeCompare(b));
+  } else {
+    // sort by average yes-win-rate across all experiments, descending
+    const score = {};
+    models.forEach(m => {
+      const rates = allExperiments.map(ex => {
+        const cell = cells?.[ex]?.[m];
+        if (!cell) return null;
+        if (cell.majority === 'yes') return cell.maj_pct;
+        if (cell.majority === 'no')  return 1 - cell.maj_pct;
+        return 0.5;
+      }).filter(v => v !== null);
+      score[m] = rates.length ? rates.reduce((a, b) => a + b, 0) / rates.length : 0;
+    });
+    models = [...models].sort((a, b) => score[b] - score[a]);
+  }
   const activeROIs = Array.isArray(region)
     ? region.filter(r => r !== 'Across Regions').map(r => r.toLowerCase()) : [];
   const activeExpFilter = Array.isArray(selectedExperiments) && selectedExperiments.length > 0
