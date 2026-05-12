@@ -152,11 +152,8 @@ const useHeatmapData = (predictionResult: any) => {
 
 const PRELOADED_IMAGE_MODULES = import.meta.glob(
   "/assets/preload/**/*.{png,jpg,jpeg,webp}",
-  {
-    eager: true,
-    import: "default",
-  }
-) as Record<string, string>;
+  { import: "default" }
+) as Record<string, () => Promise<string>>;
 
 const PRELOADED_JSON_MODULES = import.meta.glob(
   "/assets/preload/**/*.json",
@@ -280,7 +277,7 @@ const loadPrestoredDataset = async (datasetKey: string) => {
 
   try {
     const preloadFiles: PreviewFile[] = await Promise.all(
-      matchedEntries.map(async ([fullPath, url], index) => {
+      matchedEntries.map(async ([fullPath, loader], index) => {
         const normalized = normalizePath(fullPath).replace(/\s+/g, "");
         const match = normalized.match(/\/images\/(.+)$/i);
         const relativePath = match?.[1] || "";
@@ -300,6 +297,7 @@ const loadPrestoredDataset = async (datasetKey: string) => {
             ? "image/webp"
             : "image/jpeg";
 
+        const url = await loader();
         const blob = await fetch(url).then((r) => {
           if (!r.ok) throw new Error(`Failed to fetch image: ${url}`);
           return r.blob();
