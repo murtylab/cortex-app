@@ -50,8 +50,26 @@ def get_gemini_reply(user_message: str, rule_context: str | None = None, page_co
                 if parts.get("view") == "2":
                     ctx_lines.append("The user is in the Advanced Insights view.")
                 page_ctx_str = "=== USER'S CURRENT PAGE ===\n" + " ".join(ctx_lines) + "\n\n"
-            elif page_context == "lab":
-                page_ctx_str = "=== USER'S CURRENT PAGE ===\nThe user is on the Lab page.\n\n"
+            elif page_context.startswith("lab"):
+                # Parse rich lab state: "lab|region:FFA|model:clip_rn50|dataset:nsd_1000|..."
+                parts = dict(p.split(":", 1) for p in page_context.split("|") if ":" in p)
+                ctx_lines = ["The user is on the Lab page."]
+                if parts.get("region"):
+                    ctx_lines.append(f"Currently selected brain region: {parts['region']}.")
+                if parts.get("model"):
+                    ctx_lines.append(f"Selected model: {parts['model'].replace('_', ' ')}.")
+                if parts.get("dataset"):
+                    ctx_lines.append(f"Selected training dataset: {parts['dataset']}.")
+                if parts.get("preload_dataset"):
+                    ctx_lines.append(f"Using preloaded dataset: {parts['preload_dataset']}.")
+                if parts.get("images_loaded"):
+                    ctx_lines.append(f"Number of images loaded: {parts['images_loaded']}.")
+                if parts.get("has_prediction") == "true":
+                    ctx_lines.append("Prediction results are currently displayed.")
+                if parts.get("step"):
+                    step_label = parts["step"].replace("_", " ")
+                    ctx_lines.append(f"Current step: {step_label}.")
+                page_ctx_str = "=== USER'S CURRENT PAGE ===\n" + " ".join(ctx_lines) + "\n\n"
 
         prompt = (
             "You are the friendly assistant for Virtual Visual Cortex, a platform that bridges neuroscience and AI. "

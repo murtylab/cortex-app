@@ -12,7 +12,7 @@
       const modelName = match ? match[1] : null;
       return { type: "model_page", modelName };
     }
-    if (path.includes("lablanding") || path.includes("lab-page") || path.includes("lab-landing") || path.includes("lab.html")) {
+    if (path.includes("lablanding") || path.includes("lab-page") || path.includes("lab-landing") || path.includes("lab.html") || /\/lab\/?$/.test(path) || /\/lab\//.test(path)) {
       return { type: "lab", modelName: null };
     }
     if (path.includes("scoreboard")) {
@@ -259,6 +259,20 @@
       if (state.selectedModel) parts.push(`selected_model:${state.selectedModel}`);
       if (state.chartType) parts.push(`chart:${state.chartType}`);
       if (state.pageView && state.pageView !== "rank") parts.push(`view:${state.pageView}`);
+      return parts.join("|");
+    }
+    if (pageContext.type === "lab") {
+      const state = window.cortexLabState;
+      if (!state) return "lab";
+      const parts = ["lab"];
+      if (state.region) parts.push(`region:${state.region.toUpperCase()}`);
+      if (state.model) parts.push(`model:${state.model}`);
+      if (state.dataset) parts.push(`dataset:${state.dataset}`);
+      if (state.prestoreDataset) parts.push(`preload_dataset:${state.prestoreDataset}`);
+      if (state.filesCount) parts.push(`images_loaded:${state.filesCount}`);
+      if (state.hasPrediction) parts.push(`has_prediction:true`);
+      const stepLabels = ["upload_stimuli", "training_settings", "results"];
+      if (typeof state.step === "number") parts.push(`step:${stepLabels[state.step] || state.step}`);
       return parts.join("|");
     }
     if (pageContext.type !== "home") return pageContext.type;

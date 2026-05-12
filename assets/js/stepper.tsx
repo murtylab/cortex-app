@@ -713,6 +713,20 @@ useEffect(() => {
   }
 };
 
+  // Sync lab state for chatbot
+  useEffect(() => {
+    (window as any).cortexLabState = {
+      region,
+      model,
+      dataset,
+      voxelOption,
+      prestoreDataset,
+      step: current,
+      filesCount: files.length,
+      hasPrediction: !!currentRegionPredictionResult,
+    };
+  }, [region, model, dataset, voxelOption, prestoreDataset, current, files.length, currentRegionPredictionResult]);
+
   const barchartData = useBarchartData(currentRegionPredictionResult);
 
   const { heatmapData, originalFilenames } = useHeatmapData(currentRegionPredictionResult);
