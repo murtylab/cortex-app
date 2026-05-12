@@ -241,9 +241,12 @@
   }
 
   // ---- API -----------------------------------------------------------
-  const API_BASE = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-    ? "http://localhost:8000"
-    : "https://cortex-api-backend.vercel.app";
+  // Optional runtime override: set window.CORTEX_CHAT_API_BASE before this script loads.
+  const API_BASE = (window.CORTEX_CHAT_API_BASE || (
+    (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+      ? "http://localhost:8000"
+      : "https://cortex-chatbot-production.up.railway.app"
+  )).replace(/\/$/, "");
 
   function buildPageContextString() {
     if (pageContext.modelName) {
@@ -288,7 +291,10 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-    if (!res.ok) throw new Error("API error");
+    if (!res.ok) {
+      const errorText = await res.text().catch(() => "");
+      throw new Error(`API error ${res.status}: ${errorText || res.statusText}`);
+    }
     const data = await res.json();
     return data.reply || "Sorry, I couldn't generate a response.";
   }
@@ -359,7 +365,7 @@
       const offline = findOfflineAnswer(userQuery);
       if (offline) return offline;
       return (
-        "I'm currently offline, but I can still answer common questions — just click one of the suggested questions above, or try asking: " +
+        `I'm currently offline (API: ${API_BASE}), but I can still answer common questions — just click one of the suggested questions above, or try asking: ` +
         "\"What is FFA?\", \"What is BLIP2?\", \"How do I use the Lab?\", or \"What do the performance scores mean?\"."
       );
     }
