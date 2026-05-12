@@ -157,11 +157,8 @@ const PRELOADED_IMAGE_MODULES = import.meta.glob(
 
 const PRELOADED_JSON_MODULES = import.meta.glob(
   "/assets/preload/**/*.json",
-  {
-    eager: true,
-    import: "default",
-  }
-) as Record<string, any>;
+  { import: "default" }
+) as Record<string, () => Promise<any>>;
 
 const muiLabTheme = createTheme({
   typography: {
@@ -215,6 +212,8 @@ const Stepper: React.FC = () => {
 
   // prestore dataset
   const[prestoreDataset, setPrestoreDataset] = useState<string | null>(null);
+  const [preloadLoading, setPreloadLoading] = useState(false);
+  const [preloadLoadingKey, setPreloadLoadingKey] = useState<string | null>(null);
   const isPreloadMode = !!prestoreDataset;
   const inputMode = isPreloadMode ? "preload" : "upload";
 
@@ -233,7 +232,7 @@ const clearRegionPredictionCache = () => {
   setPredictionPPAResult(null);
 };
 
-const getPreloadedPredictionByRegion = (
+const getPreloadedPredictionLoaderByRegion = (
   datasetKey: string,
   targetRegion: string
 ) => {
@@ -252,8 +251,21 @@ const getPreloadedPredictionByRegion = (
   return PRELOADED_JSON_MODULES[matchedKey];
 };
 
+const loadPreloadedPredictionByRegion = async (
+  datasetKey: string,
+  targetRegion: string
+) => {
+  const loader = getPreloadedPredictionLoaderByRegion(datasetKey, targetRegion);
+  if (!loader) return null;
+  return await loader();
+};
+
 
 const loadPrestoredDataset = async (datasetKey: string) => {
+  setPreloadLoading(true);
+  setPreloadLoadingKey(datasetKey);
+  setPrestoreDataset(datasetKey);
+
   const matchedEntries = Object.entries(PRELOADED_IMAGE_MODULES)
     .filter(([fullPath]) => {
       const normalized = normalizePath(fullPath).replace(/\s+/g, "");
@@ -269,9 +281,10 @@ const loadPrestoredDataset = async (datasetKey: string) => {
 
   if (matchedEntries.length === 0) {
     message.warning(`No images found for ${datasetKey}`);
-    setPrestoreDataset(datasetKey);
     setFiles([]);
     setFileMappings([]);
+    setPreloadLoading(false);
+    setPreloadLoadingKey(null);
     return;
   }
 
@@ -324,7 +337,6 @@ const loadPrestoredDataset = async (datasetKey: string) => {
       })
     );
 
-    setPrestoreDataset(datasetKey);
     setFiles(preloadFiles);
     setFileMappings(preloadFiles);
 
@@ -333,15 +345,17 @@ const loadPrestoredDataset = async (datasetKey: string) => {
     setShowInsights(false);
     setPredictstep(1);
 
-    const ffaJson = getPreloadedPredictionByRegion(datasetKey, "ffa");
-    const ebaJson = getPreloadedPredictionByRegion(datasetKey, "eba");
-    const ppaJson = getPreloadedPredictionByRegion(datasetKey, "ppa");
+    const [ffaJson, ebaJson, ppaJson] = await Promise.all([
+      loadPreloadedPredictionByRegion(datasetKey, "ffa"),
+      loadPreloadedPredictionByRegion(datasetKey, "eba"),
+      loadPreloadedPredictionByRegion(datasetKey, "ppa"),
+    ]);
 
     if (ffaJson) setPredictionFFAResult(ffaJson);
     if (ebaJson) setPredictionEBAResult(ebaJson);
     if (ppaJson) setPredictionPPAResult(ppaJson);
 
-    const selectedJson = getPreloadedPredictionByRegion(datasetKey, region);
+    const selectedJson = await loadPreloadedPredictionByRegion(datasetKey, region);
     if (selectedJson) {
       setPredictionResult(selectedJson);
       setPredictstep(2);
@@ -351,6 +365,9 @@ const loadPrestoredDataset = async (datasetKey: string) => {
   } catch (err) {
     console.error(err);
     message.error(`Failed to load dataset ${datasetKey}`);
+  } finally {
+    setPreloadLoading(false);
+    setPreloadLoadingKey(null);
   }
 };
 
@@ -480,19 +497,32 @@ useEffect(() => {
 
   if (!prestoreDataset) return;
 
-  const ffaJson = getPreloadedPredictionByRegion(prestoreDataset, "ffa");
-  const ebaJson = getPreloadedPredictionByRegion(prestoreDataset, "eba");
-  const ppaJson = getPreloadedPredictionByRegion(prestoreDataset, "ppa");
+  let cancelled = false;
 
-  if (ffaJson) setPredictionFFAResult(ffaJson);
-  if (ebaJson) setPredictionEBAResult(ebaJson);
-  if (ppaJson) setPredictionPPAResult(ppaJson);
+  (async () => {
+    const [ffaJson, ebaJson, ppaJson] = await Promise.all([
+      loadPreloadedPredictionByRegion(prestoreDataset, "ffa"),
+      loadPreloadedPredictionByRegion(prestoreDataset, "eba"),
+      loadPreloadedPredictionByRegion(prestoreDataset, "ppa"),
+    ]);
 
-  const selectedJson = getPreloadedPredictionByRegion(prestoreDataset, region);
-  if (selectedJson) {
-    // setPredictionResult(selectedJson);
-    setPredictstep(2);
-  }
+    if (cancelled) return;
+
+    if (ffaJson) setPredictionFFAResult(ffaJson);
+    if (ebaJson) setPredictionEBAResult(ebaJson);
+    if (ppaJson) setPredictionPPAResult(ppaJson);
+
+    const selectedJson = await loadPreloadedPredictionByRegion(prestoreDataset, region);
+    if (cancelled) return;
+
+    if (selectedJson) {
+      setPredictstep(2);
+    }
+  })();
+
+  return () => {
+    cancelled = true;
+  };
 }, [
   model,
   dataset,
@@ -622,6 +652,39 @@ useEffect(() => {
       return;
     }
 
+    if (isPreloadMode && prestoreDataset) {
+      setPredictionLoading(true);
+      try {
+        const cached = getCachedResultByRegion(targetRegion);
+        const resultData = cached ?? (await loadPreloadedPredictionByRegion(prestoreDataset, targetRegion));
+
+        if (!resultData) {
+          message.error("No preloaded prediction found for this region.");
+          return;
+        }
+
+        setPredictionResult(resultData);
+
+        if (targetRegion === "ffa") {
+          setPredictionFFAResult(resultData);
+        } else if (targetRegion === "eba") {
+          setPredictionEBAResult(resultData);
+        } else if (targetRegion === "ppa") {
+          setPredictionPPAResult(resultData);
+        }
+
+        message.success("Preloaded prediction ready!");
+      } catch (e) {
+        console.error(e);
+        message.error("Failed to load preloaded prediction.");
+      } finally {
+        setPredictionLoading(false);
+        setLoading(false);
+        setPredictstep(2);
+      }
+      return;
+    }
+
     setPredictionLoading(true);
 
     try {
@@ -675,6 +738,21 @@ useEffect(() => {
   const insightPrediction = async (targetRegion: string) => {
   const cached = getCachedResultByRegion(targetRegion);
   if (cached) return cached;
+
+  if (isPreloadMode && prestoreDataset) {
+    const resultData = await loadPreloadedPredictionByRegion(prestoreDataset, targetRegion);
+    if (!resultData) return null;
+
+    if (targetRegion === "ffa") {
+      setPredictionFFAResult(resultData);
+    } else if (targetRegion === "eba") {
+      setPredictionEBAResult(resultData);
+    } else if (targetRegion === "ppa") {
+      setPredictionPPAResult(resultData);
+    }
+
+    return resultData;
+  }
 
   setInsightLoading(true);
   try {
@@ -900,10 +978,14 @@ useEffect(() => {
 
                  <PreloadDatasetPicker
                   selectedKey={prestoreDataset}
+                  isLoading={preloadLoading}
+                  loadingKey={preloadLoadingKey}
                   onSelectDataset={(key: string | null) => {
                     if (!key) {
                       // 取消选择
                       setPrestoreDataset(null);
+                      setPreloadLoading(false);
+                      setPreloadLoadingKey(null);
                       setFiles([]);
                       setFileMappings([]);
                       setPredictionResult(null);
@@ -916,6 +998,12 @@ useEffect(() => {
                     loadPrestoredDataset(key);
                   }}
                 />
+
+                {preloadLoading && (
+                  <div style={{ marginTop: 8, fontSize: 13, color: '#666' }}>
+                    Loading stimuli...
+                  </div>
+                )}
                 </div>
               </div>
 
