@@ -345,21 +345,9 @@ const loadPrestoredDataset = async (datasetKey: string) => {
     setShowInsights(false);
     setPredictstep(1);
 
-    const [ffaJson, ebaJson, ppaJson] = await Promise.all([
-      loadPreloadedPredictionByRegion(datasetKey, "ffa"),
-      loadPreloadedPredictionByRegion(datasetKey, "eba"),
-      loadPreloadedPredictionByRegion(datasetKey, "ppa"),
-    ]);
-
-    if (ffaJson) setPredictionFFAResult(ffaJson);
-    if (ebaJson) setPredictionEBAResult(ebaJson);
-    if (ppaJson) setPredictionPPAResult(ppaJson);
-
-    const selectedJson = await loadPreloadedPredictionByRegion(datasetKey, region);
-    if (selectedJson) {
-      setPredictionResult(selectedJson);
-      setPredictstep(2);
-    }
+    // Keep preload fast: only load image stimuli now.
+    // Predictions should still come from backend when user proceeds.
+    setPredictstep(1);
 
     message.success(`${datasetKey} loaded`);
   } catch (err) {
@@ -496,33 +484,6 @@ useEffect(() => {
   setShowInsights(false);
 
   if (!prestoreDataset) return;
-
-  let cancelled = false;
-
-  (async () => {
-    const [ffaJson, ebaJson, ppaJson] = await Promise.all([
-      loadPreloadedPredictionByRegion(prestoreDataset, "ffa"),
-      loadPreloadedPredictionByRegion(prestoreDataset, "eba"),
-      loadPreloadedPredictionByRegion(prestoreDataset, "ppa"),
-    ]);
-
-    if (cancelled) return;
-
-    if (ffaJson) setPredictionFFAResult(ffaJson);
-    if (ebaJson) setPredictionEBAResult(ebaJson);
-    if (ppaJson) setPredictionPPAResult(ppaJson);
-
-    const selectedJson = await loadPreloadedPredictionByRegion(prestoreDataset, region);
-    if (cancelled) return;
-
-    if (selectedJson) {
-      setPredictstep(2);
-    }
-  })();
-
-  return () => {
-    cancelled = true;
-  };
 }, [
   model,
   dataset,
@@ -652,39 +613,6 @@ useEffect(() => {
       return;
     }
 
-    if (isPreloadMode && prestoreDataset) {
-      setPredictionLoading(true);
-      try {
-        const cached = getCachedResultByRegion(targetRegion);
-        const resultData = cached ?? (await loadPreloadedPredictionByRegion(prestoreDataset, targetRegion));
-
-        if (!resultData) {
-          message.error("No preloaded prediction found for this region.");
-          return;
-        }
-
-        setPredictionResult(resultData);
-
-        if (targetRegion === "ffa") {
-          setPredictionFFAResult(resultData);
-        } else if (targetRegion === "eba") {
-          setPredictionEBAResult(resultData);
-        } else if (targetRegion === "ppa") {
-          setPredictionPPAResult(resultData);
-        }
-
-        message.success("Preloaded prediction ready!");
-      } catch (e) {
-        console.error(e);
-        message.error("Failed to load preloaded prediction.");
-      } finally {
-        setPredictionLoading(false);
-        setLoading(false);
-        setPredictstep(2);
-      }
-      return;
-    }
-
     setPredictionLoading(true);
 
     try {
@@ -738,21 +666,6 @@ useEffect(() => {
   const insightPrediction = async (targetRegion: string) => {
   const cached = getCachedResultByRegion(targetRegion);
   if (cached) return cached;
-
-  if (isPreloadMode && prestoreDataset) {
-    const resultData = await loadPreloadedPredictionByRegion(prestoreDataset, targetRegion);
-    if (!resultData) return null;
-
-    if (targetRegion === "ffa") {
-      setPredictionFFAResult(resultData);
-    } else if (targetRegion === "eba") {
-      setPredictionEBAResult(resultData);
-    } else if (targetRegion === "ppa") {
-      setPredictionPPAResult(resultData);
-    }
-
-    return resultData;
-  }
 
   setInsightLoading(true);
   try {
