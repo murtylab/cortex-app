@@ -346,33 +346,23 @@
             margin-bottom: 40px;
         }
 
-        .team-columns {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 48px;
-        }
-
-        .team-column {
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .team-column-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-sub);
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            margin: 0 0 20px 0;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(107, 99, 88, 0.2);
-        }
-
         .team-name-list {
             list-style: none;
             margin: 0;
             padding: 0;
+        }
+
+        .team-name-list.team-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            column-gap: 48px;
+        }
+
+        /* First row: PI alone on full width; rest flow L-R from row 2 */
+        .team-name-list.team-grid li:first-child {
+            grid-column: 1 / -1;
+            box-sizing: border-box;
+            min-width: 0;
         }
 
         .team-name-list li {
@@ -380,6 +370,20 @@
             color: var(--text-main);
             padding: 8px 0;
             border-bottom: 1px solid rgba(107, 99, 88, 0.08);
+        }
+
+        .team-name-list strong {
+            font-weight: 600;
+        }
+
+        .team-name-list a {
+            color: inherit;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(107, 99, 88, 0.35);
+        }
+
+        .team-name-list a:hover {
+            border-bottom-color: var(--text-main);
         }
 
         .team-name-list li:last-child {
@@ -511,35 +515,25 @@
                 <span class="tag-pill">Team</span>
                 <h2 class="section-title">Our Team</h2>
             </div>
-            <div class="team-columns">
-                <div class="team-column">
-                    <h3 class="team-column-title">Advisory Board</h3>
-                    <ul class="team-name-list">
-                        <li>N.Apurva Ratan Murty, Georgia Institute of Technology</li>
-                        <li>Nancy Kanwisher, Massachusetts Institute of Technology</li>
-                    </ul>
-                </div>
-                <div class="team-column">
-                    <h3 class="team-column-title">Core Members</h3>
-                    <ul class="team-name-list">
-                        <li>Ruolin Wang, Project & Research Lead</li>
-                        <li>Mayukh Deb, Tech Lead</li>
-                        <li>Alish Dipani, Data Lead</li>
-                        <li>Kushal Reddy Dudipala, Research Engineer</li>
-                        <li>Sanjana Chillarege, Research Engineer</li>
-                        <li>Kruthik Ravikanti, Research Engineer</li>
-                        <li>Yuxuan Li, UX Engineer</li>
-                        <li>Arya Bhanushali, UX Engineer</li>
-                        <li>Ranjani Koushik, Research Engineer</li>
-                        <li>Alex Abate, Research Scientist</li>
-                        <li>Mainak Deb, Research Scientist</li>
-                        <li>Haider Al Tahan, Research Scientist</li>
-                        <li>Herrick Fung, Research Scientist</li>
-                        <li>Nikolas McNeal, Research Scientist</li>
-                        <li>Junxia Wang, Research Scientist</li>
-                        <li>Florencia (Flo) Martinez Addiego, Research Scientist</li>
-                </div>
-            </div>
+            <ul class="team-name-list team-grid">
+                <li><strong><a href="https://www.murtylab.com/" target="_blank" rel="noopener noreferrer">N Apurva Ratan Murty</a></strong>, Principal Investigator, Assistant Professor, The School of Psychological and Brain Sciences, Georgia Institute of Technology</li>
+                <li><strong><a href="https://www.violynnewang.com/" target="_blank" rel="noopener noreferrer">Ruolin Wang</a></strong>, Project Lead, Postdoctoral Fellow</li>
+                <li><strong>Mayukh Deb</strong>, Graduate Researcher</li>
+                <li><strong>Alish Dipani</strong>, Graduate Researcher</li>
+                <li><strong>Mainak Deb</strong>, Graduate Researcher</li>
+                <li><strong>Kushal Reddy Dudipala</strong>, Undergrad Researcher</li>
+                <li><strong>Sanjana Chillarege</strong>, Undergrad Researcher</li>
+                <li><strong>Kruthik Ravikanti</strong>, Graduate Researcher</li>
+                <li><strong>Yuxuan Li</strong>, Undergrad Researcher</li>
+                <li><strong>Arya Bhanushali</strong>, Undergrad Researcher</li>
+                <li><strong>Ranjani Koushik</strong>, Undergrad Researcher</li>
+                <li><strong>Alex Abate</strong>, Graduate Researcher</li>
+                <li><strong>Haider Al Tahan</strong>, Graduate Researcher</li>
+                <li><strong>Herrick Fung</strong>, Graduate Researcher</li>
+                <li><strong>Nikolas McNeal</strong>, Graduate Researcher</li>
+                <li><strong>Junxia Wang</strong>, Graduate Researcher</li>
+                <li><strong>Florencia (Flo) Martinez Addiego</strong>, Postdoctoral Fellow</li>
+            </ul>
         </div>
 
     </div>
