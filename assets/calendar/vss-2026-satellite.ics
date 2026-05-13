@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Virtual Visual Cortex//VSS 2026 Satellite//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:vss2026-satellite-cortex-20260517@cortex.app
+DTSTAMP:20260201T150000Z
+DTSTART:20260517T164500Z
+DTEND:20260517T181500Z
+SUMMARY:VSS 2026 Satellite — In-silico replications and model benchmarking
+DESCRIPTION:Hands-on satellite workshop (Virtual Visual Cortex / Murty Lab) at VSS 2026. Event page path: /latest-news/
+LOCATION:Blue Heron\, VSS 2026
+END:VEVENT
+END:VCALENDAR

@@ -52,6 +52,54 @@
             pointer-events: none; 
         }
 
+        /* Top-left latest-news link */
+        .cortex-home-event-pill {
+            position: fixed;
+            left: max(24px, env(safe-area-inset-left, 0px));
+            top: max(24px, env(safe-area-inset-top, 0px));
+            padding: 7px 26px;
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: rgba(45, 42, 38, 0.94);
+            border-radius: 999px;
+            box-shadow: none;
+            border: 1px solid rgba(107, 99, 88, 0.32);
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 400;
+            letter-spacing: 0.03em;
+            line-height: 1.25;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            text-decoration-thickness: 1px;
+            text-decoration-color: rgba(61, 56, 50, 0.5);
+            text-align: center;
+            z-index: 9998;
+            pointer-events: auto;
+            max-width: min(640px, calc(100vw - 48px));
+            box-sizing: border-box;
+            transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, text-decoration-color 0.2s ease;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .cortex-home-event-pill:hover {
+            color: rgba(36, 34, 31, 0.98);
+            border-color: rgba(107, 99, 88, 0.48);
+            background-color: rgba(255, 255, 255, 0.92);
+            text-decoration-color: rgba(36, 34, 31, 0.65);
+        }
+
+        @media (max-width: 600px) {
+            .cortex-home-event-pill {
+                left: max(12px, env(safe-area-inset-left, 0px));
+                top: max(12px, env(safe-area-inset-top, 0px));
+                padding: 6px 18px;
+                font-size: 11px;
+                max-width: calc(100vw - 24px);
+            }
+        }
+
         #main-wrapper {
             position: relative;
             z-index: 10;
@@ -395,6 +443,8 @@
 <body>
 
     <div id="vis-container"></div>
+
+    <a href="/latest-news/" class="cortex-home-event-pill">🧠 Latest News: Come to our VSS 2026 Satellite event!</a>
 
     <div id="main-wrapper">
         

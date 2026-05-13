@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VSS 2026 Satellite — Virtual Visual Cortex</title>
+    <meta name="description" content="VSS 2026 Satellite: In-silico replications and hypothesis testing for model benchmarking.">
+    <link href="/assets/img/logo.svg" rel="icon" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/vss-page-tabs.css">
+    <style>
+        :root {
+            --bg-color: #f7f7f4;
+            --tungsten: #424242;
+            --text-main: #3d3832;
+            --text-sub: #6b6358;
+            --accent: #c98d9a;
+            --accent-soft: rgba(201, 141, 154, 0.18);
+            --card-shadow: 0 10px 30px rgba(107, 99, 88, 0.06);
+            --border: rgba(107, 99, 88, 0.18);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            background-image:
+                radial-gradient(ellipse 120% 80% at 100% 0%, rgba(201, 141, 154, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse 80% 60% at 0% 100%, rgba(184, 164, 188, 0.07) 0%, transparent 45%);
+            color: var(--text-main);
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .page-shell {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: max(28px, env(safe-area-inset-top)) max(22px, env(safe-area-inset-right)) 96px max(22px, env(safe-area-inset-left));
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(1.65rem, 4.2vw, 2.35rem);
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            color: var(--tungsten);
+            margin: 0 0 22px 0;
+            line-height: 1.2;
+            max-width: 34ch;
+        }
+
+        .hero-lead {
+            margin: 0 0 28px 0;
+            font-size: 0.95rem;
+            font-weight: 400;
+            color: var(--text-sub);
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        @media (max-width: 640px) {
+            .meta-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .meta-tile {
+            padding: 16px 18px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.62);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.75);
+            box-shadow: var(--card-shadow);
+        }
+
+        .meta-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-sub);
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .meta-value {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-main);
+            line-height: 1.35;
+        }
+
+        .calendar-add-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px 10px;
+            margin: -12px 0 28px 0;
+            font-size: 0.82rem;
+            color: var(--text-sub);
+        }
+
+        .calendar-add-label {
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            font-size: 0.68rem;
+            color: var(--text-sub);
+            margin-right: 4px;
+        }
+
+        .calendar-add-row a {
+            color: rgba(90, 72, 82, 0.95);
+            font-weight: 500;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            text-decoration-color: rgba(201, 141, 154, 0.55);
+        }
+
+        .calendar-add-row a:hover {
+            color: var(--text-main);
+            text-decoration-color: rgba(138, 90, 100, 0.85);
+        }
+
+        .calendar-add-sep {
+            color: rgba(107, 99, 88, 0.35);
+            user-select: none;
+        }
+
+        .panel {
+            margin-bottom: 20px;
+            padding: 26px 28px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.52);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            box-shadow: var(--card-shadow);
+        }
+
+        .panel-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.11em;
+            text-transform: uppercase;
+            color: var(--text-sub);
+            margin: 0 0 14px 0;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(107, 99, 88, 0.1);
+        }
+
+        .speakers-intro {
+            margin: 0 0 14px 0;
+            font-size: 0.88rem;
+            color: var(--text-sub);
+        }
+
+        .speaker-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .speaker-chip {
+            display: inline-block;
+            padding: 8px 14px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+        }
+
+        .schedule-block {
+            margin-top: 8px;
+        }
+
+        .session-head {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--tungsten);
+            margin: 22px 0 10px 0;
+        }
+
+        .session-head:first-of-type {
+            margin-top: 0;
+        }
+
+        .session-sub {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-sub);
+            margin: -4px 0 12px 0;
+        }
+
+        .schedule-item {
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(107, 99, 88, 0.08);
+        }
+
+        .schedule-block > .schedule-item:last-of-type {
+            border-bottom: none;
+        }
+
+        .schedule-item-head {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px 16px;
+        }
+
+        .schedule-item-text {
+            flex: 1;
+            min-width: min(100%, 12rem);
+        }
+
+        .schedule-item-title {
+            font-size: 0.86rem;
+            font-weight: 500;
+            color: var(--text-main);
+            line-height: 1.35;
+        }
+
+        .schedule-item-byline {
+            margin-top: 4px;
+            font-size: 0.78rem;
+            color: var(--text-sub);
+            line-height: 1.4;
+        }
+
+        .schedule-item-when {
+            flex-shrink: 0;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--text-sub);
+            text-align: right;
+        }
+
+        .schedule-item-desc {
+            margin: 10px 0 0 0;
+            font-size: 0.82rem;
+            color: var(--text-sub);
+            line-height: 1.5;
+        }
+
+        @media (max-width: 520px) {
+            .schedule-item-when {
+                width: 100%;
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <nav class="vss-page-tabs" aria-label="Page">
+            <a href="/" class="vss-page-tab">← Virtual Visual Cortex</a>
+            <a href="/latest-news/" class="vss-page-tab" aria-current="page">VSS 2026 Satellite</a>
+            <a href="/vss-2026/" class="vss-page-tab">Murty Lab @ VSS 2026</a>
+        </nav>
+
+        <h1 class="hero-title">In-silico replications and hypothesis testing for model benchmarking</h1>
+        <p class="hero-lead">
+            This satellite event will show how in-silico experimentation can be used as a practical framework for benchmarking computational models of the human brain. It builds directly on our recent efforts (Wang, Deb et al. in prep) that show how prior experiments can be replayed in silico and used to evaluate which findings replicate across candidate brain models and which do not. Participants will be invited to run in-silico experiments of their own design using a drag-and-drop executable modeling platform.
+        </p>
+
+        <div class="meta-grid">
+            <div class="meta-tile">
+                <div class="meta-label">When</div>
+                <div class="meta-value">Sunday, May 17, 2026 12:45 – 2:15 pm</div>
+            </div>
+            <div class="meta-tile">
+                <div class="meta-label">Where</div>
+                <div class="meta-value">Blue Heron</div>
+            </div>
+        </div>
+
+        <p class="calendar-add-row">
+            <span class="calendar-add-label">Add to calendar</span>
+            <a href="https://www.google.com/calendar/render?action=TEMPLATE&amp;text=VSS%202026%20Satellite%20%E2%80%94%20In-silico%20replications%20and%20hypothesis%20testing%20for%20model%20benchmarking&amp;dates=20260517T164500Z%2F20260517T181500Z&amp;details=Hands-on%20satellite%20workshop%20(Virtual%20Visual%20Cortex%20%2F%20Murty%20Lab)%20at%20VSS%202026.%20Event%20page%20path%3A%20%2Flatest-news%2F&amp;location=Blue%20Heron%2C%20VSS%202026" target="_blank" rel="noopener noreferrer">Google Calendar</a>
+            <span class="calendar-add-sep" aria-hidden="true">·</span>
+            <a href="https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&amp;rru=addevent&amp;startdt=2026-05-17T16:45:00Z&amp;enddt=2026-05-17T18:15:00Z&amp;subject=VSS%202026%20Satellite%20%E2%80%94%20In-silico%20replications%20and%20hypothesis%20testing%20for%20model%20benchmarking&amp;body=Hands-on%20satellite%20workshop%20(Virtual%20Visual%20Cortex%20%2F%20Murty%20Lab)%20at%20VSS%202026.&amp;location=Blue%20Heron%2C%20VSS%202026" target="_blank" rel="noopener noreferrer">Outlook</a>
+            <span class="calendar-add-sep" aria-hidden="true">·</span>
+            <a href="/assets/calendar/vss-2026-satellite.ics" download="vss-2026-satellite.ics">Apple &amp; others (.ics)</a>
+        </p>
+
+        <div class="panel">
+            <h2 class="panel-title">Organizer</h2>
+            <div class="speaker-chips">
+                <span class="speaker-chip">Ruolin Wang</span>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2 class="panel-title">Speakers</h2>
+            <div class="speaker-chips">
+                <span class="speaker-chip">N Apurva Ratan Murty</span>
+                <span class="speaker-chip">Nancy Kanwisher</span>
+                <span class="speaker-chip">Antônio Mello</span>
+                <span class="speaker-chip">Mayukh Deb</span>
+                <span class="speaker-chip">Ruolin Wang</span>
+            </div>
+        </div>
+
+        <div class="panel schedule-block">
+            <h2 class="panel-title">Program outline</h2>
+
+            <h3 class="session-head">Opening</h3>
+
+            <div class="schedule-item">
+                <div class="schedule-item-head">
+                    <div class="schedule-item-text">
+                        <div class="schedule-item-title">Welcome and opening remarks</div>
+                        <div class="schedule-item-byline">N Apurva Ratan Murty and Ruolin Wang</div>
+                    </div>
+                    <div class="schedule-item-when">5 min</div>
+                </div>
+            </div>
+
+            <div class="schedule-item">
+                <div class="schedule-item-head">
+                    <div class="schedule-item-text">
+                        <div class="schedule-item-title">From prediction to exploration: research motivation and platform overview</div>
+                        <div class="schedule-item-byline">Ruolin Wang</div>
+                    </div>
+                    <div class="schedule-item-when">8–10 min</div>
+                </div>
+                <p class="schedule-item-desc">A brief framing of the research motivation behind the platform: how encoding models can move beyond prediction toward replication, teaching, and hypothesis-driven exploration. Also introducing the Lab as a shared workflow for both revisiting published findings and exploring new experimental ideas.</p>
+            </div>
+
+            <div class="schedule-item">
+                <div class="schedule-item-head">
+                    <div class="schedule-item-text">
+                        <div class="schedule-item-title">What happens when you click &ldquo;run&rdquo;: understanding encoding models as predictive tools</div>
+                        <div class="schedule-item-byline">Mayukh Deb</div>
+                    </div>
+                    <div class="schedule-item-when">5 min</div>
+                </div>
+                <p class="schedule-item-desc">A concise, non-technical primer on how the platform generates model predictions, what participants will see in the outputs, and how to interpret results during the hands-on sessions.</p>
+            </div>
+
+            <div class="schedule-item">
+                <div class="schedule-item-head">
+                    <div class="schedule-item-text">
+                        <div class="schedule-item-title">Teaching with interactive brain-model tools</div>
+                        <div class="schedule-item-byline">Nancy Kanwisher</div>
+                    </div>
+                    <div class="schedule-item-when">7 min talk + 3 min Q&amp;A</div>
+                </div>
+                <p class="schedule-item-desc">How the platform can support teaching, demonstration, and conceptual understanding in vision science.</p>
+            </div>
+
+            <h3 class="session-head">Session 1</h3>
+            <p class="session-sub">Looking into the Past — Replicating Published Findings</p>
+
+            <div class="schedule-item">
+                <div class="schedule-item-head">
+                    <div class="schedule-item-text">
+                        <div class="schedule-item-title">Invited vision talk: using models to revisit published findings</div>
+                        <div class="schedule-item-byline">Antônio Mello</div>
+                    </div>
+                    <div class="schedule-item-when">7 min talk + 3 min Q&amp;A</div>
+                </div>
+            </div>
+
+            <div class="schedule-item">
+                <div class="schedule-item-head">
+                    <div class="schedule-item-text">
+                        <div class="schedule-item-title">Hands-on Lab: revisiting published experiments</div>
+                    </div>
+                    <div class="schedule-item-when">15–20 min</div>
+                </div>
+                <p class="schedule-item-desc">Participants use the Lab with curated stimuli from published studies to examine whether model predictions reproduce known experimental findings.</p>
+            </div>
+
+            <div class="schedule-item">
+                <div class="schedule-item-head">
+                    <div class="schedule-item-text">
+                        <div class="schedule-item-title">Group discussion and summary</div>
+                    </div>
+                    <div class="schedule-item-when">10–15 min</div>
+                </div>
+                <p class="schedule-item-desc">A discussion of what the models captured, where they failed, and what replication successes and failures can reveal about both computational models and cognitive theories.</p>
+            </div>
+
+            <h3 class="session-head">Session 2</h3>
+            <p class="session-sub">Looking into the Future — Planning New Experiments</p>
+
+            <div class="schedule-item">
+                <div class="schedule-item-head">
+                    <div class="schedule-item-text">
+                        <div class="schedule-item-title">Invited vision talk: using models to guide future experiments</div>
+                        <div class="schedule-item-byline">TBD</div>
+                    </div>
+                    <div class="schedule-item-when">7 min talk + 3 min Q&amp;A</div>
+                </div>
+            </div>
+
+            <div class="schedule-item">
+                <div class="schedule-item-head">
+                    <div class="schedule-item-text">
+                        <div class="schedule-item-title">Hands-on Lab: exploring new experimental ideas</div>
+                    </div>
+                    <div class="schedule-item-when">15–20 min</div>
+                </div>
+                <p class="schedule-item-desc">Participants use the same Lab workflow with their own stimuli or modified examples to compare predicted responses across ROIs or models and explore how simulations might refine future experimental hypotheses.</p>
+            </div>
+
+            <div class="schedule-item">
+                <div class="schedule-item-head">
+                    <div class="schedule-item-text">
+                        <div class="schedule-item-title">Group discussion and summary</div>
+                    </div>
+                    <div class="schedule-item-when">10–15 min</div>
+                </div>
+                <p class="schedule-item-desc">A discussion of how model simulations can help generate hypotheses, sharpen experimental designs, and reveal the limits of current models.</p>
+            </div>
+
+            <h3 class="session-head">Closing</h3>
+
+            <div class="schedule-item">
+                <div class="schedule-item-head">
+                    <div class="schedule-item-text">
+                        <div class="schedule-item-title">Closing remarks and next steps</div>
+                        <div class="schedule-item-byline">N Apurva Ratan Murty and Ruolin Wang</div>
+                    </div>
+                    <div class="schedule-item-when">5 min</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
