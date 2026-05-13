@@ -1,11 +1,20 @@
 /* Oval page tabs above the title (VSS satellite + Murty Lab @ VSS pages) */
 
 .vss-page-tabs {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    column-gap: 16px;
+    row-gap: 10px;
+    margin: 0 0 22px 0;
+}
+
+.vss-page-tabs-inner {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 10px;
-    margin: 0 0 22px 0;
+    min-width: 0;
 }
 
 .vss-page-tab {
@@ -47,10 +56,34 @@
     filter: brightness(0.96);
 }
 
+.vss-page-tabs-external {
+    display: inline-block;
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: rgba(90, 72, 82, 0.95);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(201, 141, 154, 0.45);
+    padding-bottom: 1px;
+    white-space: nowrap;
+    line-height: 1.25;
+    justify-self: end;
+}
+
+.vss-page-tabs-external:hover {
+    color: rgba(36, 34, 31, 0.95);
+    border-bottom-color: rgba(138, 90, 100, 0.75);
+}
+
 @media (max-width: 520px) {
     .vss-page-tabs {
-        gap: 8px;
+        grid-template-columns: 1fr;
         margin-bottom: 18px;
+    }
+
+    .vss-page-tabs-external {
+        justify-self: end;
     }
 
     .vss-page-tab {
