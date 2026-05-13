@@ -30,7 +30,7 @@ export default defineConfig({
         scoredboardQuality: 'scoreboardQualitative/index.html',
         scoreboardLanding: 'scoreboardLanding/index.html',
         labLanding: 'labLanding/index.html',
-        latestNews: 'latest-news/index.html',
+        vssSatellite: 'vss-satellite/index.html',
         vss2026: 'vss-2026/index.html',
         walkthrough: 'walkthrough/index.html',
       
