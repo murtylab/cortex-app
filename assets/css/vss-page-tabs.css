@@ -1,73 +1,34 @@
-/* Oval page tabs above the title (VSS satellite + Murty Lab @ VSS pages) */
+/* VSS nav: left home | centered slim segment | right Murty — single row */
 
 .vss-page-tabs {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
-    column-gap: 16px;
-    row-gap: 10px;
-    margin: 0 0 22px 0;
-}
-
-.vss-page-tabs-inner {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
+    column-gap: 12px;
+    row-gap: 0;
+    margin: 0 0 14px 0;
     min-width: 0;
-}
-
-.vss-page-tab {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 18px;
-    border-radius: 999px;
-    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
-    font-size: 0.78rem;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    color: rgba(61, 56, 50, 0.82);
-    text-decoration: none;
-    border: 1px solid rgba(107, 99, 88, 0.28);
-    background: transparent;
-    cursor: pointer;
-    transition: color 0.18s ease, border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
-    line-height: 1.25;
-    text-align: center;
-}
-
-.vss-page-tab:hover {
-    color: rgba(36, 34, 31, 0.95);
-    border-color: rgba(107, 99, 88, 0.45);
-    background-color: rgba(255, 255, 255, 0.55);
-}
-
-.vss-page-tab[aria-current="page"] {
-    font-weight: 600;
-    color: #fff;
-    border-color: transparent;
-    background: linear-gradient(135deg, #c98d9a 0%, #b8a4bc 50%, #c4b4cc 100%);
-    box-shadow: 0 4px 14px rgba(107, 99, 88, 0.18);
-}
-
-.vss-page-tab[aria-current="page"]:hover {
-    color: #fff;
-    filter: brightness(0.96);
 }
 
 .vss-page-tabs-external {
     display: inline-block;
     font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     font-weight: 500;
     letter-spacing: 0.02em;
     color: rgba(90, 72, 82, 0.95);
     text-decoration: none;
     border-bottom: 1px solid rgba(201, 141, 154, 0.45);
-    padding-bottom: 1px;
+    padding-bottom: 0;
     white-space: nowrap;
-    line-height: 1.25;
+    line-height: 1.15;
+}
+
+.vss-page-tabs-external:first-of-type {
+    justify-self: start;
+}
+
+.vss-page-tabs-external:last-of-type {
     justify-self: end;
 }
 
@@ -76,18 +37,74 @@
     border-bottom-color: rgba(138, 90, 100, 0.75);
 }
 
+.vss-page-tabs-segment {
+    justify-self: center;
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 2px;
+    max-width: 100%;
+    min-width: 0;
+    padding: 2px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.42);
+    border: 1px solid rgba(107, 99, 88, 0.22);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.vss-page-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: rgba(61, 56, 50, 0.82);
+    text-decoration: none;
+    border: 1px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    transition: color 0.18s ease, border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+    line-height: 1.15;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.vss-page-tab:hover {
+    color: rgba(36, 34, 31, 0.95);
+    background-color: rgba(255, 255, 255, 0.55);
+}
+
+.vss-page-tab[aria-current="page"] {
+    font-weight: 600;
+    color: #fff;
+    border-color: transparent;
+    background: linear-gradient(135deg, #c98d9a 0%, #b8a4bc 50%, #c4b4cc 100%);
+    box-shadow: 0 1px 6px rgba(107, 99, 88, 0.18);
+}
+
+.vss-page-tab[aria-current="page"]:hover {
+    color: #fff;
+    filter: brightness(0.96);
+}
+
 @media (max-width: 520px) {
     .vss-page-tabs {
-        grid-template-columns: 1fr;
-        margin-bottom: 18px;
+        column-gap: 8px;
+        margin-bottom: 12px;
     }
 
     .vss-page-tabs-external {
-        justify-self: end;
+        font-size: 0.65rem;
     }
 
     .vss-page-tab {
-        font-size: 0.7rem;
-        padding: 8px 14px;
+        font-size: 0.65rem;
+        padding: 3px 8px;
     }
 }
