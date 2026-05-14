@@ -27,6 +27,11 @@ import Heatmap from './Lab/heatmap.jsx';
 import BoxPlot from './Lab/boxplot.jsx';
 
 import DatasetCardLab from './Lab/datasetcard-lab.jsx';
+import {
+  REGION_OPTIONS,
+  MURTY185_INCLUDED_REGIONS,
+  NSD_1000_INCLUDED_REGIONS,
+} from './constants';
 
 
 
@@ -194,9 +199,7 @@ const Stepper: React.FC = () => {
   const [fileMappings, setFileMappings] = useState<PreviewFile[]>([]);
 
   const [predictionResult, setPredictionResult] = useState<any>(null);
-  const [predictionFFAResult, setPredictionFFAResult] = useState<any>(null);
-  const [predictionEBAResult, setPredictionEBAResult] = useState<any>(null);
-  const [predictionPPAResult, setPredictionPPAResult] = useState<any>(null);
+  const [insightRegionCache, setInsightRegionCache] = useState<Record<string, any>>({});
 
 
   // basic visulization and prediction states
@@ -206,6 +209,7 @@ const Stepper: React.FC = () => {
   // insight visulalization states
   const [showInsights, setShowInsights] = useState(false);
   const [insightLoading, setInsightLoading] = useState(false);
+  const [selectedInsightRegions, setSelectedInsightRegions] = useState<string[]>(['ffa', 'eba', 'ppa']);
 
   //visualization
   const [vizOrder, setVizOrder] = useState("group");
@@ -227,9 +231,15 @@ const Stepper: React.FC = () => {
 
 
 const clearRegionPredictionCache = () => {
-  setPredictionFFAResult(null);
-  setPredictionEBAResult(null);
-  setPredictionPPAResult(null);
+  setInsightRegionCache({});
+};
+
+const allInsightRegionValues = REGION_OPTIONS.map((r) => r.value);
+
+const getAvailableInsightRegionsByDataset = (datasetName: string) => {
+  if (datasetName === 'murty185') return MURTY185_INCLUDED_REGIONS;
+  if (datasetName === 'nsd_1000') return NSD_1000_INCLUDED_REGIONS;
+  return allInsightRegionValues;
 };
 
 const getPreloadedPredictionLoaderByRegion = (
@@ -506,39 +516,22 @@ useEffect(() => {
     setPredictionResult(null);
     setPredictstep(1);
     handlePrediction();
-  }, [region, current, predictionFFAResult, predictionEBAResult, predictionPPAResult]);
+  }, [region, current, insightRegionCache]);
 
   useEffect(() => {
     console.log("🔄 predictionResult updated:", predictionResult);
   }, [predictionResult]);
 
-  useEffect(() => {
-    console.log("😊FFA cache updated:", predictionFFAResult);
-  }, [predictionFFAResult]);
-
-  useEffect(() => {
-    console.log("😊EBA cache updated:", predictionEBAResult);
-  }, [predictionEBAResult]);
-
-  useEffect(() => {
-    console.log("😊PPA cache updated:", predictionPPAResult);
-  }, [predictionPPAResult]);
-
   const getCachedResultByRegion = (targetRegion: string) => {
-    if (targetRegion === "ffa") return predictionFFAResult;
-    if (targetRegion === "eba") return predictionEBAResult;
-    if (targetRegion === "ppa") return predictionPPAResult;
-    return null;
+    return insightRegionCache[targetRegion] ?? null;
   };
 
   const currentRegionPredictionResult = useMemo(() => {
     return getCachedResultByRegion(region) ?? predictionResult;
-  }, [region, predictionFFAResult, predictionEBAResult, predictionPPAResult, predictionResult]);
+  }, [region, insightRegionCache, predictionResult]);
 
   useEffect(() => {
-    const ffaCached = !!predictionFFAResult;
-    const ebaCached = !!predictionEBAResult;
-    const ppaCached = !!predictionPPAResult;
+    const cachedRegions = Object.keys(insightRegionCache);
 
     const selectedCache = getCachedResultByRegion(region);
     const usingCache = selectedCache === currentRegionPredictionResult && !!selectedCache;
@@ -551,9 +544,7 @@ useEffect(() => {
 
     console.log("========== REGION DEBUG ==========");
     console.log("current region:", region);
-    console.log("FFA cache exists:", ffaCached, predictionFFAResult);
-    console.log("EBA cache exists:", ebaCached, predictionEBAResult);
-    console.log("PPA cache exists:", ppaCached, predictionPPAResult);
+    console.log("cached regions:", cachedRegions);
     console.log("selected cache for current region:", selectedCache);
     console.log("predictionResult:", predictionResult);
     console.log("currentRegionPredictionResult:", currentRegionPredictionResult);
@@ -562,15 +553,39 @@ useEffect(() => {
   }, [
     region,
     predictionResult,
-    predictionFFAResult,
-    predictionEBAResult,
-    predictionPPAResult,
+    insightRegionCache,
     currentRegionPredictionResult,
   ]);
 
+  const availableInsightRegions = useMemo(() => {
+    const included = getAvailableInsightRegionsByDataset(dataset);
+    return allInsightRegionValues.filter((r) => included.includes(r));
+  }, [dataset]);
+
+  useEffect(() => {
+    setSelectedInsightRegions((prev) => {
+      const kept = prev.filter((r) => availableInsightRegions.includes(r));
+      if (kept.length > 0) return kept;
+      return availableInsightRegions;
+    });
+  }, [availableInsightRegions]);
+
+  const toggleInsightRegion = (targetRegion: string) => {
+    setSelectedInsightRegions((prev) =>
+      prev.includes(targetRegion)
+        ? prev.filter((r) => r !== targetRegion)
+        : [...prev, targetRegion]
+    );
+  };
+
 
   const handleGetInsights = async () => {
-    const missingRegions = ["ffa", "eba", "ppa"].filter(
+    if (selectedInsightRegions.length === 0) {
+      message.warning("Select at least one ROI for insights.");
+      return;
+    }
+
+    const missingRegions = selectedInsightRegions.filter(
       (r) => !getCachedResultByRegion(r)
     );
 
@@ -591,12 +606,12 @@ useEffect(() => {
     }
   };
   const insightRegionDataMap = useMemo(() => {
-    return {
-      ffa: predictionFFAResult,
-      eba: predictionEBAResult,
-      ppa: predictionPPAResult,
-    };
-  }, [predictionFFAResult, predictionEBAResult, predictionPPAResult]);
+    return selectedInsightRegions.reduce((acc, r) => {
+      const cached = getCachedResultByRegion(r);
+      if (cached) acc[r] = cached;
+      return acc;
+    }, {} as Record<string, any>);
+  }, [selectedInsightRegions, insightRegionCache]);
 
   const handlePrediction = async (targetRegion = region): Promise<boolean> => {
     console.log("📦 handlePrediction received files:");
@@ -616,14 +631,7 @@ useEffect(() => {
 
       if (localResult) {
         setPredictionResult(localResult);
-
-        if (targetRegion === "ffa") {
-          setPredictionFFAResult(localResult);
-        } else if (targetRegion === "eba") {
-          setPredictionEBAResult(localResult);
-        } else if (targetRegion === "ppa") {
-          setPredictionPPAResult(localResult);
-        }
+        setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: localResult }));
 
         setPredictstep(2);
         message.success("Loaded precomputed prediction.");
@@ -661,13 +669,7 @@ useEffect(() => {
  
       setPredictionResult(resultData);
 
-      if (targetRegion === "ffa") {
-        setPredictionFFAResult(resultData);
-      } else if (targetRegion === "eba") {
-        setPredictionEBAResult(resultData);
-      } else if (targetRegion === "ppa") {
-        setPredictionPPAResult(resultData);
-      }
+      setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: resultData }));
 
       console.log("✅ saved result into cache for:", targetRegion);
       message.success("Prediction complete!");
@@ -687,6 +689,19 @@ useEffect(() => {
   const cached = getCachedResultByRegion(targetRegion);
   if (cached) return cached;
 
+  if (prestoreDataset) {
+    const localResult = await loadPreloadedPredictionByRegion(
+      prestoreDataset,
+      targetRegion
+    );
+
+    if (localResult) {
+      setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: localResult }));
+
+      return localResult;
+    }
+  }
+
   setInsightLoading(true);
   try {
     const uploadFiles = files.map((x) => {
@@ -696,6 +711,9 @@ useEffect(() => {
     });
 
     const serverKeys = uploadFiles.map((f) => f.name);
+
+    setFiles((prev) => prev.map((x, i) => ({ ...x, serverKey: serverKeys[i] })));
+    setFileMappings((prev) => prev.map((x, i) => ({ ...x, serverKey: serverKeys[i] })));
 
     const paths: string[] = await uploadImages(uploadFiles);
 
@@ -710,13 +728,7 @@ useEffect(() => {
 
     const resultData = result.data.data;
 
-    if (targetRegion === "ffa") {
-      setPredictionFFAResult(resultData);
-    } else if (targetRegion === "eba") {
-      setPredictionEBAResult(resultData);
-    } else if (targetRegion === "ppa") {
-      setPredictionPPAResult(resultData);
-    }
+    setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: resultData }));
 
     return resultData;
   } finally {
@@ -1023,7 +1035,7 @@ useEffect(() => {
                 setOrder={setVizOrder}
               />
             )}
-            <h3 style={{ textAlign: "left", color:"black", fontSize: "18px", marginBottom: "50px", marginTop: "40px"}}><b>Multivariate Analysis:</b> Respresentational dissimilarity matrix (RDM) from predicted voxel responses</h3>
+            <h3 style={{ textAlign: "left", color:"black", fontSize: "18px", marginBottom: "6px", marginTop: "40px"}}><b>Multivariate Analysis:</b> Respresentational dissimilarity matrix (RDM) from predicted voxel responses</h3>
           {/* <Heatmap heatmapData={heatmapData} originalFilenames={originalFilenames} sortedFilenames={sortedFilenames} width={800} height={800} fileMappings={fileMappings}/> */}
           {barchartData.length <= 1 ? (
             <div style={{ textAlign: 'center', fontSize: '16px', color: '#888', fontStyle: 'italic' }}>
@@ -1034,7 +1046,7 @@ useEffect(() => {
             />
           )}
 
-          <div style={{ marginTop: "20px",  display: "flex", justifyContent: "left", alignItems: "center", gap: "10px" }}>
+          <div style={{ marginTop: "-100px",  display: "flex", justifyContent: "left", alignItems: "center", gap: "10px" }}>
             <h3
               style={{
                 textAlign: "left",
@@ -1050,10 +1062,64 @@ useEffect(() => {
               type="primary"
               onClick={handleGetInsights}
               loading={insightLoading}
-              disabled={files.length === 0}
+              disabled={files.length === 0 || selectedInsightRegions.length === 0}
             >
               Get Insights
             </Button>
+          </div>
+
+          <div
+            style={{
+              marginTop: '10px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              alignItems: 'flex-start',
+            }}
+          >
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <span style={{ fontWeight: 600, color: 'black' }}>ROI Selection:</span>
+              <Button
+                type="default"
+                size="small"
+                onClick={() => setSelectedInsightRegions(availableInsightRegions)}
+              >
+                Select All
+              </Button>
+              <Button
+                type="default"
+                size="small"
+                onClick={() => setSelectedInsightRegions([])}
+              >
+                Clear
+              </Button>
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {availableInsightRegions.map((r) => {
+                const selected = selectedInsightRegions.includes(r);
+                const label = REGION_OPTIONS.find((x) => x.value === r)?.label || r.toUpperCase();
+
+                return (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => toggleInsightRegion(r)}
+                    style={{
+                      cursor: 'pointer',
+                      borderRadius: 16,
+                      border: selected ? '1px solid var(--highlight-color-button)' : '1px solid #ccc',
+                      background: selected ? 'var(--highlight-color-button)' : '#fff',
+                      color: selected ? '#fff' : '#333',
+                      padding: '4px 12px',
+                      fontSize: 13,
+                    }}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {showInsights && (
@@ -1061,6 +1127,7 @@ useEffect(() => {
               <BoxPlot
                 regionDataMap={insightRegionDataMap}
                 fileMappings={fileMappings}
+                regionOrder={selectedInsightRegions}
                 height={560}
               />
             </div>

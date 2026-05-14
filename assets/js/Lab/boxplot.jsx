@@ -1,10 +1,41 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import * as d3 from "d3";
 import { styleTooltip } from "./barchartstyles";
-import { Box } from "@mui/material";
 
-const REGION_ORDER = ["ffa", "eba", "ppa"];
 const GROUP_ORDER_FALLBACK = ["body", "face", "object", "scene"];
+const PANEL_WIDTH = 340;
+const PANEL_GAP = 30;
+const MAX_VISIBLE_PANELS = 3;
+const TOOLTIP_OFFSET = 14;
+
+const positionTooltip = (tooltip, event) => {
+  const node = tooltip.node();
+  if (!node) return;
+
+  const tooltipWidth = node.offsetWidth || 0;
+  const tooltipHeight = node.offsetHeight || 0;
+
+  let left = event.clientX + TOOLTIP_OFFSET;
+  let top = event.clientY - tooltipHeight - TOOLTIP_OFFSET;
+
+  if (left + tooltipWidth > window.innerWidth - 12) {
+    left = event.clientX - tooltipWidth - TOOLTIP_OFFSET;
+  }
+
+  if (left < 12) {
+    left = 12;
+  }
+
+  if (top < 12) {
+    top = event.clientY + TOOLTIP_OFFSET;
+  }
+
+  if (top + tooltipHeight > window.innerHeight - 12) {
+    top = Math.max(12, window.innerHeight - tooltipHeight - 12);
+  }
+
+  tooltip.style("left", `${left}px`).style("top", `${top}px`);
+};
 
 const computeBoxStats = (values) => {
   if (!values || values.length === 0) return null;
@@ -44,10 +75,16 @@ const stableJitter = (key, amplitude) => {
   return (normalized - 0.5) * amplitude;
 };
 
-const BoxPlot = ({ regionDataMap, fileMappings, height = 560 }) => {
+const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560 }) => {
   const svgRef = useRef(null);
   const containerRef = useRef(null);
-  const [containerWidth, setContainerWidth] = useState(0);
+
+  const regions = useMemo(() => {
+    if (Array.isArray(regionOrder) && regionOrder.length > 0) {
+      return regionOrder;
+    }
+    return Object.keys(regionDataMap || {});
+  }, [regionOrder, regionDataMap]);
 
   const fileMap = useMemo(() => {
     const m = new Map();
@@ -59,7 +96,23 @@ const BoxPlot = ({ regionDataMap, fileMappings, height = 560 }) => {
     return m;
   }, [fileMappings]);
 
-  const getMappingForFilename = (filename) => fileMap.get(filename) || null;
+
+  // 更智能的 groupKey 匹配，避免 Ungrouped
+  const getMappingForFilename = (filename) => {
+    // 1. 直接查 fileMap
+    let mapping = fileMap.get(filename);
+    if (mapping) return mapping;
+    // 2. 尝试用 basename 匹配 label
+    const base = filename.split("/").pop();
+    for (const f of fileMappings || []) {
+      if (f.label === base) return f;
+    }
+    // 3. 尝试用 serverKey 匹配
+    for (const f of fileMappings || []) {
+      if (f.serverKey === filename) return f;
+    }
+    return null;
+  };
 
   const getFileInfo = (filename) => {
     const mapping = getMappingForFilename(filename);
@@ -70,7 +123,6 @@ const BoxPlot = ({ regionDataMap, fileMappings, height = 560 }) => {
         label: filename,
       };
     }
-
     return {
       blobURL: mapping.blobURL || null,
       group: mapping.groupKey || "Ungrouped",
@@ -87,7 +139,7 @@ const BoxPlot = ({ regionDataMap, fileMappings, height = 560 }) => {
     const rows = [];
     const allGroupsSet = new Set();
 
-    REGION_ORDER.forEach((region) => {
+    regions.forEach((region) => {
       const regionResult = regionDataMap?.[region];
       const data = regionResult?.[0];
       if (!data?.mean) return;
@@ -111,7 +163,7 @@ const BoxPlot = ({ regionDataMap, fileMappings, height = 560 }) => {
       });
     });
 
-    REGION_ORDER.forEach((region) => {
+    regions.forEach((region) => {
       const regionResult = regionDataMap?.[region];
       const data = regionResult?.[0];
 
@@ -149,29 +201,33 @@ const BoxPlot = ({ regionDataMap, fileMappings, height = 560 }) => {
     });
 
     return { rows, groups };
-  }, [regionDataMap, fileMap]);
+  }, [regionDataMap, fileMap, fileMappings, regions]);
 
   const hasRenderableData = useMemo(() => {
     return aggregated.groups.length > 0 && aggregated.rows.some((d) => d.points.length > 0);
   }, [aggregated]);
 
-  useEffect(() => {
-    if (!containerRef.current || !hasRenderableData) return;
+  const visiblePanelCount = Math.max(1, Math.min(MAX_VISIBLE_PANELS, regions.length));
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setContainerWidth(entry.contentRect.width);
-      }
-    });
+  const margin = {
+    top: 80,
+    right: 30,
+    bottom: 90,
+    left: 80,
+  };
 
-    resizeObserver.observe(containerRef.current);
-    return () => resizeObserver.disconnect();
-  }, [hasRenderableData]);
+  const viewportInnerWidth =
+    visiblePanelCount * PANEL_WIDTH + (visiblePanelCount - 1) * PANEL_GAP;
+  const totalInnerWidth =
+    Math.max(1, regions.length) * PANEL_WIDTH +
+    Math.max(0, regions.length - 1) * PANEL_GAP;
+  const svgWidth = margin.left + margin.right + totalInnerWidth;
+  const viewportWidth = margin.left + margin.right + viewportInnerWidth;
 
   useEffect(() => {
     const { rows, groups } = aggregated;
 
-    if (!hasRenderableData || !rows.length || !groups.length || !containerWidth) {
+    if (!hasRenderableData || !rows.length || !groups.length || regions.length === 0) {
       d3.select(svgRef.current).selectAll("*").remove();
       return;
     }
@@ -179,15 +235,7 @@ const BoxPlot = ({ regionDataMap, fileMappings, height = 560 }) => {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const margin = {
-      top: 80,
-      right: 30,
-      bottom: 90,
-      left: 80,
-    };
-
-    const width = containerWidth;
-    const innerWidth = width - margin.left - margin.right;
+    const innerWidth = totalInnerWidth;
     const innerHeight = height - margin.top - margin.bottom;
 
     const allValues = rows.flatMap((d) => d.points.map((p) => p.value));
@@ -196,22 +244,19 @@ const BoxPlot = ({ regionDataMap, fileMappings, height = 560 }) => {
 
     if (yMin == null || yMax == null) return;
 
-    const domainMin = yMin === yMax ? yMin - 1 : Math.min(0, yMin);
-    const domainMax = yMin === yMax ? yMax + 1 : yMax;
+    const maxAbs = Math.max(Math.abs(yMin), Math.abs(yMax));
+    const safeMaxAbs = maxAbs === 0 ? 1 : maxAbs;
 
     const y = d3
       .scaleLinear()
-      .domain([domainMin, domainMax])
+      .domain([-safeMaxAbs, safeMaxAbs])
       .nice()
       .range([innerHeight, 0]);
-
-    const panelGap = 30;
-    const panelWidth = (innerWidth - panelGap * (REGION_ORDER.length - 1)) / REGION_ORDER.length;
 
     const x = d3
       .scaleBand()
       .domain(groups)
-      .range([0, panelWidth])
+      .range([0, PANEL_WIDTH])
       .paddingInner(0.28)
       .paddingOuter(0.14);
 
@@ -232,22 +277,26 @@ const BoxPlot = ({ regionDataMap, fileMappings, height = 560 }) => {
       ]);
 
     const g = svg
-      .attr("width", width)
+      .attr("width", svgWidth)
       .attr("height", height)
       .append("g")
       .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-    let tooltip = d3.select(containerRef.current).select(".tooltip");
+    let tooltip = d3.select("body").select(".boxplot-tooltip");
     if (tooltip.empty()) {
       tooltip = d3
-        .select(containerRef.current)
+        .select("body")
         .append("div")
-        .attr("class", "tooltip");
+        .attr("class", "tooltip boxplot-tooltip");
     }
     styleTooltip(tooltip);
+    tooltip
+      .style("position", "fixed")
+      .style("max-height", "calc(100vh - 24px)")
+      .style("overflow-y", "auto");
 
-    REGION_ORDER.forEach((region, regionIndex) => {
-      const panelX = regionIndex * (panelWidth + panelGap);
+    regions.forEach((region, regionIndex) => {
+      const panelX = regionIndex * (PANEL_WIDTH + PANEL_GAP);
 
       const panel = g.append("g").attr("transform", `translate(${panelX},0)`);
 
@@ -257,7 +306,7 @@ const BoxPlot = ({ regionDataMap, fileMappings, height = 560 }) => {
 
       panel
         .append("text")
-        .attr("x", panelWidth / 2)
+        .attr("x", PANEL_WIDTH / 2)
         .attr("y", -10)
         .attr("text-anchor", "middle")
         .style("font-size", "16px")
@@ -267,7 +316,7 @@ const BoxPlot = ({ regionDataMap, fileMappings, height = 560 }) => {
       panel
         .append("line")
         .attr("x1", 0)
-        .attr("x2", panelWidth)
+        .attr("x2", PANEL_WIDTH)
         .attr("y1", y(0))
         .attr("y2", y(0))
         .attr("stroke", "#999")
@@ -421,12 +470,11 @@ const BoxPlot = ({ regionDataMap, fileMappings, height = 560 }) => {
             `)
             .style("display", "block")
             .style("opacity", 1);
+
+          positionTooltip(tooltip, event);
         })
         .on("mousemove", (event) => {
-          const containerRect = containerRef.current.getBoundingClientRect();
-          tooltip
-            .style("left", `${event.clientX - containerRect.left + 10}px`)
-            .style("top", `${event.clientY - containerRect.top - 40}px`);
+          positionTooltip(tooltip, event);
         })
         .on("mouseout", () => {
           tooltip.style("display", "none");
@@ -441,11 +489,12 @@ const BoxPlot = ({ regionDataMap, fileMappings, height = 560 }) => {
         .attr("transform", `translate(0, ${innerHeight})`)
         .call(d3.axisBottom(x))
         .selectAll("text")
-        .style("font-size", "11px");
+        .style("font-size", "11px")
+        .attr("dy", (_d, i) => (i % 2 === 0 ? "1.2em" : "2.3em"));
     });
 
     g.append("text")
-      .attr("x", innerWidth / 2)
+      .attr("x", totalInnerWidth / 2)
       .attr("y", innerHeight + 70)
       .attr("text-anchor", "middle")
       .style("font-size", "14px")
@@ -459,32 +508,10 @@ const BoxPlot = ({ regionDataMap, fileMappings, height = 560 }) => {
       .style("font-size", "18px")
       .text("Predicted Response Distribution");
 
-    const legend = g
-      .append("g")
-      .attr("transform", `translate(${Math.max(0, innerWidth - 80 - aggregated.groups.length * 90)}, -60)`);
-
-    aggregated.groups.forEach((group, i) => {
-      const row = legend.append("g").attr("transform", `translate(${i * 90},0)`);
-
-      row
-        .append("rect")
-        .attr("width", 14)
-        .attr("height", 14)
-        .attr("fill", groupColor(group))
-        .attr("opacity", 0.5);
-
-      row
-        .append("text")
-        .attr("x", 20)
-        .attr("y", 11)
-        .style("font-size", "12px")
-        .text(group);
-    });
-
     return () => {
-      d3.select(containerRef.current).select(".tooltip").remove();
+      d3.select("body").selectAll(".boxplot-tooltip").remove();
     };
-  }, [aggregated, containerWidth, height, fileMap, hasRenderableData]);
+  }, [aggregated, fileMap, hasRenderableData, height, regions.length, svgWidth, totalInnerWidth, margin.left, margin.top]);
 
   if (!hasRenderableData) {
     return (
@@ -508,16 +535,85 @@ const BoxPlot = ({ regionDataMap, fileMappings, height = 560 }) => {
       ref={containerRef}
       style={{
         position: "relative",
-        width: "100%",
+        width: `${viewportWidth}px`,
+        maxWidth: "100%",
         height,
         backgroundColor: "transparent",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
+        alignItems: "flex-start",
         paddingTop: "10px",
+        overflowX: "auto",
       }}
     >
-      <svg ref={svgRef} style={{ marginTop: "10px", width: "100%", fontFamily: "'Lato', sans-serif" }} />
+      <svg
+        ref={svgRef}
+        style={{
+          marginTop: "10px",
+          width: `${svgWidth}px`,
+          minWidth: `${svgWidth}px`,
+          fontFamily: "'Lato', sans-serif",
+        }}
+      />
+
+      <div
+        style={{
+          position: "absolute",
+          top: 6,
+          right: 10,
+          display: "flex",
+          alignItems: "center",
+          gap: 16,
+          flexWrap: "wrap",
+          justifyContent: "flex-end",
+          padding: "6px 10px",
+          borderRadius: 8,
+          zIndex: 3,
+          pointerEvents: "none",
+        }}
+      >
+        {aggregated.groups.map((group, i) => {
+          const legendColors = [
+            "#8ecae6",
+            "#f4a261",
+            "#90be6d",
+            "#c77dff",
+            "#f28482",
+            "#84a59d",
+            "#e9c46a",
+            "#6d597a",
+            "#43aa8b",
+            "#577590",
+          ];
+          const color = legendColors[i % legendColors.length];
+
+          return (
+            <div
+              key={group}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 12,
+                color: "#333",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <span
+                style={{
+                  width: 12,
+                  height: 12,
+                  display: "inline-block",
+                  borderRadius: 2,
+                  background: color,
+                  opacity: 0.6,
+                }}
+              />
+              {group}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
