@@ -510,11 +510,6 @@ useEffect(() => {
 
   useEffect(() => {
     console.log("🔄 predictionResult updated:", predictionResult);
-    if (predictionResult && current === 1) {
-      setTimeout(() => {
-        next(); // Automatically go to the next step
-      }, 100); // 100ms delay
-    }
   }, [predictionResult]);
 
   useEffect(() => {
@@ -603,14 +598,37 @@ useEffect(() => {
     };
   }, [predictionFFAResult, predictionEBAResult, predictionPPAResult]);
 
-  const handlePrediction = async (targetRegion = region) => {
+  const handlePrediction = async (targetRegion = region): Promise<boolean> => {
     console.log("📦 handlePrediction received files:");
     console.log(files);
     console.log("🎯 request target region:", targetRegion);
 
     if (files.length === 0) {
       message.error("No files uploaded. Please upload files first.");
-      return;
+      return false;
+    }
+
+    if (prestoreDataset) {
+      const localResult = await loadPreloadedPredictionByRegion(
+        prestoreDataset,
+        targetRegion
+      );
+
+      if (localResult) {
+        setPredictionResult(localResult);
+
+        if (targetRegion === "ffa") {
+          setPredictionFFAResult(localResult);
+        } else if (targetRegion === "eba") {
+          setPredictionEBAResult(localResult);
+        } else if (targetRegion === "ppa") {
+          setPredictionPPAResult(localResult);
+        }
+
+        setPredictstep(2);
+        message.success("Loaded precomputed prediction.");
+        return true;
+      }
     }
 
     setPredictionLoading(true);
@@ -653,9 +671,11 @@ useEffect(() => {
 
       console.log("✅ saved result into cache for:", targetRegion);
       message.success("Prediction complete!");
+      return true;
     } catch (e) {
       console.error(e);
       message.error("Prediction failed. Check server connection.");
+      return false;
     } finally {
       setPredictionLoading(false);
       setLoading(false);
@@ -1099,8 +1119,14 @@ useEffect(() => {
         {current === 1 && (
           <Button
             type="primary"
-            onClick={() => {
-              predictstep === 1 ? handlePrediction(region) : next();
+            onClick={async () => {
+              if (predictstep !== 1) {
+                next();
+                return;
+              }
+
+              const ok = await handlePrediction(region);
+              if (ok) next();
             }}
             disabled={loading || files.length === 0}
           >
