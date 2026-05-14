@@ -88,27 +88,21 @@ const { Step } = Steps;
 const SERVER_BASE_URL = SERVER_URL;
 
 const useBarchartData = (predictionResult: any) => {
-  console.log("📊 Prediction Result for Bar Chart:", predictionResult);
-
   return useMemo(() => {
     if (!predictionResult || !Array.isArray(predictionResult) || predictionResult.length === 0) {
-      console.log("❌ predictionResult is invalid or empty:", predictionResult);
       return [];
     }
 
-    const data = predictionResult[0]; // Access the first (and only) object in the array
+    const data = predictionResult[0];
 
     if (!data.mean || !data.sem) {
-      console.log("❌ predictionResult is missing required fields:", data);
       return [];
     }
     const processedData = Object.keys(data.mean).map((filename) => ({
       filename,
-      mean: +data.mean[filename], // Convert to number
-      sem: +data.sem[filename],   // Convert to number
+      mean: +data.mean[filename],
+      sem: +data.sem[filename],
     }));
-
-    console.log("✅ Final Processed Bar Chart Data:", processedData);
 
     return processedData;
   }, [predictionResult]);
@@ -117,21 +111,16 @@ const useBarchartData = (predictionResult: any) => {
 const useHeatmapData = (predictionResult: any) => {
   return useMemo(() => {
     if (!predictionResult || !Array.isArray(predictionResult) || predictionResult.length === 0) {
-      console.log("❌ predictionResult is invalid or empty:", predictionResult);
       return { heatmapData: [], originalFilenames: [], sortedFilenames: [] };
     }
     const data = predictionResult[0];
 
     if (!data.rdm || !Array.isArray(data.rdm)) {
-      console.log("❌ RDM data is missing or invalid:", data);
       return { heatmapData: [], originalFilenames: [], sortedFilenames: [] };
     }
     const rdm = data.rdm as number[][];
-    const n = rdm.length;
-    // Extract filenames from the mean or sem object
     const originalFilenames = Object.keys(data.mean || data.sem || {});
 
-    // Create heatmap data with filenames
     const heatmapData = rdm.flatMap((row, i) =>
       row.map((value, j) => ({
         x: originalFilenames[i],
@@ -140,15 +129,7 @@ const useHeatmapData = (predictionResult: any) => {
       }))
     );
 
-    // For now, we'll use the original order for sortedFilenames
-    // You can implement custom sorting logic here if needed
     const sortedFilenames = [...originalFilenames];
-
-    console.log("✅ Processed Heatmap Data:", {
-      heatmapData: heatmapData.slice(0, 5), // Log first 5 elements
-      originalFilenames,
-      sortedFilenames
-    });
 
     return { heatmapData, originalFilenames, sortedFilenames };
   }, [predictionResult]);
@@ -225,7 +206,6 @@ const Stepper: React.FC = () => {
   const prev = () => setCurrent((prev) => prev - 1);
 
   const onChange = (value: number) => {
-    console.log("Step changed:", value);
     setCurrent(value);
   };
 
@@ -509,8 +489,6 @@ useEffect(() => {
     if (current !== 2) return;
 
     const cached = getCachedResultByRegion(region);
-    console.log("region switched to:", region);
-    console.log("cached result found:", cached);
     if (cached) return;
 
     setPredictionResult(null);
@@ -519,7 +497,7 @@ useEffect(() => {
   }, [region, current, insightRegionCache]);
 
   useEffect(() => {
-    console.log("🔄 predictionResult updated:", predictionResult);
+    if (import.meta.env.DEV) console.log("🔄 predictionResult updated:", predictionResult);
   }, [predictionResult]);
 
   const getCachedResultByRegion = (targetRegion: string) => {
@@ -542,14 +520,16 @@ useEffect(() => {
     if (usingCache) source = `${region} cache`;
     else if (usingLatestPrediction) source = "predictionResult fallback";
 
-    console.log("========== REGION DEBUG ==========");
-    console.log("current region:", region);
-    console.log("cached regions:", cachedRegions);
-    console.log("selected cache for current region:", selectedCache);
-    console.log("predictionResult:", predictionResult);
-    console.log("currentRegionPredictionResult:", currentRegionPredictionResult);
-    console.log("currentRegionPredictionResult source:", source);
-    console.log("==================================");
+    if (import.meta.env.DEV) {
+      console.log("========== REGION DEBUG ==========");
+      console.log("current region:", region);
+      console.log("cached regions:", cachedRegions);
+      console.log("selected cache for current region:", selectedCache);
+      console.log("predictionResult:", predictionResult);
+      console.log("currentRegionPredictionResult:", currentRegionPredictionResult);
+      console.log("currentRegionPredictionResult source:", source);
+      console.log("==================================");
+    }
   }, [
     region,
     predictionResult,
@@ -614,10 +594,6 @@ useEffect(() => {
   }, [selectedInsightRegions, insightRegionCache]);
 
   const handlePrediction = async (targetRegion = region): Promise<boolean> => {
-    console.log("📦 handlePrediction received files:");
-    console.log(files);
-    console.log("🎯 request target region:", targetRegion);
-
     if (files.length === 0) {
       message.error("No files uploaded. Please upload files first.");
       return false;
@@ -671,7 +647,6 @@ useEffect(() => {
 
       setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: resultData }));
 
-      console.log("✅ saved result into cache for:", targetRegion);
       message.success("Prediction complete!");
       return true;
     } catch (e) {
@@ -805,8 +780,6 @@ useEffect(() => {
 
   return barchartData.map((d) => d.filename);
 }, [barchartData, fileMappings, vizOrder]);
-
-  console.log("Extract Heatmap Data from predictionResult:", heatmapData);
 
   const contentStyle: React.CSSProperties = {
     textAlign: 'center',
@@ -1195,9 +1168,9 @@ useEffect(() => {
               const ok = await handlePrediction(region);
               if (ok) next();
             }}
-            disabled={loading || files.length === 0}
+            disabled={loading || predictionLoading || files.length === 0}
           >
-            {loading ? "Processing..." : "Check Prediction Results"}
+            {loading || predictionLoading ? "Processing..." : "Check Prediction Results"}
           </Button>
         )}
 

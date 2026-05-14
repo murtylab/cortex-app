@@ -2,6 +2,8 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 
+const ngrokHost = process.env.NGROK_HOST || null;
+
 export default defineConfig({
   root: '.',
   plugins: [
@@ -40,11 +42,11 @@ export default defineConfig({
   },
   server: {
     open: '/index.html',
-    allowedHosts: ['sunny-weasel-grossly.ngrok-free.app', 'localhost'],
+    allowedHosts: ngrokHost ? [ngrokHost, 'localhost'] : ['localhost'],
     host: true,
     strictPort: true,
     port: 5173,
-    hmr: { host: 'sunny-weasel-grossly.ngrok-free.app', clientPort: 443 },
+    ...(ngrokHost ? { hmr: { host: ngrokHost, clientPort: 443 } } : {}),
   },
   resolve: {
     alias: {

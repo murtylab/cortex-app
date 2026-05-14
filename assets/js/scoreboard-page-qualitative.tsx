@@ -90,25 +90,16 @@ const ScoreboardPageQualitative: React.FC = () => {
   const qualiTrainKey = training === 'Murty185' ? 'murty185' : training === 'NSD' ? 'nsd_1000' : null;
 
   const [qualiChartData, setQualiChartData] = React.useState<any>(null);
+  const [qualiChartError, setQualiChartError] = React.useState(false);
   useEffect(() => {
     fetch('/assets/data/qualitative_chart_data.json')
       .then(r => r.json())
       .then(setQualiChartData)
-      .catch(e => console.error('[quali] failed to load chart data', e));
+      .catch(() => setQualiChartError(true));
   }, []);
 
     
-  console.log("Parent - pageView:", pageView, "activeQuestion:", activeQuestion, "isVS:", isVS);
-  console.log("Parent - pageView:", pageView, "activeQuestion:", activeQuestion, "isDasetROI:", isDatasetROI);
-
   useEffect(() => {
-  console.log("=== Current Filter Selection ===");
-  console.log("Training Source:", training);
-  console.log("Selected Regions (ROI):", region);
-  console.log("Selected Datasets:", dataset);
-  console.log("Active Question:", activeQuestion);
-  console.log("Page View:", pageView);
-  console.log("===============================");
   // Expose current scoreboard state so the chatbot widget can read it
   (window as any).cortexScoreboardState = {
     training,
@@ -575,7 +566,21 @@ const getOverviewColumnCount = (
                   alignItems: 'stretch',
                 }}
               >
-                {qualiTrainKey ? (
+                {qualiChartError ? (
+                  <div
+                    style={{
+                      color: '#cf1322',
+                      fontSize: 14,
+                      textAlign: 'center',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '100%',
+                    }}
+                  >
+                    Failed to load chart data. Please refresh the page.
+                  </div>
+                ) : qualiTrainKey ? (
                   <BubbleHeatmap
                     data={qualiChartData}
                     trainSource={qualiTrainKey}
