@@ -203,7 +203,7 @@ const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
-    const MAX_BAR_WIDTH = 100;
+    const MAX_BAR_WIDTH = 25;
     const totalWidth = Math.min(innerWidth, sortedData.length * (MAX_BAR_WIDTH + 20));
 
     const xScale = d3
@@ -220,17 +220,14 @@ const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
       (xScale.bandwidth() - adjustedBandwidth) / 2 +
       adjustedBandwidth / 2;
 
-    let yMin = d3.min(sortedData, (d) => d.mean - d.sem);
-    let yMax = d3.max(sortedData, (d) => d.mean + d.sem);
-
-    if (yMin == null || yMax == null) {
-      return;
-    }
-
-    if (yMin === yMax) {
-      yMin -= 1;
-      yMax += 1;
-    }
+    const maxAbsVariation =
+      d3.max(
+        sortedData,
+        (d) => Math.max(Math.abs(d.mean - d.sem), Math.abs(d.mean + d.sem))
+      ) ?? 0;
+    const yExtent = maxAbsVariation + 0.05;
+    const yMin = -yExtent;
+    const yMax = yExtent;
 
     const yScale = d3.scaleLinear().domain([yMin, yMax]).range([innerHeight, 0]);
 
@@ -324,8 +321,9 @@ const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
       .attr("x2", innerWidth + 20)
       .attr("y1", yScale(0))
       .attr("y2", yScale(0))
-      .attr("stroke", "#999")
-      .attr("stroke-width", 1);
+      .attr("stroke", "#666")
+      .attr("stroke-width", 1)
+      .attr("stroke-dasharray", "3,2");
 
     // Axis labels
     g.append("text")
@@ -354,7 +352,7 @@ const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
       .attr("y1", (d) => yScale(d.mean - d.sem))
       .attr("y2", (d) => yScale(d.mean + d.sem))
       .attr("stroke", "grey")
-      .attr("stroke-width", adjustedBandwidth / 10)
+      .attr("stroke-width", adjustedBandwidth / 20)
       .attr("opacity", (d) => (isGroupHighlighted(d.filename) ? 1 : 0.2));
 
     g.selectAll(".cap-top")
@@ -366,7 +364,7 @@ const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
       .attr("y1", (d) => yScale(d.mean + d.sem))
       .attr("y2", (d) => yScale(d.mean + d.sem))
       .attr("stroke", "grey")
-      .attr("stroke-width", adjustedBandwidth / 10)
+      .attr("stroke-width", adjustedBandwidth / 20)
       .attr("opacity", (d) => (isGroupHighlighted(d.filename) ? 1 : 0.2));
 
     g.selectAll(".cap-bottom")
@@ -378,7 +376,7 @@ const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
       .attr("y1", (d) => yScale(d.mean - d.sem))
       .attr("y2", (d) => yScale(d.mean - d.sem))
       .attr("stroke", "grey")
-      .attr("stroke-width", adjustedBandwidth / 10)
+      .attr("stroke-width", adjustedBandwidth / 20)
       .attr("opacity", (d) => (isGroupHighlighted(d.filename) ? 1 : 0.2));
 
 
