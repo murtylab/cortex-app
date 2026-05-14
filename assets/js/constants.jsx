@@ -3903,7 +3903,7 @@ export const PRELOAD_DATASETS = {
   murty185 : {
     label: "Murty 185",
     stimuli: "Human fMRI dataset with brain responses to 185 natural images.",
-    expectation: "Scene-selective regions prefer high spatial frequency scenes, while object-selective regions prefer low spatial frequency objects.",
+    // expectation: "Scene-selective regions prefer high spatial frequency scenes, while object-selective regions prefer low spatial frequency objects.",
     imageFolder: "/assets/preload/murty185/images",
     paperLink: "https://www.pnas.org/doi/10.1073/pnas.1912333117",
     papername: "Large-scale dissociations between views of objects, scenes, and reachable-scale environments in visual cortex"
@@ -3911,7 +3911,7 @@ export const PRELOAD_DATASETS = {
   reza: {
     label: "Reza",
     stimuli: "Cubes and spheres (smooth, textured, bumpy) with matched size, lighting, and position.",
-    expectation: "Cubes > spheres (higher spatial frequency → stronger PPA response)",
+    // expectation: "Cubes > spheres (higher spatial frequency → stronger PPA response)",
     imageFolder: "/assets/preload/reza/images",
     paperLink: "https://pmc.ncbi.nlm.nih.gov/articles/PMC3071373/",
     papername: "The “Parahippocampal Place Area” Responds Preferentially to High Spatial Frequencies in Humans and Monkeys"
@@ -3919,7 +3919,7 @@ export const PRELOAD_DATASETS = {
   brandman: {
     label: "Brandman",
     stimuli: "Bodies and faces varying in configuration (whole vs separated parts) and orientation (upright vs inverted).",
-    expectation: "Body-selective regions prefer whole bodies over parts, with reduced responses when inverted.",
+    // expectation: "Body-selective regions prefer whole bodies over parts, with reduced responses when inverted.",
     imageFolder: "/assets/preload/brandman/images",
     paperLink: "https://academic.oup.com/cercor/article/26/2/530/2366295?login=true",
     papername: "Bodies are Represented as Wholes Rather Than Their Sum of Parts in the Occipital-Temporal Cortex"
@@ -3927,7 +3927,7 @@ export const PRELOAD_DATASETS = {
   "josephs-e1": {
     label: "Josephs E1",
     stimuli: "Object, reachspace, and scene images presented at central vs peripheral visual field locations.",
-    expectation: "Object regions prefer central stimuli, scene regions prefer peripheral stimuli, and reachspaces show intermediate or distinct responses.",
+    // expectation: "Object regions prefer central stimuli, scene regions prefer peripheral stimuli, and reachspaces show intermediate or distinct responses.",
     imageFolder: "/assets/preload/josephs-e1/images",
     papername: "Large-scale dissociations between views of objects, scenes, and reachable-scale environments in visual cortex",
     paperLink: "https://www.pnas.org/doi/10.1073/pnas.1912333117"
@@ -3935,7 +3935,7 @@ export const PRELOAD_DATASETS = {
   "josephs-e1loc": {
     label: "Josephs E1 Loc",
     stimuli: "Bodies, faces, hands, multi-object, objects, scenes,and white noise.",
-    expectation: "Reachspace regions show a distinct response profile across categories, differing from classic object- and scene-selective areas.",
+    // expectation: "Reachspace regions show a distinct response profile across categories, differing from classic object- and scene-selective areas.",
     imageFolder: "/assets/preload/josephs-e1loc/images",
     papername: "Large-scale dissociations between views of objects, scenes, and reachable-scale environments in visual cortex",
     paperLink: "https://www.pnas.org/doi/10.1073/pnas.1912333117"
@@ -3943,7 +3943,7 @@ export const PRELOAD_DATASETS = {
   "josephs-e2cont": {
     label: "Josephs E2 Controlled",
     stimuli: "Controlled object, reachspace, and scene images matched for luminance, contrast, and global spatial frequency.",
-    expectation: "Reachspace preferences should remain even after low-level image statistics are controlled.",
+    // expectation: "Reachspace preferences should remain even after low-level image statistics are controlled.",
     imageFolder: "/assets/preload/josephs-e2cont/images",
     papername: "Large-scale dissociations between views of objects, scenes, and reachable-scale environments in visual cortex",
     paperLink: "https://www.pnas.org/doi/10.1073/pnas.1912333117"
@@ -3951,7 +3951,7 @@ export const PRELOAD_DATASETS = {
     "josephs-e2rsloc": {
     label: "Josephs E2 RS Loc",
     stimuli: "Natural color images of objects, reachspaces, and scenes.",
-    expectation: "Used to identify reachspace-preferring regions distinct from object- and scene-selective areas.",
+    // expectation: "Used to identify reachspace-preferring regions distinct from object- and scene-selective areas.",
     imageFolder: "/assets/preload/josephs-e2rsloc/images",
     papername: "Large-scale dissociations between views of objects, scenes, and reachable-scale environments in visual cortex",
     paperLink: "https://www.pnas.org/doi/10.1073/pnas.1912333117"
@@ -3960,7 +3960,7 @@ export const PRELOAD_DATASETS = {
   "josephs-e2seta": {
     label: "Josephs E2 Set A",
     stimuli: "Original set of object, reachspace, and scene images.",
-    expectation: "Provides baseline responses for comparison with matched or controlled stimulus sets.",
+    // expectation: "Provides baseline responses for comparison with matched or controlled stimulus sets.",
     imageFolder: "/assets/preload/josephs-e2seta/images",
     papername: "Large-scale dissociations between views of objects, scenes, and reachable-scale environments in visual cortex",
     paperLink: "https://www.pnas.org/doi/10.1073/pnas.1912333117"
@@ -3969,7 +3969,7 @@ export const PRELOAD_DATASETS = {
   "josephs-e2setb": {
     label: "Josephs E2 Set B",
     stimuli: "A second, independent set of object, reachspace, and scene images.",
-    expectation: "Replicates reachspace-selective responses across a different stimulus set.",
+    // expectation: "Replicates reachspace-selective responses across a different stimulus set.",
     imageFolder: "/assets/preload/josephs-e2setb/images",
     papername: "Large-scale dissociations between views of objects, scenes, and reachable-scale environments in visual cortex",
     paperLink: "https://www.pnas.org/doi/10.1073/pnas.1912333117"
@@ -3977,7 +3977,7 @@ export const PRELOAD_DATASETS = {
    "josephs-e3": {
     label: "Josephs E3",
     stimuli: "Original, shuffled, empty, single-object, multi-object, and vertical reachspace conditions.",
-    expectation: "Reachspace regions should prefer structured multi-object reachspaces over single-object, empty, or shuffled variants.",
+    // expectation: "Reachspace regions should prefer structured multi-object reachspaces over single-object, empty, or shuffled variants.",
     imageFolder: "/assets/preload/josephs-e3/images",
     papername: "Large-scale dissociations between views of objects, scenes, and reachable-scale environments in visual cortex",
     paperLink: "https://www.pnas.org/doi/10.1073/pnas.1912333117"
@@ -3985,7 +3985,7 @@ export const PRELOAD_DATASETS = {
    kamps2019: {
     label: "Kamps 2019",
     stimuli: "Internal and external face features in arranged vs rearranged layouts, with object and scene controls.",
-    expectation: "FFA prefers arranged face features, whereas EBA/body-selective cortex prefers rearranged features.",
+    // expectation: "FFA prefers arranged face features, whereas EBA/body-selective cortex prefers rearranged features.",
     imageFolder: "/assets/preload/kamps2019/images",
     papername: "A face is more than just the eyes, nose, and mouth: fMRI evidence that face-selective cortex represents external features",
     paperLink: "https://pmc.ncbi.nlm.nih.gov/articles/PMC6230492/"
@@ -3994,7 +3994,7 @@ export const PRELOAD_DATASETS = {
    kamps2016: {
     label: "Kamps 2016",
     stimuli: "Indoor scenes and furniture configurations varying in spatial structure and object composition",
-    expectation: "Tests sensitivity to scene structure versus object-based composition",
+    // expectation: "Tests sensitivity to scene structure versus object-based composition",
     imageFolder: "/assets/preload/kamps2016/images",
     papername: "The occipital place area represents the local elements of scenes",
     paperLink: "https://www.sciencedirect.com/science/article/pii/S1053811916001713?via%3Dihub"
@@ -4002,7 +4002,7 @@ export const PRELOAD_DATASETS = {
    "kamps2016-e1": {
     label: "Kamps 2016 E1",
     stimuli: "Intact rooms, fractured rooms, single objects, single furniture, and multiple furniture",
-    expectation: "Compares whole scenes with fragmented scenes and object-based layouts",
+    // expectation: "Compares whole scenes with fragmented scenes and object-based layouts",
     imageFolder: "/assets/preload/kamps2016/images",
     papername: "The occipital place area represents the local elements of scenes",
     paperLink: "https://www.sciencedirect.com/science/article/pii/S1053811916001713?via%3Dihub"
@@ -4011,7 +4011,7 @@ export const PRELOAD_DATASETS = {
   konkleCaramazza: {
     label: "Konkle & Caramazza",
     stimuli: "Objects varying in animacy (animate vs inanimate) and real-world size (small vs large)",
-    expectation: "Ventral stream is organized by animacy and object size, with distinct responses to big vs small objects",
+    // expectation: "Ventral stream is organized by animacy and object size, with distinct responses to big vs small objects",
     imageFolder: "/assets/preload/KonkleCaramazza/images",
     papername: "Tripartite Organization of the Ventral Stream by Animacy and Object Size",
     paperLink: "https://www.jneurosci.org/content/33/25/10235"
@@ -4020,7 +4020,7 @@ export const PRELOAD_DATASETS = {
   konkleOliva: {
     label: "Konkle & Oliva",
     stimuli: "Objects varying in real-world size from small to large",
-    expectation: "Object responses are organized by real-world size, with large objects activating medial areas and small objects lateral areas",
+    // expectation: "Object responses are organized by real-world size, with large objects activating medial areas and small objects lateral areas",
     imageFolder: "/assets/preload/KonkleOliva/images",
     papername: "A Real-World Size Organization of Object Responses in Occipitotemporal Cortex",
     paperLink: "https://www.sciencedirect.com/science/article/pii/S0896627312004412?via%3Dihub"
@@ -4029,7 +4029,7 @@ export const PRELOAD_DATASETS = {
   "park.size.clutter": {
     label: "Park Size + Clutter",
     stimuli: "Natural indoor scenes varying in spatial size and object clutter.",
-    expectation: "PPA responses track both scene size and clutter, while scene representations generalize across semantic categories.",
+    // expectation: "PPA responses track both scene size and clutter, while scene representations generalize across semantic categories.",
     imageFolder: "/assets/preload/park.size.clutter/images",
     papername: "Parametric Coding of the Size and Clutter of Natural Scenes in the Human Brain",
     paperLink: "https://academic.oup.com/cercor/article/25/7/1792/459913?login=true"
@@ -4038,7 +4038,7 @@ export const PRELOAD_DATASETS = {
   "park.size": {
     label: "Park Size",
     stimuli: "Natural indoor scenes varying in spatial size.",
-    expectation: "Scene-selective cortex, especially PPA and RSC, should be sensitive to scene size.",
+    // expectation: "Scene-selective cortex, especially PPA and RSC, should be sensitive to scene size.",
     imageFolder: "/assets/preload/park.size/images",
     papername: "Parametric Coding of the Size and Clutter of Natural Scenes in the Human Brain",
     paperLink: "https://academic.oup.com/cercor/article/25/7/1792/459913?login=true"
@@ -4047,7 +4047,7 @@ export const PRELOAD_DATASETS = {
   "bryan.exp1": {
     label: "Bryan E1",
     stimuli: "Squares and circles varying in size (large vs small)",
-    expectation: "Tests whether PPA responds to rectilinearity in simple geometric stimuli",
+    // expectation: "Tests whether PPA responds to rectilinearity in simple geometric stimuli",
     imageFolder: "/assets/preload/Bryan.exp1/images",
     papername: "Rectilinear Edge Selectivity Is Insufficient to Explain the Category Selectivity of the Parahippocampal Place Area",
     paperLink: "https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2016.00137/full"
@@ -4056,7 +4056,7 @@ export const PRELOAD_DATASETS = {
   "bryan.exp2": {
     label: "Bryan E2",
     stimuli: "Naturalistic scene and face images with high vs low rectilinearity",
-    expectation: "Tests whether rectilinearity explains PPA responses to natural images",
+    // expectation: "Tests whether rectilinearity explains PPA responses to natural images",
     imageFolder: "/assets/preload/Bryan.exp2/images",
     papername: "Rectilinear Edge Selectivity Is Insufficient to Explain the Category Selectivity of the Parahippocampal Place Area",
     paperLink: "https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2016.00137/full"
@@ -4065,7 +4065,7 @@ export const PRELOAD_DATASETS = {
   "bryan.exp3": {
     label: "Bryan E3",
     stimuli: "Pixilated scenes/faces and pointillized scenes/faces",
-    expectation: "Tests rectilinear versus curvilinear image structure under matched degradation",
+    // expectation: "Tests rectilinear versus curvilinear image structure under matched degradation",
     imageFolder: "/assets/preload/Bryan.exp3/images",
     papername: "Rectilinear Edge Selectivity Is Insufficient to Explain the Category Selectivity of the Parahippocampal Place Area",
     paperLink: "https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2016.00137/full"
@@ -4073,7 +4073,7 @@ export const PRELOAD_DATASETS = {
    cohen2016: {
   label: "Cohen 2016",
   stimuli: "Real-world object category pairs used in visual search tasks",
-  expectation: "Visual search performance is predicted by the representational structure of high-level visual cortex",
+  // expectation: "Visual search performance is predicted by the representational structure of high-level visual cortex",
   imageFolder: "/assets/preload/cohen2016/images",
   papername: "Visual search for object categories is predicted by the representational architecture of high-level visual cortex",
   paperLink: "https://journals.physiology.org/doi/full/10.1152/jn.00569.2016"
@@ -4082,7 +4082,7 @@ export const PRELOAD_DATASETS = {
   wardle2020: {
   label: "Wardle 2020",
   stimuli: "Illusory faces, matched nonface objects, and human faces",
-  expectation: "Illusory faces initially evoke face-like responses, then rapidly become object-like",
+  // expectation: "Illusory faces initially evoke face-like responses, then rapidly become object-like",
   imageFolder: "/assets/preload/wardle2020/images",
   papername: "Rapid and dynamic processing of face pareidolia in the human brain",
   paperLink: "https://www.nature.com/articles/s41467-020-18325-8"

@@ -56,9 +56,9 @@ const DatasetCardLab = ({ dataset }) => {
             Stimuli: {stimuli}
           </Typography>
 
-          <Typography variant="body2">
+          {/* <Typography variant="body2">
             Paper Expected Outcome: {expectation}
-          </Typography>
+          </Typography> */}
         </CardContent>
       </Card>
     </Box>
