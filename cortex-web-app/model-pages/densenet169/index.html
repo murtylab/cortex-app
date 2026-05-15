@@ -23,7 +23,7 @@
 
     <!-- Main CSS File -->
     <link rel="stylesheet" href="/assets/css/main.css">
-    <link rel="stylesheet" href="/assets/css/model-pages.css">
+    <link rel="stylesheet" href="/assets/css/model-pages.css?v=20260515-model-toggle-v2">
 </head>
 <body class="lab-page">
       <header id="header" class="header d-flex align-items-center sticky-top">
@@ -117,6 +117,12 @@
 
                     <div class="info-card">
                         <h2>Performance Analysis</h2>
+                        <div class="performance-toolbar">
+                            <div class="performance-source-switcher" role="group" aria-label="Training source">
+                                <button type="button" class="performance-source-button is-active" data-source="nsd" aria-pressed="true">Trained on NSD</button>
+                                <button type="button" class="performance-source-button" data-source="murty" aria-pressed="false">Trained on Murty</button>
+                            </div>
+                        </div>
                         <p style="color: var(--text-sub); margin-bottom: 1rem; font-size: 0.95rem;">
                             Pearson correlation between predicted and actual fMRI activity (trained on NSD, evaluated on held-out datasets).
                             Scores above 0.4 are <strong>excellent</strong>; 0.01–0.02 differences are meaningful.
@@ -223,7 +229,8 @@
     <script src="/assets/vendor/aos/aos.js"></script>
     <script src="/assets/vendor/glightbox/js/glightbox.min.js"></script>
     <script src="/assets/vendor/swiper/swiper-bundle.min.js"></script>
-    <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/main.js?v=20260515-model-toggle-v2"></script>
+    <script src="/assets/js/model-page-performance-toggle.js?v=20260515-model-toggle-v2"></script>
 
   <canvas id="neuralCanvas"></canvas>
   <script>

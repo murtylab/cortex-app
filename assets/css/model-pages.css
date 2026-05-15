@@ -2,7 +2,12 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:wght@400;700&display=swap');
 
-/* Per-Dataset Breakdown table: center all data cells except first column */
+/* Per-Dataset Breakdown table: center the dataset column and metric values */
+.context-section table thead th:first-child,
+.context-section table tbody td:first-child {
+  text-align: center !important;
+}
+
 .context-section table tbody td:not(:first-child) {
   text-align: center;
 }
@@ -233,4 +238,212 @@ body {
   background-clip: unset;
   -webkit-text-fill-color: var(--heading);
   color: var(--heading);
+}
+
+.performance-toolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin: -0.25rem 0 1rem;
+}
+
+.performance-toggle-switcher,
+.performance-source-switcher,
+.performance-analysis-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 0 0 1px rgba(160, 122, 170, 0.12);
+}
+
+.performance-toggle-button,
+.performance-source-button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--text-sub);
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition: transform 0.25s ease, color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.performance-toggle-button:hover,
+.performance-source-button:hover {
+  color: var(--heading);
+  transform: translateY(-1px);
+}
+
+.performance-toggle-button:focus-visible,
+.performance-source-button:focus-visible {
+  outline: 2px solid rgba(160, 122, 170, 0.35);
+  outline-offset: 2px;
+}
+
+.performance-toggle-button.is-active,
+.performance-source-button.is-active {
+  background: var(--highlight-btn);
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(160, 122, 170, 0.22);
+}
+
+.performance-card-enhanced,
+.performance-dataset-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.performance-grid-enhanced .metric-card {
+  transform-origin: center center;
+  backface-visibility: hidden;
+}
+
+.performance-summary-copy {
+  transform-origin: top center;
+}
+
+.performance-card-enhanced.is-transitioning::after,
+.performance-dataset-section.is-transitioning::after {
+  content: '';
+  position: absolute;
+  inset: -20% -35%;
+  background: linear-gradient(110deg, transparent 18%, rgba(255, 255, 255, 0.08) 39%, rgba(255, 255, 255, 0.72) 50%, rgba(255, 255, 255, 0.08) 61%, transparent 82%);
+  pointer-events: none;
+  animation: performance-card-sheen 0.56s ease;
+}
+
+.performance-card-enhanced.is-transitioning .metric-card {
+  animation: performance-metric-turn 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.performance-card-enhanced.is-transitioning .metric-card:nth-child(2) {
+  animation-delay: 0.04s;
+}
+
+.performance-card-enhanced.is-transitioning .metric-card:nth-child(3) {
+  animation-delay: 0.08s;
+}
+
+.performance-card-enhanced.is-transitioning .metric-card:nth-child(4) {
+  animation-delay: 0.12s;
+}
+
+.performance-dataset-section.is-transitioning tbody tr {
+  animation: performance-row-turn 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.performance-dataset-section.is-transitioning tbody tr:nth-child(2) {
+  animation-delay: 0.03s;
+}
+
+.performance-dataset-section.is-transitioning tbody tr:nth-child(3) {
+  animation-delay: 0.06s;
+}
+
+.performance-dataset-section.is-transitioning tbody tr:nth-child(4) {
+  animation-delay: 0.09s;
+}
+
+.performance-dataset-section.is-transitioning tbody tr:nth-child(5) {
+  animation-delay: 0.12s;
+}
+
+.performance-dataset-section.is-transitioning tbody tr:nth-child(6) {
+  animation-delay: 0.15s;
+}
+
+.performance-summary-copy.is-transitioning {
+  animation: performance-paragraph-turn 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes performance-metric-turn {
+  0% {
+    opacity: 0;
+    transform: perspective(900px) rotateY(-78deg) translateY(14px) scale(0.96);
+  }
+
+  100% {
+    opacity: 1;
+    transform: perspective(900px) rotateY(0deg) translateY(0) scale(1);
+  }
+}
+
+@keyframes performance-row-turn {
+  0% {
+    opacity: 0;
+    transform: perspective(1000px) rotateX(-72deg) translateY(12px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: perspective(1000px) rotateX(0deg) translateY(0);
+  }
+}
+
+@keyframes performance-paragraph-turn {
+  0% {
+    opacity: 0;
+    transform: perspective(1000px) rotateX(-45deg) translateY(10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: perspective(1000px) rotateX(0deg) translateY(0);
+  }
+}
+
+@keyframes performance-card-sheen {
+  0% {
+    opacity: 0;
+    transform: translateX(-55%) rotate(8deg);
+  }
+
+  25% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(55%) rotate(8deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .performance-toolbar {
+    align-items: stretch;
+  }
+
+  .performance-toggle-switcher,
+  .performance-source-switcher {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .performance-toggle-button,
+  .performance-source-button {
+    flex: 1;
+    text-align: center;
+    padding: 0.75rem 0.9rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .performance-source-button,
+  .performance-grid-enhanced .metric-card,
+  .performance-dataset-section tbody tr,
+  .performance-summary-copy {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .performance-card-enhanced.is-transitioning::after,
+  .performance-dataset-section.is-transitioning::after {
+    animation: none !important;
+  }
 }
