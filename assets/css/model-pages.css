@@ -11,6 +11,39 @@
 .context-section table tbody td:not(:first-child) {
   text-align: center;
 }
+
+.performance-dataset-table-comparison {
+  min-width: 1180px;
+}
+
+.performance-dataset-table-comparison th,
+.performance-dataset-table-comparison td {
+  padding: 0.75rem 0.85rem;
+  text-align: center;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+
+.performance-dataset-table-comparison thead .performance-dataset-header-group th {
+  background: var(--highlight);
+  color: #fff;
+  font-weight: 700;
+}
+
+.performance-dataset-table-comparison thead .performance-dataset-header-sub th {
+  background: rgba(160, 122, 170, 0.12);
+  color: var(--heading);
+  font-weight: 700;
+}
+
+.performance-dataset-table-comparison tbody td:first-child {
+  background: rgba(247, 247, 244, 0.96);
+  font-weight: 700;
+}
+
+.performance-dataset-table-comparison tbody tr:nth-child(even) td {
+  background-color: rgba(255, 255, 255, 0.5);
+}
 :root {
   --bg:          #f7f7f4;
   --text-main:   #3d3832;

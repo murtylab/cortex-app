@@ -219,6 +219,58 @@
     `).join('');
   }
 
+  function buildDatasetComparisonHeaderMarkup() {
+    const comparisonGroups = [
+      { analysisKey: 'univariate', sourceKey: 'nsd', label: 'Uni · NSD' },
+      { analysisKey: 'univariate', sourceKey: 'murty', label: 'Uni · Murty' },
+      { analysisKey: 'multivariate', sourceKey: 'nsd', label: 'Multi · NSD' },
+      { analysisKey: 'multivariate', sourceKey: 'murty', label: 'Multi · Murty' }
+    ];
+
+    const groupHeaders = comparisonGroups.map((group) => `
+      <th colspan="3" data-analysis="${group.analysisKey}" data-source="${group.sourceKey}">${group.label}</th>
+    `).join('');
+
+    const roiHeaders = comparisonGroups.map(() => {
+      return MODEL_PAGE_ROIS.map((roi) => `<th>${roi.summaryLabel}</th>`).join('');
+    }).join('');
+
+    return `
+      <tr class="performance-dataset-header-group">
+        <th rowspan="2">Dataset</th>
+        ${groupHeaders}
+      </tr>
+      <tr class="performance-dataset-header-sub">
+        ${roiHeaders}
+      </tr>
+    `;
+  }
+
+  function buildDatasetComparisonRowsMarkup(payloads) {
+    const comparisonGroups = [
+      { analysisKey: 'univariate', sourceKey: 'nsd' },
+      { analysisKey: 'univariate', sourceKey: 'murty' },
+      { analysisKey: 'multivariate', sourceKey: 'nsd' },
+      { analysisKey: 'multivariate', sourceKey: 'murty' }
+    ];
+
+    return MODEL_PAGE_DATASETS.map((dataset, rowIndex) => {
+      const cells = comparisonGroups.map(({ analysisKey, sourceKey }) => {
+        const row = payloads[analysisKey]?.[sourceKey]?.rows?.[rowIndex];
+        return MODEL_PAGE_ROIS.map((roi) => {
+          return `<td>${formatModelPageValue(row?.values?.[roi.key] ?? null)}</td>`;
+        }).join('');
+      }).join('');
+
+      return `
+        <tr style="--row-index: ${rowIndex};">
+          <td>${dataset.label}</td>
+          ${cells}
+        </tr>
+      `;
+    }).join('');
+  }
+
   function getModelPageToolbarMarkup() {
     const analysisButtonsMarkup = Object.entries(MODEL_PAGE_ANALYSES).map(([analysisKey, analysis]) => `
       <button
@@ -281,8 +333,8 @@
     });
   }
 
-  function triggerModelPagePerformanceTransition(performanceCard, datasetSection, aboutSummary) {
-    const transitionTargets = [performanceCard, datasetSection, aboutSummary];
+  function triggerModelPagePerformanceTransition(...targets) {
+    const transitionTargets = targets.filter(Boolean);
 
     transitionTargets.forEach((target) => {
       target.classList.remove('is-transitioning');
@@ -322,13 +374,14 @@
     const performanceIntro = performanceCard?.querySelector('p');
     const performanceGrid = performanceCard?.querySelector('.performance-grid');
     const datasetTable = datasetSection?.querySelector('table');
+    const datasetTableHead = datasetTable?.querySelector('thead');
     const datasetTableBody = datasetTable?.querySelector('tbody');
     const datasetIntro = datasetSection?.querySelector('p');
     const modelTitle = modelPage.querySelector('.model-header h1')?.textContent.trim();
     const aboutParagraphs = aboutSection ? Array.from(aboutSection.querySelectorAll('p')) : [];
     const aboutSummary = aboutParagraphs.length > 1 ? aboutParagraphs[1] : null;
 
-    if (!performanceCard || !performanceHeading || !performanceIntro || !performanceGrid || !datasetSection || !datasetTable || !datasetTableBody || !aboutSummary || !modelTitle) {
+    if (!performanceCard || !performanceHeading || !performanceIntro || !performanceGrid || !datasetSection || !datasetTable || !datasetTableHead || !datasetTableBody || !aboutSummary || !modelTitle) {
       return;
     }
 
@@ -378,7 +431,14 @@
         performanceGrid.classList.add('performance-grid-enhanced');
         datasetSection.classList.add('performance-dataset-section');
         datasetTable.classList.add('performance-dataset-table');
+        datasetTable.classList.add('performance-dataset-table-comparison');
         aboutSummary.classList.add('performance-summary-copy');
+        datasetTableHead.innerHTML = buildDatasetComparisonHeaderMarkup();
+        datasetTableBody.innerHTML = buildDatasetComparisonRowsMarkup(payloads);
+
+        if (datasetIntro) {
+          datasetIntro.innerHTML = 'Univariate and multivariate Pearson correlations across evaluation datasets and brain regions for models trained on NSD and Murty. These are hold-out datasets not used for model training.';
+        }
 
         const state = {
           activeAnalysis: 'univariate',
@@ -409,14 +469,10 @@
 
           performanceIntro.innerHTML = `${analysis.introLabel} Pearson correlation between predicted and actual fMRI activity (trained on ${source.introLabel}, evaluated on held-out datasets). Scores above <strong>0.4</strong> are <strong>excellent</strong>; 0.01–0.02 differences are meaningful.`;
           performanceGrid.innerHTML = buildMetricCardsMarkup(payload);
-          datasetTableBody.innerHTML = buildDatasetRowsMarkup(payload.rows);
-          if (datasetIntro) {
-            datasetIntro.innerHTML = `${analysis.datasetLabel} Pearson correlations across evaluation datasets and brain regions. These are hold-out datasets not used for model training.`;
-          }
           aboutSummary.innerHTML = `When evaluated against fMRI recordings from human participants, ${modelTitle} achieves a strong global <strong>${analysis.summaryLabel}</strong> Pearson correlation of <strong>${formatModelPageValue(payload.global)}</strong> (averaged across all evaluation datasets and brain regions). Its strongest predictions are in the <strong>${payload.strongestRoi.summaryLabel}</strong> area.`;
 
           if (animate && !prefersReducedMotion()) {
-            triggerModelPagePerformanceTransition(performanceCard, datasetSection, aboutSummary);
+            triggerModelPagePerformanceTransition(performanceCard, aboutSummary);
           }
         }
       })
