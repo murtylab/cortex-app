@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
 import { Button, message, Steps, theme } from 'antd';
 import { SmileOutlined } from '@ant-design/icons';
@@ -201,6 +201,400 @@ const Stepper: React.FC = () => {
   const [preloadLoadingKey, setPreloadLoadingKey] = useState<string | null>(null);
   const isPreloadMode = !!prestoreDataset;
   const inputMode = isPreloadMode ? "preload" : "upload";
+  const tutorialOriginalUploadStateRef = useRef<{ files: PreviewFile[]; prestoreDataset: string | null } | null>(null);
+  const tutorialRezaBaselineRef = useRef<PreviewFile[] | null>(null);
+  const tutorialUploadDemoTimerRef = useRef<number | null>(null);
+  const tutorialUploadDemoAnimationFrameRef = useRef<number | null>(null);
+  const tutorialUploadDemoVisualCleanupRef = useRef<(() => void) | null>(null);
+  const tutorialUploadDemoRequestRef = useRef(0);
+  const [tutorialCustomGroups, setTutorialCustomGroups] = useState<string[] | null>(null);
+  const [tutorialUploadDemoMode, setTutorialUploadDemoMode] = useState<string | null>(null);
+
+  const clonePreviewFiles = (items: PreviewFile[]) => items.map((item) => ({ ...item }));
+
+  const clearUploadDemoTimer = () => {
+    if (tutorialUploadDemoTimerRef.current !== null) {
+      window.clearTimeout(tutorialUploadDemoTimerRef.current);
+      tutorialUploadDemoTimerRef.current = null;
+    }
+  };
+
+  const clearUploadDemoVisuals = () => {
+    if (tutorialUploadDemoAnimationFrameRef.current !== null) {
+      window.cancelAnimationFrame(tutorialUploadDemoAnimationFrameRef.current);
+      tutorialUploadDemoAnimationFrameRef.current = null;
+    }
+
+    tutorialUploadDemoVisualCleanupRef.current?.();
+    tutorialUploadDemoVisualCleanupRef.current = null;
+  };
+
+  const syncUploadTutorialState = (
+    nextFiles: PreviewFile[],
+    datasetKey: string | null,
+    nextTutorialGroups: string[] = [],
+    nextDemoMode: string | null = null
+  ) => {
+    const clonedFiles = clonePreviewFiles(nextFiles);
+
+    setFiles(clonedFiles);
+    setFileMappings(clonePreviewFiles(clonedFiles));
+    setPrestoreDataset(datasetKey);
+    setPreloadLoading(false);
+    setPreloadLoadingKey(null);
+    setPredictionResult(null);
+    clearRegionPredictionCache();
+    setShowInsights(false);
+    setPredictstep(1);
+    setTutorialCustomGroups(nextTutorialGroups);
+    setTutorialUploadDemoMode(nextDemoMode);
+  };
+
+  const captureOriginalUploadTutorialState = () => {
+    if (tutorialOriginalUploadStateRef.current) {
+      return;
+    }
+
+    tutorialOriginalUploadStateRef.current = {
+      files: clonePreviewFiles(files),
+      prestoreDataset,
+    };
+  };
+
+  const restoreOriginalUploadTutorialState = () => {
+    const originalState = tutorialOriginalUploadStateRef.current;
+    if (!originalState) {
+      syncUploadTutorialState([], null, []);
+      return;
+    }
+
+    syncUploadTutorialState(originalState.files, originalState.prestoreDataset, []);
+  };
+
+  const resetUploadTutorialState = () => {
+    tutorialUploadDemoRequestRef.current += 1;
+    clearUploadDemoTimer();
+    clearUploadDemoVisuals();
+    restoreOriginalUploadTutorialState();
+    tutorialOriginalUploadStateRef.current = null;
+    tutorialRezaBaselineRef.current = null;
+    setTutorialCustomGroups(null);
+    setTutorialUploadDemoMode(null);
+  };
+
+  const startLoopingUploadDemo = ({
+    requestId,
+    mode,
+    baseFiles,
+    demoFiles,
+    baseGroups = [],
+    demoGroups = [],
+  }: {
+    requestId: number;
+    mode: string;
+    baseFiles: PreviewFile[];
+    demoFiles: PreviewFile[];
+    baseGroups?: string[];
+    demoGroups?: string[];
+  }) => {
+    clearUploadDemoTimer();
+    clearUploadDemoVisuals();
+
+    const loop = (delayMs: number, showDemoFrame: boolean) => {
+      tutorialUploadDemoTimerRef.current = window.setTimeout(() => {
+        if (tutorialUploadDemoRequestRef.current !== requestId) {
+          return;
+        }
+
+        syncUploadTutorialState(
+          showDemoFrame ? demoFiles : baseFiles,
+          'reza',
+          showDemoFrame ? demoGroups : baseGroups,
+          mode
+        );
+
+        loop(showDemoFrame ? 2400 : 1800, !showDemoFrame);
+      }, delayMs);
+    };
+
+    syncUploadTutorialState(baseFiles, 'reza', baseGroups, mode);
+    loop(1600, true);
+  };
+
+  const getSortedGroupKeys = (items: PreviewFile[]) =>
+    Array.from(new Set(items.map((file) => file.groupKey).filter(Boolean))).sort((left, right) =>
+      left.localeCompare(right, undefined, { numeric: true, sensitivity: 'base' })
+    );
+
+  const getDragDemoSpec = (baseFiles: PreviewFile[]) => {
+    const groups = getSortedGroupKeys(baseFiles);
+    if (groups.length < 2) {
+      return null;
+    }
+
+    const fromGroup = groups[0];
+    const toGroup = groups[1];
+    const movingItem = baseFiles.find((file) => file.groupKey === fromGroup);
+    if (!movingItem) {
+      return null;
+    }
+
+    return {
+      fromGroup,
+      toGroup,
+      movingUid: movingItem.uid,
+      previewSrc: movingItem.blobURL,
+      demoFiles: baseFiles.map((file) =>
+        file.uid === movingItem.uid ? { ...file, groupKey: toGroup } : { ...file }
+      ),
+    };
+  };
+
+  const playTutorialDragTransition = ({
+    requestId,
+    movingUid,
+    targetGroup,
+    previewSrc,
+    commitState,
+  }: {
+    requestId: number;
+    movingUid: string;
+    targetGroup: string;
+    previewSrc: string;
+    commitState: () => void;
+  }) =>
+    new Promise<boolean>((resolve) => {
+      clearUploadDemoVisuals();
+
+      const sourceElement = Array.from(document.querySelectorAll('[data-tutorial-item-uid]')).find(
+        (node) => node.getAttribute('data-tutorial-item-uid') === movingUid
+      ) as HTMLElement | undefined;
+
+      const targetElement = Array.from(document.querySelectorAll('[data-tutorial-group-key]')).find(
+        (node) => node.getAttribute('data-tutorial-group-key') === targetGroup
+      ) as HTMLElement | undefined;
+
+      if (!sourceElement || !targetElement) {
+        commitState();
+        resolve(true);
+        return;
+      }
+
+      const sourceRect = sourceElement.getBoundingClientRect();
+      const targetRect = targetElement.getBoundingClientRect();
+      const durationMs = 1800;
+      let targetLeft = targetRect.left + 24;
+      let targetTop = targetRect.top + 82;
+
+      targetLeft = Math.min(targetLeft, targetRect.right - sourceRect.width - 18);
+      targetTop = Math.min(targetTop, targetRect.bottom - sourceRect.height - 18);
+      targetLeft = Math.max(targetRect.left + 12, targetLeft);
+      targetTop = Math.max(targetRect.top + 18, targetTop);
+
+      const deltaX = targetLeft - sourceRect.left;
+      const deltaY = targetTop - sourceRect.top;
+
+      const preview = document.createElement('div');
+      preview.setAttribute('data-tutorial-drag-preview', 'true');
+      preview.style.position = 'fixed';
+      preview.style.left = `${sourceRect.left}px`;
+      preview.style.top = `${sourceRect.top}px`;
+      preview.style.width = `${sourceRect.width}px`;
+      preview.style.height = `${sourceRect.height}px`;
+      preview.style.borderRadius = '12px';
+      preview.style.overflow = 'hidden';
+      preview.style.pointerEvents = 'none';
+      preview.style.zIndex = '2147483646';
+      preview.style.boxShadow = '0 18px 40px rgba(36, 31, 27, 0.24)';
+      preview.style.background = 'rgba(255, 255, 255, 0.92)';
+      preview.style.transition = 'opacity 180ms ease';
+      preview.style.transform = 'translate3d(0, 0, 0) scale(1)';
+
+      const previewImage = document.createElement('img');
+      previewImage.src = previewSrc;
+      previewImage.alt = '';
+      previewImage.style.width = '100%';
+      previewImage.style.height = '100%';
+      previewImage.style.display = 'block';
+      previewImage.style.objectFit = 'cover';
+      preview.appendChild(previewImage);
+
+      const previousSourceOpacity = sourceElement.style.opacity;
+      const previousSourceTransition = sourceElement.style.transition;
+      const previousTargetBoxShadow = targetElement.style.boxShadow;
+      const previousTargetTransition = targetElement.style.transition;
+      const previousTargetBorderColor = targetElement.style.borderColor;
+
+      sourceElement.style.transition = 'opacity 180ms ease';
+      sourceElement.style.opacity = '0.16';
+      targetElement.style.transition = 'box-shadow 220ms ease, border-color 220ms ease';
+      targetElement.style.boxShadow = '0 0 0 3px rgba(122, 167, 255, 0.42), 0 16px 36px rgba(78, 94, 132, 0.12)';
+      targetElement.style.borderColor = 'rgba(122, 167, 255, 0.7)';
+
+      document.body.appendChild(preview);
+
+      let finishTimeout = 0;
+      let cleanupTimeout = 0;
+
+      const cleanup = () => {
+        if (tutorialUploadDemoAnimationFrameRef.current !== null) {
+          window.cancelAnimationFrame(tutorialUploadDemoAnimationFrameRef.current);
+          tutorialUploadDemoAnimationFrameRef.current = null;
+        }
+
+        if (finishTimeout) {
+          window.clearTimeout(finishTimeout);
+        }
+        if (cleanupTimeout) {
+          window.clearTimeout(cleanupTimeout);
+        }
+
+        preview.remove();
+        sourceElement.style.opacity = previousSourceOpacity;
+        sourceElement.style.transition = previousSourceTransition;
+        targetElement.style.boxShadow = previousTargetBoxShadow;
+        targetElement.style.transition = previousTargetTransition;
+        targetElement.style.borderColor = previousTargetBorderColor;
+
+        if (tutorialUploadDemoVisualCleanupRef.current === cleanup) {
+          tutorialUploadDemoVisualCleanupRef.current = null;
+        }
+      };
+
+      tutorialUploadDemoVisualCleanupRef.current = cleanup;
+
+      const easeOutQuart = (value: number) => 1 - Math.pow(1 - value, 4);
+      const animationStart = window.performance.now();
+
+      const stepAnimation = (now: number) => {
+        if (tutorialUploadDemoRequestRef.current !== requestId) {
+          cleanup();
+          resolve(false);
+          return;
+        }
+
+        const progress = Math.min(1, (now - animationStart) / durationMs);
+        const eased = easeOutQuart(progress);
+        const currentX = deltaX * eased;
+        const currentY = deltaY * eased;
+        const currentScale = 1 - 0.04 * eased;
+
+        preview.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) scale(${currentScale})`;
+
+        if (progress < 1) {
+          tutorialUploadDemoAnimationFrameRef.current = window.requestAnimationFrame(stepAnimation);
+          return;
+        }
+
+        tutorialUploadDemoAnimationFrameRef.current = null;
+        commitState();
+        preview.style.opacity = '0';
+
+        cleanupTimeout = window.setTimeout(() => {
+          cleanup();
+          resolve(true);
+        }, 180);
+      };
+
+      tutorialUploadDemoAnimationFrameRef.current = window.requestAnimationFrame(stepAnimation);
+    });
+
+  const startAnimatedDragUploadDemo = ({
+    requestId,
+    mode,
+    baseFiles,
+  }: {
+    requestId: number;
+    mode: string;
+    baseFiles: PreviewFile[];
+  }) => {
+    const dragSpec = getDragDemoSpec(baseFiles);
+    if (!dragSpec) {
+      startLoopingUploadDemo({
+        requestId,
+        mode,
+        baseFiles,
+        demoFiles: clonePreviewFiles(baseFiles),
+      });
+      return;
+    }
+
+    clearUploadDemoTimer();
+    clearUploadDemoVisuals();
+    syncUploadTutorialState(baseFiles, 'reza', [], mode);
+
+    const queueForward = (delayMs: number) => {
+      tutorialUploadDemoTimerRef.current = window.setTimeout(async () => {
+        if (tutorialUploadDemoRequestRef.current !== requestId) {
+          return;
+        }
+
+        const completed = await playTutorialDragTransition({
+          requestId,
+          movingUid: dragSpec.movingUid,
+          targetGroup: dragSpec.toGroup,
+          previewSrc: dragSpec.previewSrc,
+          commitState: () => {
+            syncUploadTutorialState(dragSpec.demoFiles, 'reza', [], mode);
+          },
+        });
+
+        if (!completed || tutorialUploadDemoRequestRef.current !== requestId) {
+          return;
+        }
+
+        queueBackward(1700);
+      }, delayMs);
+    };
+
+    const queueBackward = (delayMs: number) => {
+      tutorialUploadDemoTimerRef.current = window.setTimeout(async () => {
+        if (tutorialUploadDemoRequestRef.current !== requestId) {
+          return;
+        }
+
+        const completed = await playTutorialDragTransition({
+          requestId,
+          movingUid: dragSpec.movingUid,
+          targetGroup: dragSpec.fromGroup,
+          previewSrc: dragSpec.previewSrc,
+          commitState: () => {
+            syncUploadTutorialState(baseFiles, 'reza', [], mode);
+          },
+        });
+
+        if (!completed || tutorialUploadDemoRequestRef.current !== requestId) {
+          return;
+        }
+
+        queueForward(1350);
+      }, delayMs);
+    };
+
+    queueForward(1200);
+  };
+
+  useEffect(() => {
+    return () => {
+      tutorialUploadDemoRequestRef.current += 1;
+      clearUploadDemoTimer();
+      clearUploadDemoVisuals();
+    };
+  }, []);
+
+  const buildDragDemoFiles = (baseFiles: PreviewFile[]) => {
+    return getDragDemoSpec(baseFiles)?.demoFiles ?? clonePreviewFiles(baseFiles);
+  };
+
+  const buildClearGroupDemoFiles = (baseFiles: PreviewFile[]) => {
+    const groups = Array.from(new Set(baseFiles.map((file) => file.groupKey).filter(Boolean)));
+    if (groups.length < 2) {
+      return clonePreviewFiles(baseFiles);
+    }
+
+    const clearedGroup = groups[0];
+    return baseFiles.filter((file) => file.groupKey !== clearedGroup).map((file) => ({ ...file }));
+  };
 
   useEffect(() => {
     const tutorialApi = {
@@ -209,6 +603,76 @@ const Stepper: React.FC = () => {
 
         const safeStep = Math.max(0, Math.min(stepIndex, 2));
         setCurrent(safeStep);
+      },
+      loadDataset: async (datasetKey: string) => {
+        if (!datasetKey) return;
+        if (prestoreDataset === datasetKey || preloadLoadingKey === datasetKey) return;
+        await loadPrestoredDataset(datasetKey, { silent: true });
+      },
+      setUploadDemo: async (mode: string) => {
+        tutorialUploadDemoRequestRef.current += 1;
+        const requestId = tutorialUploadDemoRequestRef.current;
+        clearUploadDemoTimer();
+        clearUploadDemoVisuals();
+
+        setCurrent(0);
+        captureOriginalUploadTutorialState();
+
+        if (mode === 'restore-original') {
+          restoreOriginalUploadTutorialState();
+          setTutorialUploadDemoMode(mode);
+          return;
+        }
+
+        let baseFiles = tutorialRezaBaselineRef.current ? clonePreviewFiles(tutorialRezaBaselineRef.current) : null;
+        if (!baseFiles || baseFiles.length === 0) {
+          const loadedFiles = await loadPrestoredDataset('reza', { silent: true });
+          if (tutorialUploadDemoRequestRef.current !== requestId) {
+            return;
+          }
+          baseFiles = loadedFiles.length ? clonePreviewFiles(loadedFiles) : [];
+        }
+
+        if (!baseFiles.length) {
+          return;
+        }
+
+        if (mode === 'reza-base') {
+          syncUploadTutorialState(baseFiles, 'reza', [], mode);
+          return;
+        }
+
+        if (mode === 'drag-demo') {
+          startAnimatedDragUploadDemo({
+            requestId,
+            mode,
+            baseFiles,
+          });
+          return;
+        }
+
+        if (mode === 'add-group-demo') {
+          startLoopingUploadDemo({
+            requestId,
+            mode,
+            baseFiles,
+            demoFiles: baseFiles,
+            demoGroups: ['Tutorial Group'],
+          });
+          return;
+        }
+
+        if (mode === 'clear-group-demo') {
+          startLoopingUploadDemo({
+            requestId,
+            mode,
+            baseFiles,
+            demoFiles: buildClearGroupDemoFiles(baseFiles),
+          });
+        }
+      },
+      resetUploadDemo: () => {
+        resetUploadTutorialState();
       },
     };
 
@@ -219,7 +683,7 @@ const Stepper: React.FC = () => {
         delete (window as any).cortexLabTutorial;
       }
     };
-  }, []);
+  }, [files, prestoreDataset, preloadLoadingKey]);
 
   const next = () => setCurrent((prev) => prev + 1);
   const prev = () => setCurrent((prev) => prev - 1);
@@ -270,7 +734,7 @@ const loadPreloadedPredictionByRegion = async (
 };
 
 
-const loadPrestoredDataset = async (datasetKey: string) => {
+const loadPrestoredDataset = async (datasetKey: string, options: { silent?: boolean } = {}) => {
   setPreloadLoading(true);
   setPreloadLoadingKey(datasetKey);
   setPrestoreDataset(datasetKey);
@@ -289,12 +753,14 @@ const loadPrestoredDataset = async (datasetKey: string) => {
     );
 
   if (matchedEntries.length === 0) {
-    message.warning(`No images found for ${datasetKey}`);
+    if (!options.silent) {
+      message.warning(`No images found for ${datasetKey}`);
+    }
     setFiles([]);
     setFileMappings([]);
     setPreloadLoading(false);
     setPreloadLoadingKey(null);
-    return;
+    return [];
   }
 
   try {
@@ -348,6 +814,9 @@ const loadPrestoredDataset = async (datasetKey: string) => {
 
     setFiles(preloadFiles);
     setFileMappings(preloadFiles);
+    if (datasetKey.toLowerCase() === 'reza') {
+      tutorialRezaBaselineRef.current = clonePreviewFiles(preloadFiles);
+    }
 
     setPredictionResult(null);
     clearRegionPredictionCache();
@@ -358,10 +827,16 @@ const loadPrestoredDataset = async (datasetKey: string) => {
     // Predictions should still come from backend when user proceeds.
     setPredictstep(1);
 
-    message.success(`${datasetKey} loaded`);
+    if (!options.silent) {
+      message.success(`${datasetKey} loaded`);
+    }
+    return preloadFiles;
   } catch (err) {
     console.error(err);
-    message.error(`Failed to load dataset ${datasetKey}`);
+    if (!options.silent) {
+      message.error(`Failed to load dataset ${datasetKey}`);
+    }
+    return [];
   } finally {
     setPreloadLoading(false);
     setPreloadLoadingKey(null);
@@ -896,10 +1371,12 @@ useEffect(() => {
                   alignItems: 'start',
                 }}
               >
-                <Uploader
-                  key={uploaderKey}
-                  onAddFiles={(newFiles) => addIncomingFiles(newFiles)}
-                />
+                <div data-tutorial="lab-upload-uploader">
+                  <Uploader
+                    key={uploaderKey}
+                    onAddFiles={(newFiles) => addIncomingFiles(newFiles)}
+                  />
+                </div>
 
                 <div
                   style={{
@@ -946,18 +1423,23 @@ useEffect(() => {
 
               {isPreloadMode && <DatasetCardLab dataset={prestoreDataset} />}
 
-              <ImagePreviewGroupedDnD
-                files={files}
-                title={inputMode === "preload" ? "Preloaded Images" : "Uploaded Images"}
-                groupDepth={1}
-                isPreload={isPreloadMode}
-                onMoveItemToGroup={moveItemToGroup}
-                onRenameGroupKey={renameGroupKey}
-                onRemove={(uid: string) => removeOne(uid)}
-                onClear={() => clearAll()}
-                onClearGroup={(groupKey, uids) => clearGroup(uids)}
-                onGroupOrderChange={(order: string[]) => console.log("Group order:", order)}
-              />
+              <div data-tutorial="lab-upload-images-panel">
+                <ImagePreviewGroupedDnD
+                  files={files}
+                  title={inputMode === "preload" ? "Preloaded Images" : "Uploaded Images"}
+                  groupDepth={1}
+                  isPreload={isPreloadMode}
+                  allowPreloadEditing={true}
+                  tutorialCustomGroups={tutorialCustomGroups}
+                  tutorialStateKey={tutorialUploadDemoMode}
+                  onMoveItemToGroup={moveItemToGroup}
+                  onRenameGroupKey={renameGroupKey}
+                  onRemove={(uid: string) => removeOne(uid)}
+                  onClear={() => clearAll()}
+                  onClearGroup={(groupKey, uids) => clearGroup(uids)}
+                  onGroupOrderChange={(order: string[]) => console.log("Group order:", order)}
+                />
+              </div>
 
               <div style={{ textAlign: 'right', color: 'black', fontWeight: 500 }}>
                 📸 {files.length} images loaded

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 type FileWithPath = File & { webkitRelativePath?: string };
 
@@ -23,6 +23,9 @@ type ImagePreviewGroupedDnDProps = {
   foldable?: boolean;
   viewOnly?: boolean;
   isPreload?: boolean;
+  allowPreloadEditing?: boolean;
+  tutorialCustomGroups?: string[] | null;
+  tutorialStateKey?: string | null;
 
   onRemove?: (uid: string) => void;
   onClear?: () => void;
@@ -49,7 +52,17 @@ export default function ImagePreviewGroupedDnD({
   foldable = false,
   viewOnly = false,
   isPreload = false,
+  allowPreloadEditing = false,
+  tutorialCustomGroups = null,
+  tutorialStateKey = null,
 }: ImagePreviewGroupedDnDProps) {
+  const getTutorialGroupOrder = (keys: string[]) =>
+    [...keys].sort((left, right) => {
+      if (left === "Tutorial Group") return 1;
+      if (right === "Tutorial Group") return -1;
+      return left.localeCompare(right, undefined, { numeric: true, sensitivity: "base" });
+    });
+
   const getGroupKey = (file?: FileWithPath) => {
     const rel = file?.webkitRelativePath ?? "";
     if (!rel) return "Ungrouped";
@@ -110,6 +123,7 @@ export default function ImagePreviewGroupedDnD({
 
   const [groupOrder, setGroupOrder] = useState<string[]>([]);
   const [customGroups, setCustomGroups] = useState<string[]>([]);
+  const previousTutorialCustomGroupsRef = useRef<string[] | null>(null);
 
   useEffect(() => {
     if (files.length === 0) {
@@ -120,10 +134,39 @@ export default function ImagePreviewGroupedDnD({
     }
   }, [files.length]);
 
+  useEffect(() => {
+    if (tutorialCustomGroups !== null) {
+      setCustomGroups(tutorialCustomGroups);
+      setGroupError("");
+      setIsAddingGroup(false);
+      setNewGroupName("");
+    } else if (previousTutorialCustomGroupsRef.current !== null) {
+      setCustomGroups([]);
+      setGroupError("");
+      setIsAddingGroup(false);
+      setNewGroupName("");
+    }
+
+    previousTutorialCustomGroupsRef.current = tutorialCustomGroups;
+  }, [tutorialCustomGroups]);
+
+  const effectiveCustomGroups = tutorialCustomGroups ?? customGroups;
+
   const allGroupKeys = useMemo(() => {
-    const keys = [...Object.keys(grouped), ...customGroups];
+    const keys = [...Object.keys(grouped), ...effectiveCustomGroups];
     return Array.from(new Set(keys));
-  }, [grouped, customGroups]);
+  }, [effectiveCustomGroups, grouped]);
+
+  const tutorialOrderedGroupKeys = useMemo(() => getTutorialGroupOrder(allGroupKeys), [allGroupKeys]);
+
+  useEffect(() => {
+    if (tutorialStateKey === null) {
+      return;
+    }
+
+    setGroupOrder(tutorialOrderedGroupKeys);
+    onGroupOrderChange?.(tutorialOrderedGroupKeys);
+  }, [onGroupOrderChange, tutorialOrderedGroupKeys, tutorialStateKey]);
 
   useEffect(() => {
     const keys = allGroupKeys;
@@ -166,6 +209,7 @@ export default function ImagePreviewGroupedDnD({
   const [isAddingGroup, setIsAddingGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [groupError, setGroupError] = useState("");
+  const groupEditingDisabled = isPreload && !allowPreloadEditing;
 
   const orderedKeys = groupOrder.length ? groupOrder : allGroupKeys;
 
@@ -312,29 +356,30 @@ export default function ImagePreviewGroupedDnD({
 
           <button
             type="button"
-            disabled={isPreload}
+            data-tutorial="lab-upload-add-group"
+            disabled={groupEditingDisabled}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              if (isPreload) return;
+              if (groupEditingDisabled) return;
               startAddGroup();
             }}
-            style={btnStyle(isPreload)}
+            style={btnStyle(groupEditingDisabled)}
           >
             Add Group
           </button>
 
           <button
             type="button"
-            disabled={isPreload}
+            disabled={groupEditingDisabled}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              if (isPreload) return;
+              if (groupEditingDisabled) return;
               onClear?.();
               setCustomGroups([]);
             }}
-            style={btnStyle(isPreload)}
+            style={btnStyle(groupEditingDisabled)}
           >
             Clear All
           </button>
@@ -372,7 +417,7 @@ export default function ImagePreviewGroupedDnD({
             >
               <input
                 autoFocus
-                disabled={isPreload}
+                disabled={groupEditingDisabled}
                 value={newGroupName}
                 onChange={(e) => {
                   setNewGroupName(e.target.value);
@@ -395,10 +440,10 @@ export default function ImagePreviewGroupedDnD({
                 }}
               />
 
-              <button type="button" onClick={confirmAddGroup} disabled={isPreload} style={btnStyle(isPreload)}>
+              <button type="button" onClick={confirmAddGroup} disabled={groupEditingDisabled} style={btnStyle(groupEditingDisabled)}>
                 Confirm
               </button>
-              <button type="button" onClick={cancelAddGroup} disabled={isPreload} style={btnStyle(isPreload)}>
+              <button type="button" onClick={cancelAddGroup} disabled={groupEditingDisabled} style={btnStyle(groupEditingDisabled)}>
                 Cancel
               </button>
             </div>
@@ -433,6 +478,7 @@ export default function ImagePreviewGroupedDnD({
           <div style={{ height: 12 }} />
 
           <div
+            data-tutorial="lab-upload-group-grid"
             style={{
               display: "grid",
               gridTemplateColumns: orderedKeys.length <= 1 ? "minmax(0, 1fr)" : "repeat(2, minmax(0, 1fr))",
@@ -440,7 +486,7 @@ export default function ImagePreviewGroupedDnD({
               alignItems: "start",
             }}
           >
-            {orderedKeys.map((k) => {
+            {orderedKeys.map((k, groupIndex) => {
               const items = grouped[k] || [];
               const isOver = overKey === k && dragKey && dragKey !== k;
     
@@ -448,12 +494,13 @@ export default function ImagePreviewGroupedDnD({
               return (
                 <div
                   key={`${k}::${displayName(k)}`}
+                  data-tutorial-group-key={k}
                   onDragOver={(e: React.DragEvent<HTMLDivElement>) => {
-                    if(isPreload) return;
+                    if (groupEditingDisabled) return;
                     if (dragItem) e.preventDefault();
                   }}
                   onDrop={(e: React.DragEvent<HTMLDivElement>) => {
-                    if(isPreload) return;
+                    if (groupEditingDisabled) return;
                     e.preventDefault();
                     if (!dragItem?.uid) return;
 
@@ -470,25 +517,25 @@ export default function ImagePreviewGroupedDnD({
                   }}
                 >
                   <div
-                    draggable = {!isPreload}
+                    draggable={!groupEditingDisabled}
                     onDragStart={(e) => {
-                      if(isPreload) return;
+                      if (groupEditingDisabled) return;
                       setDragKey(k);
                       e.dataTransfer.effectAllowed = "move";
                     }}
                     onDragEnd={() => {
-                      if(isPreload) return;
+                      if (groupEditingDisabled) return;
                       setDragKey(null);
                       setOverKey(null);
                     }}
                     onDragOver={(e) => {
-                      if(isPreload) return;
+                      if (groupEditingDisabled) return;
                       e.preventDefault();
                       setOverKey(k);
                       e.dataTransfer.dropEffect = "move";
                     }}
                     onDrop={(e) => {
-                      if(isPreload) return;
+                      if (groupEditingDisabled) return;
                       e.preventDefault();
                       move(dragKey, k);
                       setOverKey(null);
@@ -549,14 +596,14 @@ export default function ImagePreviewGroupedDnD({
                       {editingKey !== k && (
                         <button
                           type="button"
-                          disabled={isPreload}
+                          disabled={groupEditingDisabled}
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            if(isPreload) return;
+                            if (groupEditingDisabled) return;
                             startRename(k);
                           }}
-                          style={btnStyle(isPreload)}
+                          style={btnStyle(groupEditingDisabled)}
                           title="Rename group"
                         >
                           ✏️ Rename
@@ -564,18 +611,19 @@ export default function ImagePreviewGroupedDnD({
                       )}
 
                       <button
+                        data-tutorial={groupIndex === 0 ? "lab-upload-clear-group" : undefined}
                         type="button"
-                        disabled={isPreload}
+                        disabled={groupEditingDisabled}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          if(isPreload) return;
+                          if (groupEditingDisabled) return;
 
                           const uidsToRemove = items.map((it) => it.id);
                           onClearGroup?.(k, uidsToRemove);
                           setCustomGroups((prev) => prev.filter((g) => g !== k));
                         }}
-                        style={btnStyle(isPreload)}
+                        style={btnStyle(groupEditingDisabled)}
                       >
                         Clear Group
                       </button>
@@ -596,9 +644,10 @@ export default function ImagePreviewGroupedDnD({
                         {items.slice(0, maxThumbsPerGroup).map((it) => (
                           <div
                             key={`${k}::${it.id}::${it.idx}`}
-                            draggable = {!isPreload}
+                            data-tutorial-item-uid={it.id}
+                            draggable={!groupEditingDisabled}
                             onDragStart={(e) => {
-                              if(isPreload) return; 
+                              if (groupEditingDisabled) return;
                               setDragItem({ uid: it.id, fromKey: k });
                               e.dataTransfer.effectAllowed = "move";
                             }}
@@ -659,7 +708,7 @@ export default function ImagePreviewGroupedDnD({
                             fontSize: 11,
                           }}
                         >
-                            {isPreload ? "Empty group." : "Empty group. Drag images here."}
+                          {groupEditingDisabled ? "Empty group." : "Empty group. Drag images here."}
                         </div>
                       )}
 

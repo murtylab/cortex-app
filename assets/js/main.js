@@ -639,11 +639,59 @@
         },
         {
           path: '/lab/',
-          selector: '[data-tutorial="lab-upload-panel"]',
-          title: 'Upload Stimuli',
-          body: 'Bring your own image set or load a preloaded dataset to start an experiment.',
+          selector: '[data-tutorial="lab-upload-uploader"]',
+          title: 'Upload Your Own Stimuli',
+          body: 'Use the uploader to test your own image set by dragging files in or choosing them manually.',
+          nextLabel: 'Show Preloaded Datasets',
+          prepare: { type: 'lab-upload-demo', value: 'restore-original' },
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-upload-dataset-selector"]',
+          title: 'Load a Preloaded Dataset',
+          body: 'You can also start from one of the built-in datasets instead of uploading your own stimuli.',
+          nextLabel: 'Show Reza Example',
+          prepare: { type: 'lab-upload-demo', value: 'restore-original' },
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-preload-reza"]',
+          title: 'Use Reza as an Example',
+          body: 'Pick Reza to load a ready-made grouped image set for the next few tutorial steps.',
+          nextLabel: 'Show Grouped Images',
+          prepare: { type: 'lab-upload-demo', value: 'restore-original' },
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-upload-images-panel"]',
+          title: 'Review the Loaded Images',
+          body: 'With Reza loaded, the image panel shows groups you can reorganize directly inside the Lab.',
+          nextLabel: 'Show Drag to Regroup',
+          prepare: { type: 'lab-upload-demo', value: 'reza-base' },
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-upload-group-grid"]',
+          title: 'Drag Images to Change Groups',
+          body: 'Drag an image thumbnail from one group into another to regroup the stimuli.',
+          nextLabel: 'Show Add Group',
+          prepare: { type: 'lab-upload-demo', value: 'drag-demo' },
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-upload-add-group"]',
+          title: 'Add a New Group',
+          body: 'Use Add Group to create a new bucket before moving images into it.',
+          nextLabel: 'Show Remove Group',
+          prepare: { type: 'lab-upload-demo', value: 'add-group-demo' },
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-upload-clear-group"]',
+          title: 'Remove a Group',
+          body: 'Use Clear Group to remove the images currently inside one group when you want to simplify the set.',
           nextLabel: 'Show Settings',
-          prepare: { type: 'lab-step', value: 0 },
+          prepare: { type: 'lab-upload-demo', value: 'clear-group-demo' },
         },
         {
           path: '/lab/',
@@ -716,6 +764,7 @@
     currentTargetHandler: null,
     launcherOpen: false,
     layoutListenersBound: false,
+    preparedStepKey: null,
   };
 
   function normalizeTutorialPath(pathname) {
@@ -763,7 +812,7 @@
   function getTutorialProgressLabel(tutorial, stepIndex) {
     const lastStepIndex = Math.max(0, tutorial.steps.length - 1);
     const displayStepIndex = Math.max(0, Math.min(stepIndex, lastStepIndex));
-    return `${tutorial.label} • Step ${displayStepIndex} of ${lastStepIndex}`;
+    return `${tutorial.label}\nStep ${displayStepIndex} of ${lastStepIndex}`;
   }
 
   function clearTutorialState() {
@@ -947,6 +996,8 @@
         text-transform: uppercase;
         color: #8a7768;
         font-weight: 700;
+        white-space: pre-line;
+        line-height: 1.45;
       }
 
       .cortex-tutorial-actions,
@@ -1221,10 +1272,39 @@
       return;
     }
 
+    const preparedStepKey = JSON.stringify(step.prepare);
+    if (tutorialUiState.preparedStepKey === preparedStepKey) {
+      return;
+    }
+
     if (step.prepare.type === 'lab-step') {
       const api = window.cortexLabTutorial;
       if (api && typeof api.setStep === 'function') {
         api.setStep(step.prepare.value);
+        tutorialUiState.preparedStepKey = preparedStepKey;
+      }
+      return;
+    }
+
+    if (step.prepare.type === 'lab-preload-dataset') {
+      const api = window.cortexLabTutorial;
+      if (api && typeof api.loadDataset === 'function') {
+        api.loadDataset(step.prepare.value);
+        tutorialUiState.preparedStepKey = preparedStepKey;
+      }
+      return;
+    }
+
+    if (step.prepare.type === 'lab-upload-demo') {
+      const api = window.cortexLabTutorial;
+      if (api) {
+        if (typeof api.setStep === 'function') {
+          api.setStep(0);
+        }
+        if (typeof api.setUploadDemo === 'function') {
+          api.setUploadDemo(step.prepare.value);
+          tutorialUiState.preparedStepKey = preparedStepKey;
+        }
       }
     }
   }
@@ -1341,6 +1421,7 @@
     tutorialUiState.activeTutorialId = tutorialId;
     tutorialUiState.activeStepIndex = stepIndex;
     tutorialUiState.launcherOpen = false;
+    tutorialUiState.preparedStepKey = null;
 
     writeTutorialState({ tutorialId, stepIndex });
 
@@ -1402,9 +1483,17 @@
   function closeActiveTutorial() {
     const ui = ensureTutorialUi();
 
+    if (tutorialUiState.activeTutorialId === 'labCategorySelective') {
+      const api = window.cortexLabTutorial;
+      if (api && typeof api.resetUploadDemo === 'function') {
+        api.resetUploadDemo();
+      }
+    }
+
     tutorialUiState.activeTutorialId = null;
     tutorialUiState.activeStepIndex = null;
     tutorialUiState.launcherOpen = false;
+    tutorialUiState.preparedStepKey = null;
 
     clearTutorialTarget();
     clearTutorialState();
