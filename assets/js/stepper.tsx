@@ -202,6 +202,25 @@ const Stepper: React.FC = () => {
   const isPreloadMode = !!prestoreDataset;
   const inputMode = isPreloadMode ? "preload" : "upload";
 
+  useEffect(() => {
+    const tutorialApi = {
+      setStep: (stepIndex: number) => {
+        if (!Number.isInteger(stepIndex)) return;
+
+        const safeStep = Math.max(0, Math.min(stepIndex, 2));
+        setCurrent(safeStep);
+      },
+    };
+
+    (window as any).cortexLabTutorial = tutorialApi;
+
+    return () => {
+      if ((window as any).cortexLabTutorial === tutorialApi) {
+        delete (window as any).cortexLabTutorial;
+      }
+    };
+  }, []);
+
   const next = () => setCurrent((prev) => prev + 1);
   const prev = () => setCurrent((prev) => prev - 1);
 
@@ -486,7 +505,7 @@ useEffect(() => {
 ]);
 
   useEffect(() => {
-    if (current !== 2) return;
+    if (current !== 2 || files.length === 0) return;
 
     const cached = getCachedResultByRegion(region);
     if (cached) return;
@@ -494,7 +513,7 @@ useEffect(() => {
     setPredictionResult(null);
     setPredictstep(1);
     handlePrediction();
-  }, [region, current, insightRegionCache]);
+  }, [region, current, files.length, insightRegionCache]);
 
   useEffect(() => {
     if (import.meta.env.DEV) console.log("🔄 predictionResult updated:", predictionResult);
@@ -868,7 +887,7 @@ useEffect(() => {
       title: 'Upload Stimuli',
       // content: <Uploader onFilesUploaded={handleFilesUploaded} onFileMappingsUpdate={handleFileMappingsUpdate} />,
           content: (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div data-tutorial="lab-upload-panel" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div
                 style={{
                   display: 'grid',
@@ -949,7 +968,7 @@ useEffect(() => {
     {
       title: 'Training Settings',
       content: (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px'}}>
+        <div data-tutorial="lab-settings-panel" style={{ display: 'flex', flexDirection: 'column', gap: '10px'}}>
           <RegionSelector region={region} setRegion={setRegion} dataset={dataset}/>
           <Settings
             model={model}
@@ -970,7 +989,7 @@ useEffect(() => {
     {
       title: 'Prediction Results',
       content: (
-        <div style={{ display: 'flex', flexDirection: 'column'}}>
+        <div data-tutorial="lab-results-panel" style={{ display: 'flex', flexDirection: 'column'}}>
           <RegionSelector region={region} setRegion={setRegion} dataset={dataset} />
           
 
@@ -1019,7 +1038,16 @@ useEffect(() => {
             />
           )}
 
-          <div style={{ marginTop: "-100px",  display: "flex", justifyContent: "left", alignItems: "center", gap: "10px" }}>
+          <div
+            style={{
+              marginTop: "32px",
+              display: "flex",
+              justifyContent: "left",
+              alignItems: "center",
+              gap: "10px",
+              flexWrap: "wrap",
+            }}
+          >
             <h3
               style={{
                 textAlign: "left",
@@ -1134,11 +1162,13 @@ useEffect(() => {
       }}
     >
     <ThemeProvider theme={muiLabTheme}>
-      <Steps current={current} onChange={onChange}>
-        {steps.map((item) => (
-          <Step key={item.title} title={item.title} icon={item.icon} />
-        ))}
-      </Steps>
+      <div data-tutorial="lab-stepper-nav">
+        <Steps current={current} onChange={onChange}>
+          {steps.map((item) => (
+            <Step key={item.title} title={item.title} icon={item.icon} />
+          ))}
+        </Steps>
+      </div>
 
       <div style={contentStyle}>{steps[current].content}</div>
 

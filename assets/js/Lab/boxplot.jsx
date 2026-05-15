@@ -2,6 +2,24 @@ import React, { useEffect, useMemo, useRef } from "react";
 import * as d3 from "d3";
 import { styleTooltip } from "./barchartstyles";
 
+/**
+ * @typedef {Object} FileMapping
+ * @property {string} [uid]
+ * @property {string} [serverKey]
+ * @property {string} [label]
+ * @property {string} [groupKey]
+ * @property {string | null} [blobURL]
+ * @property {{ name?: string }} [file]
+ */
+
+/**
+ * @typedef {Object} BoxPlotProps
+ * @property {Record<string, any> | undefined} regionDataMap
+ * @property {FileMapping[] | undefined} fileMappings
+ * @property {string[] | undefined} regionOrder
+ * @property {number | undefined} height
+ */
+
 const GROUP_ORDER_FALLBACK = ["body", "face", "object", "scene"];
 const PANEL_WIDTH = 340;
 const PANEL_GAP = 30;
@@ -75,6 +93,7 @@ const stableJitter = (key, amplitude) => {
   return (normalized - 0.5) * amplitude;
 };
 
+/** @param {BoxPlotProps} props */
 const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560 }) => {
   const svgRef = useRef(null);
   const containerRef = useRef(null);

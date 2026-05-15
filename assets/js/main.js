@@ -615,10 +615,843 @@
       });
   }
 
+  const TUTORIAL_STATE_KEY = 'cortexTutorialStateV2';
+  const TUTORIALS = {
+    labCategorySelective: {
+      label: 'The Lab - Category-Selective Regions',
+      description: 'Start on the Lab landing page, then move into the experiment builder.',
+      steps: [
+        {
+          path: '/labLanding/',
+          selector: '[data-tutorial="lab-category-selective-link"]',
+          title: 'Choose a Lab Path',
+          body: 'Start with Category-Selective Regions. Whole Brain stays visible here as a coming-soon path.',
+          nextLabel: 'Enter The Lab',
+          advanceOnTargetClick: true,
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-stepper-nav"]',
+          title: 'Understand the Lab Flow',
+          body: 'The Lab is organized as a stepper: upload stimuli, configure settings, then inspect prediction results.',
+          nextLabel: 'Show Upload Step',
+          prepare: { type: 'lab-step', value: 0 },
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-upload-panel"]',
+          title: 'Upload Stimuli',
+          body: 'Bring your own image set or load a preloaded dataset to start an experiment.',
+          nextLabel: 'Show Settings',
+          prepare: { type: 'lab-step', value: 0 },
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-settings-panel"]',
+          title: 'Training Settings',
+          body: 'Select the ROI, dataset, and model configuration before asking the Lab for predictions.',
+          nextLabel: 'Show Results',
+          prepare: { type: 'lab-step', value: 1 },
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-results-panel"]',
+          title: 'Prediction Results',
+          body: 'This section shows univariate responses, RDM structure, and optional cross-region insights after a run finishes.',
+          nextLabel: 'Finish',
+          prepare: { type: 'lab-step', value: 2 },
+        },
+      ],
+    },
+    scoreboardQuantitative: {
+      label: 'The Scoreboard - Quantitative',
+      description: 'Choose a quantitative entry point, then learn the comparison workspace.',
+      steps: [
+        {
+          path: '/scoreboardLanding/',
+          selector: '[data-tutorial="scoreboard-quantitative-links"]',
+          title: 'Choose a Quantitative View',
+          body: 'The quantitative flow starts here. Leaderboard is the fastest entry; Advanced Insight opens the comparison questions.',
+          nextLabel: 'Open Leaderboard',
+          advanceOnTargetClick: true,
+        },
+        {
+          path: '/scoreboardQuantitative/',
+          selector: '[data-tutorial="scoreboard-view-toggle"]',
+          title: 'Switch Views',
+          body: 'Toggle between Leaderboard and Advanced Insights without leaving the quantitative workspace.',
+        },
+        {
+          path: '/scoreboardQuantitative/',
+          selector: '[data-tutorial="scoreboard-filter-panel"]',
+          title: 'Filter the Comparison',
+          body: 'Use the left-side controls to narrow the scoreboard by training source, ROI, dataset, and model type.',
+        },
+        {
+          path: '/scoreboardQuantitative/',
+          selector: '[data-tutorial="scoreboard-chart-panel"]',
+          title: 'Read the Charts',
+          body: 'The main panel updates as filters change and shows the quantitative ranking or comparison view in detail.',
+          nextLabel: 'Finish',
+        },
+      ],
+    },
+  };
+
+  const tutorialUiState = {
+    root: null,
+    button: null,
+    backdrop: null,
+    launcher: null,
+    card: null,
+    progress: null,
+    title: null,
+    body: null,
+    backButton: null,
+    closeButton: null,
+    nextButton: null,
+    activeTutorialId: null,
+    activeStepIndex: null,
+    currentTarget: null,
+    currentTargetHandler: null,
+    launcherOpen: false,
+    layoutListenersBound: false,
+  };
+
+  function normalizeTutorialPath(pathname) {
+    if (!pathname || pathname === '/') return '/';
+
+    const trimmed = pathname.replace(/index\.html$/i, '');
+    return trimmed.endsWith('/') ? trimmed : `${trimmed}/`;
+  }
+
+  function getTutorialContextByPath(pathname) {
+    const path = normalizeTutorialPath(pathname);
+
+    if (path === '/labLanding/' || path === '/lab/') {
+      return 'labCategorySelective';
+    }
+
+    if (path === '/scoreboardLanding/' || path === '/scoreboardQuantitative/') {
+      return 'scoreboardQuantitative';
+    }
+
+    return null;
+  }
+
+  function getTutorialMatchIndex(tutorial, pathname) {
+    const currentPath = normalizeTutorialPath(pathname);
+    return tutorial.steps.findIndex((step) => normalizeTutorialPath(step.path) === currentPath);
+  }
+
+  function readTutorialState() {
+    try {
+      const raw = window.sessionStorage.getItem(TUTORIAL_STATE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }
+
+  function writeTutorialState(state) {
+    try {
+      window.sessionStorage.setItem(TUTORIAL_STATE_KEY, JSON.stringify(state));
+    } catch {}
+  }
+
+  function getTutorialProgressLabel(tutorial, stepIndex) {
+    const lastStepIndex = Math.max(0, tutorial.steps.length - 1);
+    const displayStepIndex = Math.max(0, Math.min(stepIndex, lastStepIndex));
+    return `${tutorial.label} • Step ${displayStepIndex} of ${lastStepIndex}`;
+  }
+
+  function clearTutorialState() {
+    try {
+      window.sessionStorage.removeItem(TUTORIAL_STATE_KEY);
+    } catch {}
+  }
+
+  function injectTutorialStyles() {
+    if (document.getElementById('cortex-tutorial-styles')) {
+      return;
+    }
+
+    const style = document.createElement('style');
+    style.id = 'cortex-tutorial-styles';
+    style.textContent = `
+      #cortex-tutorial-root {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 2147483647;
+        isolation: isolate;
+      }
+
+      .cortex-tutorial-fab,
+      .cortex-tutorial-backdrop,
+      .cortex-tutorial-launcher,
+      .cortex-tutorial-card {
+        pointer-events: auto;
+      }
+
+      .cortex-tutorial-fab {
+        position: fixed;
+        left: auto;
+        right: 24px;
+        bottom: 24px;
+        z-index: 2147483644;
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 18px;
+        background: var(--tungsten, #4b443e);
+        color: #fff;
+        font: 600 14px/1.1 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        box-shadow: 0 14px 32px rgba(34, 30, 26, 0.22);
+      }
+
+      .cortex-tutorial-fab:hover {
+        background: var(--highlight-color-button, #7d6a58);
+      }
+
+      .cortex-tutorial-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483641;
+        background: transparent;
+        backdrop-filter: none;
+      }
+
+      .cortex-tutorial-launcher,
+      .cortex-tutorial-card {
+        position: fixed;
+        z-index: 2147483646;
+        background: #fff;
+        border-radius: 22px;
+        box-shadow: 0 28px 56px rgba(24, 20, 17, 0.24);
+        border: 1px solid rgba(75, 68, 62, 0.12);
+        font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      }
+
+      .cortex-tutorial-launcher {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: min(720px, calc(100vw - 32px));
+        padding: 24px;
+      }
+
+      .cortex-tutorial-card {
+        left: auto;
+        right: 24px;
+        bottom: 88px;
+        width: min(420px, calc(100vw - 32px));
+        padding: 20px 20px 18px;
+      }
+
+      .cortex-tutorial-is-hidden {
+        display: none !important;
+      }
+
+      .cortex-tutorial-launcher-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      .cortex-tutorial-launcher-head h3,
+      .cortex-tutorial-title {
+        margin: 0;
+        color: #241f1b;
+        font-size: 1.15rem;
+        font-weight: 700;
+      }
+
+      .cortex-tutorial-launcher-head p,
+      .cortex-tutorial-body {
+        margin: 8px 0 0;
+        color: #5c524a;
+        font-size: 0.95rem;
+        line-height: 1.55;
+      }
+
+      .cortex-tutorial-current {
+        margin-bottom: 18px;
+        padding: 16px 18px;
+        border-radius: 18px;
+        background: #f7f2ee;
+        border: 1px solid rgba(75, 68, 62, 0.1);
+      }
+
+      .cortex-tutorial-current-label {
+        margin: 0 0 6px;
+        font-size: 0.76rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #8a7768;
+        font-weight: 700;
+      }
+
+      .cortex-tutorial-current strong {
+        display: block;
+        color: #241f1b;
+        font-size: 1rem;
+      }
+
+      .cortex-tutorial-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 14px;
+      }
+
+      .cortex-tutorial-choice {
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid rgba(75, 68, 62, 0.12);
+        background: #fcfaf8;
+      }
+
+      .cortex-tutorial-choice.is-current {
+        background: #f6f0ea;
+      }
+
+      .cortex-tutorial-choice-label {
+        margin: 0 0 8px;
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #8a7768;
+        font-weight: 700;
+      }
+
+      .cortex-tutorial-choice h4 {
+        margin: 0;
+        color: #241f1b;
+        font-size: 1rem;
+        font-weight: 700;
+      }
+
+      .cortex-tutorial-choice p {
+        margin: 8px 0 14px;
+        color: #5c524a;
+        font-size: 0.92rem;
+        line-height: 1.5;
+      }
+
+      .cortex-tutorial-progress {
+        margin-bottom: 10px;
+        font-size: 0.78rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #8a7768;
+        font-weight: 700;
+      }
+
+      .cortex-tutorial-actions,
+      .cortex-tutorial-launcher-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .cortex-tutorial-btn {
+        border: 1px solid rgba(75, 68, 62, 0.18);
+        background: #fff;
+        color: #241f1b;
+        border-radius: 999px;
+        padding: 10px 14px;
+        font: 600 14px/1 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      }
+
+      .cortex-tutorial-btn:hover {
+        border-color: rgba(75, 68, 62, 0.34);
+      }
+
+      .cortex-tutorial-btn.is-primary {
+        background: var(--tungsten, #4b443e);
+        border-color: var(--tungsten, #4b443e);
+        color: #fff;
+      }
+
+      .cortex-tutorial-btn.is-primary:hover {
+        background: var(--highlight-color-button, #7d6a58);
+        border-color: var(--highlight-color-button, #7d6a58);
+      }
+
+      .cortex-tutorial-btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .cortex-tutorial-target {
+        position: relative !important;
+        z-index: 2147483645 !important;
+        border-radius: 18px;
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.96), 0 0 0 9px rgba(134, 108, 83, 0.26);
+      }
+
+      @media (max-width: 720px) {
+        .cortex-tutorial-launcher {
+          width: calc(100vw - 20px);
+          padding: 18px;
+        }
+
+        .cortex-tutorial-card {
+          left: auto;
+          right: 10px;
+          bottom: 76px;
+          width: min(420px, calc(100vw - 20px));
+        }
+
+        .cortex-tutorial-fab {
+          left: auto;
+          right: 12px;
+          bottom: 12px;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function isTutorialElementVisible(element) {
+    if (!element) return false;
+
+    const style = window.getComputedStyle(element);
+    return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+  }
+
+  function getVisibleChatAnchor() {
+    const chatbotContainer = document.getElementById('cortex-chatbot-container');
+    if (isTutorialElementVisible(chatbotContainer)) {
+      return chatbotContainer;
+    }
+
+    const chatbotToggle = document.getElementById('cortex-chatbot-toggle');
+    if (isTutorialElementVisible(chatbotToggle)) {
+      return chatbotToggle;
+    }
+
+    return null;
+  }
+
+  function positionTutorialButton() {
+    if (!tutorialUiState.button) {
+      return;
+    }
+
+    const sideOffset = window.innerWidth <= 720 ? 12 : 24;
+    const defaultBottom = window.innerWidth <= 720 ? 12 : 24;
+    let bottom = defaultBottom;
+
+    const chatAnchor = getVisibleChatAnchor();
+    if (chatAnchor) {
+      const rect = chatAnchor.getBoundingClientRect();
+      bottom = Math.max(defaultBottom, window.innerHeight - rect.top + 12);
+    }
+
+    tutorialUiState.button.style.left = 'auto';
+    tutorialUiState.button.style.right = `${sideOffset}px`;
+    tutorialUiState.button.style.bottom = `${Math.round(bottom)}px`;
+  }
+
+  function positionTutorialCard() {
+    if (!tutorialUiState.card || tutorialUiState.card.classList.contains('cortex-tutorial-is-hidden')) {
+      return;
+    }
+
+    const sideOffset = window.innerWidth <= 720 ? 10 : 24;
+    const defaultBottom = window.innerWidth <= 720 ? 76 : 88;
+    let bottom = defaultBottom;
+
+    const buttonRect = tutorialUiState.button?.getBoundingClientRect();
+    if (buttonRect) {
+      bottom = Math.max(defaultBottom, window.innerHeight - buttonRect.top + 12);
+    }
+
+    tutorialUiState.card.style.left = 'auto';
+    tutorialUiState.card.style.right = `${sideOffset}px`;
+    tutorialUiState.card.style.bottom = `${Math.round(bottom)}px`;
+  }
+
+  function updateTutorialLayout() {
+    positionTutorialButton();
+    positionTutorialCard();
+  }
+
+  function ensureTutorialUi() {
+    if (tutorialUiState.root) {
+      return tutorialUiState;
+    }
+
+    injectTutorialStyles();
+
+    const root = document.createElement('div');
+    root.id = 'cortex-tutorial-root';
+    root.innerHTML = `
+      <button type="button" class="cortex-tutorial-fab" data-tutorial-ui="open">Tutorials</button>
+      <div class="cortex-tutorial-backdrop cortex-tutorial-is-hidden" data-tutorial-ui="backdrop"></div>
+      <div class="cortex-tutorial-launcher cortex-tutorial-is-hidden" data-tutorial-ui="launcher"></div>
+      <div class="cortex-tutorial-card cortex-tutorial-is-hidden" data-tutorial-ui="card" role="dialog" aria-modal="true" aria-live="polite">
+        <div class="cortex-tutorial-progress" data-tutorial-ui="progress"></div>
+        <h3 class="cortex-tutorial-title" data-tutorial-ui="title"></h3>
+        <p class="cortex-tutorial-body" data-tutorial-ui="body"></p>
+        <div class="cortex-tutorial-actions">
+          <button type="button" class="cortex-tutorial-btn" data-tutorial-ui="back">Back</button>
+          <button type="button" class="cortex-tutorial-btn" data-tutorial-ui="close">Close</button>
+          <button type="button" class="cortex-tutorial-btn is-primary" data-tutorial-ui="next">Next</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(root);
+
+    tutorialUiState.root = root;
+    tutorialUiState.button = root.querySelector('[data-tutorial-ui="open"]');
+    tutorialUiState.backdrop = root.querySelector('[data-tutorial-ui="backdrop"]');
+    tutorialUiState.launcher = root.querySelector('[data-tutorial-ui="launcher"]');
+    tutorialUiState.card = root.querySelector('[data-tutorial-ui="card"]');
+    tutorialUiState.progress = root.querySelector('[data-tutorial-ui="progress"]');
+    tutorialUiState.title = root.querySelector('[data-tutorial-ui="title"]');
+    tutorialUiState.body = root.querySelector('[data-tutorial-ui="body"]');
+    tutorialUiState.backButton = root.querySelector('[data-tutorial-ui="back"]');
+    tutorialUiState.closeButton = root.querySelector('[data-tutorial-ui="close"]');
+    tutorialUiState.nextButton = root.querySelector('[data-tutorial-ui="next"]');
+
+    if (!tutorialUiState.layoutListenersBound) {
+      tutorialUiState.layoutListenersBound = true;
+      window.addEventListener('resize', updateTutorialLayout);
+      window.setTimeout(updateTutorialLayout, 0);
+      window.setTimeout(updateTutorialLayout, 300);
+      window.setTimeout(updateTutorialLayout, 1000);
+    }
+
+    updateTutorialLayout();
+
+    tutorialUiState.button.addEventListener('click', () => {
+      updateTutorialLayout();
+      const storedState = readTutorialState();
+      if (storedState && TUTORIALS[storedState.tutorialId]) {
+        showTutorialStep(storedState.tutorialId, storedState.stepIndex);
+        return;
+      }
+
+      const currentTutorialId = getTutorialContextByPath(window.location.pathname);
+      if (currentTutorialId) {
+        startTutorial(currentTutorialId);
+        return;
+      }
+
+      openTutorialLauncher();
+    });
+    tutorialUiState.backdrop.addEventListener('click', () => {
+      if (tutorialUiState.launcherOpen) {
+        closeTutorialLauncher();
+      }
+    });
+    tutorialUiState.backButton.addEventListener('click', goToPreviousTutorialStep);
+    tutorialUiState.closeButton.addEventListener('click', closeActiveTutorial);
+    tutorialUiState.nextButton.addEventListener('click', goToNextTutorialStep);
+
+    return tutorialUiState;
+  }
+
+  function hideTutorialElement(element) {
+    if (element) {
+      element.classList.add('cortex-tutorial-is-hidden');
+    }
+  }
+
+  function showTutorialElement(element) {
+    if (element) {
+      element.classList.remove('cortex-tutorial-is-hidden');
+    }
+  }
+
+  function clearTutorialTarget() {
+    if (tutorialUiState.currentTarget && tutorialUiState.currentTargetHandler) {
+      tutorialUiState.currentTarget.removeEventListener('click', tutorialUiState.currentTargetHandler, true);
+    }
+
+    if (tutorialUiState.currentTarget) {
+      tutorialUiState.currentTarget.classList.remove('cortex-tutorial-target');
+    }
+
+    tutorialUiState.currentTarget = null;
+    tutorialUiState.currentTargetHandler = null;
+  }
+
+  function maybeQueueTutorialAdvance(tutorialId, stepIndex) {
+    const tutorial = TUTORIALS[tutorialId];
+    if (!tutorial || stepIndex >= tutorial.steps.length) {
+      return;
+    }
+
+    writeTutorialState({ tutorialId, stepIndex });
+  }
+
+  function applyTutorialTarget(step, tutorialId, stepIndex, target) {
+    clearTutorialTarget();
+
+    if (!target) {
+      return;
+    }
+
+    tutorialUiState.currentTarget = target;
+    target.classList.add('cortex-tutorial-target');
+    target.scrollIntoView({
+      block: 'center',
+      inline: 'nearest',
+      behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+    });
+
+    if (step.advanceOnTargetClick) {
+      tutorialUiState.currentTargetHandler = () => {
+        maybeQueueTutorialAdvance(tutorialId, stepIndex + 1);
+      };
+      target.addEventListener('click', tutorialUiState.currentTargetHandler, true);
+    }
+  }
+
+  function prepareTutorialStep(step) {
+    if (!step || !step.prepare) {
+      return;
+    }
+
+    if (step.prepare.type === 'lab-step') {
+      const api = window.cortexLabTutorial;
+      if (api && typeof api.setStep === 'function') {
+        api.setStep(step.prepare.value);
+      }
+    }
+  }
+
+  function resolveTutorialTarget(step, tutorialId, stepIndex, attempt = 0) {
+    if (tutorialUiState.activeTutorialId !== tutorialId || tutorialUiState.activeStepIndex !== stepIndex) {
+      return;
+    }
+
+    prepareTutorialStep(step);
+
+    const target = step.selector ? document.querySelector(step.selector) : null;
+    if (target) {
+      applyTutorialTarget(step, tutorialId, stepIndex, target);
+      return;
+    }
+
+    if (attempt >= 24) {
+      clearTutorialTarget();
+      return;
+    }
+
+    window.setTimeout(() => {
+      resolveTutorialTarget(step, tutorialId, stepIndex, attempt + 1);
+    }, 180);
+  }
+
+  function openTutorialLauncher() {
+    const ui = ensureTutorialUi();
+    const currentTutorialId = getTutorialContextByPath(window.location.pathname);
+
+    tutorialUiState.launcherOpen = true;
+    clearTutorialTarget();
+    hideTutorialElement(ui.card);
+    showTutorialElement(ui.backdrop);
+    showTutorialElement(ui.launcher);
+    updateTutorialLayout();
+
+    const cardsMarkup = Object.entries(TUTORIALS).map(([tutorialId, tutorial]) => {
+      const isCurrent = tutorialId === currentTutorialId;
+      return `
+        <div class="cortex-tutorial-choice${isCurrent ? ' is-current' : ''}">
+          <div class="cortex-tutorial-choice-label">${isCurrent ? 'Current section' : 'Tutorial'}</div>
+          <h4>${tutorial.label}</h4>
+          <p>${tutorial.description}</p>
+          <button type="button" class="cortex-tutorial-btn is-primary" data-tutorial-id="${tutorialId}">
+            ${isCurrent ? 'Start here' : 'Open tutorial'}
+          </button>
+        </div>
+      `;
+    }).join('');
+
+    ui.launcher.innerHTML = `
+      <div class="cortex-tutorial-launcher-head">
+        <div>
+          <h3>Tutorials</h3>
+          <p>Choose a guided flow. When you are already inside a section, the matching tutorial is surfaced first.</p>
+        </div>
+        <div class="cortex-tutorial-launcher-actions">
+          <button type="button" class="cortex-tutorial-btn" data-tutorial-ui="launcher-close">Close</button>
+        </div>
+      </div>
+      ${currentTutorialId ? `
+        <div class="cortex-tutorial-current">
+          <div class="cortex-tutorial-current-label">Current section</div>
+          <strong>${TUTORIALS[currentTutorialId].label}</strong>
+          <p style="margin:8px 0 0;color:#5c524a;">Start from the first tutorial step available on this page, or switch to a different guided flow below.</p>
+        </div>
+      ` : ''}
+      <div class="cortex-tutorial-grid">${cardsMarkup}</div>
+    `;
+
+    ui.launcher.querySelector('[data-tutorial-ui="launcher-close"]').addEventListener('click', closeTutorialLauncher);
+    ui.launcher.querySelectorAll('[data-tutorial-id]').forEach((button) => {
+      button.addEventListener('click', () => {
+        startTutorial(button.getAttribute('data-tutorial-id'));
+      });
+    });
+  }
+
+  function closeTutorialLauncher() {
+    const ui = ensureTutorialUi();
+    tutorialUiState.launcherOpen = false;
+    hideTutorialElement(ui.launcher);
+    if (!tutorialUiState.activeTutorialId) {
+      hideTutorialElement(ui.backdrop);
+    }
+  }
+
+  function showTutorialStep(tutorialId, stepIndex) {
+    const tutorial = TUTORIALS[tutorialId];
+    if (!tutorial || stepIndex < 0 || stepIndex >= tutorial.steps.length) {
+      closeActiveTutorial();
+      return;
+    }
+
+    const step = tutorial.steps[stepIndex];
+    const currentPath = normalizeTutorialPath(window.location.pathname);
+    const stepPath = normalizeTutorialPath(step.path);
+
+    if (currentPath !== stepPath) {
+      writeTutorialState({ tutorialId, stepIndex });
+
+      const destination =
+        tutorialId === 'scoreboardQuantitative' && stepIndex === 1
+          ? '/scoreboardQuantitative/?view=rank'
+          : step.path;
+
+      window.location.assign(destination);
+      return;
+    }
+
+    const ui = ensureTutorialUi();
+    tutorialUiState.activeTutorialId = tutorialId;
+    tutorialUiState.activeStepIndex = stepIndex;
+    tutorialUiState.launcherOpen = false;
+
+    writeTutorialState({ tutorialId, stepIndex });
+
+    hideTutorialElement(ui.launcher);
+    showTutorialElement(ui.backdrop);
+    showTutorialElement(ui.card);
+    updateTutorialLayout();
+
+    ui.progress.textContent = getTutorialProgressLabel(tutorial, stepIndex);
+    ui.title.textContent = step.title;
+    ui.body.textContent = step.body;
+    ui.backButton.disabled = stepIndex === 0;
+    ui.nextButton.textContent = step.nextLabel || (stepIndex === tutorial.steps.length - 1 ? 'Finish' : 'Next');
+
+    resolveTutorialTarget(step, tutorialId, stepIndex);
+  }
+
+  function startTutorial(tutorialId) {
+    const tutorial = TUTORIALS[tutorialId];
+    if (!tutorial) {
+      return;
+    }
+
+    const matchIndex = getTutorialMatchIndex(tutorial, window.location.pathname);
+    const stepIndex = matchIndex >= 0 ? matchIndex : 0;
+    showTutorialStep(tutorialId, stepIndex);
+  }
+
+  function goToNextTutorialStep() {
+    const tutorial = TUTORIALS[tutorialUiState.activeTutorialId];
+    if (!tutorial) {
+      closeActiveTutorial();
+      return;
+    }
+
+    const nextStepIndex = (tutorialUiState.activeStepIndex ?? 0) + 1;
+    if (nextStepIndex >= tutorial.steps.length) {
+      closeActiveTutorial();
+      return;
+    }
+
+    showTutorialStep(tutorialUiState.activeTutorialId, nextStepIndex);
+  }
+
+  function goToPreviousTutorialStep() {
+    const tutorialId = tutorialUiState.activeTutorialId;
+    if (!tutorialId) {
+      return;
+    }
+
+    const previousStepIndex = (tutorialUiState.activeStepIndex ?? 0) - 1;
+    if (previousStepIndex < 0) {
+      return;
+    }
+
+    showTutorialStep(tutorialId, previousStepIndex);
+  }
+
+  function closeActiveTutorial() {
+    const ui = ensureTutorialUi();
+
+    tutorialUiState.activeTutorialId = null;
+    tutorialUiState.activeStepIndex = null;
+    tutorialUiState.launcherOpen = false;
+
+    clearTutorialTarget();
+    clearTutorialState();
+    hideTutorialElement(ui.launcher);
+    hideTutorialElement(ui.card);
+    hideTutorialElement(ui.backdrop);
+    updateTutorialLayout();
+  }
+
+  function resumeTutorialIfNeeded() {
+    const storedState = readTutorialState();
+    if (!storedState || !TUTORIALS[storedState.tutorialId]) {
+      return;
+    }
+
+    const tutorial = TUTORIALS[storedState.tutorialId];
+    const stepIndex = Number.isInteger(storedState.stepIndex) ? storedState.stepIndex : 0;
+    const storedStep = tutorial.steps[stepIndex];
+    const currentPath = normalizeTutorialPath(window.location.pathname);
+
+    if (storedStep && normalizeTutorialPath(storedStep.path) === currentPath) {
+      showTutorialStep(storedState.tutorialId, stepIndex);
+      return;
+    }
+
+    const fallbackIndex = getTutorialMatchIndex(tutorial, currentPath);
+    if (fallbackIndex >= 0) {
+      showTutorialStep(storedState.tutorialId, fallbackIndex);
+    }
+  }
+
+  function initTutorialOverlay() {
+    if (!document.body || document.body.dataset.cortexTutorialReady === 'true') {
+      return;
+    }
+
+    document.body.dataset.cortexTutorialReady = 'true';
+    ensureTutorialUi();
+    resumeTutorialIfNeeded();
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initModelPagePerformanceToggle);
+    document.addEventListener('DOMContentLoaded', initTutorialOverlay);
   } else {
     initModelPagePerformanceToggle();
+    initTutorialOverlay();
   }
 
 })();

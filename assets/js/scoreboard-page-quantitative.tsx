@@ -417,7 +417,7 @@ const getOverviewColumnCount = (
         >
           {/* 2. SelectedFiltersBar */}
           {/* flex: 0 0 auto  */}
-          <div style={{ flex: '0 0 auto', marginBottom: 16 }}>
+          <div data-tutorial="scoreboard-selected-filters" style={{ flex: '0 0 auto', marginBottom: 16 }}>
             <SelectedFiltersBar
               training={training}
                 region={region}
@@ -445,6 +445,7 @@ const getOverviewColumnCount = (
 
             {/* --- left Filters --- */}
             <div
+              data-tutorial="scoreboard-filter-panel"
               style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -455,7 +456,7 @@ const getOverviewColumnCount = (
               }}
             >
               {/* view toggle: Leaderboard / Advanced Insights */}
-              <div style={{ marginBottom: 12 }}>
+              <div data-tutorial="scoreboard-view-toggle" style={{ marginBottom: 12 }}>
                 <div style={{ fontSize: '11px', color: '#888', marginLeft: 2, marginBottom: 4, fontFamily: "'Inter', system-ui, sans-serif" }}>VIEW</div>
                 <ButtonGroup size="small" fullWidth variant="outlined">
                   {[{ value: 'rank', label: 'Leaderboard' }, { value: '2', label: 'Advanced Insights' }].map((opt) => (
@@ -572,6 +573,7 @@ const getOverviewColumnCount = (
 
             {/* --- right（ChartSelect + overview + details） --- */}
             <div
+              data-tutorial="scoreboard-chart-panel"
               style={{
                 display: 'flex',
                 flexDirection: 'column',

@@ -2,6 +2,15 @@ import React from "react";
 import { Button } from "antd";
 import { PRELOAD_DATASETS } from "../constants";
 
+/**
+ * @typedef {Object} PreloadDatasetPickerProps
+ * @property {string | null | undefined} selectedKey
+ * @property {(key: string | null) => void} onSelectDataset
+ * @property {boolean | undefined} isLoading
+ * @property {string | null | undefined} loadingKey
+ */
+
+/** @param {PreloadDatasetPickerProps} props */
 export default function PreloadDatasetPicker({
   selectedKey,
   onSelectDataset,
