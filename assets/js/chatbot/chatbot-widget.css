@@ -163,9 +163,9 @@
 
 @media (max-width: 600px) {
   #cortex-chatbot-container {
+    left: auto;
     right: 12px;
-    left: 12px;
-    width: auto;
+    width: min(360px, calc(100vw - 24px));
     bottom: 12px;
     max-height: 70vh;
   }

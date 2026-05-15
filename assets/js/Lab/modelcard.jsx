@@ -1,9 +1,7 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
-import Button from '@mui/material/Button';
 import { Typography, Link } from '@mui/material';
 import { MODEL_OPTIONS, MODELCARD_INFO_LOOKUP } from '../constants';
 
@@ -23,20 +21,30 @@ const ModelCard = ({ region, dataset, model }) => {
   const { bestLayer, corrScore } = getInfo(dataset, region, model);
 
   return (
-    <Box sx={{ minWidth: 250, boxShadow: 3, borderRadius: 2, marginTop: 2 , marginBottom: 2}}>
+    <Box
+      data-tutorial="lab-results-model-card"
+      sx={{ minWidth: 250, boxShadow: 3, borderRadius: 2, marginTop: 2 , marginBottom: 2}}
+    >
       <Card variant="outlined" sx={{ borderRadius: 2, background: 'var(--background-color)'}}>
         <CardContent>
           <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
             Model Card
           </Typography>
           <Typography variant="h5" component="div">
-            <Link href={cardUrl} underline="hover"
-            sx={{
-              background: "var(--highlight-color)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-           >
+            <Link
+              data-tutorial="lab-results-model-card-link"
+              href={cardUrl}
+              underline="hover"
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                borderRadius: "999px",
+                padding: "2px 6px",
+                background: "var(--highlight-color)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
               {modelName}
             </Link>
           </Typography>

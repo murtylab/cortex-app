@@ -699,15 +699,71 @@
           title: 'Training Settings',
           body: 'Select the ROI, dataset, and model configuration before asking the Lab for predictions.',
           nextLabel: 'Show Results',
-          prepare: { type: 'lab-step', value: 1 },
+          prepare: { type: 'lab-settings-demo' },
         },
         {
           path: '/lab/',
           selector: '[data-tutorial="lab-results-panel"]',
           title: 'Prediction Results',
           body: 'This section shows univariate responses, RDM structure, and optional cross-region insights after a run finishes.',
+          nextLabel: 'Show ROI Switch',
+          prepare: { type: 'lab-results-demo', value: 'default' },
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-results-region"]',
+          title: 'Switch the ROI',
+          body: 'Use the ROI selector in the results view to recompute the readout for a different visual region.',
+          nextLabel: 'Show Model Card',
+          prepare: { type: 'lab-results-demo', value: 'region' },
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-results-model-card-link"]',
+          title: 'Open the Model Card',
+          body: 'Click CLIP-ResNet50 here to jump directly to its model page for architecture details, training context, and related notes.',
+          nextLabel: 'Show Uploaded Preview',
+          prepare: { type: 'lab-results-demo', value: 'model-card' },
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-results-upload-preview"]',
+          title: 'Review the Uploaded Images',
+          body: 'Use Unfold to open the preview again so you can match each response back to the uploaded images while reading the charts.',
+          nextLabel: 'Show Ranking Control',
+          prepare: { type: 'lab-results-demo', value: 'preview' },
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-results-barchart-order"]',
+          title: 'Switch to Rank View',
+          body: 'Change the bar chart order to Rank when you want the strongest predicted responses sorted from high to low.',
+          nextLabel: 'Show Group Highlight',
+          prepare: { type: 'lab-results-demo', value: 'ranking' },
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-results-barchart-highlight"]',
+          title: 'Highlight One Group',
+          body: 'In ranking view, filter the chart by group to focus the comparison on one image set at a time.',
+          nextLabel: 'Show Get Insights',
+          prepare: { type: 'lab-results-demo', value: 'highlight-group' },
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-results-get-insights"]',
+          title: 'Get Cross-Region Insights',
+          body: 'Use Get Insights to expand the run into side-by-side ROI comparisons once the base result looks good.',
+          nextLabel: 'Show Ask Cortex',
+          prepare: { type: 'lab-results-demo', value: 'insights' },
+        },
+        {
+          path: '/lab/',
+          selector: '#cortex-chatbot-container',
+          title: 'Chat with Ask Cortex',
+          body: 'Click Ask Cortex to open the chatbot, then use it for follow-up questions about the Lab, ROIs, models, or the current results.',
           nextLabel: 'Finish',
-          prepare: { type: 'lab-step', value: 2 },
+          prepare: { type: 'lab-results-demo', value: 'chatbot' },
         },
       ],
     },
@@ -1039,7 +1095,7 @@
       }
 
       .cortex-tutorial-target {
-        position: relative !important;
+        position: var(--cortex-tutorial-target-position, relative) !important;
         z-index: 2147483645 !important;
         border-radius: 18px;
         box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.96), 0 0 0 9px rgba(134, 108, 83, 0.26);
@@ -1228,6 +1284,7 @@
     }
 
     if (tutorialUiState.currentTarget) {
+      tutorialUiState.currentTarget.style.removeProperty('--cortex-tutorial-target-position');
       tutorialUiState.currentTarget.classList.remove('cortex-tutorial-target');
     }
 
@@ -1252,6 +1309,12 @@
     }
 
     tutorialUiState.currentTarget = target;
+    const targetPosition = window.getComputedStyle(target).position;
+    if (targetPosition && targetPosition !== 'static') {
+      target.style.setProperty('--cortex-tutorial-target-position', targetPosition);
+    } else {
+      target.style.removeProperty('--cortex-tutorial-target-position');
+    }
     target.classList.add('cortex-tutorial-target');
     target.scrollIntoView({
       block: 'center',
@@ -1293,6 +1356,38 @@
         tutorialUiState.preparedStepKey = preparedStepKey;
       }
       return;
+    }
+
+    if (step.prepare.type === 'lab-settings-demo') {
+      const api = window.cortexLabTutorial;
+      if (api) {
+        if (typeof api.playSettingsDemo === 'function') {
+          api.playSettingsDemo();
+          tutorialUiState.preparedStepKey = preparedStepKey;
+          return;
+        }
+        if (typeof api.setStep === 'function') {
+          api.setStep(1);
+          tutorialUiState.preparedStepKey = preparedStepKey;
+          return;
+        }
+      }
+    }
+
+    if (step.prepare.type === 'lab-results-demo') {
+      const api = window.cortexLabTutorial;
+      if (api) {
+        if (typeof api.setResultsDemo === 'function') {
+          api.setResultsDemo(step.prepare.value);
+          tutorialUiState.preparedStepKey = preparedStepKey;
+          return;
+        }
+        if (typeof api.setStep === 'function') {
+          api.setStep(2);
+          tutorialUiState.preparedStepKey = preparedStepKey;
+          return;
+        }
+      }
     }
 
     if (step.prepare.type === 'lab-upload-demo') {
@@ -1459,7 +1554,7 @@
 
     const nextStepIndex = (tutorialUiState.activeStepIndex ?? 0) + 1;
     if (nextStepIndex >= tutorial.steps.length) {
-      closeActiveTutorial();
+      closeActiveTutorial({ completed: true });
       return;
     }
 
@@ -1480,13 +1575,20 @@
     showTutorialStep(tutorialId, previousStepIndex);
   }
 
-  function closeActiveTutorial() {
+  function closeActiveTutorial(options = {}) {
     const ui = ensureTutorialUi();
+    const completed = Boolean(options.completed);
 
     if (tutorialUiState.activeTutorialId === 'labCategorySelective') {
       const api = window.cortexLabTutorial;
       if (api && typeof api.resetUploadDemo === 'function') {
         api.resetUploadDemo();
+      }
+      if (api && typeof api.resetResultsDemo === 'function') {
+        api.resetResultsDemo();
+      }
+      if (completed && api && typeof api.setStep === 'function') {
+        api.setStep(0);
       }
     }
 

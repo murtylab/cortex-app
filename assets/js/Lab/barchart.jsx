@@ -2,9 +2,27 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { barchartStyles, styleTooltip } from './barchartstyles';
 
-const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
+/**
+ * @param {{
+ *   barChartData: any[];
+ *   height: number;
+ *   fileMappings: any[];
+ *   order: string;
+ *   setOrder: (nextOrder: string) => void;
+ *   tutorialSelectedGroups?: string[] | null;
+ * }} props
+ */
+const BarChart = ({
+  barChartData,
+  height,
+  fileMappings,
+  order,
+  setOrder,
+  tutorialSelectedGroups = null,
+}) => {
   const svgRef = useRef(null);
   const containerRef = useRef(null);
+  const tutorialChartAnimationsRef = useRef([]);
   const [containerWidth, setContainerWidth] = useState(0);
   
   const [selectedGroups, setSelectedGroups] = useState([]);
@@ -81,6 +99,21 @@ const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
     );
   }, [barChartData, fileMap]);
 
+  const effectiveSelectedGroups = tutorialSelectedGroups ?? selectedGroups;
+  const tutorialActiveGroup = tutorialSelectedGroups?.[0] ?? null;
+
+  const clearTutorialChartAnimations = () => {
+    tutorialChartAnimationsRef.current.forEach((animation) => {
+      try {
+        animation.cancel();
+      } catch {
+        // Ignore animations that are already finished.
+      }
+    });
+
+    tutorialChartAnimationsRef.current = [];
+  };
+
   const toggleGroupSelection = (group) => {
     setSelectedGroups((prev) =>
       prev.includes(group)
@@ -94,9 +127,9 @@ const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
 
     const group = getGroupForFilename(filename);
 
-    if (selectedGroups.length === 0) return true;
+    if (effectiveSelectedGroups.length === 0) return true;
 
-    return selectedGroups.includes(group);
+    return effectiveSelectedGroups.includes(group);
   };
 
   const desaturateColor = (color, factor = 0.1) => {
@@ -156,8 +189,16 @@ const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
   }, []);
 
   useEffect(() => {
+    return () => {
+      clearTutorialChartAnimations();
+    };
+  }, []);
+
+  useEffect(() => {
     const sortedData = getSortedData;
     const groupSpans = [];
+
+    clearTutorialChartAnimations();
 
     if (order === "group" && sortedData.length > 0) {
       let startIndex = 0;
@@ -254,15 +295,18 @@ const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
     const shiftX = (x) => x + 20;
 
     // Bars
-    g.selectAll(".bar")
+    const bars = g.selectAll(".bar")
       .data(sortedData)
       .enter()
       .append("rect")
       .attr("class", "bar")
+      .attr("data-tutorial-bar-group", (d) => getGroupForFilename(d.filename))
       .attr("x", (d) => shiftX(xScale(d.filename) + (xScale.bandwidth() - adjustedBandwidth) / 2))
       .attr("y", (d) => (d.mean >= 0 ? yScale(d.mean) : yScale(0)))
       .attr("width", adjustedBandwidth)
       .attr("height", (d) => Math.abs(yScale(d.mean) - yScale(0)))
+      .style("transform-box", "fill-box")
+      .style("transform-origin", "50% 100%")
       .attr("fill", (d) => {
         const color = colorScale(d.mean);
         return isGroupHighlighted(d.filename)
@@ -270,6 +314,14 @@ const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
           : desaturateColor(color, 0.2);
       })
       .attr("opacity", (d) => (isGroupHighlighted(d.filename) ? 1 : 0.2))
+      .attr("stroke", (d) =>
+        tutorialActiveGroup && getGroupForFilename(d.filename) === tutorialActiveGroup
+          ? "rgba(196, 116, 144, 0.9)"
+          : "none"
+      )
+      .attr("stroke-width", (d) =>
+        tutorialActiveGroup && getGroupForFilename(d.filename) === tutorialActiveGroup ? 2.2 : 0
+      )
       .on("mouseover", (event, d) => {
         d3.select(event.currentTarget).attr(
           "fill",
@@ -306,9 +358,48 @@ const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
           .style("top", `${event.clientY - containerRect.top - 40}px`);
       })
       .on("mouseout", (event, d) => {
-        d3.select(event.currentTarget).attr("fill", colorScale(d.mean));
+        const color = colorScale(d.mean);
+        d3.select(event.currentTarget).attr(
+          "fill",
+          isGroupHighlighted(d.filename) ? color : desaturateColor(color, 0.2)
+        );
         tooltip.style("display", "none");
       });
+
+    if (order === "ranking" && tutorialActiveGroup) {
+      bars
+        .filter((d) => getGroupForFilename(d.filename) === tutorialActiveGroup)
+        .each((_, index, nodes) => {
+          const node = nodes[index];
+          if (!(node instanceof SVGGraphicsElement)) {
+            return;
+          }
+
+          const animation = node.animate(
+            [
+              {
+                transform: "translateY(0px) scale(1)",
+                opacity: 1,
+              },
+              {
+                transform: "translateY(-10px) scale(1.05)",
+                opacity: 1,
+              },
+              {
+                transform: "translateY(0px) scale(1)",
+                opacity: 1,
+              },
+            ],
+            {
+              duration: 920,
+              delay: index * 36,
+              easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+            }
+          );
+
+          tutorialChartAnimationsRef.current.push(animation);
+        });
+    }
 
     // Y axis
     g.append("g")
@@ -451,12 +542,14 @@ const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
           }
 
     return () => {
+      clearTutorialChartAnimations();
       d3.select(containerRef.current).select(".tooltip").remove();
     };
-  }, [getSortedData, containerWidth, height, fileMap, selectedGroups, order]);
+  }, [getSortedData, containerWidth, height, fileMap, order, tutorialActiveGroup, tutorialSelectedGroups]);
 
   return (
     <div
+      data-tutorial="lab-results-barchart-panel"
       ref={containerRef}
       style={{
         position: 'relative',
@@ -483,6 +576,7 @@ const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
         }}
       >
         <div
+          data-tutorial="lab-results-barchart-order"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -499,6 +593,7 @@ const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
 
         {order === "ranking" && allGroups.length > 0 && (
           <div
+            data-tutorial="lab-results-barchart-highlight"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -514,6 +609,7 @@ const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
             {allGroups.map((group) => (
               <label
                 key={group}
+                data-tutorial-result-group={group}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -521,11 +617,27 @@ const BarChart = ({ barChartData, height, fileMappings,order, setOrder }) => {
                   cursor: 'pointer',
                   fontSize: '13px',
                   whiteSpace: 'nowrap',
+                  padding: '4px 8px',
+                  borderRadius: '999px',
+                  border:
+                    tutorialActiveGroup === group
+                      ? '1px solid rgba(196, 116, 144, 0.45)'
+                      : '1px solid transparent',
+                  background:
+                    tutorialActiveGroup === group
+                      ? 'rgba(247, 236, 225, 0.92)'
+                      : 'transparent',
+                  boxShadow:
+                    tutorialActiveGroup === group
+                      ? '0 10px 24px rgba(196, 116, 144, 0.16)'
+                      : 'none',
+                  transform: tutorialActiveGroup === group ? 'translateY(-1px)' : 'none',
+                  transition: 'all 220ms ease',
                 }}
               >
                 <input
                   type="checkbox"
-                  checked={selectedGroups.includes(group)}
+                  checked={effectiveSelectedGroups.includes(group)}
                   onChange={() => toggleGroupSelection(group)}
                 />
                 {group}

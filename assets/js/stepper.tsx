@@ -194,6 +194,7 @@ const Stepper: React.FC = () => {
 
   //visualization
   const [vizOrder, setVizOrder] = useState("group");
+  const [resultsPreviewCollapsed, setResultsPreviewCollapsed] = useState(true);
 
   // prestore dataset
   const[prestoreDataset, setPrestoreDataset] = useState<string | null>(null);
@@ -205,9 +206,17 @@ const Stepper: React.FC = () => {
   const tutorialRezaBaselineRef = useRef<PreviewFile[] | null>(null);
   const tutorialUploadDemoTimerRef = useRef<number | null>(null);
   const tutorialUploadDemoAnimationFrameRef = useRef<number | null>(null);
+  const tutorialUploadDemoAnimationsRef = useRef<Animation[]>([]);
   const tutorialUploadDemoVisualCleanupRef = useRef<(() => void) | null>(null);
   const tutorialUploadDemoRequestRef = useRef(0);
+  const tutorialOriginalResultsStateRef = useRef<{
+    vizOrder: string;
+    previewCollapsed: boolean;
+    chatbotOpen: boolean;
+    chatbotTransform: string;
+  } | null>(null);
   const [tutorialCustomGroups, setTutorialCustomGroups] = useState<string[] | null>(null);
+  const [tutorialHighlightedResultGroups, setTutorialHighlightedResultGroups] = useState<string[] | null>(null);
   const [tutorialUploadDemoMode, setTutorialUploadDemoMode] = useState<string | null>(null);
 
   const clonePreviewFiles = (items: PreviewFile[]) => items.map((item) => ({ ...item }));
@@ -225,8 +234,34 @@ const Stepper: React.FC = () => {
       tutorialUploadDemoAnimationFrameRef.current = null;
     }
 
+    tutorialUploadDemoAnimationsRef.current.forEach((animation) => {
+      try {
+        animation.cancel();
+      } catch {
+        // Ignore animations that are already finished.
+      }
+    });
+    tutorialUploadDemoAnimationsRef.current = [];
+
     tutorialUploadDemoVisualCleanupRef.current?.();
     tutorialUploadDemoVisualCleanupRef.current = null;
+  };
+
+  const trackUploadDemoAnimation = (animation: Animation | null) => {
+    if (!animation) {
+      return null;
+    }
+
+    tutorialUploadDemoAnimationsRef.current.push(animation);
+    animation.finished
+      .catch(() => undefined)
+      .finally(() => {
+        tutorialUploadDemoAnimationsRef.current = tutorialUploadDemoAnimationsRef.current.filter(
+          (entry) => entry !== animation
+        );
+      });
+
+    return animation;
   };
 
   const syncUploadTutorialState = (
@@ -282,6 +317,338 @@ const Stepper: React.FC = () => {
     setTutorialUploadDemoMode(null);
   };
 
+  const captureOriginalResultsTutorialState = () => {
+    if (tutorialOriginalResultsStateRef.current) {
+      return;
+    }
+
+    tutorialOriginalResultsStateRef.current = {
+      vizOrder,
+      previewCollapsed: resultsPreviewCollapsed,
+      chatbotOpen: isChatbotOpen(),
+      chatbotTransform: getChatbotElements().container?.style.transform || '',
+    };
+  };
+
+  const restoreOriginalResultsTutorialState = () => {
+    setTutorialHighlightedResultGroups(null);
+
+    const originalState = tutorialOriginalResultsStateRef.current;
+    if (!originalState) {
+      return;
+    }
+
+    setVizOrder(originalState.vizOrder);
+    setResultsPreviewCollapsed(originalState.previewCollapsed);
+    setChatbotVisibility(originalState.chatbotOpen);
+    setChatbotTransform(originalState.chatbotTransform);
+  };
+
+  const resetResultsTutorialState = () => {
+    restoreOriginalResultsTutorialState();
+    tutorialOriginalResultsStateRef.current = null;
+  };
+
+  const escapeTutorialSelectorValue = (value: string) => {
+    if (window.CSS?.escape) {
+      return window.CSS.escape(value);
+    }
+
+    return value.replace(/"/g, '\\"');
+  };
+
+  const getChatbotElements = () => {
+    const container = document.getElementById('cortex-chatbot-container');
+    const toggle = document.getElementById('cortex-chatbot-toggle');
+    const input = document.getElementById('cortex-chatbot-input');
+
+    return {
+      container: container instanceof HTMLElement ? container : null,
+      toggle: toggle instanceof HTMLElement ? toggle : null,
+      input: input instanceof HTMLElement ? input : null,
+    };
+  };
+
+  const getChatbotWidgetApi = () => {
+    const api = (window as any).cortexChatbotWidget;
+    if (!api || typeof api !== 'object') {
+      return null;
+    }
+
+    return api;
+  };
+
+  const isChatbotOpen = () => {
+    const api = getChatbotWidgetApi();
+    if (api && typeof api.isOpen === 'function') {
+      return !!api.isOpen();
+    }
+
+    const { container } = getChatbotElements();
+    return !!container && window.getComputedStyle(container).display !== 'none';
+  };
+
+  const setChatbotTransform = (transformValue: string) => {
+    const { container } = getChatbotElements();
+    if (!container) {
+      return false;
+    }
+
+    container.style.transform = transformValue || 'translate(0px, 0px)';
+    return true;
+  };
+
+  const resetChatbotPosition = () => {
+    const api = getChatbotWidgetApi();
+    if (api && typeof api.resetPosition === 'function') {
+      api.resetPosition();
+      return true;
+    }
+
+    return setChatbotTransform('translate(0px, 0px)');
+  };
+
+  const setChatbotVisibility = (open: boolean, options: { resetPosition?: boolean } = {}) => {
+    const api = getChatbotWidgetApi();
+    if (api) {
+      if (open && typeof api.open === 'function') {
+        api.open({ resetPosition: Boolean(options.resetPosition) });
+        return true;
+      }
+
+      if (!open && typeof api.close === 'function') {
+        api.close();
+        return true;
+      }
+    }
+
+    const { container, toggle } = getChatbotElements();
+    if (!container || !toggle) {
+      return false;
+    }
+
+    if (open && options.resetPosition) {
+      resetChatbotPosition();
+    }
+
+    container.style.display = open ? 'flex' : 'none';
+    toggle.style.display = open ? 'none' : 'inline-flex';
+    return true;
+  };
+
+  const startAnimatedResultsDemo = ({
+    requestId,
+    mode,
+  }: {
+    requestId: number;
+    mode: string;
+  }) => {
+    clearUploadDemoTimer();
+    clearUploadDemoVisuals();
+
+    const runSequence = async () => {
+      if (tutorialUploadDemoRequestRef.current !== requestId) {
+        return;
+      }
+
+      setCurrent(2);
+      setTutorialHighlightedResultGroups(null);
+
+      if (mode === 'region') {
+        await pulseTutorialSurface({
+          selector: '[data-tutorial="lab-results-region-active"]',
+          requestId,
+          accentColor: 'rgba(196, 116, 144, 0.2)',
+        });
+        return;
+      }
+
+      if (mode === 'model-card') {
+        const cardAnimated = await pulseTutorialSurface({
+          selector: '[data-tutorial="lab-results-model-card"]',
+          requestId,
+          accentColor: 'rgba(176, 132, 92, 0.18)',
+        });
+        if (!cardAnimated || !(await waitForTutorialDelay(140, requestId))) {
+          return;
+        }
+
+        await pulseTutorialSurface({
+          selector: '[data-tutorial="lab-results-model-card-link"]',
+          requestId,
+          accentColor: 'rgba(196, 116, 144, 0.18)',
+        });
+        return;
+      }
+
+      if (mode === 'preview') {
+        if (resultsPreviewCollapsed) {
+          const toggleAnimated = await pulseTutorialButton({
+            selector: '[data-tutorial="lab-results-upload-preview-toggle"]',
+            requestId,
+          });
+          if (!toggleAnimated || !(await waitForTutorialDelay(120, requestId))) {
+            return;
+          }
+
+          setResultsPreviewCollapsed(false);
+          if (!(await waitForTutorialDelay(260, requestId))) {
+            return;
+          }
+        }
+
+        await pulseTutorialSurface({
+          selector: '[data-tutorial="lab-results-upload-preview"]',
+          requestId,
+          accentColor: 'rgba(170, 139, 89, 0.2)',
+        });
+        return;
+      }
+
+      if (mode === 'ranking') {
+        setVizOrder('group');
+        if (!(await waitForTutorialDelay(120, requestId))) {
+          return;
+        }
+
+        const orderAnimated = await pulseTutorialSurface({
+          selector: '[data-tutorial="lab-results-barchart-order"]',
+          requestId,
+          accentColor: 'rgba(176, 132, 92, 0.2)',
+        });
+        if (!orderAnimated || !(await waitForTutorialDelay(140, requestId))) {
+          return;
+        }
+
+        setVizOrder('ranking');
+        if (!(await waitForTutorialDelay(260, requestId))) {
+          return;
+        }
+
+        await pulseTutorialSurface({
+          selector: '[data-tutorial="lab-results-barchart-panel"]',
+          requestId,
+          accentColor: 'rgba(176, 132, 92, 0.16)',
+        });
+        return;
+      }
+
+      if (mode === 'highlight-group') {
+        const groups = getSortedGroupKeys(files);
+        const highlightedGroup = groups[0] ?? null;
+
+        setVizOrder('ranking');
+        if (!(await waitForTutorialDelay(180, requestId))) {
+          return;
+        }
+
+        const controlsAnimated = await pulseTutorialSurface({
+          selector: '[data-tutorial="lab-results-barchart-highlight"]',
+          requestId,
+          accentColor: 'rgba(196, 116, 144, 0.18)',
+        });
+        if (!controlsAnimated || !highlightedGroup || !(await waitForTutorialDelay(120, requestId))) {
+          return;
+        }
+
+        setTutorialHighlightedResultGroups([highlightedGroup]);
+        if (!(await waitForTutorialDelay(220, requestId))) {
+          return;
+        }
+
+        const highlightedGroupSelector = `[data-tutorial-result-group="${escapeTutorialSelectorValue(highlightedGroup)}"]`;
+        const groupAnimated = await pulseTutorialSurface({
+          selector: highlightedGroupSelector,
+          requestId,
+          accentColor: 'rgba(196, 116, 144, 0.2)',
+        });
+        if (!groupAnimated || !(await waitForTutorialDelay(120, requestId))) {
+          return;
+        }
+
+        await pulseTutorialSurface({
+          selector: '[data-tutorial="lab-results-barchart-panel"]',
+          requestId,
+          accentColor: 'rgba(196, 116, 144, 0.14)',
+        });
+        return;
+      }
+
+      if (mode === 'insights') {
+        const buttonAnimated = await pulseTutorialButton({
+          selector: '[data-tutorial="lab-results-get-insights"]',
+          requestId,
+        });
+        if (!buttonAnimated || !(await waitForTutorialDelay(120, requestId))) {
+          return;
+        }
+
+        await pulseTutorialSurface({
+          selector: '[data-tutorial="lab-results-get-insights"]',
+          requestId,
+          accentColor: 'rgba(170, 139, 89, 0.18)',
+        });
+        return;
+      }
+
+      if (mode === 'chatbot') {
+        resetChatbotPosition();
+
+        if (!isChatbotOpen()) {
+          const toggleAnimated = await pulseTutorialButton({
+            selector: '#cortex-chatbot-toggle',
+            requestId,
+          });
+          if (!toggleAnimated || !(await waitForTutorialDelay(120, requestId))) {
+            return;
+          }
+
+          setChatbotVisibility(true, { resetPosition: true });
+          if (!(await waitForTutorialDelay(220, requestId))) {
+            return;
+          }
+        }
+
+        const panelAnimated = await pulseTutorialSurface({
+          selector: '#cortex-chatbot-container',
+          requestId,
+          accentColor: 'rgba(196, 116, 144, 0.18)',
+        });
+        if (!panelAnimated || !(await waitForTutorialDelay(120, requestId))) {
+          return;
+        }
+
+        await pulseTutorialSurface({
+          selector: '#cortex-chatbot-input',
+          requestId,
+          accentColor: 'rgba(176, 132, 92, 0.18)',
+        });
+      }
+    };
+
+    tutorialUploadDemoTimerRef.current = window.setTimeout(() => {
+      tutorialUploadDemoTimerRef.current = null;
+      runSequence();
+    }, 180);
+  };
+
+  const setResultsTutorialDemo = (mode: string = 'default') => {
+    tutorialUploadDemoRequestRef.current += 1;
+    const requestId = tutorialUploadDemoRequestRef.current;
+    clearUploadDemoTimer();
+    clearUploadDemoVisuals();
+    captureOriginalResultsTutorialState();
+
+    setCurrent(2);
+
+    if (mode === 'default') {
+      setTutorialHighlightedResultGroups(null);
+      return;
+    }
+
+    startAnimatedResultsDemo({ requestId, mode });
+  };
+
   const startLoopingUploadDemo = ({
     requestId,
     mode,
@@ -326,6 +693,19 @@ const Stepper: React.FC = () => {
       left.localeCompare(right, undefined, { numeric: true, sensitivity: 'base' })
     );
 
+  const getClearGroupDemoSpec = (baseFiles: PreviewFile[]) => {
+    const groups = getSortedGroupKeys(baseFiles);
+    if (groups.length < 2) {
+      return null;
+    }
+
+    const clearedGroup = groups[0];
+    return {
+      clearedGroup,
+      demoFiles: baseFiles.filter((file) => file.groupKey !== clearedGroup).map((file) => ({ ...file })),
+    };
+  };
+
   const getDragDemoSpec = (baseFiles: PreviewFile[]) => {
     const groups = getSortedGroupKeys(baseFiles);
     if (groups.length < 2) {
@@ -348,6 +728,269 @@ const Stepper: React.FC = () => {
         file.uid === movingItem.uid ? { ...file, groupKey: toGroup } : { ...file }
       ),
     };
+  };
+
+  const waitForTutorialElement = (selector: string, requestId: number, timeoutMs = 1800) =>
+    new Promise<HTMLElement | null>((resolve) => {
+      const startedAt = window.performance.now();
+
+      const check = () => {
+        if (tutorialUploadDemoRequestRef.current !== requestId) {
+          resolve(null);
+          return;
+        }
+
+        const element = document.querySelector(selector);
+        if (element instanceof HTMLElement) {
+          resolve(element);
+          return;
+        }
+
+        if (window.performance.now() - startedAt >= timeoutMs) {
+          resolve(null);
+          return;
+        }
+
+        window.setTimeout(check, 40);
+      };
+
+      check();
+    });
+
+  const pulseTutorialButton = async ({
+    selector,
+    requestId,
+  }: {
+    selector: string;
+    requestId: number;
+  }) => {
+    const button = await waitForTutorialElement(selector, requestId, 800);
+    if (!button || tutorialUploadDemoRequestRef.current !== requestId) {
+      return false;
+    }
+
+    const animation = trackUploadDemoAnimation(
+      button.animate(
+        [
+          {
+            transform: 'scale(1)',
+            boxShadow: '0 0 0 0 rgba(176, 132, 92, 0)',
+            backgroundColor: 'rgba(255, 255, 255, 1)',
+          },
+          {
+            transform: 'scale(0.97)',
+            boxShadow: '0 0 0 10px rgba(176, 132, 92, 0.18)',
+            backgroundColor: 'rgba(247, 240, 232, 1)',
+          },
+          {
+            transform: 'scale(1)',
+            boxShadow: '0 0 0 0 rgba(176, 132, 92, 0)',
+            backgroundColor: 'rgba(255, 255, 255, 1)',
+          },
+        ],
+        {
+          duration: 840,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        }
+      )
+    );
+
+    try {
+      await animation?.finished;
+    } catch {
+      return false;
+    }
+
+    return tutorialUploadDemoRequestRef.current === requestId;
+  };
+
+  const waitForTutorialDelay = (delayMs: number, requestId: number) =>
+    new Promise<boolean>((resolve) => {
+      tutorialUploadDemoTimerRef.current = window.setTimeout(() => {
+        tutorialUploadDemoTimerRef.current = null;
+        resolve(tutorialUploadDemoRequestRef.current === requestId);
+      }, delayMs);
+    });
+
+  const pulseTutorialSurface = async ({
+    selector,
+    requestId,
+    accentColor = 'rgba(176, 132, 92, 0.2)',
+  }: {
+    selector: string;
+    requestId: number;
+    accentColor?: string;
+  }) => {
+    const element = await waitForTutorialElement(selector, requestId, 900);
+    if (!element || tutorialUploadDemoRequestRef.current !== requestId) {
+      return false;
+    }
+
+    const animation = trackUploadDemoAnimation(
+      element.animate(
+        [
+          {
+            transform: 'translateY(0) scale(1)',
+            boxShadow: '0 0 0 0 rgba(176, 132, 92, 0)',
+            filter: 'brightness(1)',
+          },
+          {
+            transform: 'translateY(-3px) scale(1.01)',
+            boxShadow: `0 0 0 12px ${accentColor}, 0 18px 34px rgba(74, 57, 42, 0.14)`,
+            filter: 'brightness(1.03)',
+          },
+          {
+            transform: 'translateY(0) scale(1)',
+            boxShadow: '0 0 0 0 rgba(176, 132, 92, 0)',
+            filter: 'brightness(1)',
+          },
+        ],
+        {
+          duration: 1080,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        }
+      )
+    );
+
+    try {
+      await animation?.finished;
+    } catch {
+      return false;
+    }
+
+    return tutorialUploadDemoRequestRef.current === requestId;
+  };
+
+  const startAnimatedSettingsDemo = ({ requestId }: { requestId: number }) => {
+    clearUploadDemoTimer();
+    clearUploadDemoVisuals();
+
+    const runSequence = async () => {
+      if (tutorialUploadDemoRequestRef.current !== requestId) {
+        return;
+      }
+
+      const regionAnimated = await pulseTutorialSurface({
+        selector: '[data-tutorial="lab-settings-region-active"]',
+        requestId,
+        accentColor: 'rgba(196, 116, 144, 0.2)',
+      });
+      if (!regionAnimated || !(await waitForTutorialDelay(420, requestId))) {
+        return;
+      }
+
+      const modelAnimated = await pulseTutorialSurface({
+        selector: '[data-tutorial="lab-settings-model"]',
+        requestId,
+        accentColor: 'rgba(176, 132, 92, 0.2)',
+      });
+      if (!modelAnimated || !(await waitForTutorialDelay(420, requestId))) {
+        return;
+      }
+
+      const trainingAnimated = await pulseTutorialSurface({
+        selector: '[data-tutorial="lab-settings-training"]',
+        requestId,
+        accentColor: 'rgba(170, 139, 89, 0.2)',
+      });
+      if (!trainingAnimated || !(await waitForTutorialDelay(1850, requestId))) {
+        return;
+      }
+
+      runSequence();
+    };
+
+    tutorialUploadDemoTimerRef.current = window.setTimeout(() => {
+      tutorialUploadDemoTimerRef.current = null;
+      runSequence();
+    }, 1200);
+  };
+
+  const animateGroupEntrance = async ({
+    requestId,
+    groupKey,
+  }: {
+    requestId: number;
+    groupKey: string;
+  }) => {
+    const selector = `[data-tutorial-group-key="${groupKey}"]`;
+    const groupElement = await waitForTutorialElement(selector, requestId, 1400);
+    if (!groupElement || tutorialUploadDemoRequestRef.current !== requestId) {
+      return false;
+    }
+
+    const animation = trackUploadDemoAnimation(
+      groupElement.animate(
+        [
+          {
+            opacity: 0,
+            transform: 'translateY(18px) scale(0.96)',
+            filter: 'blur(2px)',
+          },
+          {
+            opacity: 1,
+            transform: 'translateY(0) scale(1)',
+            filter: 'blur(0px)',
+          },
+        ],
+        {
+          duration: 1080,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        }
+      )
+    );
+
+    try {
+      await animation?.finished;
+    } catch {
+      return false;
+    }
+
+    return tutorialUploadDemoRequestRef.current === requestId;
+  };
+
+  const animateGroupExit = async ({
+    requestId,
+    groupKey,
+  }: {
+    requestId: number;
+    groupKey: string;
+  }) => {
+    const selector = `[data-tutorial-group-key="${groupKey}"]`;
+    const groupElement = await waitForTutorialElement(selector, requestId, 800);
+    if (!groupElement || tutorialUploadDemoRequestRef.current !== requestId) {
+      return false;
+    }
+
+    const animation = trackUploadDemoAnimation(
+      groupElement.animate(
+        [
+          {
+            opacity: 1,
+            transform: 'translateY(0) scale(1)',
+            filter: 'blur(0px)',
+          },
+          {
+            opacity: 0,
+            transform: 'translateY(-12px) scale(0.96)',
+            filter: 'blur(2px)',
+          },
+        ],
+        {
+          duration: 1040,
+          easing: 'cubic-bezier(0.55, 0.06, 0.68, 0.19)',
+          fill: 'forwards',
+        }
+      )
+    );
+
+    try {
+      await animation?.finished;
+    } catch {
+      return false;
+    }
+
+    return tutorialUploadDemoRequestRef.current === requestId;
   };
 
   const playTutorialDragTransition = ({
@@ -382,7 +1025,7 @@ const Stepper: React.FC = () => {
 
       const sourceRect = sourceElement.getBoundingClientRect();
       const targetRect = targetElement.getBoundingClientRect();
-      const durationMs = 1800;
+      const durationMs = 2500;
       let targetLeft = targetRect.left + 24;
       let targetTop = targetRect.top + 82;
 
@@ -428,8 +1071,8 @@ const Stepper: React.FC = () => {
       sourceElement.style.transition = 'opacity 180ms ease';
       sourceElement.style.opacity = '0.16';
       targetElement.style.transition = 'box-shadow 220ms ease, border-color 220ms ease';
-      targetElement.style.boxShadow = '0 0 0 3px rgba(122, 167, 255, 0.42), 0 16px 36px rgba(78, 94, 132, 0.12)';
-      targetElement.style.borderColor = 'rgba(122, 167, 255, 0.7)';
+      targetElement.style.boxShadow = '0 0 0 3px rgba(176, 132, 92, 0.42), 0 16px 36px rgba(74, 57, 42, 0.12)';
+      targetElement.style.borderColor = 'rgba(176, 132, 92, 0.68)';
 
       document.body.appendChild(preview);
 
@@ -543,7 +1186,7 @@ const Stepper: React.FC = () => {
           return;
         }
 
-        queueBackward(1700);
+        queueBackward(2400);
       }, delayMs);
     };
 
@@ -567,11 +1210,135 @@ const Stepper: React.FC = () => {
           return;
         }
 
-        queueForward(1350);
+        queueForward(1950);
       }, delayMs);
     };
 
-    queueForward(1200);
+    queueForward(1600);
+  };
+
+  const startAnimatedAddGroupUploadDemo = ({
+    requestId,
+    mode,
+    baseFiles,
+  }: {
+    requestId: number;
+    mode: string;
+    baseFiles: PreviewFile[];
+  }) => {
+    const tutorialGroupKey = 'Tutorial Group';
+    clearUploadDemoTimer();
+    clearUploadDemoVisuals();
+    syncUploadTutorialState(baseFiles, 'reza', [], mode);
+
+    const queueShow = (delayMs: number) => {
+      tutorialUploadDemoTimerRef.current = window.setTimeout(async () => {
+        if (tutorialUploadDemoRequestRef.current !== requestId) {
+          return;
+        }
+
+        const pulsed = await pulseTutorialButton({
+          selector: '[data-tutorial="lab-upload-add-group"]',
+          requestId,
+        });
+        if (!pulsed || tutorialUploadDemoRequestRef.current !== requestId) {
+          return;
+        }
+
+        syncUploadTutorialState(baseFiles, 'reza', [tutorialGroupKey], mode);
+        const animated = await animateGroupEntrance({ requestId, groupKey: tutorialGroupKey });
+        if (!animated || tutorialUploadDemoRequestRef.current !== requestId) {
+          return;
+        }
+
+        queueHide(2550);
+      }, delayMs);
+    };
+
+    const queueHide = (delayMs: number) => {
+      tutorialUploadDemoTimerRef.current = window.setTimeout(async () => {
+        if (tutorialUploadDemoRequestRef.current !== requestId) {
+          return;
+        }
+
+        const animated = await animateGroupExit({ requestId, groupKey: tutorialGroupKey });
+        if (!animated || tutorialUploadDemoRequestRef.current !== requestId) {
+          return;
+        }
+
+        syncUploadTutorialState(baseFiles, 'reza', [], mode);
+        queueShow(2100);
+      }, delayMs);
+    };
+
+    queueShow(1550);
+  };
+
+  const startAnimatedClearGroupUploadDemo = ({
+    requestId,
+    mode,
+    baseFiles,
+  }: {
+    requestId: number;
+    mode: string;
+    baseFiles: PreviewFile[];
+  }) => {
+    const clearSpec = getClearGroupDemoSpec(baseFiles);
+    if (!clearSpec) {
+      startLoopingUploadDemo({
+        requestId,
+        mode,
+        baseFiles,
+        demoFiles: clonePreviewFiles(baseFiles),
+      });
+      return;
+    }
+
+    clearUploadDemoTimer();
+    clearUploadDemoVisuals();
+    syncUploadTutorialState(baseFiles, 'reza', [], mode);
+
+    const queueClear = (delayMs: number) => {
+      tutorialUploadDemoTimerRef.current = window.setTimeout(async () => {
+        if (tutorialUploadDemoRequestRef.current !== requestId) {
+          return;
+        }
+
+        const pulsed = await pulseTutorialButton({
+          selector: '[data-tutorial="lab-upload-clear-group"]',
+          requestId,
+        });
+        if (!pulsed || tutorialUploadDemoRequestRef.current !== requestId) {
+          return;
+        }
+
+        const animated = await animateGroupExit({ requestId, groupKey: clearSpec.clearedGroup });
+        if (!animated || tutorialUploadDemoRequestRef.current !== requestId) {
+          return;
+        }
+
+        syncUploadTutorialState(clearSpec.demoFiles, 'reza', [], mode);
+        queueRestore(2550);
+      }, delayMs);
+    };
+
+    const queueRestore = (delayMs: number) => {
+      tutorialUploadDemoTimerRef.current = window.setTimeout(async () => {
+        if (tutorialUploadDemoRequestRef.current !== requestId) {
+          return;
+        }
+
+        syncUploadTutorialState(baseFiles, 'reza', [], mode);
+        const animated = await animateGroupEntrance({ requestId, groupKey: clearSpec.clearedGroup });
+        if (!animated || tutorialUploadDemoRequestRef.current !== requestId) {
+          return;
+        }
+
+        queueClear(2100);
+      }, delayMs);
+    };
+
+    queueClear(1550);
   };
 
   useEffect(() => {
@@ -587,19 +1354,18 @@ const Stepper: React.FC = () => {
   };
 
   const buildClearGroupDemoFiles = (baseFiles: PreviewFile[]) => {
-    const groups = Array.from(new Set(baseFiles.map((file) => file.groupKey).filter(Boolean)));
-    if (groups.length < 2) {
-      return clonePreviewFiles(baseFiles);
-    }
-
-    const clearedGroup = groups[0];
-    return baseFiles.filter((file) => file.groupKey !== clearedGroup).map((file) => ({ ...file }));
+    return getClearGroupDemoSpec(baseFiles)?.demoFiles ?? clonePreviewFiles(baseFiles);
   };
 
   useEffect(() => {
     const tutorialApi = {
       setStep: (stepIndex: number) => {
         if (!Number.isInteger(stepIndex)) return;
+
+        tutorialUploadDemoRequestRef.current += 1;
+        clearUploadDemoTimer();
+        clearUploadDemoVisuals();
+        setTutorialHighlightedResultGroups(null);
 
         const safeStep = Math.max(0, Math.min(stepIndex, 2));
         setCurrent(safeStep);
@@ -614,6 +1380,7 @@ const Stepper: React.FC = () => {
         const requestId = tutorialUploadDemoRequestRef.current;
         clearUploadDemoTimer();
         clearUploadDemoVisuals();
+        setTutorialHighlightedResultGroups(null);
 
         setCurrent(0);
         captureOriginalUploadTutorialState();
@@ -652,27 +1419,40 @@ const Stepper: React.FC = () => {
         }
 
         if (mode === 'add-group-demo') {
-          startLoopingUploadDemo({
+          startAnimatedAddGroupUploadDemo({
             requestId,
             mode,
             baseFiles,
-            demoFiles: baseFiles,
-            demoGroups: ['Tutorial Group'],
           });
           return;
         }
 
         if (mode === 'clear-group-demo') {
-          startLoopingUploadDemo({
+          startAnimatedClearGroupUploadDemo({
             requestId,
             mode,
             baseFiles,
-            demoFiles: buildClearGroupDemoFiles(baseFiles),
           });
         }
       },
+      playSettingsDemo: () => {
+        tutorialUploadDemoRequestRef.current += 1;
+        const requestId = tutorialUploadDemoRequestRef.current;
+        clearUploadDemoTimer();
+        clearUploadDemoVisuals();
+        setTutorialHighlightedResultGroups(null);
+
+        setCurrent(1);
+        startAnimatedSettingsDemo({ requestId });
+      },
+      setResultsDemo: (mode: string) => {
+        setResultsTutorialDemo(mode);
+      },
       resetUploadDemo: () => {
         resetUploadTutorialState();
+      },
+      resetResultsDemo: () => {
+        resetResultsTutorialState();
       },
     };
 
@@ -683,7 +1463,7 @@ const Stepper: React.FC = () => {
         delete (window as any).cortexLabTutorial;
       }
     };
-  }, [files, prestoreDataset, preloadLoadingKey]);
+  }, [files, prestoreDataset, preloadLoadingKey, resultsPreviewCollapsed, vizOrder]);
 
   const next = () => setCurrent((prev) => prev + 1);
   const prev = () => setCurrent((prev) => prev - 1);
@@ -1472,7 +2252,13 @@ useEffect(() => {
       title: 'Prediction Results',
       content: (
         <div data-tutorial="lab-results-panel" style={{ display: 'flex', flexDirection: 'column'}}>
-          <RegionSelector region={region} setRegion={setRegion} dataset={dataset} />
+          <RegionSelector
+            region={region}
+            setRegion={setRegion}
+            dataset={dataset}
+            tutorialRootKey="lab-results-region"
+            activeTutorialKey="lab-results-region-active"
+          />
           
 
           <ModelCard
@@ -1481,20 +2267,25 @@ useEffect(() => {
             model={model}
           />
 
-           <ImagePreviewGroupedDnD
-            files={files}
-            title="Uploaded Images Preview"
-            groupDepth={1}
-            isPreload={isPreloadMode}
-            onMoveItemToGroup={moveItemToGroup}
-            onRenameGroupKey={renameGroupKey}
-            onRemove={(uid: string) => removeOne(uid)}
-            onClear={() => clearAll()}
-            onClearGroup={(groupKey, uids) => clearGroup(uids)}
-            onGroupOrderChange={(order: string[]) => console.log("Group order:", order)}
-            foldable={true}
-            viewOnly={true}
-          />
+          <div data-tutorial="lab-results-upload-preview">
+            <ImagePreviewGroupedDnD
+              files={files}
+              title="Uploaded Images Preview"
+              groupDepth={1}
+              isPreload={isPreloadMode}
+              onMoveItemToGroup={moveItemToGroup}
+              onRenameGroupKey={renameGroupKey}
+              onRemove={(uid: string) => removeOne(uid)}
+              onClear={() => clearAll()}
+              onClearGroup={(groupKey, uids) => clearGroup(uids)}
+              onGroupOrderChange={(order: string[]) => console.log("Group order:", order)}
+              foldable={true}
+              panelCollapsed={resultsPreviewCollapsed}
+              onPanelCollapsedChange={setResultsPreviewCollapsed}
+              tutorialCollapseToggleKey="lab-results-upload-preview-toggle"
+              viewOnly={true}
+            />
+          </div>
 
           {predictionLoading && <LinearIndeterminate />} {/* add progress bar when predictionLoading is true */}
             <h3 style={{ textAlign: "left", color:"black", fontSize: "18px", marginBottom: "10px", marginTop: "40px"}}>
@@ -1507,6 +2298,7 @@ useEffect(() => {
                 fileMappings={fileMappings}
                 order={vizOrder}
                 setOrder={setVizOrder}
+                tutorialSelectedGroups={tutorialHighlightedResultGroups}
               />
             )}
             <h3 style={{ textAlign: "left", color:"black", fontSize: "18px", marginBottom: "6px", marginTop: "40px"}}><b>Multivariate Analysis:</b> Respresentational dissimilarity matrix (RDM) from predicted voxel responses</h3>
@@ -1542,6 +2334,7 @@ useEffect(() => {
             </h3>
 
             <Button
+              data-tutorial="lab-results-get-insights"
               type="primary"
               onClick={handleGetInsights}
               loading={insightLoading}

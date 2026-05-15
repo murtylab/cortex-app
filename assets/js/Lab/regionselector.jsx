@@ -10,7 +10,13 @@ import {
   NSD_1000_INCLUDED_REGIONS,
 } from "../constants";
 
-const RegionSelector = ({ region, setRegion, dataset }) => {
+const RegionSelector = ({
+  region,
+  setRegion,
+  dataset,
+  tutorialRootKey = "lab-settings-region",
+  activeTutorialKey = "lab-settings-region-active",
+}) => {
   const isEnabled = (option) => {
     const value = (option?.value || "").toLowerCase();
 
@@ -26,7 +32,7 @@ const RegionSelector = ({ region, setRegion, dataset }) => {
   };
 
   return (
-    <FormControl sx={{ minWidth: 120 }} fullWidth>
+    <FormControl data-tutorial={tutorialRootKey} sx={{ minWidth: 120 }} fullWidth>
       <FormLabel
         id="region-buttons-group-label"
         sx={{ textAlign: "left", color: "black", marginBottom: 1 }}
@@ -42,6 +48,7 @@ const RegionSelector = ({ region, setRegion, dataset }) => {
           return (
             <Button
               key={option.value}
+              data-tutorial={selected ? activeTutorialKey : undefined}
               onClick={() => isEnabled(option) && setRegion(option.value)}
               variant="contained"
               disabled={!isEnabled(option)}

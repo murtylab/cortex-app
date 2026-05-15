@@ -3,47 +3,6 @@
 > vite build
 
 vite v6.4.2 building for production...
-<script src="/assets/js/chatbot/chatbot-widget.js"> in "/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/php-email-form/validate.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/aos/aos.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/glightbox/js/glightbox.min.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/purecounter/purecounter_vanilla.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/isotope-layout/isotope.pkgd.min.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/swiper/swiper-bundle.min.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
-<script src="/assets/js/main.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
-<script src="/assets/js/chatbot/chatbot-widget.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/php-email-form/validate.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/aos/aos.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/glightbox/js/glightbox.min.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/purecounter/purecounter_vanilla.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/isotope-layout/isotope.pkgd.min.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/swiper/swiper-bundle.min.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/js/main.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/js/chatbot/chatbot-widget.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/php-email-form/validate.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/aos/aos.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/glightbox/js/glightbox.min.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/purecounter/purecounter_vanilla.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/isotope-layout/isotope.pkgd.min.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/swiper/swiper-bundle.min.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/js/main.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/js/chatbot/chatbot-widget.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"> in "/lab/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/php-email-form/validate.js"> in "/lab/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/aos/aos.js"> in "/lab/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/glightbox/js/glightbox.min.js"> in "/lab/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/purecounter/purecounter_vanilla.js"> in "/lab/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"> in "/lab/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/isotope-layout/isotope.pkgd.min.js"> in "/lab/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/swiper/swiper-bundle.min.js"> in "/lab/index.html" can't be bundled without type="module" attribute
-<script src="/assets/js/main.js"> in "/lab/index.html" can't be bundled without type="module" attribute
-<script src="/assets/js/chatbot/chatbot-widget.js"> in "/lab/index.html" can't be bundled without type="module" attribute
 <script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"> in "/scoreboardQuantitative/index.html" can't be bundled without type="module" attribute
 <script src="/assets/vendor/php-email-form/validate.js"> in "/scoreboardQuantitative/index.html" can't be bundled without type="module" attribute
 <script src="/assets/vendor/aos/aos.js"> in "/scoreboardQuantitative/index.html" can't be bundled without type="module" attribute
@@ -54,7 +13,27 @@ vite v6.4.2 building for production...
 <script src="/assets/vendor/swiper/swiper-bundle.min.js"> in "/scoreboardQuantitative/index.html" can't be bundled without type="module" attribute
 <script src="/assets/js/main.js"> in "/scoreboardQuantitative/index.html" can't be bundled without type="module" attribute
 <script src="/assets/js/chatbot/chatbot-widget.js"> in "/scoreboardQuantitative/index.html" can't be bundled without type="module" attribute
-<script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"> in "/walkthrough/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"> in "/lab/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/php-email-form/validate.js"> in "/lab/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/aos/aos.js"> in "/lab/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/glightbox/js/glightbox.min.js"> in "/lab/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/purecounter/purecounter_vanilla.js"> in "/lab/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"> in "/lab/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/isotope-layout/isotope.pkgd.min.js"> in "/lab/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/swiper/swiper-bundle.min.js"> in "/lab/index.html" can't be bundled without type="module" attribute
+<script src="/assets/js/main.js"> in "/lab/index.html" can't be bundled without type="module" attribute
+<script src="/assets/js/chatbot/chatbot-widget.js"> in "/lab/index.html" can't be bundled without type="module" attribute
+<script src="/assets/js/chatbot/chatbot-widget.js"> in "/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/php-email-form/validate.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/aos/aos.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/glightbox/js/glightbox.min.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/purecounter/purecounter_vanilla.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/isotope-layout/isotope.pkgd.min.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/swiper/swiper-bundle.min.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
+<script src="/assets/js/main.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
+<script src="/assets/js/chatbot/chatbot-widget.js"> in "/scoreboardLanding/index.html" can't be bundled without type="module" attribute
 <script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"> in "/lab-whole-brain/index.html" can't be bundled without type="module" attribute
 <script src="/assets/vendor/php-email-form/validate.js"> in "/lab-whole-brain/index.html" can't be bundled without type="module" attribute
 <script src="/assets/vendor/aos/aos.js"> in "/lab-whole-brain/index.html" can't be bundled without type="module" attribute
@@ -64,6 +43,27 @@ vite v6.4.2 building for production...
 <script src="/assets/vendor/isotope-layout/isotope.pkgd.min.js"> in "/lab-whole-brain/index.html" can't be bundled without type="module" attribute
 <script src="/assets/vendor/swiper/swiper-bundle.min.js"> in "/lab-whole-brain/index.html" can't be bundled without type="module" attribute
 <script src="/assets/js/main.js"> in "/lab-whole-brain/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/php-email-form/validate.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/aos/aos.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/glightbox/js/glightbox.min.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/purecounter/purecounter_vanilla.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/isotope-layout/isotope.pkgd.min.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/swiper/swiper-bundle.min.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
+<script src="/assets/js/main.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
+<script src="/assets/js/chatbot/chatbot-widget.js"> in "/labLanding/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/php-email-form/validate.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/aos/aos.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/glightbox/js/glightbox.min.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/purecounter/purecounter_vanilla.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/isotope-layout/isotope.pkgd.min.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/swiper/swiper-bundle.min.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
+<script src="/assets/js/main.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
+<script src="/assets/js/chatbot/chatbot-widget.js"> in "/scoreboardQualitative/index.html" can't be bundled without type="module" attribute
+<script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"> in "/walkthrough/index.html" can't be bundled without type="module" attribute
 transforming...
 ✓ 8498 modules transformed.
 rendering chunks...
@@ -364,8 +364,8 @@ dist/assets/phones8-CwVjNj_W.jpg                                                
 dist/assets/cars23-C1zo7fI8.jpg                                                    6.25 kB
 dist/assets/pointplace7-CeZTknu6.jpeg                                              6.25 kB
 dist/assets/chairs3-BecAYIDg.jpg                                                   6.26 kB
-dist/assets/cars30-Ds2j9S9i.jpg                                                    6.27 kB
 dist/assets/cars7-DEDiyWTS.jpg                                                     6.27 kB
+dist/assets/cars30-Ds2j9S9i.jpg                                                    6.27 kB
 dist/assets/faces6-mFHvnldy.jpg                                                    6.27 kB
 dist/assets/bp45-MBgC-5AB.jpeg                                                     6.27 kB
 dist/assets/chairs30-DYlqtAct.jpg                                                  6.27 kB
@@ -604,8 +604,8 @@ dist/assets/bp31-AFHu5-aA.jpeg                                                  
 dist/assets/Anetworkplug3-CLRciE0O.jpeg                                            7.86 kB
 dist/assets/4-1-loft_9-BzWhW7GW.jpg                                                7.88 kB
 dist/assets/6-1-parkinggarage_2-Ba3kHaG8.jpg                                       7.90 kB
-dist/assets/pixplace33-CrwW3ojd.jpeg                                               7.91 kB
 dist/assets/pixplace34-CarSxsjq.jpeg                                               7.91 kB
+dist/assets/pixplace33-CrwW3ojd.jpeg                                               7.91 kB
 dist/assets/tp9-DqYT-EhO.jpeg                                                      7.94 kB
 dist/assets/pointplace5-D9VIbZ_A.jpeg                                              7.94 kB
 dist/assets/faces4-4au7T5Hd.jpg                                                    7.94 kB
@@ -7675,10 +7675,10 @@ dist/assets/transform-DdjN_Fve.js                                               
 dist/assets/roicard-hS0RJTeD.js                                                  127.54 kB │ gzip:    28.43 kB
 dist/assets/scoreboardQuantitative-DgE1b8i2.js                                   143.17 kB │ gzip:    44.28 kB
 dist/assets/index-AmPEgN8S.js                                                    162.30 kB │ gzip:    52.19 kB
-dist/assets/imagePreviewGrid--sWBcquz.js                                         226.91 kB │ gzip:    72.27 kB
-dist/assets/labWholeBrain-9IzHMp5u.js                                            260.53 kB │ gzip:    80.35 kB
+dist/assets/imagePreviewGrid-Bx9rQarj.js                                         226.21 kB │ gzip:    72.01 kB
+dist/assets/labWholeBrain-BP2sEnKs.js                                            260.53 kB │ gzip:    80.35 kB
 dist/assets/FormGroup-BG7ruzxx.js                                                542.60 kB │ gzip:   163.69 kB
-dist/assets/lab-BTKvmbNL.js                                                      581.31 kB │ gzip:    86.49 kB
+dist/assets/lab-xyQe9Eqd.js                                                      574.37 kB │ gzip:    84.81 kB
 dist/assets/main-D7fcgpQr.js                                                     601.15 kB │ gzip:   152.89 kB
 dist/assets/clip_rn50_nsd_1000_ffa-BNtOvfUl.js                                 1,571.91 kB │ gzip:   691.76 kB
 dist/assets/clip_rn50_nsd_1000_ppa-BrExVeJ8.js                                 1,657.25 kB │ gzip:   722.84 kB
@@ -7691,4 +7691,4 @@ dist/assets/clip_rn50_murty185_ppa-fNfOFXg8.js                                 7
 - Using dynamic import() to code-split the application
 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
-✓ built in 13.50s
+✓ built in 11.88s

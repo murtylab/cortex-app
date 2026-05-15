@@ -421,6 +421,16 @@
     let xOffset = 0;
     let yOffset = 0;
 
+    function resetPosition() {
+      currentX = 0;
+      currentY = 0;
+      initialX = 0;
+      initialY = 0;
+      xOffset = 0;
+      yOffset = 0;
+      container.style.transform = "translate(0px, 0px)";
+    }
+
     function dragStart(e) {
       if (e.target.tagName === "BUTTON" || e.target.closest("button")) return;
       initialX = e.clientX - xOffset;
@@ -539,19 +549,37 @@
     });
 
     // ---- Open / close -------------------------------------------------
-    closeBtn.addEventListener("click", () => {
+    function closeChatbot() {
       container.style.display = "none";
       toggleBtn.style.display = "inline-flex";
-    });
+    }
 
-    toggleBtn.addEventListener("click", () => {
+    function openChatbot(options = {}) {
+      if (options.resetPosition) {
+        resetPosition();
+      }
+
       container.style.display = "flex";
       toggleBtn.style.display = "none";
+    }
+
+    closeBtn.addEventListener("click", closeChatbot);
+
+    toggleBtn.addEventListener("click", () => {
+      openChatbot({ resetPosition: true });
     });
+
+    window.cortexChatbotWidget = {
+      open: openChatbot,
+      close: closeChatbot,
+      resetPosition,
+      isOpen: () => container.style.display !== "none",
+    };
 
     // Default: collapsed on page load
     container.style.display = "none";
     toggleBtn.style.display = "inline-flex";
+    resetPosition();
   }
 
   // Wait for DOM

@@ -100,7 +100,7 @@ const Settings = ({
       </Typography>
 
       {/* Model Selection */}
-      <FormControl sx={{ m: 1, minWidth: 120, textAlign: 'left'}} fullWidth size="small">
+      <FormControl data-tutorial="lab-settings-model" sx={{ m: 1, minWidth: 120, textAlign: 'left'}} fullWidth size="small">
         <InputLabel
           sx={sharedLabelSx}
           id="model-select-label"
@@ -127,7 +127,7 @@ const Settings = ({
       </FormControl>
 
       {/* Dataset Selection */}
-      <FormControl sx={{ m: 1, minWidth: 120, textAlign: 'left'}} fullWidth size="small">
+      <FormControl data-tutorial="lab-settings-training" sx={{ m: 1, minWidth: 120, textAlign: 'left'}} fullWidth size="small">
         <InputLabel
           sx={sharedLabelSx}
           id="dataset-select-label"

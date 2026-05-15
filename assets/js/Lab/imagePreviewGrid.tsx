@@ -26,6 +26,9 @@ type ImagePreviewGroupedDnDProps = {
   allowPreloadEditing?: boolean;
   tutorialCustomGroups?: string[] | null;
   tutorialStateKey?: string | null;
+  panelCollapsed?: boolean;
+  onPanelCollapsedChange?: (collapsed: boolean) => void;
+  tutorialCollapseToggleKey?: string | null;
 
   onRemove?: (uid: string) => void;
   onClear?: () => void;
@@ -55,6 +58,9 @@ export default function ImagePreviewGroupedDnD({
   allowPreloadEditing = false,
   tutorialCustomGroups = null,
   tutorialStateKey = null,
+  panelCollapsed,
+  onPanelCollapsedChange,
+  tutorialCollapseToggleKey = null,
 }: ImagePreviewGroupedDnDProps) {
   const getTutorialGroupOrder = (keys: string[]) =>
     [...keys].sort((left, right) => {
@@ -76,12 +82,84 @@ export default function ImagePreviewGroupedDnD({
   const [dragItem, setDragItem] = useState<{ uid: string; fromKey: string } | null>(null);
 
 
-  const [isPanelCollapsed, setIsPanelCollapsed] = useState<boolean>(foldable);
+  const [internalPanelCollapsed, setInternalPanelCollapsed] = useState<boolean>(foldable);
+  const panelContentRef = useRef<HTMLDivElement | null>(null);
+  const panelAnimationsRef = useRef<Animation[]>([]);
+  const isPanelCollapseControlled = typeof panelCollapsed === "boolean";
+  const isPanelCollapsed = isPanelCollapseControlled ? panelCollapsed : internalPanelCollapsed;
 
 
   useEffect(() => {
-    setIsPanelCollapsed(foldable);
-  }, [foldable]);
+    if (!isPanelCollapseControlled) {
+      setInternalPanelCollapsed(foldable);
+    }
+  }, [foldable, isPanelCollapseControlled]);
+
+  useEffect(() => {
+    panelAnimationsRef.current.forEach((animation) => {
+      try {
+        animation.cancel();
+      } catch {
+        // Ignore animations that are already finished.
+      }
+    });
+    panelAnimationsRef.current = [];
+
+    if (isPanelCollapsed || !panelContentRef.current) {
+      return;
+    }
+
+    const animation = panelContentRef.current.animate(
+      [
+        {
+          opacity: 0.18,
+          transform: "translateY(-12px) scale(0.985)",
+          filter: "blur(2px)",
+        },
+        {
+          opacity: 1,
+          transform: "translateY(0) scale(1)",
+          filter: "blur(0px)",
+        },
+      ],
+      {
+        duration: 460,
+        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+      }
+    );
+
+    panelAnimationsRef.current.push(animation);
+
+    return () => {
+      try {
+        animation.cancel();
+      } catch {
+        // Ignore animations that are already finished.
+      }
+      panelAnimationsRef.current = panelAnimationsRef.current.filter((entry) => entry !== animation);
+    };
+  }, [isPanelCollapsed]);
+
+  useEffect(() => {
+    return () => {
+      panelAnimationsRef.current.forEach((animation) => {
+        try {
+          animation.cancel();
+        } catch {
+          // Ignore animations that are already finished.
+        }
+      });
+      panelAnimationsRef.current = [];
+    };
+  }, []);
+
+  const updatePanelCollapsed = (nextCollapsed: boolean) => {
+    onPanelCollapsedChange?.(nextCollapsed);
+
+    if (!isPanelCollapseControlled) {
+      setInternalPanelCollapsed(nextCollapsed);
+    }
+  };
 
   useEffect(() => {
     setItemGroupMap((prev) => {
@@ -343,10 +421,11 @@ export default function ImagePreviewGroupedDnD({
           {foldable && (
             <button
               type="button"
+              data-tutorial={tutorialCollapseToggleKey ?? undefined}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setIsPanelCollapsed((prev) => !prev);
+                updatePanelCollapsed(!isPanelCollapsed);
               }}
               style={btnStyle()}
             >
@@ -404,7 +483,7 @@ export default function ImagePreviewGroupedDnD({
       )}
 
       {!isPanelCollapsed && (
-        <>
+        <div ref={panelContentRef}>
           {isAddingGroup && (
             <div
               style={{
@@ -723,7 +802,7 @@ export default function ImagePreviewGroupedDnD({
               );
             })}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
