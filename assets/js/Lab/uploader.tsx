@@ -27,6 +27,7 @@ const { Text } = Typography;
 
 interface UploaderProps {
   onAddFiles: (files: File[]) => void; // ✅ parent owns state
+  fillHeight?: boolean;
 }
 
 async function traverseEntry(entry: AnyEntry): Promise<File[]> {
@@ -66,7 +67,7 @@ function fileKey(f: File) {
   return `${rel}::${f.name}::${f.size}::${f.lastModified}`;
 }
 
-const Uploader: React.FC<UploaderProps> = ({ onAddFiles }) => {
+const Uploader: React.FC<UploaderProps> = ({ onAddFiles, fillHeight = false }) => {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [completedCount, setCompletedCount] = useState(0);
   const folderInputRef = useRef<HTMLInputElement | null>(null);
@@ -157,7 +158,15 @@ const Uploader: React.FC<UploaderProps> = ({ onAddFiles }) => {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+    <div
+      className={fillHeight ? "lab-uploader-fill" : undefined}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 0,
+        ...(fillHeight ? { height: "100%", minHeight: 0 } : {}),
+      }}
+    >
       <input
         ref={folderInputRef}
         type="file"
@@ -171,7 +180,12 @@ const Uploader: React.FC<UploaderProps> = ({ onAddFiles }) => {
         onChange={onFolderChange}
       />
 
-      <Dragger {...props} fileList={fileList} showUploadList={false}>
+      <Dragger
+        {...props}
+        className={fillHeight ? "lab-uploader-dragger" : undefined}
+        fileList={fileList}
+        showUploadList={false}
+      >
         <p className="ant-upload-drag-icon"><InboxOutlined /></p>
         <p className="ant-upload-text">Click or Drag files to upload</p>
 
@@ -203,7 +217,7 @@ const Uploader: React.FC<UploaderProps> = ({ onAddFiles }) => {
         className="progress-bar"
         percent={progressPercent}
         status={progressPercent === 100 ? "success" : "active"}
-        style={{ marginTop: 0 }}
+        style={{ marginTop: fillHeight ? 8 : 0, flexShrink: 0 }}
         strokeColor="var(--highlight-color-button)"
       />
     </div>

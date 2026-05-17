@@ -2144,28 +2144,26 @@ useEffect(() => {
           content: (
             <div data-tutorial="lab-upload-panel" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div
+                className="lab-upload-columns"
                 style={{
                   display: 'grid',
                   gridTemplateColumns: 'minmax(0, 1fr) 220px',
                   gap: 16,
-                  alignItems: 'start',
+                  alignItems: 'stretch',
                 }}
               >
-                <div data-tutorial="lab-upload-uploader">
+                <div
+                  data-tutorial="lab-upload-uploader"
+                  className="lab-upload-column-panel"
+                >
                   <Uploader
                     key={uploaderKey}
+                    fillHeight
                     onAddFiles={(newFiles) => addIncomingFiles(newFiles)}
                   />
                 </div>
 
-                <div
-                  style={{
-                    background: 'var(--background-color)',
-                    border: '1px solid #ececec',
-                    borderRadius: 12,
-                    padding: 12,
-                  }}
-                >
+                <div className="lab-upload-column-panel lab-preload-column-panel">
                   <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 10, lineHeight: 1.35 }}>
                     Preloaded Datasets from Published Studies
                   </div>
