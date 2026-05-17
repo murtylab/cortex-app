@@ -618,14 +618,14 @@
   const TUTORIAL_STATE_KEY = 'cortexTutorialStateV2';
   const TUTORIALS = {
     labCategorySelective: {
-      label: 'The Lab - Category-Selective Regions',
+      label: 'The Lab - Functional Regions (fROIs)',
       description: 'Start on the Lab landing page, then move into the experiment builder.',
       steps: [
         {
           path: '/labLanding/',
           selector: '[data-tutorial="lab-category-selective-link"]',
           title: 'Choose a Lab Path',
-          body: 'Start with Category-Selective Regions. Whole Brain stays visible here as a coming-soon path.',
+          body: 'Start with Functional Regions (fROIs). Whole Brain stays visible here as a coming-soon path.',
           nextLabel: 'Enter The Lab',
           advanceOnTargetClick: true,
         },
