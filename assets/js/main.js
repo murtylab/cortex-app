@@ -7,7 +7,7 @@
   function toggleScrolled() {
     const selectBody = document.querySelector('body');
     const selectHeader = document.querySelector('#header');
-    if (!selectHeader.classList.contains('scroll-up-sticky') && !selectHeader.classList.contains('sticky-top') && !selectHeader.classList.contains('fixed-top')) return;
+          body: 'The main panel shows quantitative model rankings. Click an item in the left overview to highlight and auto-locate the matching item in the right detail panel. Use the view toggle at the top of the filter panel to switch between Leaderboard and Advanced Insights.',
     window.scrollY > 100 ? selectBody.classList.add('scrolled') : selectBody.classList.remove('scrolled');
   }
 
@@ -791,15 +791,17 @@
         {
           path: '/scoreboardQuantitative/',
           destination: '/scoreboardQuantitative/?view=rank',
-          selector: '[data-tutorial="scoreboard-filter-panel"]',
-          title: 'Filter the Comparison',
-          body: 'Narrow results by training source, ROI, dataset, and model type using the left panel.',
+          selector: '[data-tutorial="scoreboard-core-filters"]',
+          title: 'Core Filters',
+          body: 'This section includes the four core filters: Training Dataset, Region of Interest, Evaluation Dataset, and Model Type. Watch the demo: open one filter, pick an option, clear it, then close the filter.',
+          prepare: { type: 'scoreboard-filter-demo' },
         },
         {
           path: '/scoreboardQuantitative/',
           selector: '[data-tutorial="scoreboard-chart-panel"]',
           title: 'Read the Rankings',
-          body: 'The main panel shows quantitative model rankings. Use the view toggle at the top of the filter panel to switch between Leaderboard and Advanced Insights.',
+          body: 'The main panel shows quantitative model rankings. Click an item in the left overview to highlight and auto-locate the matching item in the right detail panel. Use the view toggle at the top of the filter panel to switch between Leaderboard and Advanced Insights.',
+          prepare: { type: 'scoreboard-ranking-demo' },
           nextLabel: 'Finish',
         },
       ],
@@ -824,6 +826,14 @@
           selector: '[data-tutorial="scoreboard-selected-filters"]',
           title: 'Selected Filters',
           body: 'This label bar shows all active filters. You can review what is applied and remove any filter directly from here.',
+        },
+        {
+          path: '/scoreboardQuantitative/',
+          destination: '/scoreboardQuantitative/?view=2',
+          selector: '[data-tutorial="scoreboard-core-filters"]',
+          title: 'Core Filters',
+          body: 'This section includes the four core filters: Training Dataset, Region of Interest, Evaluation Dataset, and Model Type. Watch the demo: open one filter, pick an option, clear it, then close the filter.',
+          prepare: { type: 'scoreboard-filter-demo' },
         },
         {
           path: '/scoreboardQuantitative/',
@@ -866,6 +876,13 @@
           selector: '[data-tutorial="scoreboard-selected-filters"]',
           title: 'Selected Filters',
           body: 'This label bar shows all active filters. You can review what is applied and remove any filter directly from here.',
+        },
+        {
+          path: '/scoreboardQualitative/',
+          selector: '[data-tutorial="scoreboard-core-filters"]',
+          title: 'Core Filters',
+          body: 'This section includes the four core filters: Training Dataset, Region of Interest, Evaluation Dataset, and Model Type. Watch the demo: open one filter, pick an option, clear it, then close the filter.',
+          prepare: { type: 'scoreboard-filter-demo' },
         },
         {
           path: '/scoreboardQualitative/',
@@ -1383,6 +1400,21 @@
     tutorialUiState.currentTargetHandler = null;
   }
 
+  function stopScoreboardDemos() {
+    const api = window.cortexScoreboardTutorial;
+    if (!api) {
+      return;
+    }
+
+    if (typeof api.stopFilterDemo === 'function') {
+      api.stopFilterDemo();
+    }
+
+    if (typeof api.stopRankingDemo === 'function') {
+      api.stopRankingDemo();
+    }
+  }
+
   function maybeQueueTutorialAdvance(tutorialId, stepIndex) {
     const tutorial = TUTORIALS[tutorialId];
     if (!tutorial || stepIndex >= tutorial.steps.length) {
@@ -1422,6 +1454,12 @@
   }
 
   function prepareTutorialStep(step) {
+    const prepareType = step && step.prepare ? step.prepare.type : null;
+    const isScoreboardDemo = prepareType === 'scoreboard-filter-demo' || prepareType === 'scoreboard-ranking-demo';
+    if (!isScoreboardDemo) {
+      stopScoreboardDemos();
+    }
+
     if (!step || !step.prepare) {
       return;
     }
@@ -1493,6 +1531,28 @@
         }
       }
     }
+
+    if (step.prepare.type === 'scoreboard-filter-demo') {
+      const api = window.cortexScoreboardTutorial;
+      if (api && typeof api.playFilterDemo === 'function') {
+        if (typeof api.stopRankingDemo === 'function') {
+          api.stopRankingDemo();
+        }
+        api.playFilterDemo();
+        tutorialUiState.preparedStepKey = preparedStepKey;
+      }
+    }
+
+    if (step.prepare.type === 'scoreboard-ranking-demo') {
+      const api = window.cortexScoreboardTutorial;
+      if (api && typeof api.playRankingDemo === 'function') {
+        if (typeof api.stopFilterDemo === 'function') {
+          api.stopFilterDemo();
+        }
+        api.playRankingDemo();
+        tutorialUiState.preparedStepKey = preparedStepKey;
+      }
+    }
   }
 
   function resolveTutorialTarget(step, tutorialId, stepIndex, attempt = 0) {
@@ -1523,6 +1583,7 @@
     const currentTutorialId = getTutorialContextByPath(window.location.pathname);
 
     tutorialUiState.launcherOpen = true;
+    stopScoreboardDemos();
     clearTutorialTarget();
     hideTutorialElement(ui.card);
     showTutorialElement(ui.backdrop);
@@ -1729,6 +1790,8 @@
         api.setStep(0);
       }
     }
+
+    stopScoreboardDemos();
 
     tutorialUiState.activeTutorialId = null;
     tutorialUiState.activeStepIndex = null;

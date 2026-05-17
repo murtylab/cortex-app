@@ -121,6 +121,39 @@ const ScoreboardPageQuantitative: React.FC = () => {
     dataset: false,
     modelType: false,
   });
+  const demoTimersRef = useRef<number[]>([]);
+
+  const clearFilterDemoTimers = React.useCallback(() => {
+    demoTimersRef.current.forEach((timerId) => window.clearTimeout(timerId));
+    demoTimersRef.current = [];
+  }, []);
+  const demoLoopActiveRef = useRef(false);
+  const rankingDemoLoopRef = useRef(false);
+  const trainingRef = useRef(training);
+  const pageViewRef = useRef(pageView);
+  const detailScrollRefState = useRef(detailScrollRef.current);
+
+  useEffect(() => {
+    trainingRef.current = training;
+  }, [training]);
+
+  useEffect(() => {
+    pageViewRef.current = pageView;
+  }, [pageView]);
+
+  useEffect(() => {
+    detailScrollRefState.current = detailScrollRef.current;
+  });
+
+  const stopFilterDemo = React.useCallback(() => {
+    demoLoopActiveRef.current = false;
+    clearFilterDemoTimers();
+  }, [clearFilterDemoTimers]);
+
+  const stopRankingDemo = React.useCallback(() => {
+    rankingDemoLoopRef.current = false;
+    clearFilterDemoTimers();
+  }, [clearFilterDemoTimers]);
 
   const datasetLabelMap: Record<string, string> = {
     murty185: "Murty185",
@@ -195,6 +228,169 @@ const ScoreboardPageQuantitative: React.FC = () => {
       [type]: true
     }));
   };
+
+  useEffect(() => {
+    const tutorialApi = {
+      playFilterDemo: () => {
+        stopFilterDemo();
+        demoLoopActiveRef.current = true;
+
+        const originalTraining = trainingRef.current;
+        const nextTraining = originalTraining === 'NSD'
+          ? 'Murty185'
+          : originalTraining === 'Murty185'
+            ? 'NSD'
+            : 'NSD';
+
+        const schedule = (callback: () => void, delay: number) => {
+          const timerId = window.setTimeout(callback, delay);
+          demoTimersRef.current.push(timerId);
+        };
+
+        const runCycle = () => {
+          if (!demoLoopActiveRef.current) return;
+
+          // Step A: start from fully collapsed filters.
+          setExpandedStates({
+            training: false,
+            region: false,
+            dataset: false,
+            modelType: false,
+          });
+
+          // Step B: open one filter.
+          schedule(() => {
+            if (!demoLoopActiveRef.current) return;
+            setExpandedStates((prev) => ({
+              ...prev,
+              training: true,
+              region: false,
+              dataset: false,
+              modelType: false,
+            }));
+          }, 400);
+
+          // Step C: pick an option.
+          schedule(() => {
+            if (!demoLoopActiveRef.current) return;
+            setTraining(nextTraining);
+          }, 1300);
+
+          // Step D: deselect by restoring original option.
+          schedule(() => {
+            if (!demoLoopActiveRef.current) return;
+            setTraining(originalTraining);
+          }, 1950);
+
+          // Step E: close the filter.
+          schedule(() => {
+            if (!demoLoopActiveRef.current) return;
+            setExpandedStates((prev) => ({
+              ...prev,
+              training: false,
+            }));
+          }, 2550);
+
+          // Repeat cycle while the tutorial step stays active.
+          schedule(() => {
+            if (!demoLoopActiveRef.current) return;
+            runCycle();
+          }, 3200);
+        };
+
+        runCycle();
+      },
+      stopFilterDemo,
+      playRankingDemo: () => {
+        stopRankingDemo();
+        rankingDemoLoopRef.current = true;
+
+        const dataSource = getDataByTraining(trainingRef.current) || {};
+        const roiKeys = Object.keys(dataSource).filter((k) => k !== 'overall' && k !== 'Across Regions');
+        const firstRoi = roiKeys[0] || 'Overall';
+        const roiBucket = dataSource[firstRoi] || dataSource.Overall || {};
+        const modelKeys = Object.keys(roiBucket).filter((k) => k !== 'ceiling');
+
+        const fallbackModels = MODEL_OPTIONS.map((m: any) => m.value);
+        const firstModel = modelKeys[0] || fallbackModels[0] || null;
+        const secondModel = modelKeys[2] || modelKeys[1] || fallbackModels[2] || fallbackModels[1] || firstModel;
+
+        const schedule = (callback: () => void, delay: number) => {
+          const timerId = window.setTimeout(callback, delay);
+          demoTimersRef.current.push(timerId);
+        };
+
+        const scrollDetailViewport = (ratio: number) => {
+          const detailEl = detailScrollRefState.current;
+          if (!detailEl) return;
+
+          const maxLeft = Math.max(0, detailEl.scrollWidth - detailEl.clientWidth);
+          const maxTop = Math.max(0, detailEl.scrollHeight - detailEl.clientHeight);
+
+          if (maxLeft > 4) {
+            detailEl.scrollTo({ left: maxLeft * ratio, behavior: 'smooth' });
+            return;
+          }
+
+          if (maxTop > 4) {
+            detailEl.scrollTo({ top: maxTop * ratio, behavior: 'smooth' });
+          }
+        };
+
+        const runCycle = () => {
+          if (!rankingDemoLoopRef.current) return;
+
+          if (pageViewRef.current !== 'rank') {
+            setPageView('rank');
+          }
+
+          // Overview select #1 -> detail highlight and viewport focus.
+          schedule(() => {
+            if (!rankingDemoLoopRef.current || !firstModel) return;
+            setSelectedModel(firstModel);
+            scrollDetailViewport(0.0);
+          }, 250);
+
+          // Overview select #2 -> detail scrolls to another viewport.
+          schedule(() => {
+            if (!rankingDemoLoopRef.current || !secondModel) return;
+            setSelectedModel(secondModel);
+            scrollDetailViewport(0.78);
+          }, 1450);
+
+          // Continue a little further to make viewport motion more obvious.
+          schedule(() => {
+            if (!rankingDemoLoopRef.current || !secondModel) return;
+            scrollDetailViewport(0.9);
+          }, 2050);
+
+          // Keep highlight then reset to beginning.
+          schedule(() => {
+            if (!rankingDemoLoopRef.current) return;
+            scrollDetailViewport(0.0);
+          }, 3000);
+
+          schedule(() => {
+            if (!rankingDemoLoopRef.current) return;
+            runCycle();
+          }, 3900);
+        };
+
+        runCycle();
+      },
+      stopRankingDemo,
+    };
+
+    (window as any).cortexScoreboardTutorial = tutorialApi;
+
+    return () => {
+      stopFilterDemo();
+      stopRankingDemo();
+      if ((window as any).cortexScoreboardTutorial === tutorialApi) {
+        delete (window as any).cortexScoreboardTutorial;
+      }
+    };
+  }, [stopFilterDemo, stopRankingDemo]);
 
   useEffect(() => {
   if (isVS) {
@@ -524,50 +720,56 @@ const getOverviewColumnCount = (
                 </Button>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <TrainingSelect
-                  training={training}
-                  setTraining={setTraining}
-                  dataset={dataset}
-                  vsOption = {isVS}
-                  expanded={expandedStates.training} //read property
-                  onToggle={handleTogglePanel('training')}
-                />
+              <div data-tutorial="scoreboard-core-filters" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div data-tutorial="scoreboard-filter-training">
+                  <TrainingSelect
+                    training={training}
+                    setTraining={setTraining}
+                    dataset={dataset}
+                    vsOption = {isVS}
+                    expanded={expandedStates.training} //read property
+                    onToggle={handleTogglePanel('training')}
+                  />
+                </div>
 
-                <ROISelect
-                  region={region}
-                  setRegion={setRegion}
-                  dataset={dataset}
-                  setDataset={setDataset}
-                  allowToggle={true}
-                  mode={1}
-                  training={training}
-                  expanded={expandedStates.region} // read property
-                  onToggle={handleTogglePanel('region')}
-                  isVS = {isVS}
-                />
+                <div data-tutorial="scoreboard-filter-region">
+                  <ROISelect
+                    region={region}
+                    setRegion={setRegion}
+                    dataset={dataset}
+                    setDataset={setDataset}
+                    allowToggle={true}
+                    mode={1}
+                    training={training}
+                    expanded={expandedStates.region} // read property
+                    onToggle={handleTogglePanel('region')}
+                    isVS = {isVS}
+                  />
+                </div>
 
-                <DatasetSelect
-                  dataset={dataset}
-                  setDataset={setDataset}
-                  training={training}
-                  region={region}
-                  allowToggle={true}
-                  mode={1}
-                  expanded={expandedStates.dataset}
-                  onToggle={handleTogglePanel('dataset')}
-                />
+                <div data-tutorial="scoreboard-filter-dataset">
+                  <DatasetSelect
+                    dataset={dataset}
+                    setDataset={setDataset}
+                    training={training}
+                    region={region}
+                    allowToggle={true}
+                    mode={1}
+                    expanded={expandedStates.dataset}
+                    onToggle={handleTogglePanel('dataset')}
+                  />
+                </div>
 
-                <ModelTypeSelect
-                  modelType={modelType}
-                  setModelType={setModelType}
-                  allowToggle={true}
-                  mode={1}
-                  expanded={expandedStates.modelType}
-                  onToggle={handleTogglePanel('modelType')}
-                />
-
-
+                <div data-tutorial="scoreboard-filter-model-type">
+                  <ModelTypeSelect
+                    modelType={modelType}
+                    setModelType={setModelType}
+                    allowToggle={true}
+                    mode={1}
+                    expanded={expandedStates.modelType}
+                    onToggle={handleTogglePanel('modelType')}
+                  />
+                </div>
               </div>
             </div>
 

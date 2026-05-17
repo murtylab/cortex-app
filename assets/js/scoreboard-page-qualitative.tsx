@@ -117,6 +117,33 @@ const ScoreboardPageQualitative: React.FC = () => {
     experiment: false,
     modelType: false,
   });
+  const demoTimersRef = useRef<number[]>([]);
+
+  const clearFilterDemoTimers = React.useCallback(() => {
+    demoTimersRef.current.forEach((timerId) => window.clearTimeout(timerId));
+    demoTimersRef.current = [];
+  }, []);
+  const demoLoopActiveRef = useRef(false);
+  const tutorialStateRef = useRef({
+    training,
+    region,
+    selectedExperiments,
+    modelType,
+  });
+
+  useEffect(() => {
+    tutorialStateRef.current = {
+      training,
+      region,
+      selectedExperiments,
+      modelType,
+    };
+  }, [training, region, selectedExperiments, modelType]);
+
+  const stopFilterDemo = React.useCallback(() => {
+    demoLoopActiveRef.current = false;
+    clearFilterDemoTimers();
+  }, [clearFilterDemoTimers]);
 
   const datasetLabelMap: Record<string, string> = {
     murty185: "Murty185",
@@ -191,6 +218,99 @@ const ScoreboardPageQualitative: React.FC = () => {
       [type]: true
     }));
   };
+
+  useEffect(() => {
+    const tutorialApi = {
+      playFilterDemo: () => {
+        stopFilterDemo();
+        demoLoopActiveRef.current = true;
+
+        const original = {
+          training: tutorialStateRef.current.training,
+          region: [...tutorialStateRef.current.region],
+          selectedExperiments: [...tutorialStateRef.current.selectedExperiments],
+          modelType: [...tutorialStateRef.current.modelType],
+        };
+
+        const nextTraining = original.training === 'NSD'
+          ? 'Murty185'
+          : original.training === 'Murty185'
+            ? 'NSD'
+            : 'NSD';
+        const schedule = (callback: () => void, delay: number) => {
+          const timerId = window.setTimeout(callback, delay);
+          demoTimersRef.current.push(timerId);
+        };
+
+        const runCycle = () => {
+          if (!demoLoopActiveRef.current) return;
+
+          // Step A: start from fully collapsed filters.
+          setExpandedStates({
+            training: false,
+            region: false,
+            experiment: false,
+            modelType: false,
+          });
+
+          // Step B: open one filter.
+          schedule(() => {
+            if (!demoLoopActiveRef.current) return;
+            setExpandedStates((prev) => ({
+              ...prev,
+              training: true,
+              region: false,
+              experiment: false,
+              modelType: false,
+            }));
+          }, 400);
+
+          // Step C: pick an option.
+          schedule(() => {
+            if (!demoLoopActiveRef.current) return;
+            setTraining(nextTraining);
+          }, 1300);
+
+          // Step D: deselect by restoring original option.
+          schedule(() => {
+            if (!demoLoopActiveRef.current) return;
+            setTraining(original.training);
+          }, 1950);
+
+          // Step E: close the filter.
+          schedule(() => {
+            if (!demoLoopActiveRef.current) return;
+            setExpandedStates((prev) => ({
+              ...prev,
+              training: false,
+            }));
+          }, 2550);
+
+          // Keep user filter values unchanged and loop again.
+          schedule(() => {
+            if (!demoLoopActiveRef.current) return;
+            setTraining(original.training);
+            setRegion(original.region);
+            setSelectedExperiments(original.selectedExperiments);
+            setModelType(original.modelType);
+            runCycle();
+          }, 3200);
+        };
+
+        runCycle();
+      },
+      stopFilterDemo,
+    };
+
+    (window as any).cortexScoreboardTutorial = tutorialApi;
+
+    return () => {
+      stopFilterDemo();
+      if ((window as any).cortexScoreboardTutorial === tutorialApi) {
+        delete (window as any).cortexScoreboardTutorial;
+      }
+    };
+  }, [stopFilterDemo]);
 
   useEffect(() => {
   if (isVS) {
@@ -494,47 +614,53 @@ const getOverviewColumnCount = (
 
 
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <TrainingSelect
-                  training={training}
-                  setTraining={setTraining}
-                  dataset={dataset}
-                  vsOption = {isVS}
-                  expanded={expandedStates.training} //read property
-                  onToggle={handleTogglePanel('training')}
-                />
+              <div data-tutorial="scoreboard-core-filters" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div data-tutorial="scoreboard-filter-training">
+                  <TrainingSelect
+                    training={training}
+                    setTraining={setTraining}
+                    dataset={dataset}
+                    vsOption = {isVS}
+                    expanded={expandedStates.training} //read property
+                    onToggle={handleTogglePanel('training')}
+                  />
+                </div>
 
-                <ROISelect
-                  region={region}
-                  setRegion={setRegion}
-                  dataset={dataset}
-                  setDataset={setDataset}
-                  allowToggle={true}
-                  mode={1}
-                  training={training}
-                  expanded={expandedStates.region} // read property
-                  onToggle={handleTogglePanel('region')}
-                  isVS = {isVS}
-                />
+                <div data-tutorial="scoreboard-filter-roi">
+                  <ROISelect
+                    region={region}
+                    setRegion={setRegion}
+                    dataset={dataset}
+                    setDataset={setDataset}
+                    allowToggle={true}
+                    mode={1}
+                    training={training}
+                    expanded={expandedStates.region} // read property
+                    onToggle={handleTogglePanel('region')}
+                    isVS = {isVS}
+                  />
+                </div>
 
-                <ExperimentSelect
-                  experiments={qualiTrainKey && qualiChartData ? qualiChartData[qualiTrainKey]?.experiments ?? [] : []}
-                  selectedExperiments={selectedExperiments}
-                  setSelectedExperiments={setSelectedExperiments}
-                  expanded={expandedStates.experiment}
-                  onToggle={handleTogglePanel('experiment')}
-                />
+                <div data-tutorial="scoreboard-filter-evaluation-dataset">
+                  <ExperimentSelect
+                    experiments={qualiTrainKey && qualiChartData ? qualiChartData[qualiTrainKey]?.experiments ?? [] : []}
+                    selectedExperiments={selectedExperiments}
+                    setSelectedExperiments={setSelectedExperiments}
+                    expanded={expandedStates.experiment}
+                    onToggle={handleTogglePanel('experiment')}
+                  />
+                </div>
 
-                <ModelTypeSelect
-                  modelType={modelType}
-                  setModelType={setModelType}
-                  allowToggle={true}
-                  mode={1}
-                  expanded={expandedStates.modelType}
-                  onToggle={handleTogglePanel('modelType')}
-                />
-
-
+                <div data-tutorial="scoreboard-filter-model-type">
+                  <ModelTypeSelect
+                    modelType={modelType}
+                    setModelType={setModelType}
+                    allowToggle={true}
+                    mode={1}
+                    expanded={expandedStates.modelType}
+                    onToggle={handleTogglePanel('modelType')}
+                  />
+                </div>
               </div>
             </div>
 
