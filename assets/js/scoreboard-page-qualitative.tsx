@@ -14,7 +14,6 @@ import ModelTypeSelect from './Scoreboard/Settings/modeltypeselect.jsx';
 
 
 import ChartSelect from './Scoreboard/Settings/chartselect.jsx';
-import PageSelect from './Scoreboard/Settings/pageselect.jsx';
 import QuestionSelect from './Scoreboard/Settings/questionselect.jsx';
 
 
@@ -412,7 +411,7 @@ const getOverviewColumnCount = (
         >
           {/* 2. SelectedFiltersBar */}
           {/* flex: 0 0 auto  */}
-          <div style={{ flex: '0 0 auto', marginBottom: 16 }}>
+          <div data-tutorial="scoreboard-selected-filters" style={{ flex: '0 0 auto', marginBottom: 16 }}>
             <SelectedFiltersBar
               training={training}
                 region={region}
@@ -440,6 +439,7 @@ const getOverviewColumnCount = (
 
             {/* --- left Filters --- */}
             <div
+              data-tutorial="scoreboard-filter-panel"
               style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -541,6 +541,7 @@ const getOverviewColumnCount = (
             {/* --- right（ChartSelect + overview + details） --- */}
             {/* --- right（Chart / Image Area） --- */}
             <div
+              data-tutorial="scoreboard-chart-panel"
               style={{
                 display: 'flex',
                 flexDirection: 'column',

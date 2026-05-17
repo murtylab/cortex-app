@@ -767,35 +767,117 @@
         },
       ],
     },
-    scoreboardQuantitative: {
-      label: 'The Scoreboard - Quantitative',
-      description: 'Choose a quantitative entry point, then learn the comparison workspace.',
+    scoreboardLeaderboard: {
+      label: 'Quantitative – Leaderboard',
+      description: 'Rank models by brain-predictivity and filter by training source, ROI, and dataset.',
       steps: [
         {
-          path: '/scoreboardLanding/',
-          selector: '[data-tutorial="scoreboard-quantitative-links"]',
-          title: 'Choose a Quantitative View',
-          body: 'The quantitative flow starts here. Leaderboard is the fastest entry; Advanced Insight opens the comparison questions.',
-          nextLabel: 'Open Leaderboard',
-          advanceOnTargetClick: true,
+          type: 'choice',
+          title: 'Choose a Scoreboard Tutorial',
+          body: 'Select the tutorial you want to follow.\n\n- Leaderboard: Fastest entry for model ranking\n- Advanced Insights: Deep-dive scatter/gap analysis\n- Qualitative: Image-level predictions',
+          choices: [
+            { label: 'Quantitative – Leaderboard', tutorialId: 'scoreboardLeaderboard', step: 1, description: 'Rank models by brain-predictivity.' },
+            { label: 'Quantitative – Advanced Insights', tutorialId: 'scoreboardAdvancedInsights', step: 1, description: 'Scatter plots and gap-to-ceiling.' },
+            { label: 'Qualitative – Leaderboard', tutorialId: 'scoreboardQualitative', step: 1, description: 'Image-level model predictions.' }
+          ]
         },
         {
           path: '/scoreboardQuantitative/',
+          destination: '/scoreboardQuantitative/?view=rank',
+          selector: '[data-tutorial="scoreboard-selected-filters"]',
+          title: 'Selected Filters',
+          body: 'This label bar shows all active filters. You can review what is applied and remove any filter directly from here.',
+        },
+        {
+          path: '/scoreboardQuantitative/',
+          destination: '/scoreboardQuantitative/?view=rank',
+          selector: '[data-tutorial="scoreboard-filter-panel"]',
+          title: 'Filter the Comparison',
+          body: 'Narrow results by training source, ROI, dataset, and model type using the left panel.',
+        },
+        {
+          path: '/scoreboardQuantitative/',
+          selector: '[data-tutorial="scoreboard-chart-panel"]',
+          title: 'Read the Rankings',
+          body: 'The main panel shows quantitative model rankings. Use the view toggle at the top of the filter panel to switch between Leaderboard and Advanced Insights.',
+          nextLabel: 'Finish',
+        },
+      ],
+    },
+    scoreboardAdvancedInsights: {
+      label: 'Quantitative – Advanced Insights',
+      description: 'Use scatter plots and gap-to-ceiling charts to compare model brain-alignment in depth.',
+      steps: [
+        {
+          type: 'choice',
+          title: 'Choose a Scoreboard Tutorial',
+          body: 'Select the tutorial you want to follow.\n\n- Leaderboard: Fastest entry for model ranking\n- Advanced Insights: Deep-dive scatter/gap analysis\n- Qualitative: Image-level predictions',
+          choices: [
+            { label: 'Quantitative – Leaderboard', tutorialId: 'scoreboardLeaderboard', step: 1, description: 'Rank models by brain-predictivity.' },
+            { label: 'Quantitative – Advanced Insights', tutorialId: 'scoreboardAdvancedInsights', step: 1, description: 'Scatter plots and gap-to-ceiling.' },
+            { label: 'Qualitative – Leaderboard', tutorialId: 'scoreboardQualitative', step: 1, description: 'Image-level model predictions.' }
+          ]
+        },
+        {
+          path: '/scoreboardQuantitative/',
+          destination: '/scoreboardQuantitative/?view=2',
+          selector: '[data-tutorial="scoreboard-selected-filters"]',
+          title: 'Selected Filters',
+          body: 'This label bar shows all active filters. You can review what is applied and remove any filter directly from here.',
+        },
+        {
+          path: '/scoreboardQuantitative/',
+          destination: '/scoreboardQuantitative/?view=2',
           selector: '[data-tutorial="scoreboard-view-toggle"]',
           title: 'Switch Views',
-          body: 'Toggle between Leaderboard and Advanced Insights without leaving the quantitative workspace.',
+          body: 'Toggle between Leaderboard and Advanced Insights at any time using this control.',
         },
         {
           path: '/scoreboardQuantitative/',
           selector: '[data-tutorial="scoreboard-filter-panel"]',
           title: 'Filter the Comparison',
-          body: 'Use the left-side controls to narrow the scoreboard by training source, ROI, dataset, and model type.',
+          body: 'Narrow results by training source, ROI, dataset, and model type using the left panel.',
         },
         {
           path: '/scoreboardQuantitative/',
           selector: '[data-tutorial="scoreboard-chart-panel"]',
           title: 'Read the Charts',
-          body: 'The main panel updates as filters change and shows the quantitative ranking or comparison view in detail.',
+          body: 'The chart area updates as filters change and shows the advanced comparison in detail.',
+          nextLabel: 'Finish',
+        },
+      ],
+    },
+    scoreboardQualitative: {
+      label: 'Qualitative – Leaderboard',
+      description: 'Browse image-level predictions and see which models produce the most realistic brain responses.',
+      steps: [
+        {
+          type: 'choice',
+          title: 'Choose a Scoreboard Tutorial',
+          body: 'Select the tutorial you want to follow.\n\n- Leaderboard: Fastest entry for model ranking\n- Advanced Insights: Deep-dive scatter/gap analysis\n- Qualitative: Image-level predictions',
+          choices: [
+            { label: 'Quantitative – Leaderboard', tutorialId: 'scoreboardLeaderboard', step: 1, description: 'Rank models by brain-predictivity.' },
+            { label: 'Quantitative – Advanced Insights', tutorialId: 'scoreboardAdvancedInsights', step: 1, description: 'Scatter plots and gap-to-ceiling.' },
+            { label: 'Qualitative – Leaderboard', tutorialId: 'scoreboardQualitative', step: 1, description: 'Image-level model predictions.' }
+          ]
+        },
+        {
+          path: '/scoreboardQualitative/',
+          selector: '[data-tutorial="scoreboard-selected-filters"]',
+          title: 'Selected Filters',
+          body: 'This label bar shows all active filters. You can review what is applied and remove any filter directly from here.',
+        },
+        {
+          path: '/scoreboardQualitative/',
+          selector: '[data-tutorial="scoreboard-filter-panel"]',
+          title: 'Filter Results',
+          body: 'Use the left panel to filter by training source, ROI, experiment, and model type.',
+        },
+        {
+          path: '/scoreboardQualitative/',
+          selector: '[data-tutorial="scoreboard-chart-panel"]',
+          title: 'Read the Heatmap',
+          body: 'The bubble heatmap shows qualitative model performance. Click a bubble to explore image-level responses.',
           nextLabel: 'Finish',
         },
       ],
@@ -838,7 +920,11 @@
     }
 
     if (path === '/scoreboardLanding/' || path === '/scoreboardQuantitative/') {
-      return 'scoreboardQuantitative';
+      return 'scoreboardLeaderboard';
+    }
+
+    if (path === '/scoreboardQualitative/') {
+      return 'scoreboardQualitative';
     }
 
     return null;
@@ -1502,17 +1588,54 @@
     }
 
     const step = tutorial.steps[stepIndex];
+
+    // Branch selection step
+    if (step.type === 'choice' && Array.isArray(step.choices)) {
+      const ui = ensureTutorialUi();
+      tutorialUiState.activeTutorialId = tutorialId;
+      tutorialUiState.activeStepIndex = stepIndex;
+      tutorialUiState.launcherOpen = false;
+      tutorialUiState.preparedStepKey = null;
+
+      writeTutorialState({ tutorialId, stepIndex });
+
+      hideTutorialElement(ui.launcher);
+      showTutorialElement(ui.backdrop);
+      showTutorialElement(ui.card);
+      updateTutorialLayout();
+
+      ui.progress.textContent = getTutorialProgressLabel(tutorial, stepIndex);
+      ui.title.textContent = step.title;
+      // Render choices as buttons
+      let html = `<div style="margin-bottom:1.2em;white-space:pre-line">${step.body || ''}</div><div class="cortex-tutorial-choice-list">`;
+      for (const choice of step.choices) {
+        html += `<button class="cortex-tutorial-btn cortex-tutorial-choice-btn" data-tutorial-branch="${choice.tutorialId}" data-tutorial-step="${choice.step}" style="display:block;width:100%;margin-bottom:0.7em;text-align:left;padding:1em 1.2em;font-size:1.08em;">
+          <strong>${choice.label}</strong><br><span style="font-size:0.97em;color:#666">${choice.description || ''}</span>
+        </button>`;
+      }
+      html += '</div>';
+      ui.body.innerHTML = html;
+      ui.backButton.disabled = stepIndex === 0;
+      ui.nextButton.style.display = 'none';
+
+      // Add click listeners
+      Array.from(ui.body.querySelectorAll('[data-tutorial-branch]')).forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          const branchId = btn.getAttribute('data-tutorial-branch');
+          const branchStep = parseInt(btn.getAttribute('data-tutorial-step'), 10) || 1;
+          showTutorialStep(branchId, branchStep);
+        });
+      });
+      return;
+    }
+
+    // Normal step
     const currentPath = normalizeTutorialPath(window.location.pathname);
     const stepPath = normalizeTutorialPath(step.path);
 
     if (currentPath !== stepPath) {
       writeTutorialState({ tutorialId, stepIndex });
-
-      const destination =
-        tutorialId === 'scoreboardQuantitative' && stepIndex === 1
-          ? '/scoreboardQuantitative/?view=rank'
-          : step.path;
-
+      const destination = step.destination || step.path;
       window.location.assign(destination);
       return;
     }
@@ -1534,6 +1657,7 @@
     ui.title.textContent = step.title;
     ui.body.textContent = step.body;
     ui.backButton.disabled = stepIndex === 0;
+    ui.nextButton.style.display = '';
     ui.nextButton.textContent = step.nextLabel || (stepIndex === tutorial.steps.length - 1 ? 'Finish' : 'Next');
 
     resolveTutorialTarget(step, tutorialId, stepIndex);
@@ -1543,6 +1667,15 @@
     const tutorial = TUTORIALS[tutorialId];
     if (!tutorial) {
       return;
+    }
+
+    // Show scoreboard step 0 only on landing page.
+    if (tutorialId === 'scoreboardLeaderboard' || tutorialId === 'scoreboardAdvancedInsights' || tutorialId === 'scoreboardQualitative') {
+      const currentPath = normalizeTutorialPath(window.location.pathname);
+      if (currentPath === '/scoreboardLanding/') {
+        showTutorialStep(tutorialId, 0);
+        return;
+      }
     }
 
     const matchIndex = getTutorialMatchIndex(tutorial, window.location.pathname);
