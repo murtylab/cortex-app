@@ -908,15 +908,20 @@
         z-index: 2147483644;
         border: 0;
         border-radius: 999px;
-        padding: 12px 18px;
-        background: var(--tungsten, #4b443e);
+        padding: 5px 22px;
+        min-height: 0;
+        background: #a89b8f;
         color: #fff;
-        font: 600 14px/1.1 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-        box-shadow: 0 14px 32px rgba(34, 30, 26, 0.22);
+        font: 500 12px/1.2 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        letter-spacing: 0.03em;
+        box-shadow: 0 6px 16px rgba(34, 30, 26, 0.12);
+        cursor: pointer;
+        transition: background 0.15s ease, box-shadow 0.15s ease;
       }
 
       .cortex-tutorial-fab:hover {
-        background: var(--highlight-color-button, #7d6a58);
+        background: #b8aba0;
+        box-shadow: 0 8px 18px rgba(34, 30, 26, 0.14);
       }
 
       .cortex-tutorial-backdrop {
@@ -949,7 +954,7 @@
       .cortex-tutorial-card {
         left: auto;
         right: 24px;
-        bottom: 88px;
+        bottom: 72px;
         width: min(420px, calc(100vw - 32px));
         padding: 20px 20px 18px;
       }
@@ -1110,7 +1115,7 @@
         .cortex-tutorial-card {
           left: auto;
           right: 10px;
-          bottom: 76px;
+          bottom: 64px;
           width: min(420px, calc(100vw - 20px));
         }
 
@@ -1171,7 +1176,7 @@
     }
 
     const sideOffset = window.innerWidth <= 720 ? 10 : 24;
-    const defaultBottom = window.innerWidth <= 720 ? 76 : 88;
+    const defaultBottom = window.innerWidth <= 720 ? 64 : 72;
     let bottom = defaultBottom;
 
     const buttonRect = tutorialUiState.button?.getBoundingClientRect();
