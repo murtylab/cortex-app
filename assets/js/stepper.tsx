@@ -2146,7 +2146,7 @@ useEffect(() => {
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: ' 420px minmax(0, 1fr)',
+                  gridTemplateColumns: 'minmax(0, 1fr) 220px',
                   gap: 16,
                   alignItems: 'start',
                 }}
@@ -2166,8 +2166,8 @@ useEffect(() => {
                     padding: 12,
                   }}
                 >
-                  <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 10 }}>
-                    Preloaded Datasets
+                  <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 10, lineHeight: 1.35 }}>
+                    Preloaded Datasets from Published Studies
                   </div>
 
                  <PreloadDatasetPicker

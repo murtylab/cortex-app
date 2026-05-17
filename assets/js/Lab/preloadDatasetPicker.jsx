@@ -18,7 +18,7 @@ export default function PreloadDatasetPicker({
   loadingKey = null,
 }) {
   return (
-    <div data-tutorial="lab-upload-dataset-selector" style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+    <div data-tutorial="lab-upload-dataset-selector" style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%" }}>
       {Object.entries(PRELOAD_DATASETS).map(([key, ds]) => {
         const active = selectedKey === key;
         const buttonLoading = isLoading && loadingKey === key;
@@ -27,16 +27,18 @@ export default function PreloadDatasetPicker({
           <span
             key={key}
             data-tutorial={key === "reza" ? "lab-preload-reza" : undefined}
-            style={{ display: "inline-flex" }}
+            style={{ display: "block", width: "100%" }}
           >
             <Button
               type={active ? "primary" : "default"}
               loading={buttonLoading}
               disabled={isLoading && loadingKey !== key}
               onClick={() => onSelectDataset(active ? null : key)}
+              block
               style={{
-                borderRadius: 999,
+                borderRadius: 8,
                 fontWeight: 500,
+                textAlign: "left",
               }}
             >
               {ds.label}
