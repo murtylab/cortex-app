@@ -380,7 +380,7 @@
         }
 
         .team-section {
-            margin: 80px 10% 150px 10%;
+            margin: 80px 10% 0 10%;
             padding: 60px;
             background: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(12px);
@@ -436,6 +436,47 @@
 
         .team-name-list li:last-child {
             border-bottom: none;
+        }
+
+        .feedback-section {
+            margin: 48px 10% 150px 10%;
+            padding: 48px 60px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: var(--card-shadow);
+            pointer-events: auto;
+            text-align: center;
+        }
+
+        .feedback-section .section-header {
+            margin-bottom: 28px;
+        }
+
+        .feedback-section .feedback-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 28px;
+            border-radius: 999px;
+            background: var(--tungsten);
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .feedback-section .feedback-link:hover {
+            background: #5c554d;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .feedback-section {
+                margin: 32px 5% 100px 5%;
+                padding: 36px 28px;
+            }
         }
 
     </style>
@@ -585,6 +626,19 @@
                 <li><strong>Florencia (Flo) Martinez Addiego</strong>, Postdoctoral Fellow</li>
             </ul>
         </div>
+
+        <section class="feedback-section" aria-label="Feedback">
+            <div class="section-header">
+                <span class="tag-pill">Feedback</span>
+                <h2 class="section-title">We’d love your feedback</h2>
+            </div>
+            <a
+              class="feedback-link"
+              href="https://forms.office.com/r/nT01GfLtZs"
+              target="_blank"
+              rel="noopener noreferrer"
+            >Send us your feedback here!</a>
+        </section>
 
     </div>
 
