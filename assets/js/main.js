@@ -922,6 +922,9 @@
     preparedStepKey: null,
   };
 
+  // Scoreboard tutorials disabled for now (hide Tutorials FAB on scoreboard pages).
+  const SCOREBOARD_TUTORIALS_ENABLED = false;
+
   function normalizeTutorialPath(pathname) {
     if (!pathname || pathname === '/') return '/';
 
@@ -929,11 +932,44 @@
     return trimmed.endsWith('/') ? trimmed : `${trimmed}/`;
   }
 
+  function isScoreboardTutorialPage(pathname = window.location.pathname) {
+    const path = normalizeTutorialPath(pathname);
+    return (
+      path === '/scoreboardLanding/' ||
+      path === '/scoreboardQuantitative/' ||
+      path === '/scoreboardQualitative/'
+    );
+  }
+
+  function shouldShowTutorialFab() {
+    return SCOREBOARD_TUTORIALS_ENABLED || !isScoreboardTutorialPage();
+  }
+
+  function syncTutorialFabVisibility() {
+    if (!tutorialUiState.button) {
+      return;
+    }
+
+    if (shouldShowTutorialFab()) {
+      tutorialUiState.button.classList.remove('cortex-tutorial-is-hidden');
+      return;
+    }
+
+    tutorialUiState.button.classList.add('cortex-tutorial-is-hidden');
+    if (tutorialUiState.activeTutorialId || tutorialUiState.launcherOpen) {
+      closeActiveTutorial();
+    }
+  }
+
   function getTutorialContextByPath(pathname) {
     const path = normalizeTutorialPath(pathname);
 
     if (path === '/labLanding/' || path === '/lab/') {
       return 'labCategorySelective';
+    }
+
+    if (!SCOREBOARD_TUTORIALS_ENABLED) {
+      return null;
     }
 
     if (path === '/scoreboardLanding/' || path === '/scoreboardQuantitative/') {
@@ -1293,6 +1329,7 @@
   }
 
   function updateTutorialLayout() {
+    syncTutorialFabVisibility();
     positionTutorialButton();
     positionTutorialCard();
   }
@@ -1809,6 +1846,13 @@
   function resumeTutorialIfNeeded() {
     const storedState = readTutorialState();
     if (!storedState || !TUTORIALS[storedState.tutorialId]) {
+      return;
+    }
+
+    if (
+      !SCOREBOARD_TUTORIALS_ENABLED &&
+      (isScoreboardTutorialPage() || String(storedState.tutorialId || '').startsWith('scoreboard'))
+    ) {
       return;
     }
 
