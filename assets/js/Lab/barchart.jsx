@@ -545,7 +545,16 @@ const BarChart = ({
       clearTutorialChartAnimations();
       d3.select(containerRef.current).select(".tooltip").remove();
     };
-  }, [getSortedData, containerWidth, height, fileMap, order, tutorialActiveGroup, tutorialSelectedGroups]);
+  }, [
+    getSortedData,
+    containerWidth,
+    height,
+    fileMap,
+    order,
+    selectedGroups,
+    tutorialActiveGroup,
+    tutorialSelectedGroups,
+  ]);
 
   return (
     <div
@@ -622,16 +631,27 @@ const BarChart = ({
                   border:
                     tutorialActiveGroup === group
                       ? '1px solid rgba(196, 116, 144, 0.45)'
+                      : effectiveSelectedGroups.includes(group)
+                      ? '1px solid rgba(107, 99, 88, 0.35)'
                       : '1px solid transparent',
                   background:
                     tutorialActiveGroup === group
                       ? 'rgba(247, 236, 225, 0.92)'
+                      : effectiveSelectedGroups.includes(group)
+                      ? 'rgba(247, 242, 238, 0.95)'
                       : 'transparent',
                   boxShadow:
                     tutorialActiveGroup === group
                       ? '0 10px 24px rgba(196, 116, 144, 0.16)'
                       : 'none',
-                  transform: tutorialActiveGroup === group ? 'translateY(-1px)' : 'none',
+                  transform:
+                    tutorialActiveGroup === group || effectiveSelectedGroups.includes(group)
+                      ? 'translateY(-1px)'
+                      : 'none',
+                  opacity:
+                    effectiveSelectedGroups.length > 0 && !effectiveSelectedGroups.includes(group)
+                      ? 0.55
+                      : 1,
                   transition: 'all 220ms ease',
                 }}
               >
