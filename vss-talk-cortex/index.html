@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talk 51.21 — Cortex Framework — VSS 2026</title>
+    <meta name="description" content="VSS 2026 Talk 51.21: Cortex, a unified framework for evaluating the predictive and cognitive alignment of vision models entirely zero-shot.">
+    <link href="/assets/img/logo.svg" rel="icon" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/vss-page-tabs.css">
+    <style>
+        :root {
+            --bg-color: #f7f7f4;
+            --tungsten: #424242;
+            --text-main: #3d3832;
+            --text-sub: #6b6358;
+            --accent: #c98d9a;
+            --accent-soft: rgba(201, 141, 154, 0.18);
+            --card-shadow: 0 10px 30px rgba(107, 99, 88, 0.06);
+            --border: rgba(107, 99, 88, 0.18);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            background-image:
+                radial-gradient(ellipse 120% 80% at 100% 0%, rgba(201, 141, 154, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse 80% 60% at 0% 100%, rgba(184, 164, 188, 0.07) 0%, transparent 45%);
+            color: var(--text-main);
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .page-shell {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: max(28px, env(safe-area-inset-top)) max(22px, env(safe-area-inset-right)) 96px max(22px, env(safe-area-inset-left));
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(1.65rem, 4.2vw, 2.35rem);
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            color: var(--tungsten);
+            margin: 0 0 22px 0;
+            line-height: 1.2;
+            max-width: 34ch;
+        }
+
+        .hero-lead {
+            margin: 0 0 28px 0;
+            font-size: 0.95rem;
+            font-weight: 400;
+            color: var(--text-sub);
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        @media (max-width: 640px) {
+            .meta-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .meta-tile {
+            padding: 16px 18px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.62);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.75);
+            box-shadow: var(--card-shadow);
+        }
+
+        .meta-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-sub);
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .meta-value {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-main);
+            line-height: 1.35;
+        }
+
+        .panel {
+            margin-bottom: 20px;
+            padding: 26px 28px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.52);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            box-shadow: var(--card-shadow);
+        }
+
+        .panel-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.11em;
+            text-transform: uppercase;
+            color: var(--text-sub);
+            margin: 0 0 14px 0;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(107, 99, 88, 0.1);
+        }
+
+        .panel-body {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            line-height: 1.6;
+        }
+
+        .speaker-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .speaker-chip {
+            display: inline-block;
+            padding: 8px 14px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <nav class="vss-page-tabs" aria-label="Page">
+            <a href="/" class="vss-page-tabs-external">← Virtual Visual Cortex</a>
+            <div class="vss-page-tabs-segment" role="group" aria-label="VSS event pages">
+                <a href="/vss-satellite/" class="vss-page-tab">VSS 2026 Satellite</a>
+                <a href="/vss-2026/" class="vss-page-tab">Murty Lab @ VSS 2026</a>
+            </div>
+            <a class="vss-page-tabs-external" href="https://www.murtylab.com/" target="_blank" rel="noopener noreferrer">Murty Lab Homepage →</a>
+        </nav>
+
+        <h1 class="hero-title">Cortex: A unified framework for evaluating the predictive and cognitive alignment of vision models entirely zero-shot</h1>
+        <p class="hero-lead">
+            A talk from the Murty Lab at VSS 2026, part of the session <em>Functional Organization of Visual Pathways 2</em> (Talk 51.21).
+        </p>
+
+        <div class="meta-grid">
+            <div class="meta-tile">
+                <div class="meta-label">When</div>
+                <div class="meta-value">Tuesday, May 19, 2026 8:15 – 9:45 am</div>
+            </div>
+            <div class="meta-tile">
+                <div class="meta-label">Where</div>
+                <div class="meta-value">Talk Room 2</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2 class="panel-title">Speaker</h2>
+            <div class="speaker-chips">
+                <span class="speaker-chip">Ruolin Wang</span>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2 class="panel-title">Session</h2>
+            <p class="panel-body">Functional Organization of Visual Pathways 2 · Talk 51.21</p>
+        </div>
+    </div>
+</body>
+</html>

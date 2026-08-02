@@ -379,6 +379,130 @@
             line-height: 1.7;
         }
 
+        .latest-news-section {
+            margin: 80px 10% 0 10%;
+            padding: 60px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: var(--card-shadow);
+            pointer-events: auto;
+        }
+
+        .news-timeline {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .news-item {
+            position: relative;
+            display: block;
+            padding: 0 0 34px 34px;
+            border-left: 2px solid rgba(107, 99, 88, 0.15);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .news-item:last-child {
+            padding-bottom: 4px;
+            border-left-color: transparent;
+        }
+
+        .news-item::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 3px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--bg-color);
+            border: 2px solid var(--accent-color);
+            transition: background 0.25s ease, transform 0.25s ease;
+        }
+
+        .news-item:hover::before {
+            background: var(--accent-color);
+            transform: scale(1.15);
+        }
+
+        .news-item-time {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-sub);
+            margin-bottom: 8px;
+        }
+
+        .news-item-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px 10px;
+            margin-bottom: 10px;
+        }
+
+        .news-item-conf {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .news-item-kind {
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent-color);
+            background: var(--accent-muted);
+            padding: 3px 10px;
+            border-radius: 999px;
+        }
+
+        .news-item-presenter {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        .news-item-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-main);
+            line-height: 1.35;
+            margin: 0;
+            transition: color 0.2s ease;
+        }
+
+        .news-item:hover .news-item-title {
+            color: var(--accent-color);
+        }
+
+        .news-item-arrow {
+            display: inline-block;
+            margin-left: 6px;
+            color: var(--accent-color);
+            font-weight: 700;
+            opacity: 0;
+            transform: translateX(-4px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .news-item:hover .news-item-arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .latest-news-section {
+                margin: 60px 5% 0 5%;
+                padding: 40px 28px;
+            }
+        }
+
         .team-section {
             margin: 80px 10% 0 10%;
             padding: 60px;
@@ -485,7 +609,9 @@
 
     <div id="vis-container"></div>
 
+    <!-- Temporarily hidden: top-left Latest News pill (moved into the Latest News section below).
     <a href="/vss-satellite/" class="cortex-home-event-pill" target="_blank" rel="noopener noreferrer">🧠 Latest News: Come to our VSS 2026 Satellite event!</a>
+    -->
 
     <div id="main-wrapper">
         
@@ -534,6 +660,60 @@
             <div class="stat-card">
                 <div class="stat-number" data-target="175396">0</div>
                 <div class="stat-label">Images Uploaded by Users</div>
+            </div>
+        </div>
+
+        <div class="latest-news-section">
+            <div class="section-header">
+                <span class="tag-pill">News</span>
+                <h2 class="section-title">Latest News</h2>
+            </div>
+
+            <div class="news-timeline">
+                <a class="news-item" href="/ccn-satellite/">
+                    <span class="news-item-time">August 2, 2026</span>
+                    <div class="news-item-meta">
+                        <span class="news-item-conf">CCN 2026</span>
+                        <span class="news-item-kind">Satellite Talk</span>
+                    </div>
+                    <h3 class="news-item-title">Linking brain predictions to cognitive tests at scale with executable brain models<span class="news-item-arrow">→</span></h3>
+                </a>
+
+                <a class="news-item" href="/vss-talk-cortex/">
+                    <span class="news-item-time">May 19, 2026</span>
+                    <div class="news-item-meta">
+                        <span class="news-item-conf">VSS 2026</span>
+                        <span class="news-item-kind">Talk</span>
+                    </div>
+                    <h3 class="news-item-title">Cortex: A unified framework for evaluating the predictive and cognitive alignment of vision models entirely zero-shot<span class="news-item-arrow">→</span></h3>
+                </a>
+
+                <a class="news-item" href="/vss-satellite/">
+                    <span class="news-item-time">May 17, 2026</span>
+                    <div class="news-item-meta">
+                        <span class="news-item-conf">VSS 2026</span>
+                        <span class="news-item-kind">Satellite Event</span>
+                    </div>
+                    <h3 class="news-item-title">In-silico replications and hypothesis testing for model benchmarking<span class="news-item-arrow">→</span></h3>
+                </a>
+
+                <a class="news-item" href="/vss-symposium-murty/">
+                    <span class="news-item-time">May 15, 2026</span>
+                    <div class="news-item-meta">
+                        <span class="news-item-conf">VSS 2026</span>
+                        <span class="news-item-kind">Symposium</span>
+                    </div>
+                    <h3 class="news-item-title">Using cognitive tests to reveal the strengths and limits of brain encoding models<span class="news-item-arrow">→</span></h3>
+                </a>
+
+                <a class="news-item" href="/chi-poster/">
+                    <span class="news-item-time">April 13, 2026</span>
+                    <div class="news-item-meta">
+                        <span class="news-item-conf">CHI 2026</span>
+                        <span class="news-item-kind">Poster</span>
+                    </div>
+                    <h3 class="news-item-title">Cortex-Canvas: An Interactive Web Interface for Executing and Evaluating Models of Category-Selective Regions in Human Visual Cortex<span class="news-item-arrow">→</span></h3>
+                </a>
             </div>
         </div>
 

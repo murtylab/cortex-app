@@ -34,6 +34,10 @@ export default defineConfig({
         labLanding: 'labLanding/index.html',
         vssSatellite: 'vss-satellite/index.html',
         vss2026: 'vss-2026/index.html',
+        vssSymposiumMurty: 'vss-symposium-murty/index.html',
+        vssTalkCortex: 'vss-talk-cortex/index.html',
+        ccnSatellite: 'ccn-satellite/index.html',
+        chiPoster: 'chi-poster/index.html',
         walkthrough: 'walkthrough/index.html',
       
 
