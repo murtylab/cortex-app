@@ -120,7 +120,7 @@ body.lab-page .navmenu .dropdown ul {
   box-shadow: none;
   margin: 2rem auto;
   max-width: 1200px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .model-header {
@@ -593,8 +593,43 @@ body.lab-page .navmenu .dropdown ul {
 }
 
 @media (max-width: 768px) {
+  .model-page {
+    margin: 0.75rem;
+    border-radius: var(--radius);
+  }
+
+  .model-header,
+  .model-content {
+    padding: 1.25rem 1rem;
+  }
+
   .model-header h1 {
-    font-size: 2rem;
+    font-size: clamp(1.6rem, 7vw, 2rem);
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .info-card,
+  .context-section {
+    padding: 1.1rem;
+  }
+
+  .info-item strong {
+    display: block;
+    min-width: 0;
+    margin-bottom: 0.25rem;
+  }
+
+  .metric-value {
+    font-size: 2.1rem;
+  }
+
+  .performance-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
   }
 
   .performance-toolbar {
@@ -611,7 +646,20 @@ body.lab-page .navmenu .dropdown ul {
   .performance-source-button {
     flex: 1;
     text-align: center;
-    padding: 0.75rem 0.9rem;
+    padding: 0.7rem 0.6rem;
+    font-size: 0.78rem;
+  }
+
+  .context-section table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 400px) {
+  .performance-grid {
+    grid-template-columns: 1fr;
   }
 }
 

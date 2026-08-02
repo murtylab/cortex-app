@@ -49,7 +49,7 @@ const RegionSelector = ({
           aria-labelledby="region-buttons-group-label"
           style={{
             display: "flex",
-            flexWrap: "nowrap",
+            flexWrap: "wrap",
             gap: 6,
             width: "100%",
           }}

@@ -615,6 +615,7 @@ export default function ImagePreviewGroupedDnD({
           <div style={{ height: 12 }} />
 
           <div
+            className="lab-groups-grid"
             data-tutorial="lab-upload-group-grid"
             style={{
               display: "grid",

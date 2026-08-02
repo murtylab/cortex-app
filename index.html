@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Virtual Visual Cortex</title>
     <link href="/assets/img/logo.svg" rel="icon" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -515,6 +516,116 @@
             .latest-news-section {
                 margin: 60px 5% 0 5%;
                 padding: 40px 28px;
+            }
+
+            .hero-section {
+                padding: 0 1.25rem;
+                min-height: 100svh;
+                height: auto;
+            }
+
+            .hero-heading-block {
+                width: 100%;
+                max-width: 360px;
+            }
+
+            .hero-title {
+                font-size: clamp(2.1rem, 11vw, 2.85rem);
+                white-space: normal;
+                letter-spacing: -0.5px;
+                line-height: 1.12;
+            }
+
+            .typewriter-container {
+                height: auto;
+                min-height: 2.6em;
+                font-size: 0.95rem;
+                padding: 0 4px;
+                margin-bottom: 28px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+                flex-wrap: wrap;
+                gap: 10px;
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .btn-primary {
+                width: 100%;
+                padding: 12px 16px;
+                font-size: 0.88rem;
+            }
+
+            .stats-section {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 48px 5%;
+                gap: 12px;
+            }
+
+            .stat-card {
+                padding: 20px 14px;
+            }
+
+            .stat-number {
+                font-size: 2.35rem;
+            }
+
+            .stat-label {
+                font-size: 0.72rem;
+                letter-spacing: 0.3px;
+            }
+
+            .faq-section,
+            .team-section,
+            .latest-news-section,
+            .feedback-section {
+                margin-left: 4%;
+                margin-right: 4%;
+                padding: 28px 18px;
+                border-radius: 18px;
+            }
+
+            .faq-section {
+                margin-bottom: 80px;
+            }
+
+            .faq-grid {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .faq-item.open .faq-content {
+                max-height: none;
+            }
+
+            .team-name-list.team-grid {
+                grid-template-columns: 1fr;
+                column-gap: 0;
+            }
+
+            .news-item-title {
+                font-size: 1rem;
+            }
+
+            .scroll-indicator {
+                bottom: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-section {
+                grid-template-columns: 1fr;
+                padding: 36px 5%;
+            }
+
+            .hero-title {
+                font-size: clamp(1.9rem, 10.5vw, 2.4rem);
             }
         }
 

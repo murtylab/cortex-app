@@ -395,6 +395,107 @@
       filter: none;
     }
 
+    /* Desktop: keep ROI chips in one equal-width row */
+    @media (min-width: 769px) {
+      body.lab-page #container [role="group"][aria-labelledby="region-buttons-group-label"] {
+        flex-wrap: nowrap !important;
+      }
+    }
+
+    /* ── Mobile / portrait ── */
+    @media (max-width: 768px) {
+      body.lab-page #container {
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-bottom: 96px;
+        box-sizing: border-box;
+      }
+
+      body.lab-page #container .lab-upload-columns {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+
+      body.lab-page #container .lab-upload-column-panel {
+        padding: 12px;
+      }
+
+      body.lab-page #container .ant-upload-text {
+        font-size: 16px !important;
+      }
+
+      body.lab-page #container .ant-upload-hint {
+        margin-top: 12px !important;
+        font-size: 12px !important;
+      }
+
+      body.lab-page #container .lab-step-title {
+        font-size: 12px;
+        line-height: 1.2;
+      }
+
+      body.lab-page #container .lab-step-num {
+        font-size: 22px;
+      }
+
+      body.lab-page #container [data-tutorial="lab-stepper-nav"] {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      body.lab-page #container [data-tutorial="lab-stepper-nav"] > button {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        padding: 10px 6px;
+        min-width: 0;
+      }
+
+      body.lab-page #container [role="group"][aria-labelledby="region-buttons-group-label"] {
+        flex-wrap: wrap !important;
+      }
+
+      body.lab-page #container [role="group"][aria-labelledby="region-buttons-group-label"] > button {
+        flex: 1 1 calc(33.33% - 6px) !important;
+        min-width: 72px !important;
+        font-size: 12px !important;
+        padding: 10px 4px !important;
+      }
+
+      body.lab-page #container .lab-heading {
+        font-size: 17px;
+      }
+
+      body.lab-page #container .ant-btn-primary {
+        width: 100%;
+      }
+
+      body.lab-page .scroll-top {
+        right: 16px;
+        bottom: 62px;
+      }
+
+      body.lab-page #container .lab-groups-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      body.lab-page #container .lab-groups-grid input {
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body.lab-page #container [role="group"][aria-labelledby="region-buttons-group-label"] > button {
+        flex: 1 1 calc(50% - 6px) !important;
+      }
+
+      body.lab-page #container .lab-step-title {
+        font-size: 11px;
+      }
+    }
+
   </style>
 
 </head>
