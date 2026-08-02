@@ -17,7 +17,7 @@
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
   <!-- Vendor CSS Files -->
   <link href="/assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -82,9 +82,9 @@
     }
 
     .landing-left h1 {
+      font-family: var(--heading-font);
       font-size: 3rem;
-      font-weight: bold;
-      /* color: #012970; */
+      font-weight: 700;
       color: var(--tungsten);
     }
 
@@ -92,15 +92,14 @@
       display: inline-block;
       margin-top: 2rem;
       padding: 1rem 2rem;
-      border-radius: 9999px;
-      /* background: linear-gradient(to bottom, #4154f1, #4154f1); */
+      border-radius: var(--radius-control);
       background: var(--tungsten);
       color: #ffffff; /* white text */
       font-weight: 600;
       font-size: 1.2rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      box-shadow: none;
       text-decoration: none;
-      transition: all 0.2s ease-in-out;
+      transition: background 0.2s ease-in-out;
     }
 
     .landing-cta-group {
@@ -116,29 +115,28 @@
     }
 
 .try-btn:hover {
-  background: linear-gradient(135deg, #c98d9a 0%, #b8a4bc 50%, #c4b4cc 100%); 
-  /* linear-gradient(to bottom, #2d367f, #2d367f); */
+  background: linear-gradient(135deg, #c98d9a 0%, #b8a4bc 50%, #c4b4cc 100%);
   color: #ffffff; /* keep text white */
-  transform: translateY(-2px);
 }
 
 
 .landing-right {
-  background: var(--highlight-color-background);
-  border-radius: 20px;
+  background: #ffffff;
+  border: 1px solid var(--hairline-color);
+  border-radius: var(--radius-card);
   padding: 2rem;
   font-size: 1rem;
-  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
   min-width: 300px;
   max-width: 420px;
-  font-family: "Lato", sans-serif;
+  font-family: var(--default-font);
 }
 
 .landing-right h2 {
+  font-family: var(--heading-font);
   font-size: 1.3rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
-  font-family: "Lato", sans-serif;
 }
 
 .landing-option {
@@ -217,7 +215,7 @@
             </ul>
           </li>
           <li class="dropdown">
-            <a href="#">
+            <a href="/scoreboardLanding/">
               <span>The Scoreboard</span>
               <i class="bi bi-chevron-down toggle-dropdown"></i>
             </a>

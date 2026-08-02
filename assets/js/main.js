@@ -746,14 +746,14 @@
           selector: '[data-tutorial="lab-results-barchart-highlight"]',
           title: 'Highlight One Group',
           body: 'In ranking view, filter the chart by group to focus the comparison on one image set at a time.',
-          nextLabel: 'Show Get Insights',
+          nextLabel: 'Show Across Regions',
           prepare: { type: 'lab-results-demo', value: 'highlight-group' },
         },
         {
           path: '/lab/',
           selector: '[data-tutorial="lab-results-get-insights"]',
-          title: 'Get Cross-Region Insights',
-          body: 'Use Get Insights to expand the run into side-by-side ROI comparisons once the base result looks good.',
+          title: 'Across-Region Insights',
+          body: 'Across regions follows your ROI selection and loads side-by-side comparisons automatically once the base result is ready.',
           nextLabel: 'Finish',
           prepare: { type: 'lab-results-demo', value: 'insights' },
         },
@@ -1046,7 +1046,7 @@
         bottom: 24px;
         z-index: 2147483644;
         border: 0;
-        border-radius: 999px;
+        border-radius: 5px;
         padding: 5px 22px;
         min-height: 0;
         background: #a89b8f;
@@ -1213,7 +1213,7 @@
         border: 1px solid rgba(75, 68, 62, 0.18);
         background: #fff;
         color: #241f1b;
-        border-radius: 999px;
+        border-radius: 5px;
         padding: 10px 14px;
         font: 600 14px/1 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
       }

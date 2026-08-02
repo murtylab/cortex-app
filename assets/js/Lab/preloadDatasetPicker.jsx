@@ -36,9 +36,11 @@ export default function PreloadDatasetPicker({
               onClick={() => onSelectDataset(active ? null : key)}
               block
               style={{
-                borderRadius: 8,
+                borderRadius: 5,
                 fontWeight: 500,
                 textAlign: "left",
+                fontFamily: "var(--lab-sans, 'Inter', sans-serif)",
+                fontSize: 13,
               }}
             >
               {ds.label}

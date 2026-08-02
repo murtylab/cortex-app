@@ -115,7 +115,7 @@ const ScatterMurtyVsNsd = ({ murtyData, nsdData, murtyDataFull, nsdDataFull,roi,
       .append("svg")
       .attr("width", width)
       .attr("height", height)
-      .style("font-family", "'Lato', sans-serif");
+      .style("font-family", "'Inter', sans-serif");
       
 
 

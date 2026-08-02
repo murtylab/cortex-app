@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { Button, message, Steps, theme } from 'antd';
-import { SmileOutlined } from '@ant-design/icons';
+import { Images } from 'lucide-react';
 import { uploadImages } from './services/imageUploader-WholeBrain.js';
 import { SERVER_URL_Whole_Brain } from './services/config.js';
 import { ConfigProvider } from 'antd'; 
@@ -636,8 +636,9 @@ const downloadData = async () => {
             
           />
 
-          <div style={{ textAlign: 'right', color: 'black', fontWeight: 500 }}>
-            📸 {files.length} images uploaded
+          <div style={{ textAlign: 'right', color: 'black', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6 }}>
+            <Images size={15} strokeWidth={1.5} aria-hidden="true" />
+            <span style={{ fontFamily: "var(--mono-font, 'IBM Plex Mono', monospace)" }}>{files.length}</span> images uploaded
           </div>
 
            <Settings
@@ -762,7 +763,6 @@ const downloadData = async () => {
 
         </div>
       ),
-      icon: <SmileOutlined />,
     },
   ];
 
@@ -785,11 +785,59 @@ const downloadData = async () => {
         },
       }}
     >
-      <Steps current={current} onChange={onChange}>
-        {steps.map((item) => (
-          <Step key={item.title} title={item.title} icon={item.icon} />
-        ))}
-      </Steps>
+      <div
+        style={{
+          display: "flex",
+          borderBottom: "1px solid var(--hairline-color, rgba(60,55,48,0.14))",
+        }}
+      >
+        {steps.map((item, idx) => {
+          const active = idx === current;
+          const done = idx < current;
+          return (
+            <button
+              key={item.title}
+              type="button"
+              onClick={() => onChange(idx)}
+              style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "baseline",
+                gap: 10,
+                padding: "10px 14px",
+                background: "transparent",
+                border: "none",
+                borderBottom: active
+                  ? "2px solid var(--accent-color, #5b3a6e)"
+                  : "2px solid transparent",
+                marginBottom: -1,
+                cursor: "pointer",
+                textAlign: "left",
+                color: active
+                  ? "var(--accent-strong, #4a2e5c)"
+                  : done
+                  ? "var(--text-main, #3d3832)"
+                  : "rgba(61,56,50,0.42)",
+                transition: "color 0.2s ease, border-color 0.2s ease",
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "var(--mono-font, 'IBM Plex Mono', monospace)",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  letterSpacing: "0.02em",
+                }}
+              >
+                {String(idx + 1).padStart(2, "0")}
+              </span>
+              <span style={{ fontSize: 14, fontWeight: active ? 600 : 500 }}>
+                {item.title}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
       <div style={contentStyle}>{steps[current].content}</div>
 

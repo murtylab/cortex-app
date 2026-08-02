@@ -1,8 +1,9 @@
 /* Fonts */
 :root {
-  --default-font: "Lato",  system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --heading-font: "Playfair Display",  sans-serif;
-  --nav-font: "Lato",  sans-serif;
+  --default-font: "Inter", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --heading-font: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --nav-font: "Inter", sans-serif;
+  --mono-font: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
 
 /* Global Colors - The following color variables are used throughout the website. Updating them here will change the color scheme of the entire website */
@@ -13,15 +14,19 @@
   --heading-color: #2c2c2c; /* 012970 Color for headings, subheadings and title throughout the website */
   --text-sub: #6b6358;
   --text-main: #3d3832;
-  --accent-color: #6b6358; /* #4655dd Accent color that represents your brand on the website. It's used for buttons, links, and other elements that need to stand out */
-  --accent-gradient: linear-gradient(135deg, #7d7469 0%, #6b6358 100%);
-  --accent-muted: rgba(107, 99, 88, 0.14);
-  --solid-pink: #b192b7;
+  --accent-color: #5b3a6e; /* Deep aubergine accent — brand color for buttons, links, active states */
+  --accent-strong: #4a2e5c;
+  --accent-gradient: #5b3a6e;
+  --accent-muted: rgba(91, 58, 110, 0.10);
+  --solid-pink: #5b3a6e;
   --surface-color: #f7f7f4; /* The surface color is used as a background of boxed elements within sections, such as cards, icon boxes, or other elements that require a visual separation from the global background. */
   --contrast-color: #ffffff; /* Contrast color for text, ensuring readability against backgrounds of accent, heading, or default colors. */
-  --highlight-color: linear-gradient(135deg, #b66072 0%, #875e8f 50%, #8b669f 100%); /* Highlight color for important elements, such as active navigation links, call-to-action buttons, or other elements that require extra emphasis. */
-  --highlight-color-button: linear-gradient(135deg, #c98d9a 0%, #b8a4bc 50%, #c4b4cc 100%);
-  --highlight-color-background: linear-gradient(135deg, #c98d9a30 0%, #b8a4bc30 50%, #c4b4cc30 100%);
+  --highlight-color: #4a2e5c; /* Highlight color for important elements: active nav links, CTAs, emphasis */
+  --highlight-color-button: #5b3a6e;
+  --highlight-color-background: rgba(91, 58, 110, 0.06);
+  --hairline-color: rgba(60, 55, 48, 0.14);
+  --radius-control: 5px;
+  --radius-card: 8px;
 }
 
 /* Nav Menu Colors - The following color variables are used specifically for the navigation menu. They are separate from the global colors to allow for more customization options */

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
-import { Button, message, Steps, theme } from 'antd';
-import { SmileOutlined } from '@ant-design/icons';
+import { Button, message, Spin, Steps, theme } from 'antd';
+import { Images } from 'lucide-react';
 import { uploadImages } from './services/imageUploader.js';
 import { SERVER_URL } from './services/config';
 import { ConfigProvider } from 'antd';
@@ -149,6 +149,14 @@ const PRELOADED_JSON_MODULES = import.meta.glob(
 const muiLabTheme = createTheme({
   typography: {
     fontFamily: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif",
+    fontWeightRegular: 400,
+    fontWeightMedium: 500,
+    fontWeightBold: 500,
+    button: {
+      textTransform: 'none',
+      fontWeight: 500,
+      fontSize: 13,
+    },
   },
 });
 
@@ -190,7 +198,7 @@ const Stepper: React.FC = () => {
   // insight visulalization states
   const [showInsights, setShowInsights] = useState(false);
   const [insightLoading, setInsightLoading] = useState(false);
-  const [selectedInsightRegions, setSelectedInsightRegions] = useState<string[]>(['ffa', 'eba', 'ppa']);
+  const [selectedInsightRegions, setSelectedInsightRegions] = useState<string[]>([DEFAULT_REGION]);
 
   //visualization
   const [vizOrder, setVizOrder] = useState("group");
@@ -1816,13 +1824,16 @@ useEffect(() => {
     return allInsightRegionValues.filter((r) => included.includes(r));
   }, [dataset]);
 
+  // Bottom Across-regions selection follows the top ROI selector.
   useEffect(() => {
-    setSelectedInsightRegions((prev) => {
-      const kept = prev.filter((r) => availableInsightRegions.includes(r));
-      if (kept.length > 0) return kept;
-      return availableInsightRegions;
-    });
-  }, [availableInsightRegions]);
+    if (availableInsightRegions.includes(region)) {
+      setSelectedInsightRegions([region]);
+      return;
+    }
+    setSelectedInsightRegions(
+      availableInsightRegions.length > 0 ? [availableInsightRegions[0]] : []
+    );
+  }, [region, availableInsightRegions]);
 
   const toggleInsightRegion = (targetRegion: string) => {
     setSelectedInsightRegions((prev) =>
@@ -1832,33 +1843,6 @@ useEffect(() => {
     );
   };
 
-
-  const handleGetInsights = async () => {
-    if (selectedInsightRegions.length === 0) {
-      message.warning("Select at least one ROI for insights.");
-      return;
-    }
-
-    const missingRegions = selectedInsightRegions.filter(
-      (r) => !getCachedResultByRegion(r)
-    );
-
-    if (missingRegions.length === 0) {
-      setShowInsights(true);
-      return;
-    }
-
-    setInsightLoading(true);
-    try {
-      await Promise.all(missingRegions.map((r) => insightPrediction(r)));
-      setShowInsights(true);
-    } catch (e) {
-      console.error(e);
-      message.error("Failed to load advanced insights.");
-    } finally {
-      setInsightLoading(false);
-    }
-  };
   const insightRegionDataMap = useMemo(() => {
     return selectedInsightRegions.reduce((acc, r) => {
       const cached = getCachedResultByRegion(r);
@@ -1935,24 +1919,21 @@ useEffect(() => {
   };
 
   const insightPrediction = async (targetRegion: string) => {
-  const cached = getCachedResultByRegion(targetRegion);
-  if (cached) return cached;
+    const cached = getCachedResultByRegion(targetRegion);
+    if (cached) return cached;
 
-  if (prestoreDataset) {
-    const localResult = await loadPreloadedPredictionByRegion(
-      prestoreDataset,
-      targetRegion
-    );
+    if (prestoreDataset) {
+      const localResult = await loadPreloadedPredictionByRegion(
+        prestoreDataset,
+        targetRegion
+      );
 
-    if (localResult) {
-      setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: localResult }));
-
-      return localResult;
+      if (localResult) {
+        setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: localResult }));
+        return localResult;
+      }
     }
-  }
 
-  setInsightLoading(true);
-  try {
     const uploadFiles = files.map((x) => {
       const ext = getExt(x.file.name);
       const newName = `${safe(x.uid)}${ext}`;
@@ -1976,14 +1957,83 @@ useEffect(() => {
     });
 
     const resultData = result.data.data;
-
     setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: resultData }));
-
     return resultData;
-  } finally {
-    setInsightLoading(false);
-  }
-};
+  };
+
+  // Auto-load and show insights whenever the selection is ready (no Get Insights button).
+  useEffect(() => {
+    if (current !== 2 || files.length === 0) return;
+    if (selectedInsightRegions.length === 0) {
+      setShowInsights(false);
+      setInsightLoading(false);
+      return;
+    }
+
+    const missingRegions = selectedInsightRegions.filter(
+      (r) => !getCachedResultByRegion(r)
+    );
+
+    if (missingRegions.length === 0) {
+      setShowInsights(true);
+      setInsightLoading(false);
+      return;
+    }
+
+    // Main prediction owns the active ROI; only fetch it here as a fallback.
+    const activeMissing = missingRegions.includes(region);
+    const extraMissing = missingRegions.filter((r) => r !== region);
+    const regionsToFetch = [
+      ...extraMissing,
+      ...(!predictionLoading && activeMissing ? [region] : []),
+    ];
+
+    if (regionsToFetch.length === 0) {
+      setInsightLoading(true);
+      setShowInsights(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadInsights = async () => {
+      setInsightLoading(true);
+      setShowInsights(false);
+      try {
+        await Promise.all(regionsToFetch.map((r) => insightPrediction(r)));
+        if (cancelled) return;
+
+        const stillMissing = selectedInsightRegions.some(
+          (r) => !getCachedResultByRegion(r)
+        );
+        if (!stillMissing) {
+          setShowInsights(true);
+          setInsightLoading(false);
+        }
+      } catch (e) {
+        console.error(e);
+        if (!cancelled) {
+          message.error("Failed to load advanced insights.");
+          setInsightLoading(false);
+        }
+      }
+    };
+
+    loadInsights();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    current,
+    files.length,
+    selectedInsightRegions,
+    insightRegionCache,
+    predictionLoading,
+    region,
+    prestoreDataset,
+    dataset,
+    model,
+  ]);
 
   // Sync lab state for chatbot
   useEffect(() => {
@@ -2139,7 +2189,7 @@ useEffect(() => {
   
   const steps = [
     {
-      title: 'Upload Stimuli',
+      title: 'Upload stimuli',
       // content: <Uploader onFilesUploaded={handleFilesUploaded} onFileMappingsUpdate={handleFileMappingsUpdate} />,
           content: (
             <div data-tutorial="lab-upload-panel" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -2164,8 +2214,8 @@ useEffect(() => {
                 </div>
 
                 <div className="lab-upload-column-panel lab-preload-column-panel">
-                  <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 10, lineHeight: 1.35 }}>
-                    Preloaded Datasets from Published Studies
+                  <div className="lab-eyebrow" style={{ marginBottom: 12 }}>
+                    Preloaded datasets from published studies
                   </div>
 
                  <PreloadDatasetPicker
@@ -2192,8 +2242,15 @@ useEffect(() => {
                 />
 
                 {preloadLoading && (
-                  <div style={{ marginTop: 8, fontSize: 13, color: '#666' }}>
-                    Loading stimuli...
+                  <div
+                    style={{
+                      marginTop: 8,
+                      fontSize: 13,
+                      fontFamily: "var(--lab-sans, 'Inter', sans-serif)",
+                      color: "var(--lab-muted, #8A8378)",
+                    }}
+                  >
+                    Loading stimuli…
                   </div>
                 )}
                 </div>
@@ -2204,6 +2261,8 @@ useEffect(() => {
               <div data-tutorial="lab-upload-images-panel">
                 <ImagePreviewGroupedDnD
                   files={files}
+                  variant="lab"
+                  eyebrow="Uploaded stimuli"
                   title={inputMode === "preload" ? "Preloaded Images" : "Uploaded Images"}
                   groupDepth={1}
                   isPreload={isPreloadMode}
@@ -2219,18 +2278,21 @@ useEffect(() => {
                 />
               </div>
 
-              <div style={{ textAlign: 'right', color: 'black', fontWeight: 500 }}>
-                📸 {files.length} images loaded
+              <div style={{ textAlign: 'right', color: 'var(--lab-secondary, #57534A)', fontWeight: 500, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6 }}>
+                <Images size={16} strokeWidth={1.5} aria-hidden="true" color="currentColor" />
+                <span className="lab-mono-num" style={{ fontFamily: "var(--lab-mono, 'IBM Plex Mono', monospace)", fontWeight: 500 }}>{files.length}</span>
+                <span>images loaded</span>
               </div>
             </div>
           ),
     },
     {
-      title: 'Training Settings',
+      title: 'Training settings',
       content: (
         <div data-tutorial="lab-settings-panel" style={{ display: 'flex', flexDirection: 'column', gap: '10px'}}>
-          <RegionSelector region={region} setRegion={setRegion} dataset={dataset}/>
+          <RegionSelector region={region} setRegion={setRegion} dataset={dataset} variant="lab" />
           <Settings
+            variant="lab"
             model={model}
             setModel={setModel}
             dataset={dataset}
@@ -2247,7 +2309,7 @@ useEffect(() => {
       ),
     },
     {
-      title: 'Prediction Results',
+      title: 'Prediction results',
       content: (
         <div data-tutorial="lab-results-panel" style={{ display: 'flex', flexDirection: 'column'}}>
           <RegionSelector
@@ -2256,10 +2318,11 @@ useEffect(() => {
             dataset={dataset}
             tutorialRootKey="lab-results-region"
             activeTutorialKey="lab-results-region-active"
+            variant="lab"
           />
-          
 
           <ModelCard
+            variant="lab"
             region={region}
             dataset={dataset}
             model={model}
@@ -2268,6 +2331,8 @@ useEffect(() => {
           <div data-tutorial="lab-results-upload-preview">
             <ImagePreviewGroupedDnD
               files={files}
+              variant="lab"
+              eyebrow="Uploaded stimuli"
               title="Uploaded Images Preview"
               groupDepth={1}
               isPreload={isPreloadMode}
@@ -2285,10 +2350,11 @@ useEffect(() => {
             />
           </div>
 
-          {predictionLoading && <LinearIndeterminate />} {/* add progress bar when predictionLoading is true */}
-            <h3 style={{ textAlign: "left", color:"black", fontSize: "18px", marginBottom: "10px", marginTop: "40px"}}>
-            <b>Univariate Analysis:</b> Predicted voxel average responses
-            </h3>
+          {predictionLoading && <LinearIndeterminate />}
+          <div className="lab-section-header">
+            <span className="lab-eyebrow">Univariate analysis</span>
+            <h3 className="lab-heading">Predicted voxel average responses</h3>
+          </div>
             {barchartData.length > 0 && (
               <BarChart
                 barChartData={barchartData}
@@ -2297,119 +2363,141 @@ useEffect(() => {
                 order={vizOrder}
                 setOrder={setVizOrder}
                 tutorialSelectedGroups={tutorialHighlightedResultGroups}
+                labChart
               />
             )}
-            <h3 style={{ textAlign: "left", color:"black", fontSize: "18px", marginBottom: "6px", marginTop: "40px"}}><b>Multivariate Analysis:</b> Respresentational dissimilarity matrix (RDM) from predicted voxel responses</h3>
-          {/* <Heatmap heatmapData={heatmapData} originalFilenames={originalFilenames} sortedFilenames={sortedFilenames} width={800} height={800} fileMappings={fileMappings}/> */}
+          <div className="lab-section-header">
+            <span className="lab-eyebrow">Multivariate analysis</span>
+            <h3 className="lab-heading">Representational dissimilarity matrix (RDM) from predicted voxel responses</h3>
+          </div>
           {barchartData.length <= 1 ? (
-            <div style={{ textAlign: 'center', fontSize: '16px', color: '#888', fontStyle: 'italic' }}>
+            <div style={{ textAlign: 'left', fontSize: '14px', color: 'var(--lab-muted, #8A8378)', fontStyle: 'italic', lineHeight: 1.6 }}>
               RDM unavailable for one image. Please upload more than 2 images to see the visualization.
             </div>
           ) : (
-            <Heatmap heatmapData={heatmapData} originalFilenames={originalFilenames} sortedFilenames={orderedFilenames} width={800} height={800} fileMappings={fileMappings} order={vizOrder} 
+            <Heatmap
+              heatmapData={heatmapData}
+              originalFilenames={originalFilenames}
+              sortedFilenames={orderedFilenames}
+              width={800}
+              height={800}
+              fileMappings={fileMappings}
+              order={vizOrder}
+              labChart
             />
           )}
 
           <div
-            style={{
-              marginTop: "32px",
-              display: "flex",
-              justifyContent: "left",
-              alignItems: "center",
-              gap: "10px",
-              flexWrap: "wrap",
-            }}
+            className="lab-section-header"
+            data-tutorial="lab-results-get-insights"
           >
-            <h3
-              style={{
-                textAlign: "left",
-                color: "black",
-                fontSize: "18px",
-                margin: 0,
-              }}
-            >
-              <b>Advanced Insights Across Regions</b>
-            </h3>
+            <span className="lab-eyebrow">Advanced insights</span>
+            <h3 className="lab-heading">Across regions</h3>
           </div>
 
           <div
             style={{
               marginTop: '10px',
               display: 'flex',
-              flexDirection: 'column',
-              gap: '8px',
-              alignItems: 'flex-start',
+              alignItems: 'center',
+              gap: '10px',
+              flexWrap: 'wrap',
             }}
           >
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-              <span style={{ fontWeight: 600, color: 'black' }}>ROI Selection:</span>
-              <Button
-                type="default"
-                size="small"
-                onClick={() => setSelectedInsightRegions(availableInsightRegions)}
-              >
-                Select All
-              </Button>
-              <Button
-                type="default"
-                size="small"
-                onClick={() => setSelectedInsightRegions([])}
-              >
-                Clear
-              </Button>
-            </div>
+            <span
+              style={{
+                fontWeight: 500,
+                whiteSpace: 'nowrap',
+                fontSize: 13,
+                fontFamily: "var(--lab-sans, 'Inter', sans-serif)",
+                color: 'var(--lab-text, #211F1C)',
+              }}
+            >
+              ROI selection
+            </span>
 
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {availableInsightRegions.map((r) => {
-                const selected = selectedInsightRegions.includes(r);
-                const label = REGION_OPTIONS.find((x) => x.value === r)?.label || r.toUpperCase();
+            {availableInsightRegions.map((r) => {
+              const selected = selectedInsightRegions.includes(r);
+              const label = REGION_OPTIONS.find((x) => x.value === r)?.label || r.toUpperCase();
 
-                return (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => toggleInsightRegion(r)}
+              return (
+                <label
+                  key={r}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    whiteSpace: 'nowrap',
+                    padding: '4px 8px',
+                    borderRadius: '5px',
+                    border: selected
+                      ? '1px solid rgba(107, 99, 88, 0.35)'
+                      : '1px solid transparent',
+                    background: selected
+                      ? 'rgba(247, 242, 238, 0.95)'
+                      : 'transparent',
+                    boxShadow: 'none',
+                    opacity:
+                      selectedInsightRegions.length > 0 && !selected ? 0.55 : 1,
+                    transition: 'all 220ms ease',
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selected}
+                    onChange={() => toggleInsightRegion(r)}
+                  />
+                  <span
                     style={{
-                      cursor: 'pointer',
-                      borderRadius: 16,
-                      border: selected ? '1px solid var(--highlight-color-button)' : '1px solid #ccc',
-                      background: selected ? 'var(--highlight-color-button)' : '#fff',
-                      color: selected ? '#fff' : '#333',
-                      padding: '4px 12px',
-                      fontSize: 13,
+                      fontFamily: "var(--lab-mono, 'IBM Plex Mono', monospace)",
+                      fontSize: '12px',
+                      fontWeight: 400,
+                      color: 'var(--lab-text, #211F1C)',
                     }}
                   >
                     {label}
-                  </button>
-                );
-              })}
-            </div>
-
-            <Button
-              data-tutorial="lab-results-get-insights"
-              type="primary"
-              onClick={handleGetInsights}
-              loading={insightLoading}
-              disabled={files.length === 0 || selectedInsightRegions.length === 0}
-              style={{ marginTop: '4px' }}
-            >
-              Get Insights
-            </Button>
+                  </span>
+                </label>
+              );
+            })}
           </div>
 
-          {showInsights && (
+          {insightLoading && (
+            <div
+              style={{
+                marginTop: 16,
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 10,
+                minHeight: 120,
+                color: 'var(--lab-secondary, #57534A)',
+              }}
+            >
+              <Spin size="large" />
+              <span style={{ fontSize: 13, fontFamily: "var(--lab-sans, 'Inter', sans-serif)" }}>
+                Loading cross-region insights…
+              </span>
+            </div>
+          )}
+
+          {!insightLoading && showInsights && (
             <div style={{ marginTop: "5px" }}>
               <BoxPlot
                 regionDataMap={insightRegionDataMap}
                 fileMappings={fileMappings}
                 regionOrder={selectedInsightRegions}
                 height={560}
+                labChart
               />
             </div>
           )}
         </div>
       ),
-      icon: <SmileOutlined />,
     },
   ];
 
@@ -2419,29 +2507,78 @@ useEffect(() => {
       theme={{
         token: {
           fontFamily: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif",
+          fontSize: 14,
+          colorPrimary: "var(--tungsten, #424242)",
+          borderRadius: 5,
         },
         components: {
-          Steps: {
-            colorPrimary: "var(--tungsten)", // Customize the primary color for Steps
-          },
           Button: {
-            colorPrimary: "var(--tungsten)",                 
-            colorPrimaryHover: "var(--highlight-color-button)", 
-            colorPrimaryActive: "var(--highlight-color-button)", 
+            colorPrimary: "var(--tungsten, #424242)",
+            colorPrimaryHover: "var(--highlight-color-button)",
+            colorPrimaryActive: "var(--highlight-color-button)",
+            fontWeight: 500,
+            controlHeight: 36,
           },
-           Progress: {
+          Progress: {
             colorPrimary: "var(--highlight-color-button)",
           },
         },
       }}
     >
     <ThemeProvider theme={muiLabTheme}>
-      <div data-tutorial="lab-stepper-nav">
-        <Steps current={current} onChange={onChange}>
-          {steps.map((item) => (
-            <Step key={item.title} title={item.title} icon={item.icon} />
-          ))}
-        </Steps>
+      <div
+        data-tutorial="lab-stepper-nav"
+        style={{
+          display: "flex",
+          borderBottom: "1px solid var(--lab-hairline, #D6D2C6)",
+        }}
+      >
+        {steps.map((item, idx) => {
+          const active = idx === current;
+          const done = idx < current;
+          const tabClass = [
+            "lab-step-tab",
+            active ? "is-active" : "",
+            done ? "is-done" : "",
+            !active && !done ? "is-upcoming" : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
+
+          return (
+            <button
+              key={item.title}
+              type="button"
+              className={tabClass}
+              onClick={() => onChange(idx)}
+              style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "baseline",
+                justifyContent: "center",
+                gap: 10,
+                padding: "12px 14px",
+                background: "transparent",
+                border: "none",
+                borderBottom: active
+                  ? "2px solid var(--lab-accent, #4A2E5C)"
+                  : "2px solid transparent",
+                marginBottom: -1,
+                cursor: "pointer",
+                textAlign: "center",
+                transition: "color 0.2s ease, border-color 0.2s ease",
+                boxShadow: "none",
+              }}
+            >
+              <span className="lab-step-num">
+                {idx + 1}
+              </span>
+              <span className="lab-step-title">
+                {item.title}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       <div style={contentStyle}>{steps[current].content}</div>
@@ -2456,7 +2593,7 @@ useEffect(() => {
             }}
             disabled={loading || files.length === 0}
           >
-            {loading ? "Uploading..." : "Proceed to Settings"}
+            {loading ? "Uploading..." : "Proceed to settings"}
           </Button>
         )}
 
@@ -2474,13 +2611,13 @@ useEffect(() => {
             }}
             disabled={loading || predictionLoading || files.length === 0}
           >
-            {loading || predictionLoading ? "Processing..." : "Check Prediction Results"}
+            {loading || predictionLoading ? "Processing..." : "Check prediction results"}
           </Button>
         )}
 
         {current === steps.length - 1 && (
           <Button type="primary" onClick={downloadData} disabled={!currentRegionPredictionResult}>
-            Download Data
+            Download data
           </Button>
         )}
       </div>

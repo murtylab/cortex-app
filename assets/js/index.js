@@ -106,7 +106,9 @@ material.onBeforeCompile = (shader) => {
     (err) => {
       console.error('STL 加载失败：', err);
       container.innerHTML =
-        '<div style="padding:12px;border-radius:12px;background:#f8d7da;color:#842029;font-size:14px;">⚠️ 模型加载失败，请检查路径和文件体积。</div>';
+        '<div style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:8px;background:#fff;border:1px solid rgba(132,32,41,0.35);color:#842029;font-size:14px;">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>' +
+        '<span>模型加载失败，请检查路径和文件体积。</span></div>';
     }
   );
 

@@ -839,7 +839,7 @@ const getOverviewColumnCount = (
                 {isDatasetDetailMode && dataset.map((dsName) => (
                   region.map((roiValue) => (
                     <div key={`${dsName}-${roiValue}`} style={{ flex: 1, minHeight: '80px', background: 'var(--background-color)', padding: '6px', borderRadius: 6, display: 'flex', flexDirection: 'column' }}>
-                      <div style={{ textAlign: 'center', fontSize: '10px', fontWeight: 'bold', color: '#888' }}>
+                      <div style={{ textAlign: 'center', fontSize: '10px', fontWeight: 500, color: '#888' }}>
                         {roiValue === 'Across Regions' ? 'Across Regions' : roiValue} ({dsName})
                       </div>
                       <div style={{ flex: 1, minHeight: 0 }}>
@@ -929,7 +929,7 @@ const getOverviewColumnCount = (
                             style={{
                               textAlign: 'center',
                               fontSize: '10px',
-                              fontWeight: 'bold',
+                              fontWeight: 500,
                               color: '#888',
                               marginBottom: 4,
                             }}
@@ -1159,7 +1159,7 @@ const getOverviewColumnCount = (
                           {/* subtitle */}
                           <div style={{
                             textAlign: 'center',
-                            fontWeight: 'bold',
+                            fontWeight: 500,
                             marginBottom: 12,
                             fontSize: '13px',
                             color: '#555',

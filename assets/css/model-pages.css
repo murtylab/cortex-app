@@ -1,6 +1,28 @@
-/* Model page styles — matches the Virtual Visual Cortex design language */
+/* Model page styles — aligned with homepage + Lab design language */
 
-@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #f7f7f4;
+  --panel: #FBFAF6;
+  --text-main: #211F1C;
+  --text-sub: #57534A;
+  --text-muted: #8A8378;
+  --heading: #211F1C;
+  --surface: #ffffff;
+  --border: #D6D2C6;
+  --hairline: #D6D2C6;
+  --highlight: #4A2E5C;
+  --highlight-btn: #4A2E5C;
+  --accent: #4A2E5C;
+  --accent-strong: #4A2E5C;
+  --btn-gradient: linear-gradient(135deg, #c98d9a 0%, #b8a4bc 50%, #c4b4cc 100%);
+  --serif-font: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans-font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono-font: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --script-font: "Caveat", "Segoe Script", "Bradley Hand", cursive;
+  --radius: 5px;
+}
 
 /* Per-Dataset Breakdown table: center the dataset column and metric values */
 .context-section table thead th:first-child,
@@ -21,47 +43,63 @@
   padding: 0.75rem 0.85rem;
   text-align: center;
   white-space: nowrap;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 0.5px solid var(--border);
+  font-family: var(--sans-font);
+  font-size: 0.9rem;
+  font-weight: 400;
 }
 
 .performance-dataset-table-comparison thead .performance-dataset-header-group th {
-  background: var(--highlight);
-  color: #fff;
-  font-weight: 700;
+  background: rgba(74, 46, 92, 0.08);
+  color: var(--heading);
+  font-family: var(--mono-font);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .performance-dataset-table-comparison thead .performance-dataset-header-sub th {
-  background: rgba(160, 122, 170, 0.12);
-  color: var(--heading);
-  font-weight: 700;
+  background: rgba(247, 247, 244, 0.96);
+  color: var(--text-sub);
+  font-family: var(--mono-font);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
 }
 
 .performance-dataset-table-comparison tbody td:first-child {
-  background: rgba(247, 247, 244, 0.96);
-  font-weight: 700;
+  background: transparent;
+  font-family: var(--mono-font);
+  font-weight: 500;
+  color: var(--heading);
 }
 
 .performance-dataset-table-comparison tbody tr:nth-child(even) td {
-  background-color: rgba(255, 255, 255, 0.5);
-}
-:root {
-  --bg:          #f7f7f4;
-  --text-main:   #3d3832;
-  --text-sub:    #6b6358;
-  --heading:     #2c2c2c;
-  --surface:     #ffffff;
-  --border:      #e5e1db;
-  --highlight:   linear-gradient(135deg, #c98d9a 0%, #b8a4bc 50%, #c4b4cc 100%);
-  --highlight-btn: linear-gradient(135deg, #d4a8b2 0%, #c9bcd0 50%, #d3c7da 100%);
-  --accent:      #a07aaa;
+  background-color: rgba(33, 31, 28, 0.02);
 }
 
 body {
   background-color: var(--bg);
   color: var(--text-main);
-  font-family: 'Lato', 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--sans-font);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.6;
   min-height: 100vh;
   position: relative;
+}
+
+body.lab-page #header {
+  --nav-dropdown-background-color: var(--bg);
+  --nav-mobile-background-color: var(--bg);
+  background-color: var(--bg);
+}
+
+body.lab-page .navmenu .dropdown ul {
+  background: var(--bg);
+  border: 0.5px solid color-mix(in srgb, var(--text-main), transparent 88%);
+  box-shadow: none;
 }
 
 /* Neural network background canvas */
@@ -76,84 +114,132 @@ body {
 }
 
 .model-page {
-  background: rgba(255, 255, 255, 0.96);
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(61, 56, 50, 0.10);
+  background: transparent;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: none;
   margin: 2rem auto;
   max-width: 1200px;
   overflow: hidden;
-  backdrop-filter: blur(10px);
 }
 
 .model-header {
-  background: var(--highlight);
-  color: #fff;
-  padding: 3rem 2rem;
+  background: transparent;
+  color: var(--heading);
+  padding: 2.5rem 2rem 2rem;
   text-align: center;
+  border-bottom: 0.5px solid var(--border);
 }
 
 .model-header h1 {
-  font-family: 'Playfair Display', serif;
-  font-size: 3rem;
+  font-family: var(--serif-font);
+  font-size: 2.5rem;
   font-weight: 700;
-  margin-bottom: 1rem;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+  margin: 0 0 0.6rem;
+  color: var(--heading);
+  text-shadow: none;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .model-header p {
-  font-size: 1.15rem;
-  opacity: 0.92;
-  margin-bottom: 2rem;
+  font-family: var(--mono-font);
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: 1;
+  margin: 0 0 1.5rem;
 }
 
 .back-button {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-  padding: 0.8rem 2rem;
-  border-radius: 50px;
+  background: transparent;
+  color: var(--text-main);
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius);
   text-decoration: none;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  border: 2px solid rgba(255, 255, 255, 0.35);
+  font-family: var(--sans-font);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  border: 0.5px solid var(--border);
+  box-shadow: none;
 }
 
 .back-button:hover {
-  background: rgba(255, 255, 255, 0.32);
-  color: #fff;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  background: rgba(33, 31, 28, 0.03);
+  border-color: var(--text-sub);
+  color: var(--heading);
+}
+
+.back-button.back-button-disabled,
+.back-button-disabled {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 0.5px solid var(--border);
+  opacity: 0.7;
+  cursor: not-allowed;
+  pointer-events: none;
+  user-select: none;
+}
+
+.back-button.back-button-disabled:hover {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+.back-button-soon {
+  display: block;
+  font-family: var(--sans-font);
+  font-size: 0.72rem;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  text-transform: none;
 }
 
 .model-content {
-  padding: 3rem 2rem;
+  padding: 2.5rem 2rem;
 }
 
 .info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin-bottom: 3rem;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .info-card {
-  background: var(--bg);
-  border-radius: 15px;
-  padding: 2rem;
-  border-left: 5px solid var(--accent);
+  background: transparent;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  border-left: 0.5px solid var(--border);
 }
 
 .info-card h2 {
   color: var(--heading);
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
-  font-family: 'Playfair Display', serif;
+  margin: 0 0 1.25rem;
+  font-size: 1.25rem;
+  font-family: var(--serif-font);
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .info-item {
-  margin-bottom: 1rem;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 0.5px solid var(--border);
+  font-size: 0.95rem;
+  color: var(--text-main);
 }
 
 .info-item:last-child {
@@ -161,116 +247,174 @@ body {
 }
 
 .info-item strong {
-  color: var(--accent);
+  color: var(--text-sub);
   display: inline-block;
   min-width: 120px;
+  font-family: var(--mono-font);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .performance-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin: 2rem 0;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0 0;
 }
 
 .metric-card {
-  background: var(--highlight);
-  color: #fff;
-  padding: 2rem;
-  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--text-main);
+  padding: 1.5rem 1.25rem;
+  border-radius: var(--radius);
   text-align: center;
-  box-shadow: 0 8px 20px rgba(135, 94, 143, 0.18);
+  box-shadow: none;
+  border: 0.5px solid var(--border);
 }
 
 .metric-value {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
+  font-family: var(--script-font);
+  font-style: italic;
+  font-size: 2.6rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  color: var(--accent-strong);
+  line-height: 1.1;
 }
 
 .metric-label {
-  font-size: 1rem;
-  opacity: 0.9;
+  font-family: var(--sans-font);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-sub);
+  opacity: 1;
+  letter-spacing: 0.01em;
 }
 
 .context-section {
-  background: var(--bg);
-  border-radius: 15px;
-  padding: 2rem;
-  margin-top: 2rem;
+  background: transparent;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  margin-top: 1.5rem;
 }
 
 .context-section h2 {
   color: var(--heading);
-  margin-bottom: 1.5rem;
-  font-family: 'Playfair Display', serif;
+  margin: 0 0 1rem;
+  font-family: var(--serif-font);
+  font-size: 1.35rem;
+  font-weight: 600;
 }
 
 .context-section p {
   color: var(--text-sub);
   line-height: 1.7;
   margin-bottom: 1rem;
+  font-family: var(--sans-font);
+  font-size: 0.95rem;
+}
+
+.context-section table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.context-section table thead tr {
+  background: rgba(74, 46, 92, 0.06) !important;
+  color: var(--heading) !important;
+}
+
+.context-section table thead th {
+  padding: 0.75rem 1rem !important;
+  text-align: center;
+  font-family: var(--mono-font);
+  font-size: 0.72rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-sub) !important;
+  border-bottom: 0.5px solid var(--border);
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.context-section table tbody td {
+  padding: 0.7rem 1rem;
+  border-bottom: 0.5px solid var(--border);
+  font-family: var(--mono-font);
+  font-size: 0.85rem;
+  color: var(--text-main);
+}
+
+.context-section table tbody tr:nth-child(even) td {
+  background: rgba(33, 31, 28, 0.02);
 }
 
 .doc-link {
   display: inline-block;
-  background: var(--highlight-btn);
-  color: #fff;
-  padding: 1rem 2rem;
-  border-radius: 50px;
+  background: var(--btn-gradient);
+  color: #fff !important;
+  padding: 0.75rem 1.4rem;
+  border-radius: var(--radius);
   text-decoration: none;
-  font-weight: 600;
-  margin-top: 1rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 5px 15px rgba(135, 94, 143, 0.25);
+  font-family: var(--sans-font);
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 0.75rem;
+  transition: filter 0.2s ease;
+  box-shadow: none;
+  border: none;
 }
 
 .doc-link:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(135, 94, 143, 0.35);
-  color: #fff;
+  filter: brightness(0.96);
+  color: #fff !important;
+  background: var(--btn-gradient);
 }
 
 /* Navbar overrides */
 .navbar {
   background: rgba(247, 247, 244, 0.95);
   backdrop-filter: blur(10px);
-  box-shadow: 0 2px 20px rgba(61, 56, 50, 0.08);
+  box-shadow: none;
+  border-bottom: 0.5px solid var(--border);
 }
 
 .navbar-brand {
-  font-weight: 700;
-  color: var(--accent) !important;
+  font-weight: 600;
+  color: var(--heading) !important;
 }
 
 .navbar-nav .nav-link {
   color: var(--text-main) !important;
   font-weight: 500;
-  transition: color 0.3s ease;
+  transition: color 0.2s ease;
 }
 
 .navbar-nav .nav-link:hover {
   color: var(--accent) !important;
 }
 
-/* Nav links (Home / The Lab / The Scoreboard) — match chatbot button gradient */
 .navmenu li:hover > a,
 .navmenu .active,
 .navmenu .active:focus {
-  background: linear-gradient(135deg, #c98d9a 0%, #b8a4bc 50%, #c4b4cc 100%) !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  color: transparent !important;
+  background: none !important;
+  -webkit-text-fill-color: var(--accent) !important;
+  color: var(--accent) !important;
 }
 
-/* Sitename "Cortex" logo text — solid dark to match rest of site */
 .header .logo .sitename {
   background: none;
   -webkit-background-clip: unset;
   background-clip: unset;
   -webkit-text-fill-color: var(--heading);
   color: var(--heading);
+  font-family: var(--serif-font);
+  font-weight: 600;
 }
 
 .performance-toolbar {
@@ -288,9 +432,9 @@ body {
   align-items: center;
   gap: 0.35rem;
   padding: 0.3rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: inset 0 0 0 1px rgba(160, 122, 170, 0.12);
+  border-radius: var(--radius);
+  background: transparent;
+  box-shadow: inset 0 0 0 0.5px var(--border);
 }
 
 .performance-toggle-button,
@@ -299,31 +443,32 @@ body {
   border: 0;
   background: transparent;
   color: var(--text-sub);
-  border-radius: 999px;
-  padding: 0.55rem 1rem;
-  font: inherit;
-  font-size: 0.9rem;
-  font-weight: 700;
-  transition: transform 0.25s ease, color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+  border-radius: var(--radius);
+  padding: 0.5rem 0.9rem;
+  font-family: var(--sans-font);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: color 0.2s ease, background 0.2s ease;
 }
 
 .performance-toggle-button:hover,
 .performance-source-button:hover {
   color: var(--heading);
-  transform: translateY(-1px);
+  background: rgba(33, 31, 28, 0.03);
+  transform: none;
 }
 
 .performance-toggle-button:focus-visible,
 .performance-source-button:focus-visible {
-  outline: 2px solid rgba(160, 122, 170, 0.35);
+  outline: 2px solid rgba(74, 46, 92, 0.35);
   outline-offset: 2px;
 }
 
 .performance-toggle-button.is-active,
 .performance-source-button.is-active {
-  background: var(--highlight-btn);
+  background: var(--btn-gradient);
   color: #fff;
-  box-shadow: 0 10px 22px rgba(160, 122, 170, 0.22);
+  box-shadow: none;
 }
 
 .performance-card-enhanced,
@@ -448,6 +593,10 @@ body {
 }
 
 @media (max-width: 768px) {
+  .model-header h1 {
+    font-size: 2rem;
+  }
+
   .performance-toolbar {
     align-items: stretch;
   }

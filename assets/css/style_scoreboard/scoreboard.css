@@ -18,7 +18,7 @@
 
 .label-container {
     font-size: 16px;
-    font-weight: bold;
+    font-weight: 500;
     margin-right: 10px;
 }
 
@@ -33,7 +33,7 @@
     background-color: rgb(194, 215, 194);  
     color: black;
     border: 2px solid darkgreen; 
-    font-weight: bold;
+    font-weight: 500;
 }
 
 
@@ -71,7 +71,7 @@
 /* fMRI  */
 .subject {
     text-align: center;
-    font-weight: bold;
+    font-weight: 500;
 }
 
 /* Heatmap */
@@ -109,8 +109,8 @@
 /* shortcut part at the bottom */
 
 .chart { margin: 20px; }
-.axis-label { font-weight: bold; font-size: 14px; }
-.model-label { font-weight: bold; font-style: italic; }
+.axis-label { font-weight: 500; font-size: 14px; }
+.model-label { font-weight: 500; font-style: italic; }
 
 
 .thumbnail-container {

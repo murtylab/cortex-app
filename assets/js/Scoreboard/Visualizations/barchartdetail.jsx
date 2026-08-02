@@ -267,6 +267,7 @@ const BarChartDetail = ({
       .attr("y", height - margin.bottom + 10)
       .attr("text-anchor", "start")
       .attr("font-size", "9px")
+      .style("font-family", "var(--mono-font, 'IBM Plex Mono', monospace)")
       .attr("fill", (d) => (d.model === selectedModel ? "#6b4a8c" : "#555"))
       .attr("font-weight", (d) => (d.model === selectedModel ? "700" : "400"))
       .attr(

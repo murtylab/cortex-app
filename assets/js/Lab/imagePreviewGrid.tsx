@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Pencil, X } from "lucide-react";
 
 type FileWithPath = File & { webkitRelativePath?: string };
 
@@ -17,6 +18,10 @@ type GroupedMap = Record<string, GroupedItem[]>;
 type ImagePreviewGroupedDnDProps = {
   files: PreviewFile[];
   title?: string;
+  /** Lab page only: mono eyebrow + secondary control styling. Whole-brain leaves default. */
+  variant?: "default" | "lab";
+  /** Lab variant eyebrow override (e.g. "Uploaded stimuli"). Falls back to title. */
+  eyebrow?: string;
   groupDepth?: number;
   maxThumbsPerGroup?: number;
   showPathDebug?: boolean;
@@ -42,6 +47,8 @@ type ImagePreviewGroupedDnDProps = {
 export default function ImagePreviewGroupedDnD({
   files = [],
   title = "Uploaded Images",
+  variant = "default",
+  eyebrow,
   onRemove,
   onClear,
   onClearGroup,
@@ -62,6 +69,7 @@ export default function ImagePreviewGroupedDnD({
   onPanelCollapsedChange,
   tutorialCollapseToggleKey = null,
 }: ImagePreviewGroupedDnDProps) {
+  const isLab = variant === "lab";
   const getTutorialGroupOrder = (keys: string[]) =>
     [...keys].sort((left, right) => {
       if (left === "Tutorial Group") return 1;
@@ -345,7 +353,7 @@ export default function ImagePreviewGroupedDnD({
 
   const commitRename = (k: string) => {
     const name = (draftName || "").trim();
-    if (!name || name === k) {
+    if (!name || name === k || name === displayName(k)) {
       setEditingKey(null);
       return;
     }
@@ -378,6 +386,23 @@ export default function ImagePreviewGroupedDnD({
   };
 
   function btnStyle(disabled = false): React.CSSProperties {
+    if (isLab) {
+      return {
+        border: "0.5px solid var(--lab-hairline, #D6D2C6)",
+        background: "transparent",
+        color: disabled ? "var(--lab-muted, #8A8378)" : "var(--lab-text, #211F1C)",
+        borderRadius: 5,
+        padding: "9px 16px",
+        cursor: disabled ? "not-allowed" : "pointer",
+        fontFamily: "var(--lab-sans, 'Inter', sans-serif)",
+        fontWeight: 500,
+        fontSize: 13,
+        whiteSpace: "nowrap",
+        opacity: disabled ? 0.45 : 1,
+        boxShadow: "none",
+        textTransform: "none" as const,
+      };
+    }
     return {
       border: "1px solid rgba(0,0,0,0.15)",
       background: disabled ? "rgba(0,0,0,0.04)" : "white",
@@ -396,9 +421,22 @@ export default function ImagePreviewGroupedDnD({
 
   if (!files.length) {
     return (
-      <div style={{ border: "1px dashed rgba(0,0,0,0.25)", borderRadius: 12, padding: 12 }}>
-        <div style={{ fontWeight: 700, color: "black" }}>{title}</div>
-        <div style={{ marginTop: 6, color: "rgba(0,0,0,0.55)" }}>No images yet.</div>
+      <div
+        style={{
+          border: isLab ? "0.5px solid var(--lab-hairline, #D6D2C6)" : "1px dashed rgba(0,0,0,0.25)",
+          borderRadius: isLab ? 8 : 12,
+          padding: 12,
+          background: isLab ? "var(--lab-panel, #FBFAF6)" : undefined,
+        }}
+      >
+        {isLab ? (
+          <div className="lab-eyebrow">{eyebrow || title}</div>
+        ) : (
+          <div style={{ fontWeight: 700, color: "black" }}>{title}</div>
+        )}
+        <div style={{ marginTop: 6, color: isLab ? "var(--lab-muted, #8A8378)" : "rgba(0,0,0,0.55)", fontSize: isLab ? 14 : undefined }}>
+          No images yet.
+        </div>
       </div>
     );
   }
@@ -406,18 +444,36 @@ export default function ImagePreviewGroupedDnD({
   return (
     <div
       style={{
-        border: "1px solid rgba(0,0,0,0.12)",
-        borderRadius: 10,
+        border: isLab ? "0.5px solid var(--lab-hairline, #D6D2C6)" : "1px solid rgba(0,0,0,0.12)",
+        borderRadius: isLab ? 8 : 10,
         padding: 10,
-        background: "rgba(0,0,0,0.02)",
+        background: isLab ? "var(--lab-panel, #FBFAF6)" : "rgba(0,0,0,0.02)",
+        boxShadow: "none",
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-        <div style={{ fontWeight: 700, color: "black" }}>
-          {title} <span style={{ fontWeight: 450, color: "rgba(0,0,0,0.55)" }}>({files.length})</span>
-        </div>
+        {isLab ? (
+          <div className="lab-eyebrow">{eyebrow || title}</div>
+        ) : (
+          <div style={{ fontWeight: 700, color: "black" }}>
+            {title} <span style={{ fontWeight: 450, color: "rgba(0,0,0,0.55)" }}>({files.length})</span>
+          </div>
+        )}
 
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          {isLab && (
+            <span
+              className="lab-mono-num"
+              style={{
+                fontFamily: "var(--lab-mono, 'IBM Plex Mono', monospace)",
+                fontWeight: 500,
+                fontSize: 13,
+                color: "var(--lab-text, #211F1C)",
+              }}
+            >
+              {files.length}
+            </span>
+          )}
           {foldable && (
             <button
               type="button"
@@ -429,7 +485,9 @@ export default function ImagePreviewGroupedDnD({
               }}
               style={btnStyle()}
             >
-              {isPanelCollapsed ? "▸ Unfold" : "▾ Fold"}
+              {isLab
+                ? (isPanelCollapsed ? "Unfold" : "Fold")
+                : (isPanelCollapsed ? "▸ Unfold" : "▾ Fold")}
             </button>
           )}
 
@@ -445,7 +503,7 @@ export default function ImagePreviewGroupedDnD({
             }}
             style={btnStyle(groupEditingDisabled)}
           >
-            Add Group
+            {isLab ? "Add group" : "Add Group"}
           </button>
 
           <button
@@ -460,7 +518,7 @@ export default function ImagePreviewGroupedDnD({
             }}
             style={btnStyle(groupEditingDisabled)}
           >
-            Clear All
+            {isLab ? "Clear all" : "Clear All"}
           </button>
         </div>
       </div>
@@ -640,7 +698,7 @@ export default function ImagePreviewGroupedDnD({
                         <input
                           value={draftName}
                           autoFocus
-                          disabled={isPreload}
+                          disabled={groupEditingDisabled}
                           onChange={(e) => setDraftName(e.target.value)}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") commitRename(k);
@@ -650,23 +708,35 @@ export default function ImagePreviewGroupedDnD({
                           style={{
                             width: 240,
                             maxWidth: "60vw",
-                            borderRadius: 10,
-                            border: "1px solid rgba(0,0,0,0.25)",
+                            borderRadius: isLab ? 5 : 10,
+                            border: isLab ? "0.5px solid var(--lab-hairline, #D6D2C6)" : "1px solid rgba(0,0,0,0.25)",
                             padding: "6px 10px",
-                            fontWeight: 800,
+                            fontFamily: isLab ? "var(--lab-mono, 'IBM Plex Mono', monospace)" : undefined,
+                            fontWeight: isLab ? 400 : 800,
                             outline: "none",
                           }}
                         />
                       ) : (
                         <div
                           style={{
-                            fontWeight: 800,
+                            fontFamily: isLab ? "var(--lab-mono, 'IBM Plex Mono', monospace)" : undefined,
+                            fontWeight: isLab ? 400 : 800,
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
+                            color: isLab ? "var(--lab-text, #211F1C)" : undefined,
                           }}
                         >
-                          {displayName(k)} <span style={{ fontWeight: 500, opacity: 0.6 }}>{items.length}</span>
+                          {displayName(k)}{" "}
+                          <span
+                            style={{
+                              fontFamily: isLab ? "var(--lab-mono, 'IBM Plex Mono', monospace)" : undefined,
+                              fontWeight: 500,
+                              opacity: 0.6,
+                            }}
+                          >
+                            {items.length}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -682,10 +752,10 @@ export default function ImagePreviewGroupedDnD({
                             if (groupEditingDisabled) return;
                             startRename(k);
                           }}
-                          style={btnStyle(groupEditingDisabled)}
+                          style={{ ...btnStyle(groupEditingDisabled), display: "inline-flex", alignItems: "center", gap: 5 }}
                           title="Rename group"
                         >
-                          ✏️ Rename
+                          <Pencil size={isLab ? 16 : 13} strokeWidth={1.5} aria-hidden="true" /> Rename
                         </button>
                       )}
 
@@ -704,7 +774,7 @@ export default function ImagePreviewGroupedDnD({
                         }}
                         style={btnStyle(groupEditingDisabled)}
                       >
-                        Clear Group
+                        {isLab ? "Clear group" : "Clear Group"}
                       </button>
                     </div>
                   </div>
@@ -760,16 +830,19 @@ export default function ImagePreviewGroupedDnD({
                                     top: 8,
                                     right: 8,
                                     border: "none",
-                                    borderRadius: 10,
-                                    padding: "6px 8px",
+                                    borderRadius: 5,
+                                    padding: "5px",
                                     background: "rgba(0,0,0,0.55)",
                                     color: "white",
                                     cursor: "pointer",
-                                    fontSize: 12,
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    lineHeight: 0,
                                   }}
                                   title="Remove"
                                 >
-                                  ✕
+                                  <X size={16} strokeWidth={1.5} aria-hidden="true" />
                                 </button>
                                 )}
                             </div>

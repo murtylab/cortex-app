@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useCallback, useState } from "react";
 import "../../css/main.css";
 import { InboxOutlined, FolderOpenOutlined } from "@ant-design/icons";
 import type { UploadProps, UploadFile } from "antd";
-import { Upload, Progress, message, Typography } from "antd";
+import { Upload, Progress, message } from "antd";
 
 // --- WebKit directory drop type defs (TS) ---
 interface FileSystemEntry {
@@ -23,7 +23,6 @@ interface FileSystemDirectoryReader {
 type AnyEntry = FileSystemFileEntry | FileSystemDirectoryEntry;
 
 const { Dragger } = Upload;
-const { Text } = Typography;
 
 interface UploaderProps {
   onAddFiles: (files: File[]) => void; // ✅ parent owns state
@@ -187,29 +186,25 @@ const Uploader: React.FC<UploaderProps> = ({ onAddFiles, fillHeight = false }) =
         showUploadList={false}
       >
         <p className="ant-upload-drag-icon"><InboxOutlined /></p>
-        <p className="ant-upload-text">Click or Drag files to upload</p>
+        <p className="ant-upload-text">Click or drag files to upload</p>
 
         <div className="ant-upload-hint" style={{ lineHeight: 1.6 }}>
-          <br />
-          <Text type="secondary">
-            Or{" "}
-            <span
-              className="gradient-link"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                openFolderPicker();
-              }}
-              role="button"
-            >
-              <FolderOpenOutlined className="highlight-icon" style={{ transform: "translateY(3px)" }} />
-              <span className="gradient-text" style={{ transform: "translateY(3px)" }}>
-                choose a whole folder here
-              </span>
-            </span>{" "}
-            to upload everything inside.
-          </Text>
-          <br />
+          Or{" "}
+          <span
+            className="gradient-link"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              openFolderPicker();
+            }}
+            role="button"
+          >
+            <FolderOpenOutlined className="highlight-icon" style={{ transform: "translateY(3px)" }} />
+            <span className="gradient-text" style={{ transform: "translateY(3px)" }}>
+              choose a whole folder here
+            </span>
+          </span>{" "}
+          to upload everything inside.
         </div>
       </Dragger>
 

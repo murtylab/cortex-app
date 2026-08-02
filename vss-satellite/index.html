@@ -8,18 +8,25 @@
     <link href="/assets/img/logo.svg" rel="icon" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/vss-page-tabs.css">
     <style>
         :root {
             --bg-color: #f7f7f4;
-            --tungsten: #424242;
+            --tungsten: #3a352f;
             --text-main: #3d3832;
             --text-sub: #6b6358;
-            --accent: #c98d9a;
-            --accent-soft: rgba(201, 141, 154, 0.18);
-            --card-shadow: 0 10px 30px rgba(107, 99, 88, 0.06);
-            --border: rgba(107, 99, 88, 0.18);
+            --accent: #5b3a6e;
+            --accent-strong: #4a2e5c;
+            --accent-soft: rgba(91, 58, 110, 0.12);
+            --card-bg: #fbfbf9;
+            --card-shadow: none;
+            --border: rgba(60, 55, 48, 0.14);
+            --radius-control: 5px;
+            --radius-card: 8px;
+            --heading-font: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+            --body-font: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+            --mono-font: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
         }
 
         * {
@@ -31,9 +38,7 @@
             min-height: 100vh;
             font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
             background-color: var(--bg-color);
-            background-image:
-                radial-gradient(ellipse 120% 80% at 100% 0%, rgba(201, 141, 154, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse 80% 60% at 0% 100%, rgba(184, 164, 188, 0.07) 0%, transparent 45%);
+            background-image: none;
             color: var(--text-main);
             line-height: 1.55;
             -webkit-font-smoothing: antialiased;
@@ -46,9 +51,9 @@
         }
 
         .hero-title {
-            font-family: 'Playfair Display', Georgia, serif;
+            font-family: var(--heading-font);
             font-size: clamp(1.65rem, 4.2vw, 2.35rem);
-            font-weight: 800;
+            font-weight: 700;
             letter-spacing: -0.025em;
             color: var(--tungsten);
             margin: 0 0 22px 0;
@@ -78,11 +83,9 @@
 
         .meta-tile {
             padding: 16px 18px;
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 0.62);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.75);
+            border-radius: var(--radius-card);
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             box-shadow: var(--card-shadow);
         }
 
@@ -143,11 +146,9 @@
         .panel {
             margin-bottom: 20px;
             padding: 26px 28px;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.52);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.72);
+            border-radius: var(--radius-card);
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             box-shadow: var(--card-shadow);
         }
 
@@ -176,13 +177,13 @@
 
         .speaker-chip {
             display: inline-block;
-            padding: 8px 14px;
-            font-size: 0.82rem;
+            padding: 6px 12px;
+            font-size: 0.8rem;
             font-weight: 500;
             color: var(--text-main);
-            background: rgba(255, 255, 255, 0.85);
+            background: #ffffff;
             border: 1px solid var(--border);
-            border-radius: 999px;
+            border-radius: var(--radius-control);
         }
 
         .schedule-block {
@@ -190,7 +191,7 @@
         }
 
         .session-head {
-            font-family: 'Playfair Display', Georgia, serif;
+            font-family: var(--heading-font);
             font-size: 1.05rem;
             font-weight: 600;
             color: var(--tungsten);

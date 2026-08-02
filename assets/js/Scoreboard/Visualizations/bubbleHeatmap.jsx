@@ -274,6 +274,7 @@ const BubbleHeatmap = ({
         .attr('dominant-baseline', 'central')
         .attr('text-anchor', 'end')
         .style('font-size', '10px')
+        .style('font-family', "var(--mono-font, 'IBM Plex Mono', monospace)")
         .style('fill', isSelected ? '#6b4a8c' : '#444')
         .style('font-weight', isSelected ? '600' : '400')
         .style('cursor', 'pointer')

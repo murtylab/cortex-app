@@ -102,7 +102,7 @@ const HeatmapOverview = ({
       .attr("height", totalHeight)
       .style("background", "transparent")
       .style("display", "block")
-      .style("font-family", "'Lato', sans-serif");
+      .style("font-family", "'Inter', sans-serif");
 
     svg
       .selectAll("rect.cell")

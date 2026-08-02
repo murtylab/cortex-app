@@ -61,15 +61,15 @@ const SelectedFiltersBar = ({ training, region, dataset, modelType, clearSingle,
             }
           }}
           style={{
-            borderRadius: 20,
+            borderRadius: 5,
             padding: '3px 10px',
             cursor: 'pointer',
-            fontWeight: 400,
+            fontWeight: 500,
             fontSize: '0.78em',
-            background: 'linear-gradient(135deg, #c98d9a 0%, #b8a4bc 50%, #c4b4cc 100%)',
+            background: 'var(--accent-color, #5b3a6e)',
             color: '#fff',
             border: 'none',
-            fontFamily: "'Inter', system-ui, sans-serif",
+            fontFamily: "var(--mono-font, 'IBM Plex Mono', monospace)",
           }}
           closeIcon={<span style={{ color: '#fff', opacity: 0.85, fontSize: '10px' }}>×</span>}
         >

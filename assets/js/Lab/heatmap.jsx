@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { heatmapStyles, styleTooltip } from './heatmapstyles';
+import { LAB_CHART, LAB_COLORS, styleLabAxis, applyLabAxisTitle } from './labTheme';
 
-const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, height, fileMappings, order}) => {
+const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, height, fileMappings, order, labChart = false }) => {
   const svgRef = useRef();
   const containerRef = useRef();
   const [containerWidth, setContainerWidth] = useState(0); 
@@ -167,7 +168,7 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
                   background: transparent;
                   border-radius: 12px;
                   min-width: 280px;
-                  font-family: 'Lato', sans-serif;
+                  font-family: 'Inter', sans-serif;
                 ">
 
                   <div style="
@@ -265,13 +266,16 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
     const legendAxis = d3.axisLeft(legendScale).ticks(6);
     
     
-    legend.append("g")
+    const legendAxisG = legend.append("g")
       .attr("transform", `translate(${legendWidth - 20}, 0)`)
       .call(legendAxis);
-    
 
-    legend.selectAll("text") // Select all tick labels
-      .style("font-size", "14px")
+    if (labChart) {
+      styleLabAxis(legendAxisG);
+      legendAxisG.select(".domain").attr("stroke", LAB_COLORS.hairline);
+    } else {
+      legend.selectAll("text").style("font-size", "14px");
+    }
     
     legend.selectAll("rect")
       .data(d3.range(legendHeight))
@@ -283,19 +287,21 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
       .attr("height", 1)
       .attr("fill", d => legendColorScale(legendScale.invert(d)));
     
-    legend.append("text")
+    const legendTitle1 = legend.append("text")
       .attr("x", legendWidth / 2)
       .attr("y", legendHeight + 20)
       .attr("text-anchor", "middle")
-      .style("font-size", "15px")
-      .text("euclidean");
+      .style("font-size", labChart ? `${LAB_CHART.axisTitle.fontSize}px` : "15px")
+      .text(labChart ? "Euclidean" : "euclidean");
+    if (labChart) applyLabAxisTitle(legendTitle1);
 
-    legend.append("text")
+    const legendTitle2 = legend.append("text")
       .attr("x", legendWidth / 2)
       .attr("y", legendHeight + 38)
       .attr("text-anchor", "middle")
-      .style("font-size", "15px")
+      .style("font-size", labChart ? `${LAB_CHART.axisTitle.fontSize}px` : "15px")
       .text("distance");
+    if (labChart) applyLabAxisTitle(legendTitle2);
 
     // Group bracket labels (top + right) when order === "group"
     if (order === "group" && groupSpans.length > 0) {
@@ -325,7 +331,9 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
         topG.append("text")
           .attr("x", cx).attr("y", TOP_Y - 3)
           .attr("text-anchor", "middle")
-          .style("font-size", "11px").style("fill", "#666")
+          .style("font-family", labChart ? LAB_CHART.category.fontFamily : null)
+          .style("font-size", "11px")
+          .style("fill", labChart ? LAB_CHART.category.fill : "#666")
           .text(group);
       });
 
@@ -354,7 +362,9 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
           .attr("x", RIGHT_X + 4).attr("y", cy)
           .attr("text-anchor", "start")
           .attr("dominant-baseline", "middle")
-          .style("font-size", "11px").style("fill", "#666")
+          .style("font-family", labChart ? LAB_CHART.category.fontFamily : null)
+          .style("font-size", "11px")
+          .style("fill", labChart ? LAB_CHART.category.fill : "#666")
           .text(group);
       });
     }
@@ -363,18 +373,18 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
         d3.select(".tooltip").remove(); // Cleanup tooltip on component unmount
     };
 
-  }, [heatmapData, originalFilenames, sortedFilenames, width, height, order, fileMappings]);
+  }, [heatmapData, originalFilenames, sortedFilenames, width, height, order, fileMappings, labChart]);
 
   return (
     <div ref={containerRef} style={{ position: 'relative', width, height, backgroundColor: 'transparent' }}>
-      {/* <div className="controls" style={{ position: 'absolute', top: 10, left: 10 }}>
-        <label htmlFor="order">Order by: </label>
-        <select id="order" value={order} onChange={e => setOrder(e.target.value)}>
-          <option value="name">Name</option>
-          <option value="group">Group</option>
-        </select>
-      </div> */}
-      <svg ref={svgRef} style={{ fontFamily: "'Lato', sans-serif" }}></svg>
+      <svg
+        ref={svgRef}
+        style={{
+          fontFamily: labChart
+            ? "'IBM Plex Mono', ui-monospace, monospace"
+            : "'Inter', sans-serif",
+        }}
+      ></svg>
     </div>
   );
 };

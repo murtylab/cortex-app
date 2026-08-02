@@ -46,6 +46,8 @@ const WholeBrainSelector = ({ wholeBrain, setWholeBrain}) => {
                 background: selected ? "var(--highlight-color-button)" : "transparent",
                 color: selected ? "#fff" : "var(--tungsten)",
                 boxShadow: "none",
+                borderRadius: "5px",
+                fontFamily: "var(--mono-font, 'IBM Plex Mono', monospace)",
                 "&:active": { boxShadow: "none" },
                 border: "1px solid var(--solid-pink)",
 

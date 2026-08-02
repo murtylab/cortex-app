@@ -17,13 +17,14 @@ export const createXScale = (categories, innerWidth) =>
 export const styleTooltip = (tooltip) => {
   tooltip
     .style("position", "absolute")
-    .style("background", "rgba(255, 255, 255, 0.9)")
-    .style("border", "1px solid #ccc")
-    .style("border-radius", "8px") // Slightly larger rounded corners
-    .style("padding", "15px") // Increase padding for a bigger appearance
-    .style("box-shadow", "0 4px 8px rgba(0, 0, 0, 0.3)") // More shadow for emphasis
+    .style("background", "#ffffff")
+    .style("border", "1px solid rgba(60, 55, 48, 0.18)")
+    .style("border-radius", "8px")
+    .style("padding", "12px 14px")
+    .style("box-shadow", "0 4px 14px rgba(0, 0, 0, 0.12)")
     .style("pointer-events", "none")
-    .style("font-size", "18px") // Bigger font for readability
+    .style("font-family", "var(--mono-font, 'IBM Plex Mono', ui-monospace, monospace)")
+    .style("font-size", "13px")
     .style("line-height", "1.5") // Improve spacing for text
     .style("min-width", "200px") // Ensure a larger tooltip width
     .style("max-width", "400px") // Prevent tooltip from being too wide

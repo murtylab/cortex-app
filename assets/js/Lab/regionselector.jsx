@@ -9,6 +9,7 @@ import {
   MURTY185_INCLUDED_REGIONS,
   NSD_1000_INCLUDED_REGIONS,
 } from "../constants";
+import { LAB_COLORS } from "./labTheme";
 
 const RegionSelector = ({
   region,
@@ -16,6 +17,7 @@ const RegionSelector = ({
   dataset,
   tutorialRootKey = "lab-settings-region",
   activeTutorialKey = "lab-settings-region-active",
+  variant = "default",
 }) => {
   const isEnabled = (option) => {
     const value = (option?.value || "").toLowerCase();
@@ -30,6 +32,70 @@ const RegionSelector = ({
 
     return true;
   };
+
+  if (variant === "lab") {
+    return (
+      <FormControl data-tutorial={tutorialRootKey} sx={{ minWidth: 120 }} fullWidth>
+        <div
+          id="region-buttons-group-label"
+          className="lab-eyebrow"
+          style={{ marginBottom: 12, fontSize: 12 }}
+        >
+          Region of interest
+        </div>
+
+        <div
+          role="group"
+          aria-labelledby="region-buttons-group-label"
+          style={{
+            display: "flex",
+            flexWrap: "nowrap",
+            gap: 6,
+            width: "100%",
+          }}
+        >
+          {REGION_OPTIONS.map((option) => {
+            const selected =
+              (region || "").toLowerCase() === (option.value || "").toLowerCase();
+            const enabled = isEnabled(option);
+
+            return (
+              <button
+                key={option.value}
+                type="button"
+                data-tutorial={selected ? activeTutorialKey : undefined}
+                onClick={() => enabled && setRegion(option.value)}
+                disabled={!enabled}
+                style={{
+                  flex: "1 1 0",
+                  minWidth: 0,
+                  fontFamily: "var(--lab-mono, 'IBM Plex Mono', monospace)",
+                  fontSize: 14,
+                  fontWeight: 400,
+                  padding: "12px 6px",
+                  borderRadius: 5,
+                  border: selected
+                    ? "0.5px solid transparent"
+                    : `0.5px solid ${LAB_COLORS.hairline}`,
+                  background: selected
+                    ? "var(--highlight-color-button, linear-gradient(135deg, #c98d9a 0%, #b8a4bc 50%, #c4b4cc 100%))"
+                    : "transparent",
+                  color: selected ? "#ffffff" : LAB_COLORS.text,
+                  cursor: enabled ? "pointer" : "not-allowed",
+                  opacity: enabled ? 1 : 0.4,
+                  lineHeight: 1.2,
+                  boxShadow: "none",
+                  textAlign: "center",
+                }}
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      </FormControl>
+    );
+  }
 
   return (
     <FormControl data-tutorial={tutorialRootKey} sx={{ minWidth: 120 }} fullWidth>
@@ -56,6 +122,8 @@ const RegionSelector = ({
                 background: selected ? "var(--highlight-color-button)" : "transparent",
                 color: selected ? "#fff" : "var(--tungsten)",
                 boxShadow: "none",
+                borderRadius: "5px",
+                fontFamily: "var(--mono-font, 'IBM Plex Mono', monospace)",
                 "&:active": { boxShadow: "none" },
                 border: "1px solid var(--solid-pink)",
 

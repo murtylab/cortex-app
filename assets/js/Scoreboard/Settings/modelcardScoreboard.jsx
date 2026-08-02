@@ -87,11 +87,13 @@ const ModelCardScoreboard = ({ region, dataset, model, evalDataset }) => {
       "Please select a region, a training dataset, and an evaluation dataset to view layer information.";
   }
 
+  const monoSx = { fontFamily: "var(--mono-font, 'IBM Plex Mono', monospace)", fontWeight: 600 };
+
   return (
-    <Box sx={{ minWidth: 250, boxShadow: 3, borderRadius: 2, marginTop: 2 , marginBottom: 2}}>
+    <Box sx={{ minWidth: 250, borderRadius: "8px", marginTop: 2, marginBottom: 2 }}>
       <Card
         variant="outlined"
-        sx={{ borderRadius: 2, background: 'var(--background-color)' }}
+        sx={{ borderRadius: "8px", boxShadow: "none", border: "1px solid var(--hairline-color, rgba(60,55,48,0.14))", background: 'var(--background-color)' }}
       >
         <CardContent sx={{ textAlign: 'center' }}>
           <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
@@ -105,9 +107,9 @@ const ModelCardScoreboard = ({ region, dataset, model, evalDataset }) => {
               rel="noopener noreferrer"
               underline="hover"
               sx={{
-                background: "var(--highlight-color)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
+                fontFamily: "var(--mono-font, 'IBM Plex Mono', monospace)",
+                fontWeight: 600,
+                color: "var(--accent-color, #5b3a6e)",
               }}
             >
               {modelName}
@@ -127,10 +129,10 @@ const ModelCardScoreboard = ({ region, dataset, model, evalDataset }) => {
           {canShowLayerInfo &&
             dedupedInfoList.map((item, index) => (
               <Typography key={index} variant="body2" sx={{ mb: 1 }}>
-                The optimal model layer for the selected ROI ({String(item.region).toUpperCase()}):{' '}
-                <strong>{item.bestLayer}</strong>, with highest correlation raw score:{' '}
-                <strong>{Number(item.corrScore).toFixed(2)}</strong>, evaluated on the selected
-                fMRI dataset: <strong>{item.dataset}</strong>
+                The optimal model layer for the selected ROI (<Box component="span" sx={monoSx}>{String(item.region).toUpperCase()}</Box>):{' '}
+                <Box component="span" sx={monoSx}>{item.bestLayer}</Box>, with highest correlation raw score:{' '}
+                <Box component="span" sx={monoSx}>{Number(item.corrScore).toFixed(2)}</Box>, evaluated on the selected
+                fMRI dataset: <Box component="span" sx={monoSx}>{item.dataset}</Box>
               </Typography>
             ))}
         </CardContent>

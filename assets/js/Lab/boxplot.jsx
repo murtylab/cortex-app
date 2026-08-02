@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import * as d3 from "d3";
 import { styleTooltip } from "./barchartstyles";
+import { LAB_CHART, LAB_COLORS, styleLabAxis, applyLabAxisTitle } from "./labTheme";
 
 /**
  * @typedef {Object} FileMapping
@@ -21,9 +22,24 @@ import { styleTooltip } from "./barchartstyles";
  */
 
 const GROUP_ORDER_FALLBACK = ["body", "face", "object", "scene"];
-const PANEL_WIDTH = 340;
-const PANEL_GAP = 30;
+const GROUP_COLORS = [
+  "#8ecae6",
+  "#f4a261",
+  "#90be6d",
+  "#c77dff",
+  "#f28482",
+  "#84a59d",
+  "#e9c46a",
+  "#6d597a",
+  "#43aa8b",
+  "#577590",
+];
+const PANEL_PLOT_WIDTH = 340;
+const PANEL_AXIS_WIDTH = 56;
+const PANEL_WIDTH = PANEL_AXIS_WIDTH + PANEL_PLOT_WIDTH;
+const PANEL_GAP = 36;
 const MAX_VISIBLE_PANELS = 3;
+const LEGEND_COLUMN_WIDTH = 118;
 const TOOLTIP_OFFSET = 14;
 
 const positionTooltip = (tooltip, event) => {
@@ -94,7 +110,7 @@ const stableJitter = (key, amplitude) => {
 };
 
 /** @param {BoxPlotProps} props */
-const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560 }) => {
+const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560, labChart = false }) => {
   const svgRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -229,10 +245,10 @@ const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560 }
   const visiblePanelCount = Math.max(1, Math.min(MAX_VISIBLE_PANELS, regions.length));
 
   const margin = {
-    top: 80,
-    right: 30,
-    bottom: 90,
-    left: 80,
+    top: 48,
+    right: 24,
+    bottom: 56,
+    left: 8,
   };
 
   const viewportInnerWidth =
@@ -241,7 +257,7 @@ const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560 }
     Math.max(1, regions.length) * PANEL_WIDTH +
     Math.max(0, regions.length - 1) * PANEL_GAP;
   const svgWidth = margin.left + margin.right + totalInnerWidth;
-  const viewportWidth = margin.left + margin.right + viewportInnerWidth;
+  const plotsViewportWidth = margin.left + margin.right + viewportInnerWidth;
 
   useEffect(() => {
     const { rows, groups } = aggregated;
@@ -254,46 +270,16 @@ const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560 }
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const innerWidth = totalInnerWidth;
     const innerHeight = height - margin.top - margin.bottom;
-
-    const allValues = rows.flatMap((d) => d.points.map((p) => p.value));
-    const yMin = d3.min(allValues);
-    const yMax = d3.max(allValues);
-
-    if (yMin == null || yMax == null) return;
-
-    const maxAbs = Math.max(Math.abs(yMin), Math.abs(yMax));
-    const safeMaxAbs = maxAbs === 0 ? 1 : maxAbs;
-
-    const y = d3
-      .scaleLinear()
-      .domain([-safeMaxAbs, safeMaxAbs])
-      .nice()
-      .range([innerHeight, 0]);
 
     const x = d3
       .scaleBand()
       .domain(groups)
-      .range([0, PANEL_WIDTH])
+      .range([0, PANEL_PLOT_WIDTH])
       .paddingInner(0.28)
       .paddingOuter(0.14);
 
-    const groupColor = d3
-      .scaleOrdinal()
-      .domain(groups)
-      .range([
-        "#8ecae6",
-        "#f4a261",
-        "#90be6d",
-        "#c77dff",
-        "#f28482",
-        "#84a59d",
-        "#e9c46a",
-        "#6d597a",
-        "#43aa8b",
-        "#577590",
-      ]);
+    const groupColor = d3.scaleOrdinal().domain(groups).range(GROUP_COLORS);
 
     const g = svg
       .attr("width", svgWidth)
@@ -316,32 +302,69 @@ const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560 }
 
     regions.forEach((region, regionIndex) => {
       const panelX = regionIndex * (PANEL_WIDTH + PANEL_GAP);
-
       const panel = g.append("g").attr("transform", `translate(${panelX},0)`);
+      const plot = panel
+        .append("g")
+        .attr("transform", `translate(${PANEL_AXIS_WIDTH},0)`);
 
       const regionRows = rows.filter(
         (d) => d.region === region && d.points.length > 0 && d.stats
       );
 
-      panel
-        .append("text")
-        .attr("x", PANEL_WIDTH / 2)
-        .attr("y", -10)
-        .attr("text-anchor", "middle")
-        .style("font-size", "16px")
-        .style("font-weight", "600")
-        .text(region.toUpperCase());
+      const regionValues = regionRows.flatMap((d) => d.points.map((p) => p.value));
+      const yMin = d3.min(regionValues);
+      const yMax = d3.max(regionValues);
+      if (yMin == null || yMax == null) return;
+
+      // Independent y-scale per region (do not share across panels).
+      const maxAbs = Math.max(Math.abs(yMin), Math.abs(yMax));
+      const safeMaxAbs = maxAbs === 0 ? 1 : maxAbs;
+      const y = d3
+        .scaleLinear()
+        .domain([-safeMaxAbs, safeMaxAbs])
+        .nice()
+        .range([innerHeight, 0]);
 
       panel
+        .append("text")
+        .attr("x", PANEL_AXIS_WIDTH + PANEL_PLOT_WIDTH / 2)
+        .attr("y", -10)
+        .attr("text-anchor", "middle")
+        .style("font-family", labChart ? LAB_CHART.category.fontFamily : null)
+        .style("font-size", labChart ? "11px" : "16px")
+        .style("font-weight", labChart ? 400 : 600)
+        .style("fill", labChart ? LAB_CHART.category.fill : null)
+        .text(region.toUpperCase());
+
+      const yAxisG = panel
+        .append("g")
+        .attr("transform", `translate(${PANEL_AXIS_WIDTH},0)`)
+        .call(d3.axisLeft(y).ticks(6));
+      if (labChart) {
+        styleLabAxis(yAxisG);
+        yAxisG.select(".domain").remove();
+      }
+
+      const yTitle = panel
+        .append("text")
+        .attr("x", -innerHeight / 2)
+        .attr("y", 10)
+        .attr("transform", "rotate(-90)")
+        .attr("text-anchor", "middle")
+        .style("font-size", labChart ? `${LAB_CHART.axisTitle.fontSize}px` : "12px")
+        .text(labChart ? "Predicted response" : "Predicted Response");
+      if (labChart) applyLabAxisTitle(yTitle);
+
+      plot
         .append("line")
         .attr("x1", 0)
-        .attr("x2", PANEL_WIDTH)
+        .attr("x2", PANEL_PLOT_WIDTH)
         .attr("y1", y(0))
         .attr("y2", y(0))
         .attr("stroke", "#999")
         .attr("stroke-width", 1);
 
-      panel
+      plot
         .selectAll(".whisker-line")
         .data(regionRows)
         .enter()
@@ -354,7 +377,7 @@ const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560 }
         .attr("stroke", "#666")
         .attr("stroke-width", 1.4);
 
-      panel
+      plot
         .selectAll(".whisker-cap-top")
         .data(regionRows)
         .enter()
@@ -367,7 +390,7 @@ const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560 }
         .attr("stroke", "#666")
         .attr("stroke-width", 1.4);
 
-      panel
+      plot
         .selectAll(".whisker-cap-bottom")
         .data(regionRows)
         .enter()
@@ -380,7 +403,7 @@ const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560 }
         .attr("stroke", "#666")
         .attr("stroke-width", 1.4);
 
-      panel
+      plot
         .selectAll(".box")
         .data(regionRows)
         .enter()
@@ -395,7 +418,7 @@ const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560 }
         .attr("stroke", (d) => groupColor(d.group))
         .attr("stroke-width", 1.6);
 
-      panel
+      plot
         .selectAll(".median-line")
         .data(regionRows)
         .enter()
@@ -408,7 +431,7 @@ const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560 }
         .attr("stroke", "#333")
         .attr("stroke-width", 2);
 
-      panel
+      plot
         .selectAll(".dot")
         .data(
           regionRows.flatMap((row) =>
@@ -499,38 +522,28 @@ const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560 }
           tooltip.style("display", "none");
         });
 
-      if (regionIndex === 0) {
-        panel.append("g").call(d3.axisLeft(y));
-      }
-
-      panel
+      const xAxisG = plot
         .append("g")
         .attr("transform", `translate(0, ${innerHeight})`)
-        .call(d3.axisBottom(x))
+        .call(d3.axisBottom(x));
+      xAxisG
         .selectAll("text")
+        .style("font-family", labChart ? LAB_CHART.tick.fontFamily : null)
         .style("font-size", "11px")
+        .style("fill", labChart ? LAB_CHART.tick.fill : null)
         .attr("dy", (_d, i) => (i % 2 === 0 ? "1.2em" : "2.3em"));
+      if (labChart) {
+        xAxisG.selectAll("path, line")
+          .attr("stroke", LAB_COLORS.hairline)
+          .attr("stroke-width", 1);
+        xAxisG.select(".domain").remove();
+      }
     });
-
-    g.append("text")
-      .attr("x", totalInnerWidth / 2)
-      .attr("y", innerHeight + 70)
-      .attr("text-anchor", "middle")
-      .style("font-size", "14px")
-      .text("Stimulus Groups");
-
-    g.append("text")
-      .attr("x", -innerHeight / 2)
-      .attr("y", -55)
-      .attr("transform", "rotate(-90)")
-      .attr("text-anchor", "middle")
-      .style("font-size", "18px")
-      .text("Predicted Response Distribution");
 
     return () => {
       d3.select("body").selectAll(".boxplot-tooltip").remove();
     };
-  }, [aggregated, fileMap, hasRenderableData, height, regions.length, svgWidth, totalInnerWidth, margin.left, margin.top]);
+  }, [aggregated, fileMap, hasRenderableData, height, regions.length, svgWidth, totalInnerWidth, margin.left, margin.top, labChart]);
 
   if (!hasRenderableData) {
     return (
@@ -554,67 +567,47 @@ const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560 }
       ref={containerRef}
       style={{
         position: "relative",
-        width: `${viewportWidth}px`,
-        maxWidth: "100%",
+        width: "100%",
+        maxWidth: `${LEGEND_COLUMN_WIDTH + plotsViewportWidth}px`,
         height,
         backgroundColor: "transparent",
         display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-start",
+        flexDirection: "row",
+        alignItems: "stretch",
         paddingTop: "10px",
-        overflowX: "auto",
+        gap: 0,
       }}
     >
-      <svg
-        ref={svgRef}
-        style={{
-          marginTop: "10px",
-          width: `${svgWidth}px`,
-          minWidth: `${svgWidth}px`,
-          fontFamily: "'Lato', sans-serif",
-        }}
-      />
-
+      {/* Group conditions: fixed left column (does not scroll with region panels) */}
       <div
         style={{
-          position: "absolute",
-          top: 6,
-          right: 10,
+          flex: `0 0 ${LEGEND_COLUMN_WIDTH}px`,
+          width: LEGEND_COLUMN_WIDTH,
+          paddingTop: margin.top + 10,
+          paddingRight: 10,
+          boxSizing: "border-box",
           display: "flex",
-          alignItems: "center",
-          gap: 16,
-          flexWrap: "wrap",
-          justifyContent: "flex-end",
-          padding: "6px 10px",
-          borderRadius: 8,
-          zIndex: 3,
-          pointerEvents: "none",
+          flexDirection: "column",
+          gap: 10,
+          background: labChart ? "var(--lab-page-bg, #f7f7f4)" : "#fff",
+          zIndex: 2,
         }}
       >
         {aggregated.groups.map((group, i) => {
-          const legendColors = [
-            "#8ecae6",
-            "#f4a261",
-            "#90be6d",
-            "#c77dff",
-            "#f28482",
-            "#84a59d",
-            "#e9c46a",
-            "#6d597a",
-            "#43aa8b",
-            "#577590",
-          ];
-          const color = legendColors[i % legendColors.length];
-
+          const color = GROUP_COLORS[i % GROUP_COLORS.length];
           return (
             <div
               key={group}
               style={{
-                display: "inline-flex",
+                display: "flex",
                 alignItems: "center",
-                gap: 6,
+                gap: 8,
                 fontSize: 12,
-                color: "#333",
+                fontFamily: labChart
+                  ? "var(--lab-mono, 'IBM Plex Mono', monospace)"
+                  : "inherit",
+                fontWeight: 400,
+                color: labChart ? LAB_COLORS.text : "#333",
                 whiteSpace: "nowrap",
               }}
             >
@@ -622,16 +615,37 @@ const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560 }
                 style={{
                   width: 12,
                   height: 12,
+                  flex: "0 0 12px",
                   display: "inline-block",
                   borderRadius: 2,
                   background: color,
-                  opacity: 0.6,
+                  opacity: 0.75,
                 }}
               />
               {group}
             </div>
           );
         })}
+      </div>
+
+      <div
+        style={{
+          flex: "1 1 auto",
+          minWidth: 0,
+          overflowX: "auto",
+          height: "100%",
+        }}
+      >
+        <svg
+          ref={svgRef}
+          style={{
+            width: `${svgWidth}px`,
+            minWidth: `${svgWidth}px`,
+            fontFamily: labChart
+              ? "'IBM Plex Mono', ui-monospace, monospace"
+              : "'Inter', sans-serif",
+          }}
+        />
       </div>
     </div>
   );

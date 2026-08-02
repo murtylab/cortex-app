@@ -1,6 +1,15 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { barchartStyles, styleTooltip } from './barchartstyles';
+import { LAB_CHART, LAB_COLORS, styleLabAxis, applyLabAxisTitle } from './labTheme';
+
+// Fabio Crameri's "vik" perceptually-uniform diverging scientific colour map
+// (blue = negative, warm red = positive). Colour-blind safe.
+const VIK_COLORS = [
+  "#001261", "#022a70", "#03417f", "#08598f", "#2575a1", "#5194b6",
+  "#80b2ca", "#b0cfde", "#dee6e9", "#eedbd0", "#e4bea8", "#d7a081",
+  "#cc855d", "#c06b3a", "#af4c18", "#8f2b06", "#731406", "#590008",
+];
 
 /**
  * @param {{
@@ -10,6 +19,7 @@ import { barchartStyles, styleTooltip } from './barchartstyles';
  *   order: string;
  *   setOrder: (nextOrder: string) => void;
  *   tutorialSelectedGroups?: string[] | null;
+ *   labChart?: boolean;
  * }} props
  */
 const BarChart = ({
@@ -19,6 +29,7 @@ const BarChart = ({
   order,
   setOrder,
   tutorialSelectedGroups = null,
+  labChart = false,
 }) => {
   const svgRef = useRef(null);
   const containerRef = useRef(null);
@@ -275,7 +286,7 @@ const BarChart = ({
     const colorScale = d3
       .scaleDiverging()
       .domain([yMin, 0, yMax])
-      .interpolator((t) => d3.interpolateRdBu(1 - t));
+      .interpolator(d3.interpolateRgbBasis(VIK_COLORS));
 
     const g = svg
       .attr("width", width)
@@ -316,7 +327,7 @@ const BarChart = ({
       .attr("opacity", (d) => (isGroupHighlighted(d.filename) ? 1 : 0.2))
       .attr("stroke", (d) =>
         tutorialActiveGroup && getGroupForFilename(d.filename) === tutorialActiveGroup
-          ? "rgba(196, 116, 144, 0.9)"
+          ? "rgba(91, 58, 110, 0.9)"
           : "none"
       )
       .attr("stroke-width", (d) =>
@@ -402,9 +413,14 @@ const BarChart = ({
     }
 
     // Y axis
-    g.append("g")
+    const yAxisG = g.append("g")
       .attr("transform", "translate(20, 0)")
       .call(d3.axisLeft(yScale));
+    if (labChart) {
+      styleLabAxis(yAxisG);
+      // No plot frame: hide domain path, keep ticks
+      yAxisG.select(".domain").remove();
+    }
 
     // X axis baseline
     g.append("line")
@@ -412,25 +428,27 @@ const BarChart = ({
       .attr("x2", innerWidth + 20)
       .attr("y1", yScale(0))
       .attr("y2", yScale(0))
-      .attr("stroke", "#666")
+      .attr("stroke", labChart ? LAB_COLORS.hairline : "#666")
       .attr("stroke-width", 1)
-      .attr("stroke-dasharray", "3,2");
+      .attr("stroke-dasharray", labChart ? null : "3,2");
 
     // Axis labels
-    g.append("text")
+    const xTitle = g.append("text")
       .attr("x", innerWidth / 2)
       .attr("y", innerHeight + margin.bottom - 10)
       .attr("text-anchor", "middle")
-      .style("font-size", "14px")
-      .text("Images");
+      .style("font-size", labChart ? `${LAB_CHART.axisTitle.fontSize}px` : "14px")
+      .text(labChart ? "Images" : "Images");
+    if (labChart) applyLabAxisTitle(xTitle);
 
-    g.append("text")
+    const yTitle = g.append("text")
       .attr("x", -margin.left - 50)
       .attr("y", -30)
       .attr("text-anchor", "middle")
       .attr("transform", "rotate(-90)")
-      .style("font-size", "20px")
-      .text("Mean Predicted Response");
+      .style("font-size", labChart ? `${LAB_CHART.axisTitle.fontSize}px` : "20px")
+      .text(labChart ? "Predicted response" : "Mean Predicted Response");
+    if (labChart) applyLabAxisTitle(yTitle);
 
     // Error bars
     g.selectAll(".error-bar")
@@ -535,8 +553,10 @@ const BarChart = ({
         .attr("x", centerX)
         .attr("y", textOffsetY + 2)
         .attr("text-anchor", "middle")
-        .style("font-size", "12px")
-        .style("fill", "#666")
+        .style("font-family", labChart ? LAB_CHART.category.fontFamily : null)
+        .style("font-size", labChart ? `${LAB_CHART.category.fontSize}px` : "12px")
+        .style("font-weight", labChart ? LAB_CHART.category.fontWeight : null)
+        .style("fill", labChart ? LAB_CHART.category.fill : "#666")
         .text(group);
             });
           }
@@ -554,6 +574,7 @@ const BarChart = ({
     selectedGroups,
     tutorialActiveGroup,
     tutorialSelectedGroups,
+    labChart,
   ]);
 
   return (
@@ -593,8 +614,32 @@ const BarChart = ({
             flexShrink: 0,
           }}
         >
-          <label htmlFor="order">Order by:</label>
-          <select id="order" value={order} onChange={(e) => setOrder(e.target.value)}>
+          <label
+            htmlFor="order"
+            style={labChart ? {
+              fontFamily: "var(--lab-sans, 'Inter', sans-serif)",
+              fontSize: 13,
+              fontWeight: 500,
+              color: 'var(--lab-text, #211F1C)',
+            } : undefined}
+          >
+            {labChart ? 'Order by' : 'Order by:'}
+          </label>
+          <select
+            id="order"
+            value={order}
+            onChange={(e) => setOrder(e.target.value)}
+            style={labChart ? {
+              fontFamily: 'inherit',
+              fontSize: 13,
+              fontWeight: 500,
+              border: '0.5px solid var(--lab-hairline, #D6D2C6)',
+              borderRadius: 5,
+              padding: '6px 10px',
+              background: 'var(--lab-panel, #FBFAF6)',
+              color: 'var(--lab-text, #211F1C)',
+            } : undefined}
+          >
             <option value="group">Group</option>
             <option value="ranking">Rank</option>
           </select>
@@ -611,8 +656,13 @@ const BarChart = ({
               justifyContent: 'flex-end',
             }}
           >
-            <span style={{ fontWeight: 500, whiteSpace: 'nowrap' }}>
-              Highlight group:
+            <span style={{
+              fontWeight: 500,
+              whiteSpace: 'nowrap',
+              fontSize: labChart ? 13 : undefined,
+              fontFamily: labChart ? "var(--lab-sans, 'Inter', sans-serif)" : undefined,
+            }}>
+              {labChart ? 'Highlight group' : 'Highlight group:'}
             </span>
 
             {allGroups.map((group) => (
@@ -627,27 +677,21 @@ const BarChart = ({
                   fontSize: '13px',
                   whiteSpace: 'nowrap',
                   padding: '4px 8px',
-                  borderRadius: '999px',
+                  borderRadius: '5px',
                   border:
                     tutorialActiveGroup === group
-                      ? '1px solid rgba(196, 116, 144, 0.45)'
+                      ? '1px solid rgba(91, 58, 110, 0.45)'
                       : effectiveSelectedGroups.includes(group)
                       ? '1px solid rgba(107, 99, 88, 0.35)'
                       : '1px solid transparent',
                   background:
                     tutorialActiveGroup === group
-                      ? 'rgba(247, 236, 225, 0.92)'
+                      ? 'rgba(91, 58, 110, 0.10)'
                       : effectiveSelectedGroups.includes(group)
                       ? 'rgba(247, 242, 238, 0.95)'
                       : 'transparent',
-                  boxShadow:
-                    tutorialActiveGroup === group
-                      ? '0 10px 24px rgba(196, 116, 144, 0.16)'
-                      : 'none',
-                  transform:
-                    tutorialActiveGroup === group || effectiveSelectedGroups.includes(group)
-                      ? 'translateY(-1px)'
-                      : 'none',
+                  boxShadow: 'none',
+                  transform: 'none',
                   opacity:
                     effectiveSelectedGroups.length > 0 && !effectiveSelectedGroups.includes(group)
                       ? 0.55
@@ -660,33 +704,42 @@ const BarChart = ({
                   checked={effectiveSelectedGroups.includes(group)}
                   onChange={() => toggleGroupSelection(group)}
                 />
-                {group}
+                <span style={{
+                  fontFamily: "var(--lab-mono, var(--mono-font, 'IBM Plex Mono', monospace))",
+                  fontSize: '12px',
+                  fontWeight: 400,
+                }}>{group}</span>
               </label>
             ))}
 
             <button
               type="button"
+              className={labChart ? 'lab-secondary-btn' : undefined}
               onClick={() => setSelectedGroups([])}
               disabled={effectiveSelectedGroups.length === 0}
-              style={{
+              style={labChart ? {
+                padding: '4px 12px',
+                opacity: effectiveSelectedGroups.length === 0 ? 0.45 : 1,
+                cursor: effectiveSelectedGroups.length === 0 ? 'default' : 'pointer',
+              } : {
                 cursor: effectiveSelectedGroups.length === 0 ? 'default' : 'pointer',
                 whiteSpace: 'nowrap',
                 fontSize: '13px',
                 fontWeight: 500,
                 color: effectiveSelectedGroups.length === 0 ? 'rgba(107, 99, 88, 0.4)' : 'rgba(61, 56, 50, 0.9)',
                 padding: '4px 12px',
-                borderRadius: '999px',
+                borderRadius: '5px',
                 border: '1px solid rgba(107, 99, 88, 0.35)',
                 background: 'rgba(255, 255, 255, 0.65)',
                 opacity: effectiveSelectedGroups.length === 0 ? 0.6 : 1,
                 transition: 'all 220ms ease',
               }}
-              onMouseEnter={(e) => {
+              onMouseEnter={labChart ? undefined : (e) => {
                 if (effectiveSelectedGroups.length === 0) return;
                 e.currentTarget.style.background = 'rgba(247, 242, 238, 0.95)';
-                e.currentTarget.style.borderColor = 'rgba(196, 116, 144, 0.45)';
+                e.currentTarget.style.borderColor = 'rgba(91, 58, 110, 0.45)';
               }}
-              onMouseLeave={(e) => {
+              onMouseLeave={labChart ? undefined : (e) => {
                 e.currentTarget.style.background = 'rgba(255, 255, 255, 0.65)';
                 e.currentTarget.style.borderColor = 'rgba(107, 99, 88, 0.35)';
               }}
@@ -697,7 +750,16 @@ const BarChart = ({
         )}
       </div>
 
-      <svg ref={svgRef} style={{ marginTop: '10px', width: '100%', fontFamily: "'Lato', sans-serif" }} />
+      <svg
+        ref={svgRef}
+        style={{
+          marginTop: '10px',
+          width: '100%',
+          fontFamily: labChart
+            ? "'IBM Plex Mono', ui-monospace, monospace"
+            : "'Inter', system-ui, sans-serif",
+        }}
+      />
     </div>
   );
 };

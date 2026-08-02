@@ -308,7 +308,7 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
     const width = chartWidth + headerMargin.left + headerMargin.right;
 
     // ======= Header =======
-    const svgHeader = d3.select(headerRef.current).append("svg").attr("width", width).attr("height", headerHeight).style("font-family", "'Lato', sans-serif");
+    const svgHeader = d3.select(headerRef.current).append("svg").attr("width", width).attr("height", headerHeight).style("font-family", "'Inter', sans-serif");
 
     svgHeader
       .append("g")
@@ -366,7 +366,7 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
         .call((g) => { g.select(".domain").remove(); g.selectAll("text").style("font-size", "12px").style("font-weight", "bold"); });
     }
     // ======= Body =======
-    const svgBody = d3.select(bodyRef.current).append("svg").attr("width", width).attr("height", bodyHeight).style("font-family", "'Lato', sans-serif");
+    const svgBody = d3.select(bodyRef.current).append("svg").attr("width", width).attr("height", bodyHeight).style("font-family", "'Inter', sans-serif");
 
     // highlight logic
     if (selectedModel) {
@@ -457,6 +457,7 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
           g.select(".domain").remove();
           g.selectAll("text")
             .style("font-size", "11px")
+            .style("font-family", "var(--mono-font, 'IBM Plex Mono', monospace)")
             .style("fill", (d) => (d === selectedModel ? "#6b4a8c" : "black"))
             .style("font-weight", (d) => (d === selectedModel ? "600" : "normal"))
             .style("cursor", "pointer")
@@ -479,7 +480,7 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
     // svgLegend.append("g").attr("transform", `translate(42,0)`).call(d3.axisRight(legendScale).ticks(5));
     if (showYAxis && showLegend) {
         const legendHeight = 200;
-        const svgLegend = d3.select(legendRef.current).append("svg").attr("width", 60).attr("height", legendHeight + 40).style("font-family", "'Lato', sans-serif");
+        const svgLegend = d3.select(legendRef.current).append("svg").attr("width", 60).attr("height", legendHeight + 40).style("font-family", "'Inter', sans-serif");
         const defs = svgLegend.append("defs");
         const gradient = defs.append("linearGradient").attr("id", "grad").attr("x1", "0%").attr("y1", "100%").attr("x2", "0%").attr("y2", "0%");
         gradient.append("stop").attr("offset", "0%").attr("stop-color", "#ede9d8");

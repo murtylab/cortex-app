@@ -27,25 +27,42 @@ const Settings = ({
   setVoxelNumber,
   participantName,
   setParticipantName,
+  variant = 'default',
 }) => {
+  const isLab = variant === 'lab';
+  const accent = isLab ? 'var(--lab-accent, #4A2E5C)' : 'var(--solid-pink)';
+  const hairline = isLab ? 'var(--lab-hairline, #D6D2C6)' : 'rgba(0,0,0,0.2)';
+  const bg = isLab ? 'var(--lab-panel, #FBFAF6)' : 'var(--background-color)';
+
   const sharedSelectSx = {
-    backgroundColor: 'var(--background-color)',
+    backgroundColor: bg,
+    fontFamily: isLab ? "var(--lab-sans, 'Inter', sans-serif)" : undefined,
+    fontSize: isLab ? 15 : undefined,
+    fontWeight: isLab ? 500 : undefined,
+    borderRadius: isLab ? '5px' : undefined,
     '& .MuiOutlinedInput-notchedOutline': {
-      borderColor: 'rgba(0,0,0,0.2)',
+      borderColor: hairline,
+      borderWidth: isLab ? '0.5px' : '1px',
     },
     '&:hover .MuiOutlinedInput-notchedOutline': {
-      borderColor: 'var(--solid-pink)',
+      borderColor: accent,
     },
     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: 'var(--solid-pink)',
+      borderColor: accent,
       borderWidth: '1px',
+    },
+    '& .MuiSelect-select': {
+      fontSize: isLab ? 15 : undefined,
     },
   };
 
   const sharedLabelSx = {
-    backgroundColor: 'var(--background-color)',
+    backgroundColor: bg,
+    fontFamily: isLab ? "var(--lab-sans, 'Inter', sans-serif)" : undefined,
+    fontSize: isLab ? '15px !important' : undefined,
+    fontWeight: isLab ? 500 : undefined,
     '&.Mui-focused': {
-      color: 'var(--solid-pink)',
+      color: accent,
     },
   };
 
@@ -65,17 +82,17 @@ const Settings = ({
 
   const sharedTextFieldSx = {
     marginTop: 2,
-    backgroundColor: 'var(--background-color)',
-    borderRadius: '4px',
+    backgroundColor: bg,
+    borderRadius: isLab ? '5px' : '4px',
     '& .MuiOutlinedInput-root': {
       '& .MuiOutlinedInput-notchedOutline': {
-        borderColor: 'rgba(0,0,0,0.2)',
+        borderColor: hairline,
       },
       '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor: 'var(--solid-pink)',
+        borderColor: accent,
       },
       '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-        borderColor: 'var(--solid-pink)',
+        borderColor: accent,
       },
     },
   };
@@ -87,17 +104,27 @@ const Settings = ({
         padding: 0,
         margintop: 2,
         marginLeft: 0,
-        backgroundColor: 'var(--background-color)',
+        backgroundColor: isLab ? 'transparent' : 'var(--background-color)',
         borderRadius: '8px',
-        // width: { xs: '90%', sm: '50%', md: '30%', lg: '30%', xl: '30%' },
         width: '100%',
         marginRight: '0 auto',
         flexDirection: { xs: 'column !important', md: 'row !important', lg: 'row !important', xl: 'row !important' }
       }}
     >
-      <Typography variant="body2" sx={{ textAlign: 'left', color: 'black', mt: 1, px: 2 }}>
-        Advanced Settings:
-      </Typography>
+      {isLab ? (
+        <Typography
+          id="lab-advanced-settings-label"
+          component="div"
+          className="lab-eyebrow"
+          sx={{ textAlign: 'center', mt: 1, px: 0, width: '100%' }}
+        >
+          Advanced settings
+        </Typography>
+      ) : (
+        <Typography variant="body2" sx={{ textAlign: 'left', color: 'black', mt: 1, px: 2 }}>
+          Advanced Settings:
+        </Typography>
+      )}
 
       {/* Model Selection */}
       <FormControl data-tutorial="lab-settings-model" sx={{ m: 1, minWidth: 120, textAlign: 'left'}} fullWidth size="small">
@@ -105,7 +132,7 @@ const Settings = ({
           sx={sharedLabelSx}
           id="model-select-label"
         >
-          Select a base-model architecture
+          {isLab ? 'Base-model architecture' : 'Select a base-model architecture'}
         </InputLabel>
         <Select
           labelId="model-select-label"
@@ -132,7 +159,7 @@ const Settings = ({
           sx={sharedLabelSx}
           id="dataset-select-label"
         >
-          Select the fMRI mapping dataset
+          {isLab ? 'fMRI mapping dataset' : 'Select the fMRI mapping dataset'}
         </InputLabel>
         <Select
           labelId="dataset-select-label"
@@ -156,7 +183,7 @@ const Settings = ({
       {/* Voxel Selection — fixed display */}
       <FormControl sx={{ m: 1, minWidth: 120, textAlign: 'left' }} fullWidth size="small">
         <InputLabel shrink sx={sharedLabelSx} id="voxel-select-label">
-          Select Voxels
+          {isLab ? 'Voxels' : 'Select Voxels'}
         </InputLabel>
         <Select
           labelId="voxel-select-label"
@@ -170,7 +197,7 @@ const Settings = ({
             },
           }}
         >
-          <MenuItem value="all-participants">All Participants</MenuItem>
+          <MenuItem value="all-participants">{isLab ? 'All participants' : 'All Participants'}</MenuItem>
         </Select>
       </FormControl>
 
