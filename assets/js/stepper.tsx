@@ -2330,16 +2330,6 @@ useEffect(() => {
             >
               <b>Advanced Insights Across Regions</b>
             </h3>
-
-            <Button
-              data-tutorial="lab-results-get-insights"
-              type="primary"
-              onClick={handleGetInsights}
-              loading={insightLoading}
-              disabled={files.length === 0 || selectedInsightRegions.length === 0}
-            >
-              Get Insights
-            </Button>
           </div>
 
           <div
@@ -2394,6 +2384,17 @@ useEffect(() => {
                 );
               })}
             </div>
+
+            <Button
+              data-tutorial="lab-results-get-insights"
+              type="primary"
+              onClick={handleGetInsights}
+              loading={insightLoading}
+              disabled={files.length === 0 || selectedInsightRegions.length === 0}
+              style={{ marginTop: '4px' }}
+            >
+              Get Insights
+            </Button>
           </div>
 
           {showInsights && (

@@ -667,9 +667,28 @@ const BarChart = ({
             <button
               type="button"
               onClick={() => setSelectedGroups([])}
+              disabled={effectiveSelectedGroups.length === 0}
               style={{
-                cursor: 'pointer',
+                cursor: effectiveSelectedGroups.length === 0 ? 'default' : 'pointer',
                 whiteSpace: 'nowrap',
+                fontSize: '13px',
+                fontWeight: 500,
+                color: effectiveSelectedGroups.length === 0 ? 'rgba(107, 99, 88, 0.4)' : 'rgba(61, 56, 50, 0.9)',
+                padding: '4px 12px',
+                borderRadius: '999px',
+                border: '1px solid rgba(107, 99, 88, 0.35)',
+                background: 'rgba(255, 255, 255, 0.65)',
+                opacity: effectiveSelectedGroups.length === 0 ? 0.6 : 1,
+                transition: 'all 220ms ease',
+              }}
+              onMouseEnter={(e) => {
+                if (effectiveSelectedGroups.length === 0) return;
+                e.currentTarget.style.background = 'rgba(247, 242, 238, 0.95)';
+                e.currentTarget.style.borderColor = 'rgba(196, 116, 144, 0.45)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.65)';
+                e.currentTarget.style.borderColor = 'rgba(107, 99, 88, 0.35)';
               }}
             >
               Clear
