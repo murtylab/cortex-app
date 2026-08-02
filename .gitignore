@@ -4,3 +4,4 @@ vite.log
 .DS_Store
 .env*
 !.env.example
+.cursor/rules/auto-build.mdc
