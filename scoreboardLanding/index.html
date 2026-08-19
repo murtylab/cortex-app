@@ -168,33 +168,6 @@
   align-items: flex-start;
 }
 
-.try-btn-wrapper {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.try-btn-disabled {
-  background: #c0c0c0;
-  color: #888;
-  cursor: not-allowed;
-  pointer-events: none;
-  box-shadow: none;
-}
-
-.try-btn-disabled:hover {
-  background: #c0c0c0;
-  color: #888;
-  transform: none;
-}
-
-.coming-soon-label {
-  font-size: 0.78rem;
-  color: #999;
-  font-style: italic;
-}
-
 @media (max-width: 768px) {
   .landing-section {
     padding: 2.5rem 1rem;
@@ -293,8 +266,8 @@
                   <i class="bi bi-chevron-left toggle-dropdown"></i>
                 </a>
                 <ul>
-                  <li><span style="display:block;padding:10px 20px;font-size:15px;color:#aaa;cursor:not-allowed;pointer-events:none;">Leaderboard<small style="display:block;font-size:0.72em;font-style:italic;color:#bbb;line-height:1.4;">Coming soon</small></span></li>
-                  <li><span style="display:block;padding:10px 20px;font-size:15px;color:#aaa;cursor:not-allowed;pointer-events:none;">Advanced Insight<small style="display:block;font-size:0.72em;font-style:italic;color:#bbb;line-height:1.4;">Coming soon</small></span></li>
+                  <li><a href="/scoreboardQuantitative/?view=rank">Leaderboard</a></li>
+                  <li><a href="/scoreboardQuantitative/?view=2">Advanced Insight</a></li>
                 </ul>
               </li>
               <li class="dropdown">
@@ -303,7 +276,7 @@
                   <i class="bi bi-chevron-left toggle-dropdown"></i>
                 </a>
                 <ul>
-                  <li><span style="display:block;padding:10px 20px;font-size:15px;color:#aaa;cursor:not-allowed;pointer-events:none;">Leaderboard<small style="display:block;font-size:0.72em;font-style:italic;color:#bbb;line-height:1.4;">Coming soon</small></span></li>
+                  <li><a href="/scoreboardQualitative/">Leaderboard</a></li>
                 </ul>
               </li>
             </ul>
@@ -333,24 +306,15 @@
         <div class="scoreboard-group" data-tutorial="scoreboard-quantitative-links">
           <h3>Quantitative</h3>
           <div class="scoreboard-buttons">
-            <div class="try-btn-wrapper" data-tutorial="scoreboard-leaderboard-link">
-              <span class="try-btn try-btn-disabled">Leaderboard</span>
-              <span class="coming-soon-label">Coming soon</span>
-            </div>
-            <div class="try-btn-wrapper" data-tutorial="scoreboard-advanced-link">
-              <span class="try-btn try-btn-disabled">Advanced Insight</span>
-              <span class="coming-soon-label">Coming soon</span>
-            </div>
+            <a href="/scoreboardQuantitative/?view=rank" class="try-btn" data-tutorial="scoreboard-leaderboard-link">Leaderboard</a>
+            <a href="/scoreboardQuantitative/?view=2" class="try-btn" data-tutorial="scoreboard-advanced-link">Advanced Insight</a>
           </div>
         </div>
 
         <div class="scoreboard-group" data-tutorial="scoreboard-qualitative-links" style="margin-top: 2rem;">
           <h3>Qualitative</h3>
           <div class="scoreboard-buttons">
-            <div class="try-btn-wrapper" data-tutorial="scoreboard-qualitative-leaderboard-link">
-              <span class="try-btn try-btn-disabled">Leaderboard</span>
-              <span class="coming-soon-label">Coming soon</span>
-            </div>
+            <a href="/scoreboardQualitative/" class="try-btn" data-tutorial="scoreboard-qualitative-leaderboard-link">Leaderboard</a>
           </div>
         </div>
       </div>

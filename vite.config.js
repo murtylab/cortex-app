@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
+import modelPagesPlugin from './scripts/vite-plugin-model-pages.js';
 
 const ngrokHost = process.env.NGROK_HOST || null;
 
@@ -8,14 +9,11 @@ export default defineConfig({
   root: '.',
   plugins: [
     react(),
+    modelPagesPlugin(),
     viteStaticCopy({
       targets: [
         {
           src: 'assets',
-          dest: '.'
-        },
-        {
-          src: 'cortex-web-app/model-pages',
           dest: '.'
         }
       ]
@@ -39,8 +37,6 @@ export default defineConfig({
         ccnSatellite: 'ccn-satellite/index.html',
         chiPoster: 'chi-poster/index.html',
         walkthrough: 'walkthrough/index.html',
-      
-
       },
     },
   },

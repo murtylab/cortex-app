@@ -7,9 +7,8 @@
   function getPageContext() {
     const path = window.location.pathname.toLowerCase();
     if (path.includes("model-pages") || path.includes("model_pages")) {
-      // Extract model name from filename (e.g. "resnet50" from "resnet50.html")
-      const match = path.match(/\/([^/]+)\.html?$/);
-      const modelName = match ? match[1] : null;
+      const match = path.match(/\/model-pages\/([^/]+)/);
+      const modelName = match && match[1] !== "index.html" ? match[1] : null;
       return { type: "model_page", modelName };
     }
     if (path.includes("lablanding") || path.includes("lab-page") || path.includes("lab-landing") || path.includes("lab.html") || /\/lab\/?$/.test(path) || /\/lab\//.test(path)) {
@@ -169,60 +168,60 @@
   }
 
   // ---- Model page links -----------------------------------------------
-  // Map model display names → their model-page HTML file.
+  // Map model display names → their model-page slug.
   // Order matters: more-specific / longer names must come before shorter prefixes
   // so the single-pass regex prefers them (e.g. "CLIP-RN50" before "CLIP").
   const MODEL_LINK_MAP = [
-    ["WebSSL-DINO300M", "webssl_dino300m.html"],
-    ["WebSSL-MAE300M",  "webssl_mae300m.html"],
-    ["CLIP-ViT-B/32",   "clip_vit_b32.html"],
-    ["CLIP ViT-B/32",   "clip_vit_b32.html"],
-    ["CLIP-RN101",      "clip_rn101.html"],
-    ["CLIP-RN50",       "clip_rn50.html"],
-    ["CLIP RN101",      "clip_rn101.html"],
-    ["CLIP RN50",       "clip_rn50.html"],
-    ["DINOv2-large",    "dinov2_large.html"],
-    ["Inception-v3",    "inceptionv3.html"],
-    ["WideResNet101",   "wideresnet101.html"],
-    ["WideResNet50",    "wideresnet50.html"],
-    ["WideResNet",      "wideresnet50.html"],
-    ["MobileNetV2",     "mobilenetv2.html"],
-    ["EfficientNet",    "efficient_net.html"],
-    ["CORnet-RT",       "cornet_rt.html"],
-    ["CORnet-S",        "cornet_s.html"],
-    ["CORnet-Z",        "cornet_z.html"],
-    ["VOneAlexNet",     "vone_alexnet.html"],
-    ["VOneNet",         "vone_rn50.html"],
-    ["ResNet101",       "resnet101.html"],
-    ["ResNet50",        "resnet50.html"],
-    ["ResNet18",        "resnet18.html"],
-    ["DenseNet",        "densenet121.html"],
-    ["EVA-02",          "eva2.html"],
-    ["DINOv2",          "dinov2.html"],
-    ["SigLIP2",         "siglip2.html"],
-    ["SigLIP",          "siglip.html"],
-    ["AIMv2",           "aimv2.html"],
-    ["Kosmos2",         "kosmos2.html"],
-    ["ConvNeXt",        "convnext.html"],
-    ["TDANN",           "tdann_simclr.html"],
-    ["BLIP2",           "blip2.html"],
-    ["TopoNets",        "toponets_rn18.html"],
-    ["Taskonomy",       "taskonomy_depth_euclidean.html"],
-    ["DreamSim",        "dreamsim_vitb16.html"],
-    ["CrossViT",        "cross_vit.html"],
-    ["AlexNet",         "alexnet.html"],
-    ["VGG16",           "vgg16_imagenet1kv1.html"],
-    ["VGG19",           "vgg19_imagenet1kv1.html"],
-    ["BEiT",            "beit.html"],
-    ["HRNet",           "hrnet.html"],
-    ["Nomic",           "nomic.html"],
-    ["Xception",        "xception.html"],
-    ["Inception",       "inceptionv3.html"],
-    ["ResNet",          "resnet50.html"],
-    ["VGG",             "vgg16_imagenet1kv1.html"],
-    ["CORnet",          "cornet_s.html"],
-    ["CLIP",            "clip_vit_b32.html"],
-    ["BiT",             "bit.html"],
+    ["WebSSL-DINO300M", "webssl_dino300m"],
+    ["WebSSL-MAE300M",  "webssl_mae300m"],
+    ["CLIP-ViT-B/32",   "clip_vit_b32"],
+    ["CLIP ViT-B/32",   "clip_vit_b32"],
+    ["CLIP-RN101",      "clip_rn101"],
+    ["CLIP-RN50",       "clip_rn50"],
+    ["CLIP RN101",      "clip_rn101"],
+    ["CLIP RN50",       "clip_rn50"],
+    ["DINOv2-large",    "dinov2_large"],
+    ["Inception-v3",    "inceptionv3"],
+    ["WideResNet101",   "wideresnet101"],
+    ["WideResNet50",    "wideresnet50"],
+    ["WideResNet",      "wideresnet50"],
+    ["MobileNetV2",     "mobilenetv2"],
+    ["EfficientNet",    "efficient_net"],
+    ["CORnet-RT",       "cornet_rt"],
+    ["CORnet-S",        "cornet_s"],
+    ["CORnet-Z",        "cornet_z"],
+    ["VOneAlexNet",     "vone_alexnet"],
+    ["VOneNet",         "vone_rn50"],
+    ["ResNet101",       "resnet101"],
+    ["ResNet50",        "resnet50"],
+    ["ResNet18",        "resnet18"],
+    ["DenseNet",        "densenet121"],
+    ["EVA-02",          "eva2"],
+    ["DINOv2",          "dinov2"],
+    ["SigLIP2",         "siglip2"],
+    ["SigLIP",          "siglip"],
+    ["AIMv2",           "aimv2"],
+    ["Kosmos2",         "kosmos2"],
+    ["ConvNeXt",        "convnext"],
+    ["TDANN",           "tdann_simclr"],
+    ["BLIP2",           "blip2"],
+    ["TopoNets",        "toponets_rn18"],
+    ["Taskonomy",       "taskonomy_depth_euclidean"],
+    ["DreamSim",        "dreamsim_vitb16"],
+    ["CrossViT",        "cross_vit"],
+    ["AlexNet",         "alexnet"],
+    ["VGG16",           "vgg16_imagenet1kv1"],
+    ["VGG19",           "vgg19_imagenet1kv1"],
+    ["BEiT",            "beit"],
+    ["HRNet",           "hrnet"],
+    ["Nomic",           "nomic"],
+    ["Xception",        "xception"],
+    ["Inception",       "inceptionv3"],
+    ["ResNet",          "resnet50"],
+    ["VGG",             "vgg16_imagenet1kv1"],
+    ["CORnet",          "cornet_s"],
+    ["CLIP",            "clip_vit_b32"],
+    ["BiT",             "bit"],
   ];
 
   // Replace model name mentions in plain text with clickable links to their model pages.

@@ -1,0 +1,2128 @@
+{
+  "adversarial_inceptionv3": {
+    "name": "Adversarial InceptionV3",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Adversarial InceptionV3",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – Inception V3",
+      "Parameters": "24M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=3)",
+      "Pre-training": "Supervised classification with PGD adversarial training"
+    },
+    "about": [
+      "InceptionV3 trained with PGD adversarial perturbations (ε=3), making it more robust to input noise. Adversarial training often yields more brain-like representations because it forces the model to rely on shape rather than texture."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_inception_v3/"
+  },
+  "aimv2": {
+    "name": "AIMv2",
+    "category": "Vision-Language Model",
+    "info": {
+      "Model Name": "AIMv2",
+      "Category": "Vision-Language Model",
+      "Architecture": "Autoregressive Vision Transformer",
+      "Parameters": "600M",
+      "Training Data": "Large-scale image-text pairs (Apple)",
+      "Pre-training": "Autoregressive multimodal pre-training"
+    },
+    "about": [
+      "AIMv2 is Apple's autoregressive image model that predicts both image tokens and text tokens jointly. It combines the strengths of visual pre-training with language grounding, achieving strong performance on downstream vision tasks."
+    ],
+    "docsUrl": "https://huggingface.co/apple/aimv2-large-patch14-224"
+  },
+  "alexnet": {
+    "name": "AlexNet",
+    "category": "Classic CNN",
+    "info": {
+      "Model Name": "AlexNet",
+      "Category": "Classic CNN",
+      "Architecture": "CNN – AlexNet",
+      "Parameters": "61M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "AlexNet (Krizhevsky et al., 2012) was the landmark deep CNN that won ImageNet 2012 and ignited the deep learning revolution. Despite its age, it remains an important baseline, and its early convolutional layers capture low-level visual features similar to those in early visual cortex."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_alexnet/"
+  },
+  "alexnet_random": {
+    "name": "AlexNet (Random Weights)",
+    "category": "Baseline (Random Weights)",
+    "info": {
+      "Model Name": "AlexNet (Random Weights)",
+      "Category": "Baseline (Random Weights)",
+      "Architecture": "CNN – AlexNet",
+      "Parameters": "61M",
+      "Training Data": "None (randomly initialized)",
+      "Pre-training": "No pre-training"
+    },
+    "about": [
+      "AlexNet with random weights serves as a lower-bound baseline. Comparing trained AlexNet against this variant isolates the contribution of learning from ImageNet data versus network architecture alone."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_alexnet/"
+  },
+  "beit": {
+    "name": "BEiT",
+    "category": "Self-Supervised Vision Transformer",
+    "info": {
+      "Model Name": "BEiT",
+      "Category": "Self-Supervised Vision Transformer",
+      "Architecture": "Vision Transformer (ViT-Base/16)",
+      "Parameters": "86M",
+      "Training Data": "ImageNet-22K (via DALL-E tokenizer tokens)",
+      "Pre-training": "Masked Image Modeling (BERT-style)"
+    },
+    "about": [
+      "BEiT (BERT Pre-Training of Image Transformers) applies masked token prediction to visual patches using discrete visual tokens from DALL-E. Self-supervised training on large image collections yields rich, transferable visual representations."
+    ],
+    "docsUrl": "https://huggingface.co/microsoft/beit-base-patch16-224-pt22k"
+  },
+  "bit": {
+    "name": "BiT (Big Transfer)",
+    "category": "Large-Scale Supervised CNN",
+    "info": {
+      "Model Name": "BiT (Big Transfer)",
+      "Category": "Large-Scale Supervised CNN",
+      "Architecture": "ResNet (Wide ResNet-101x1)",
+      "Parameters": "~44M",
+      "Training Data": "ImageNet-21K",
+      "Pre-training": "Supervised classification on large-scale data, then fine-tuned"
+    },
+    "about": [
+      "BiT (Big Transfer, Kolesnikov et al.) pre-trains large ResNet models on very large datasets (ImageNet-21K, JFT-300M) and fine-tunes on target tasks. The key insight is that scale and careful normalization choices enable transfer learning that rivals task-specific architectures."
+    ],
+    "docsUrl": "https://huggingface.co/google/bit-50"
+  },
+  "blip2": {
+    "name": "BLIP-2",
+    "category": "Vision-Language Model",
+    "info": {
+      "Model Name": "BLIP-2",
+      "Category": "Vision-Language Model",
+      "Architecture": "ViT-G + Q-Former + LLM",
+      "Parameters": "~1.2B (vision encoder ~1B)",
+      "Training Data": "Large-scale image-text pairs (LAION, COCO, etc.)",
+      "Pre-training": "Bootstrapped language-image pre-training with frozen encoders"
+    },
+    "about": [
+      "BLIP-2 (Li et al., 2023) connects a powerful frozen image encoder (EVA-ViT-G) to a language model via a lightweight Q-Former module. This enables zero-shot image-text alignment, visual question answering, and image captioning without retraining either the vision or language backbone."
+    ],
+    "docsUrl": "https://huggingface.co/Salesforce/blip2-opt-2.7b"
+  },
+  "briaai": {
+    "name": "BRIA AI (RMBG)",
+    "category": "Specialized Vision Model",
+    "info": {
+      "Model Name": "BRIA AI (RMBG)",
+      "Category": "Specialized Vision Model",
+      "Architecture": "Transformer-based segmentation model",
+      "Parameters": "~80M",
+      "Training Data": "Proprietary background removal dataset",
+      "Pre-training": "Supervised background removal / matting"
+    },
+    "about": [
+      "BRIA AI's RMBG model is trained specifically for background removal and image matting. Its focus on foreground/background segmentation makes it an interesting model to probe for scene-boundary and object-form representations in the brain."
+    ],
+    "docsUrl": "https://huggingface.co/briaai/RMBG-1.4"
+  },
+  "clip_rn101": {
+    "name": "CLIP (ResNet-101)",
+    "category": "Vision-Language Model",
+    "info": {
+      "Model Name": "CLIP (ResNet-101)",
+      "Category": "Vision-Language Model",
+      "Architecture": "CNN – ResNet-101 (image encoder)",
+      "Parameters": "~56M (image encoder)",
+      "Training Data": "400M image-text pairs (OpenAI WIT)",
+      "Pre-training": "Contrastive language-image pre-training"
+    },
+    "about": [
+      "CLIP with a deeper ResNet-101 image encoder. The larger capacity allows it to capture richer visual features while still being grounded in natural language through contrastive training on 400 million image-text pairs."
+    ],
+    "docsUrl": "https://github.com/openai/CLIP"
+  },
+  "clip_rn101_random": {
+    "name": "CLIP RN101 (Random Weights)",
+    "category": "Baseline (Random Weights)",
+    "info": {
+      "Model Name": "CLIP RN101 (Random Weights)",
+      "Category": "Baseline (Random Weights)",
+      "Architecture": "CNN – ResNet-101",
+      "Parameters": "~56M",
+      "Training Data": "None (randomly initialized)",
+      "Pre-training": "No pre-training"
+    },
+    "about": [
+      "CLIP ResNet-101 with random weights baseline, used to isolate the effect of CLIP training from network depth and architecture."
+    ],
+    "docsUrl": "https://github.com/openai/CLIP"
+  },
+  "clip_rn50": {
+    "name": "CLIP (ResNet-50)",
+    "category": "Vision-Language Model",
+    "info": {
+      "Model Name": "CLIP (ResNet-50)",
+      "Category": "Vision-Language Model",
+      "Architecture": "CNN – ResNet-50 (image encoder)",
+      "Parameters": "~38M (image encoder)",
+      "Training Data": "400M image-text pairs from the internet (OpenAI WIT)",
+      "Pre-training": "Contrastive language-image pre-training"
+    },
+    "about": [
+      "CLIP (Radford et al., 2021) jointly trains an image encoder and text encoder to align matching image-text pairs in a shared embedding space. The ResNet-50 variant uses a standard CNN backbone. CLIP representations generalize broadly because they are grounded in natural language."
+    ],
+    "docsUrl": "https://huggingface.co/openai/clip-vit-base-patch32"
+  },
+  "clip_rn50_random": {
+    "name": "CLIP RN50 (Random Weights)",
+    "category": "Baseline (Random Weights)",
+    "info": {
+      "Model Name": "CLIP RN50 (Random Weights)",
+      "Category": "Baseline (Random Weights)",
+      "Architecture": "CNN – ResNet-50",
+      "Parameters": "~38M",
+      "Training Data": "None (randomly initialized)",
+      "Pre-training": "No pre-training"
+    },
+    "about": [
+      "CLIP ResNet-50 with randomly initialized weights, used as a baseline to isolate the contribution of CLIP pre-training from the architecture itself."
+    ],
+    "docsUrl": "https://huggingface.co/openai/clip-vit-base-patch32"
+  },
+  "clip_vit_b32": {
+    "name": "CLIP (ViT-B/32)",
+    "category": "Vision-Language Model",
+    "info": {
+      "Model Name": "CLIP (ViT-B/32)",
+      "Category": "Vision-Language Model",
+      "Architecture": "Vision Transformer – ViT-B/32",
+      "Parameters": "~86M (image encoder)",
+      "Training Data": "400M image-text pairs (OpenAI WIT)",
+      "Pre-training": "Contrastive language-image pre-training"
+    },
+    "about": [
+      "CLIP with a Vision Transformer (ViT-B/32) backbone instead of a CNN. The global attention mechanism of transformers may capture spatial relationships differently from CNNs, making this variant particularly interesting for studying higher-level visual cortex areas."
+    ],
+    "docsUrl": "https://huggingface.co/openai/clip-vit-base-patch32"
+  },
+  "clip_vit_b32_random": {
+    "name": "CLIP ViT-B/32 (Random Weights)",
+    "category": "Baseline (Random Weights)",
+    "info": {
+      "Model Name": "CLIP ViT-B/32 (Random Weights)",
+      "Category": "Baseline (Random Weights)",
+      "Architecture": "Vision Transformer – ViT-B/32",
+      "Parameters": "~86M",
+      "Training Data": "None (randomly initialized)",
+      "Pre-training": "No pre-training"
+    },
+    "about": [
+      "CLIP ViT-B/32 with random weights, providing a baseline to assess whether CLIP's language grounding or the transformer architecture itself drives brain predictivity."
+    ],
+    "docsUrl": "https://huggingface.co/openai/clip-vit-base-patch32"
+  },
+  "convnext": {
+    "name": "ConvNeXt",
+    "category": "Modern CNN",
+    "info": {
+      "Model Name": "ConvNeXt",
+      "Category": "Modern CNN",
+      "Architecture": "CNN – ConvNeXt-Base",
+      "Parameters": "~89M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "ConvNeXt (Liu et al., 2022) modernizes CNNs by borrowing design decisions from Vision Transformers—larger kernel sizes, fewer normalization layers, GELU activations, and layer-scale. It achieves transformer-level performance while remaining a pure convolutional network."
+    ],
+    "docsUrl": "https://huggingface.co/facebook/convnext-base-224"
+  },
+  "cornet_rt": {
+    "name": "CORnet-RT",
+    "category": "Brain-Optimized Model",
+    "info": {
+      "Model Name": "CORnet-RT",
+      "Category": "Brain-Optimized Model",
+      "Architecture": "Recurrent CNN (brain-constrained)",
+      "Parameters": "~18M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification with recurrent temporal dynamics"
+    },
+    "about": [
+      "CORnet-RT extends CORnet-S with explicit recurrent time steps that model temporal dynamics in cortical processing. It maps to V1, V2, V4, and IT cortex and incorporates feedback connections, capturing the recurrent nature of biological visual processing."
+    ],
+    "docsUrl": "https://github.com/dicarlolab/CORnet"
+  },
+  "cornet_s": {
+    "name": "CORnet-S",
+    "category": "Brain-Optimized Model",
+    "info": {
+      "Model Name": "CORnet-S",
+      "Category": "Brain-Optimized Model",
+      "Architecture": "Recurrent CNN (4-area cortical hierarchy)",
+      "Parameters": "~18M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "CORnet-S (Kubilius et al., 2019) explicitly models the primate visual hierarchy (V1→V2→V4→IT) with four areas, each implemented as a residual block with recurrent connections. Its brain-constrained architecture makes it highly predictive of neural activity in ventral visual stream areas."
+    ],
+    "docsUrl": "https://github.com/dicarlolab/CORnet"
+  },
+  "cornet_z": {
+    "name": "CORnet-Z",
+    "category": "Brain-Optimized Model",
+    "info": {
+      "Model Name": "CORnet-Z",
+      "Category": "Brain-Optimized Model",
+      "Architecture": "Feedforward CNN (4-area cortical hierarchy)",
+      "Parameters": "~15M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "CORnet-Z is the simplest CORnet variant—a purely feedforward CNN with four layers corresponding to V1, V2, V4, and IT. It serves as a baseline for the recurrent CORnet-S and CORnet-RT models."
+    ],
+    "docsUrl": "https://github.com/dicarlolab/CORnet"
+  },
+  "cross_vit": {
+    "name": "CrossViT",
+    "category": "Vision Transformer",
+    "info": {
+      "Model Name": "CrossViT",
+      "Category": "Vision Transformer",
+      "Architecture": "Dual-scale Vision Transformer",
+      "Parameters": "~27M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "CrossViT (Chen et al., 2021) processes image patches at two different scales simultaneously and fuses them via cross-attention. Multi-scale token fusion helps capture both fine-grained details and global context, potentially mimicking multi-scale processing in visual cortex."
+    ],
+    "docsUrl": "https://huggingface.co/IBM/CrossViT-18"
+  },
+  "densenet121": {
+    "name": "DenseNet-121",
+    "category": "CNN",
+    "info": {
+      "Model Name": "DenseNet-121",
+      "Category": "CNN",
+      "Architecture": "CNN – DenseNet-121",
+      "Parameters": "~8M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "DenseNet-121 (Huang et al., 2017) connects each layer to every subsequent layer, creating dense skip connections. These connections encourage feature reuse and allow gradients to flow more easily, enabling effective training with fewer parameters."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_densenet/"
+  },
+  "densenet161": {
+    "name": "DenseNet-161",
+    "category": "CNN",
+    "info": {
+      "Model Name": "DenseNet-161",
+      "Category": "CNN",
+      "Architecture": "CNN – DenseNet-161",
+      "Parameters": "~29M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "DenseNet-161 is the deepest and widest DenseNet variant. Dense connectivity between all layers promotes feature reuse and gradient flow, while the increased capacity allows the model to capture richer visual representations."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_densenet/"
+  },
+  "densenet161_random": {
+    "name": "DenseNet-161 (Random Weights)",
+    "category": "Baseline (Random Weights)",
+    "info": {
+      "Model Name": "DenseNet-161 (Random Weights)",
+      "Category": "Baseline (Random Weights)",
+      "Architecture": "CNN – DenseNet-161",
+      "Parameters": "~29M",
+      "Training Data": "None (randomly initialized)",
+      "Pre-training": "No pre-training"
+    },
+    "about": [
+      "DenseNet-161 with random weights, used as a baseline to evaluate the contribution of dense connectivity architecture versus learned features."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_densenet/"
+  },
+  "densenet169": {
+    "name": "DenseNet-169",
+    "category": "CNN",
+    "info": {
+      "Model Name": "DenseNet-169",
+      "Category": "CNN",
+      "Architecture": "CNN – DenseNet-169",
+      "Parameters": "~14M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "DenseNet-169 balances depth and efficiency with dense skip connections throughout its 169 layers. A middle ground between the compact DenseNet-121 and the large DenseNet-201."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_densenet/"
+  },
+  "densenet201": {
+    "name": "DenseNet-201",
+    "category": "CNN",
+    "info": {
+      "Model Name": "DenseNet-201",
+      "Category": "CNN",
+      "Architecture": "CNN – DenseNet-201",
+      "Parameters": "~20M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "DenseNet-201 is a deeper DenseNet variant with 201 layers and dense skip connections. The larger depth and growth rate allow richer feature hierarchies to emerge."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_densenet/"
+  },
+  "dinov2": {
+    "name": "DINOv2 (ViT-B/14)",
+    "category": "Self-Supervised Vision Transformer",
+    "info": {
+      "Model Name": "DINOv2 (ViT-B/14)",
+      "Category": "Self-Supervised Vision Transformer",
+      "Architecture": "Vision Transformer – ViT-B/14",
+      "Parameters": "~86M",
+      "Training Data": "LVD-142M (142M curated images from internet)",
+      "Pre-training": "Self-distillation with no labels (DINO v2)"
+    },
+    "about": [
+      "DINOv2 (Oquab et al., 2023) trains ViT via self-supervised knowledge distillation on a curated 142M image dataset (LVD-142M). Without any labels, it learns dense, semantically rich features that transfer exceptionally well—including to predicting neural activity in high-level visual areas."
+    ],
+    "docsUrl": "https://huggingface.co/facebook/dinov2-base"
+  },
+  "dinov2_large": {
+    "name": "DINOv2 Large (ViT-L/14)",
+    "category": "Self-Supervised Vision Transformer",
+    "info": {
+      "Model Name": "DINOv2 Large (ViT-L/14)",
+      "Category": "Self-Supervised Vision Transformer",
+      "Architecture": "Vision Transformer – ViT-L/14",
+      "Parameters": "~307M",
+      "Training Data": "LVD-142M (142M curated images)",
+      "Pre-training": "Self-distillation with no labels (DINO v2)"
+    },
+    "about": [
+      "The large variant of DINOv2, with ~307M parameters and deeper transformer blocks. Increased model capacity yields even richer visual features, often leading to better predictions of neural activity in high-level visual cortex regions like FFA and PPA."
+    ],
+    "docsUrl": "https://huggingface.co/facebook/dinov2-large"
+  },
+  "dinov2_random": {
+    "name": "DINOv2 (Random Weights)",
+    "category": "Baseline (Random Weights)",
+    "info": {
+      "Model Name": "DINOv2 (Random Weights)",
+      "Category": "Baseline (Random Weights)",
+      "Architecture": "Vision Transformer – ViT-B/14",
+      "Parameters": "~86M",
+      "Training Data": "None (randomly initialized)",
+      "Pre-training": "No pre-training"
+    },
+    "about": [
+      "DINOv2 architecture with random weights, providing a baseline to measure how much of DINOv2's brain predictivity comes from self-supervised training versus the ViT architecture itself."
+    ],
+    "docsUrl": "https://huggingface.co/facebook/dinov2-base"
+  },
+  "dreamsim_vitb16": {
+    "name": "DreamSim (ViT-B/16)",
+    "category": "Perceptually Aligned Model",
+    "info": {
+      "Model Name": "DreamSim (ViT-B/16)",
+      "Category": "Perceptually Aligned Model",
+      "Architecture": "Vision Transformer – ViT-B/16 (ensemble)",
+      "Parameters": "~86M",
+      "Training Data": "Human perceptual similarity judgments (fine-tuned from CLIP/DINO/OpenCLIP)",
+      "Pre-training": "Perceptual similarity fine-tuning on human triplet judgments"
+    },
+    "about": [
+      "DreamSim (Fu et al., 2023) fine-tunes CLIP and DINO models on human perceptual similarity judgments, aligning model representations with human perceptual experience. ViT-B/16 backbone with perceptual grounding makes it a strong model for understanding high-level visual cortex."
+    ],
+    "docsUrl": "https://github.com/ssundaram21/dreamsim"
+  },
+  "dreamsim_vitb32": {
+    "name": "DreamSim (ViT-B/32)",
+    "category": "Perceptually Aligned Model",
+    "info": {
+      "Model Name": "DreamSim (ViT-B/32)",
+      "Category": "Perceptually Aligned Model",
+      "Architecture": "Vision Transformer – ViT-B/32 (ensemble)",
+      "Parameters": "~86M",
+      "Training Data": "Human perceptual similarity judgments",
+      "Pre-training": "Perceptual similarity fine-tuning on human triplet judgments"
+    },
+    "about": [
+      "DreamSim with a ViT-B/32 backbone, trained on human perceptual similarity judgments. Slightly coarser patch size than the /16 variant but similarly aligned to human perception through triplet-based fine-tuning."
+    ],
+    "docsUrl": "https://github.com/ssundaram21/dreamsim"
+  },
+  "efficient_net": {
+    "name": "EfficientNet",
+    "category": "CNN",
+    "info": {
+      "Model Name": "EfficientNet",
+      "Category": "CNN",
+      "Architecture": "CNN – EfficientNet-B0",
+      "Parameters": "~5.3M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "EfficientNet (Tan & Le, 2019) scales width, depth, and resolution simultaneously using a principled compound scaling method. EfficientNet-B0 achieves high accuracy with very few parameters, making it an efficient and competitive CNN baseline."
+    ],
+    "docsUrl": "https://pytorch.org/hub/nvidia_deeplearningexamples_efficientnet/"
+  },
+  "ese_vovnet": {
+    "name": "ESE-VoVNet",
+    "category": "CNN",
+    "info": {
+      "Model Name": "ESE-VoVNet",
+      "Category": "CNN",
+      "Architecture": "CNN – VoVNet with Squeeze-Excitation",
+      "Parameters": "~25M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "ESE-VoVNet uses One-Shot Aggregation (OSA) to reduce redundancy in DenseNet's dense connections, combined with Effective Squeeze-Excitation (eSE) blocks for channel recalibration. It is designed for real-time inference on detection tasks."
+    ],
+    "docsUrl": "https://github.com/youngwanLEE/vovnet-detectron2"
+  },
+  "eva2": {
+    "name": "EVA-02",
+    "category": "Vision Transformer",
+    "info": {
+      "Model Name": "EVA-02",
+      "Category": "Vision Transformer",
+      "Architecture": "Vision Transformer – ViT-B/16",
+      "Parameters": "~86M",
+      "Training Data": "ImageNet-21K + MIM pre-training with CLIP features",
+      "Pre-training": "Masked Image Modeling targeting CLIP feature space"
+    },
+    "about": [
+      "EVA-02 (Fang et al., 2023) pre-trains a ViT to reconstruct CLIP features from masked image patches, combining the generalization of MIM with semantic richness of CLIP supervision. It achieves strong performance across classification, detection, and segmentation benchmarks."
+    ],
+    "docsUrl": "https://huggingface.co/Yuxin-CV/EVA-02"
+  },
+  "fbnet": {
+    "name": "FBNet",
+    "category": "Efficient CNN",
+    "info": {
+      "Model Name": "FBNet",
+      "Category": "Efficient CNN",
+      "Architecture": "CNN – FBNet-C (Neural Architecture Search)",
+      "Parameters": "~5.6M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "FBNet is a mobile-optimized CNN designed by Neural Architecture Search (NAS) to maximize accuracy within mobile hardware constraints. Its efficient design prioritizes inference speed over raw accuracy."
+    ],
+    "docsUrl": "https://github.com/facebookresearch/mobile-vision"
+  },
+  "ghost_net": {
+    "name": "GhostNet",
+    "category": "Efficient CNN",
+    "info": {
+      "Model Name": "GhostNet",
+      "Category": "Efficient CNN",
+      "Architecture": "CNN – GhostNet",
+      "Parameters": "~5.2M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "GhostNet (Han et al., 2020) generates cheap 'ghost' feature maps using linear transformations of standard convolutions, dramatically reducing computation while maintaining accuracy. Designed for mobile and edge inference."
+    ],
+    "docsUrl": "https://github.com/huawei-noah/Efficient-AI-Backbones"
+  },
+  "google_vit": {
+    "name": "ViT-B/16 (Google)",
+    "category": "Vision Transformer",
+    "info": {
+      "Model Name": "ViT-B/16 (Google)",
+      "Category": "Vision Transformer",
+      "Architecture": "Vision Transformer – ViT-B/16",
+      "Parameters": "~86M",
+      "Training Data": "ImageNet-21K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "The original ViT (Vision Transformer, Dosovitskiy et al., 2020) demonstrates that pure transformer architectures can outperform CNNs on image classification when pre-trained on large datasets. Patches of the image are treated as tokens, enabling global attention from the very first layer."
+    ],
+    "docsUrl": "https://huggingface.co/google/vit-base-patch16-224"
+  },
+  "google_vit_random": {
+    "name": "ViT-B/16 (Random Weights)",
+    "category": "Baseline (Random Weights)",
+    "info": {
+      "Model Name": "ViT-B/16 (Random Weights)",
+      "Category": "Baseline (Random Weights)",
+      "Architecture": "Vision Transformer – ViT-B/16",
+      "Parameters": "~86M",
+      "Training Data": "None (randomly initialized)",
+      "Pre-training": "No pre-training"
+    },
+    "about": [
+      "ViT-B/16 with random weights, used as a baseline to isolate the effect of ImageNet-21K pre-training from the attention-based transformer architecture."
+    ],
+    "docsUrl": "https://huggingface.co/google/vit-base-patch16-224"
+  },
+  "hrnet": {
+    "name": "HRNet",
+    "category": "CNN",
+    "info": {
+      "Model Name": "HRNet",
+      "Category": "CNN",
+      "Architecture": "CNN – High-Resolution Network",
+      "Parameters": "~29M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "HRNet (Wang et al., 2020) maintains high-resolution feature maps throughout the entire network, running multiple parallel convolutions at different resolutions and fusing them repeatedly. Unlike most CNNs that progressively downsample, HRNet preserves spatial detail—valuable for dense prediction tasks."
+    ],
+    "docsUrl": "https://github.com/HRNet/HRNet-Image-Classification"
+  },
+  "inception_rn_v2": {
+    "name": "Inception-ResNet-V2",
+    "category": "CNN",
+    "info": {
+      "Model Name": "Inception-ResNet-V2",
+      "Category": "CNN",
+      "Architecture": "CNN – Inception-ResNet-V2",
+      "Parameters": "~56M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "Inception-ResNet-V2 combines Inception modules (multi-scale parallel convolutions) with residual skip connections, achieving strong accuracy by leveraging both architectural motifs. Deeper and more accurate than plain Inception or ResNet alone."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_inception_resnet_v2/"
+  },
+  "inceptionv3": {
+    "name": "InceptionV3",
+    "category": "CNN",
+    "info": {
+      "Model Name": "InceptionV3",
+      "Category": "CNN",
+      "Architecture": "CNN – Inception V3",
+      "Parameters": "~24M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "InceptionV3 (Szegedy et al., 2016) uses factorized convolutions and auxiliary classifiers to efficiently capture multi-scale features. Its intermediate representations have been widely used in computational neuroscience as predictors of ventral stream activity."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_inception_v3/"
+  },
+  "inceptionv4": {
+    "name": "InceptionV4",
+    "category": "CNN",
+    "info": {
+      "Model Name": "InceptionV4",
+      "Category": "CNN",
+      "Architecture": "CNN – Inception V4",
+      "Parameters": "~43M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "InceptionV4 simplifies and unifies the Inception architecture with a more regular design. The more homogeneous architecture provides a cleaner ablation baseline compared to the hybrid Inception-ResNet variants."
+    ],
+    "docsUrl": "https://huggingface.co/timm/inceptionv4.tf_in1k"
+  },
+  "kosmos2": {
+    "name": "Kosmos-2",
+    "category": "Vision-Language Model",
+    "info": {
+      "Model Name": "Kosmos-2",
+      "Category": "Vision-Language Model",
+      "Architecture": "Multimodal LLM + ViT encoder",
+      "Parameters": "~1.6B",
+      "Training Data": "Grounded Image-Caption Pairs (GRIT dataset + web data)",
+      "Pre-training": "Grounded vision-language pre-training with bounding box grounding"
+    },
+    "about": [
+      "Kosmos-2 (Peng et al., 2023) extends KOSMOS-1 with grounding capabilities—it can refer and reason about objects in images using bounding box coordinates embedded directly in the language model. This spatial grounding may produce representations more aligned with retinotopic cortical processing."
+    ],
+    "docsUrl": "https://huggingface.co/microsoft/kosmos-2-patch14-224"
+  },
+  "mixnet": {
+    "name": "MixNet",
+    "category": "Efficient CNN",
+    "info": {
+      "Model Name": "MixNet",
+      "Category": "Efficient CNN",
+      "Architecture": "CNN – MixNet-S (mixed depthwise conv)",
+      "Parameters": "~4.1M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "MixNet (Tan & Le, 2019) mixes different kernel sizes within a single depthwise convolution layer, allowing each channel to operate at the most effective receptive field size. This multi-kernel approach improves accuracy with minimal parameter overhead."
+    ],
+    "docsUrl": "https://github.com/tensorflow/tpu/tree/master/models/official/mnasnet/mixnet"
+  },
+  "mnasnet": {
+    "name": "MnasNet",
+    "category": "Efficient CNN",
+    "info": {
+      "Model Name": "MnasNet",
+      "Category": "Efficient CNN",
+      "Architecture": "CNN – MnasNet (mobile NAS)",
+      "Parameters": "~4.4M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "MnasNet (Tan et al., 2019) uses NAS with real mobile hardware latency as the optimization objective. It optimizes the trade-off between accuracy and inference speed on actual devices, producing architecturally diverse blocks tailored for mobile deployment."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_mnasnet/"
+  },
+  "mobilenetv2": {
+    "name": "MobileNetV2",
+    "category": "Efficient CNN",
+    "info": {
+      "Model Name": "MobileNetV2",
+      "Category": "Efficient CNN",
+      "Architecture": "CNN – MobileNetV2 (inverted residuals)",
+      "Parameters": "~3.4M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "MobileNetV2 (Sandler et al., 2018) introduces inverted residual blocks with linear bottlenecks, enabling lightweight inference on mobile devices. Its depthwise separable convolutions reduce computation dramatically compared to standard convolutions."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_mobilenet_v2/"
+  },
+  "nomic": {
+    "name": "Nomic Embed Vision",
+    "category": "Vision-Language Model",
+    "info": {
+      "Model Name": "Nomic Embed Vision",
+      "Category": "Vision-Language Model",
+      "Architecture": "Vision Transformer (CLIP-style)",
+      "Parameters": "~86M",
+      "Training Data": "Large-scale image-text pairs",
+      "Pre-training": "Contrastive vision-language pre-training"
+    },
+    "about": [
+      "Nomic Embed Vision is an open-weights embedding model trained for high-quality visual and text alignment. It extends CLIP-style training with improved data curation, producing semantically rich image representations useful for retrieval and classification."
+    ],
+    "docsUrl": "https://huggingface.co/nomic-ai/nomic-embed-vision-v1.5"
+  },
+  "nomic_random": {
+    "name": "Nomic Embed Vision (Random Weights)",
+    "category": "Baseline (Random Weights)",
+    "info": {
+      "Model Name": "Nomic Embed Vision (Random Weights)",
+      "Category": "Baseline (Random Weights)",
+      "Architecture": "Vision Transformer (CLIP-style)",
+      "Parameters": "~86M",
+      "Training Data": "None (randomly initialized)",
+      "Pre-training": "No pre-training"
+    },
+    "about": [
+      "Nomic Embed Vision with random weights, used as a baseline to evaluate the contribution of contrastive vision-language pre-training versus the transformer architecture alone."
+    ],
+    "docsUrl": "https://huggingface.co/nomic-ai/nomic-embed-vision-v1.5"
+  },
+  "resnet101": {
+    "name": "ResNet-101",
+    "category": "CNN",
+    "info": {
+      "Model Name": "ResNet-101",
+      "Category": "CNN",
+      "Architecture": "CNN – ResNet-101",
+      "Parameters": "~44M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "ResNet-101 extends ResNet-50 with 101 layers, capturing richer visual hierarchies while still benefiting from residual connections. The deeper network generally achieves higher ImageNet accuracy and can extract more complex visual features."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_resnet/"
+  },
+  "resnet101_imagenet1kv1": {
+    "name": "ResNet-101 (ImageNet-1K v1 weights)",
+    "category": "CNN",
+    "info": {
+      "Model Name": "ResNet-101 (ImageNet-1K v1 weights)",
+      "Category": "CNN",
+      "Architecture": "CNN – ResNet-101",
+      "Parameters": "~44M",
+      "Training Data": "ImageNet-1K (v1 training recipe)",
+      "Pre-training": "Supervised classification (legacy training)"
+    },
+    "about": [
+      "ResNet-101 trained with the original ImageNet-1K recipe (v1 weights). Compared to v2 weights, this version uses a simpler training pipeline, enabling analysis of how training recipe improvements affect brain predictivity."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_resnet/"
+  },
+  "resnet101_random": {
+    "name": "ResNet-101 (Random Weights)",
+    "category": "Baseline (Random Weights)",
+    "info": {
+      "Model Name": "ResNet-101 (Random Weights)",
+      "Category": "Baseline (Random Weights)",
+      "Architecture": "CNN – ResNet-101",
+      "Parameters": "~44M",
+      "Training Data": "None (randomly initialized)",
+      "Pre-training": "No pre-training"
+    },
+    "about": [
+      "ResNet-101 with random weights, providing a baseline for the deeper ResNet architecture without any learned visual features."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_resnet/"
+  },
+  "resnet18": {
+    "name": "ResNet-18",
+    "category": "CNN",
+    "info": {
+      "Model Name": "ResNet-18",
+      "Category": "CNN",
+      "Architecture": "CNN – ResNet-18",
+      "Parameters": "~11M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "ResNet-18 (He et al., 2016) is the shallowest ResNet, with 18 layers and residual skip connections that enable training without vanishing gradients. Its relatively simple hierarchy maps well to early and intermediate visual cortex areas."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_resnet/"
+  },
+  "resnet18_random": {
+    "name": "ResNet-18 (Random Weights)",
+    "category": "Baseline (Random Weights)",
+    "info": {
+      "Model Name": "ResNet-18 (Random Weights)",
+      "Category": "Baseline (Random Weights)",
+      "Architecture": "CNN – ResNet-18",
+      "Parameters": "~11M",
+      "Training Data": "None (randomly initialized)",
+      "Pre-training": "No pre-training"
+    },
+    "about": [
+      "ResNet-18 with random weights, used as a baseline to isolate the effect of ImageNet training from the residual network architecture."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_resnet/"
+  },
+  "resnet50": {
+    "name": "ResNet-50",
+    "category": "CNN",
+    "info": {
+      "Model Name": "ResNet-50",
+      "Category": "CNN",
+      "Architecture": "CNN – ResNet-50",
+      "Parameters": "~25M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "ResNet-50 (He et al., 2016) uses bottleneck residual blocks with skip connections to enable training of very deep networks. With 50 layers and ~25M parameters, it is a strong, widely-used baseline whose representations have been extensively benchmarked against ventral visual stream recordings."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_resnet/"
+  },
+  "resnet50_places365": {
+    "name": "ResNet-50 (Places365)",
+    "category": "CNN",
+    "info": {
+      "Model Name": "ResNet-50 (Places365)",
+      "Category": "CNN",
+      "Architecture": "CNN – ResNet-50",
+      "Parameters": "~25M",
+      "Training Data": "Places365 (365 scene categories)",
+      "Pre-training": "Supervised scene classification"
+    },
+    "about": [
+      "ResNet-50 trained on Places365, a large dataset of 365 indoor and outdoor scene categories. Training on scenes rather than objects may yield representations more aligned with scene-selective areas like PPA."
+    ],
+    "docsUrl": "https://github.com/CSAILVision/places365"
+  },
+  "resnet50_random": {
+    "name": "ResNet-50 (Random Weights)",
+    "category": "Baseline (Random Weights)",
+    "info": {
+      "Model Name": "ResNet-50 (Random Weights)",
+      "Category": "Baseline (Random Weights)",
+      "Architecture": "CNN – ResNet-50",
+      "Parameters": "~25M",
+      "Training Data": "None (randomly initialized)",
+      "Pre-training": "No pre-training"
+    },
+    "about": [
+      "ResNet-50 with random weights, the standard lower-bound baseline showing what residual architecture alone contributes before any learning from image data."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_resnet/"
+  },
+  "resnet50_vggface2": {
+    "name": "ResNet-50 (VGGFace2)",
+    "category": "Domain-Specific CNN",
+    "info": {
+      "Model Name": "ResNet-50 (VGGFace2)",
+      "Category": "Domain-Specific CNN",
+      "Architecture": "CNN – ResNet-50",
+      "Parameters": "~25M",
+      "Training Data": "VGGFace2 (face identity recognition)",
+      "Pre-training": "Supervised face recognition"
+    },
+    "about": [
+      "ResNet-50 trained for face identity recognition on VGGFace2. Face-specialized training likely yields representations strongly aligned with the Fusiform Face Area (FFA), which is selectively activated by faces."
+    ],
+    "docsUrl": "https://github.com/ox-vgg/vgg_face2"
+  },
+  "robust_densenet161_epsilon_3": {
+    "name": "Robust DenseNet-161 (ε=3)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust DenseNet-161 (ε=3)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – DenseNet-161 (adversarially trained)",
+      "Parameters": "~29M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=3)",
+      "Pre-training": "PGD adversarial training with ε=3"
+    },
+    "about": [
+      "DenseNet-161 with strong adversarial training (ε=3). Combining dense skip connections with adversarial robustness tests whether the improved gradient flow of DenseNet architecture also benefits adversarially robust brain predictivity."
+    ],
+    "docsUrl": "https://github.com/MadryLab/robustness"
+  },
+  "robust_mnasnet_epsilon_3": {
+    "name": "Robust MnasNet (ε=3)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust MnasNet (ε=3)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – MnasNet (adversarially trained)",
+      "Parameters": "~4.4M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=3)",
+      "Pre-training": "PGD adversarial training with ε=3"
+    },
+    "about": [
+      "MnasNet adversarially trained with ε=3. Tests whether the efficiency-focused NAS architecture can still benefit from adversarial training to improve brain alignment."
+    ],
+    "docsUrl": "https://github.com/MadryLab/robustness"
+  },
+  "robust_mobilenetv2_epsilon_3": {
+    "name": "Robust MobileNetV2 (ε=3)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust MobileNetV2 (ε=3)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – MobileNetV2 (adversarially trained)",
+      "Parameters": "~3.4M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=3)",
+      "Pre-training": "PGD adversarial training with ε=3"
+    },
+    "about": [
+      "MobileNetV2 adversarially trained with ε=3. A lightweight, robust model exploring whether efficient mobile architectures can achieve brain-like representations through adversarial training."
+    ],
+    "docsUrl": "https://github.com/MadryLab/robustness"
+  },
+  "robust_rn18_blur_strong": {
+    "name": "Robust ResNet-18 (Blur – Strong)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust ResNet-18 (Blur – Strong)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – ResNet-18 (blur-augmented)",
+      "Parameters": "~11M",
+      "Training Data": "ImageNet-1K (with strong Gaussian blur augmentation)",
+      "Pre-training": "Supervised classification with heavy blur augmentation"
+    },
+    "about": [
+      "ResNet-18 trained with heavy Gaussian blur augmentation, forcing the network to learn features at coarse spatial scales. Strong blur training may mimic the spatial frequency preferences of the magnocellular visual pathway."
+    ],
+    "docsUrl": "https://github.com/bethgelab/game-of-noise"
+  },
+  "robust_rn18_blur_weak": {
+    "name": "Robust ResNet-18 (Blur – Weak)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust ResNet-18 (Blur – Weak)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – ResNet-18 (blur-augmented)",
+      "Parameters": "~11M",
+      "Training Data": "ImageNet-1K (with Gaussian blur augmentation, weak)",
+      "Pre-training": "Supervised classification with mild blur augmentation"
+    },
+    "about": [
+      "ResNet-18 trained with mild Gaussian blur data augmentation. Blur training encourages the model to learn lower-frequency features and reduces reliance on high-frequency texture cues, which may improve robustness and brain alignment."
+    ],
+    "docsUrl": "https://github.com/bethgelab/game-of-noise"
+  },
+  "robust_rn18_epsilon_003": {
+    "name": "Robust ResNet-18 (ε=0.003)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust ResNet-18 (ε=0.003)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – ResNet-18 (adversarially trained)",
+      "Parameters": "~11M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=0.003)",
+      "Pre-training": "PGD adversarial training with ε=0.003"
+    },
+    "about": [
+      "ResNet-18 adversarially trained with a very small perturbation budget (ε=0.003). Minimal adversarial training provides slight input robustness while barely affecting natural accuracy. A useful control for the effect of adversarial training intensity."
+    ],
+    "docsUrl": "https://github.com/MadryLab/robustness"
+  },
+  "robust_rn18_epsilon_01": {
+    "name": "Robust ResNet-18 (ε=0.01)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust ResNet-18 (ε=0.01)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – ResNet-18 (adversarially trained)",
+      "Parameters": "~11M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=0.01)",
+      "Pre-training": "PGD adversarial training with ε=0.01"
+    },
+    "about": [
+      "ResNet-18 adversarially trained with ε=0.01. Research shows that adversarial training at moderate epsilon leads to more shape-biased, brain-like representations."
+    ],
+    "docsUrl": "https://github.com/MadryLab/robustness"
+  },
+  "robust_rn18_epsilon_025": {
+    "name": "Robust ResNet-18 (ε=0.025)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust ResNet-18 (ε=0.025)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – ResNet-18 (adversarially trained)",
+      "Parameters": "~11M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=0.025)",
+      "Pre-training": "PGD adversarial training with ε=0.025"
+    },
+    "about": [
+      "ResNet-18 with ε=0.025 adversarial training. At this epsilon, the model must learn more shape-based features rather than relying on texture statistics, potentially improving alignment with ventral visual stream."
+    ],
+    "docsUrl": "https://github.com/MadryLab/robustness"
+  },
+  "robust_rn18_epsilon_3": {
+    "name": "Robust ResNet-18 (ε=3)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust ResNet-18 (ε=3)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – ResNet-18 (adversarially trained)",
+      "Parameters": "~11M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=3)",
+      "Pre-training": "PGD adversarial training with ε=3"
+    },
+    "about": [
+      "ResNet-18 with strong adversarial training (ε=3). At large epsilon, the model learns highly robust but stylized features. Research (Feather et al., 2019; Engstrom et al., 2019) shows such models correlate strongly with higher visual cortex areas."
+    ],
+    "docsUrl": "https://github.com/MadryLab/robustness"
+  },
+  "robust_rn18_epsilon_5": {
+    "name": "Robust ResNet-18 (ε=5)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust ResNet-18 (ε=5)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – ResNet-18 (adversarially trained)",
+      "Parameters": "~11M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=5)",
+      "Pre-training": "PGD adversarial training with ε=5"
+    },
+    "about": [
+      "ResNet-18 with the strongest adversarial training (ε=5). Very large perturbation budgets may degrade natural task accuracy while maximizing input robustness, creating extremely shape-biased representations."
+    ],
+    "docsUrl": "https://github.com/MadryLab/robustness"
+  },
+  "robust_rn50_blur_strong": {
+    "name": "Robust ResNet-50 (Blur – Strong)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust ResNet-50 (Blur – Strong)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – ResNet-50 (blur-augmented)",
+      "Parameters": "~25M",
+      "Training Data": "ImageNet-1K (with heavy Gaussian blur augmentation)",
+      "Pre-training": "Supervised classification with heavy blur augmentation"
+    },
+    "about": [
+      "ResNet-50 trained with heavy blur augmentation, maximally de-emphasizing high-frequency texture cues and encouraging coarse spatial feature learning."
+    ],
+    "docsUrl": "https://github.com/bethgelab/game-of-noise"
+  },
+  "robust_rn50_blur_weak": {
+    "name": "Robust ResNet-50 (Blur – Weak)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust ResNet-50 (Blur – Weak)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – ResNet-50 (blur-augmented)",
+      "Parameters": "~25M",
+      "Training Data": "ImageNet-1K (with mild Gaussian blur augmentation)",
+      "Pre-training": "Supervised classification with mild blur augmentation"
+    },
+    "about": [
+      "ResNet-50 trained with mild Gaussian blur augmentation, encouraging lower-frequency feature learning while preserving most natural accuracy."
+    ],
+    "docsUrl": "https://github.com/bethgelab/game-of-noise"
+  },
+  "robust_rn50_epsilon_003": {
+    "name": "Robust ResNet-50 (ε=0.003)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust ResNet-50 (ε=0.003)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – ResNet-50 (adversarially trained)",
+      "Parameters": "~25M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=0.003)",
+      "Pre-training": "PGD adversarial training with ε=0.003"
+    },
+    "about": [
+      "ResNet-50 with very weak adversarial training (ε=0.003), a near-standard model providing a control for the effect of minimal adversarial regularization."
+    ],
+    "docsUrl": "https://github.com/MadryLab/robustness"
+  },
+  "robust_rn50_epsilon_01": {
+    "name": "Robust ResNet-50 (ε=0.01)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust ResNet-50 (ε=0.01)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – ResNet-50 (adversarially trained)",
+      "Parameters": "~25M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=0.01)",
+      "Pre-training": "PGD adversarial training with ε=0.01"
+    },
+    "about": [
+      "ResNet-50 with moderate adversarial training (ε=0.01). This epsilon level is often where the trade-off between robustness and natural accuracy begins to significantly improve brain alignment."
+    ],
+    "docsUrl": "https://github.com/MadryLab/robustness"
+  },
+  "robust_rn50_epsilon_025": {
+    "name": "Robust ResNet-50 (ε=0.025)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust ResNet-50 (ε=0.025)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – ResNet-50 (adversarially trained)",
+      "Parameters": "~25M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=0.025)",
+      "Pre-training": "PGD adversarial training with ε=0.025"
+    },
+    "about": [
+      "ResNet-50 adversarially trained with ε=0.025. Shape-bias increases at this epsilon, and the model's internal representations often show improved alignment with ventral stream recordings."
+    ],
+    "docsUrl": "https://github.com/MadryLab/robustness"
+  },
+  "robust_rn50_epsilon_3": {
+    "name": "Robust ResNet-50 (ε=3)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust ResNet-50 (ε=3)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – ResNet-50 (adversarially trained)",
+      "Parameters": "~25M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=3)",
+      "Pre-training": "PGD adversarial training with ε=3"
+    },
+    "about": [
+      "ResNet-50 with strong adversarial training (ε=3). Engstrom et al. (2019) showed that such robustly-trained models are among the best brain predictors, suggesting that adversarial robustness and neural alignment share common computational principles."
+    ],
+    "docsUrl": "https://github.com/MadryLab/robustness"
+  },
+  "robust_rn50_epsilon_5": {
+    "name": "Robust ResNet-50 (ε=5)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust ResNet-50 (ε=5)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – ResNet-50 (adversarially trained)",
+      "Parameters": "~25M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=5)",
+      "Pre-training": "PGD adversarial training with ε=5"
+    },
+    "about": [
+      "ResNet-50 with maximum adversarial training (ε=5). Pushes the model toward highly abstracted, shape-biased representations at the cost of some natural accuracy."
+    ],
+    "docsUrl": "https://github.com/MadryLab/robustness"
+  },
+  "robust_vgg16_blur_strong": {
+    "name": "Robust VGG-16 (Blur – Strong)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust VGG-16 (Blur – Strong)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – VGG-16 (blur-augmented)",
+      "Parameters": "~138M",
+      "Training Data": "ImageNet-1K (with heavy Gaussian blur)",
+      "Pre-training": "Supervised classification with heavy blur augmentation"
+    },
+    "about": [
+      "VGG-16 trained with heavy blur augmentation, strongly reducing reliance on high-frequency texture cues and focusing the model on coarser spatial structure."
+    ],
+    "docsUrl": "https://github.com/bethgelab/game-of-noise"
+  },
+  "robust_vgg16_blur_weak": {
+    "name": "Robust VGG-16 (Blur – Weak)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust VGG-16 (Blur – Weak)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – VGG-16 (blur-augmented)",
+      "Parameters": "~138M",
+      "Training Data": "ImageNet-1K (with mild Gaussian blur)",
+      "Pre-training": "Supervised classification with mild blur augmentation"
+    },
+    "about": [
+      "VGG-16 trained with mild blur augmentation, reducing texture bias while preserving most of the original accuracy."
+    ],
+    "docsUrl": "https://github.com/bethgelab/game-of-noise"
+  },
+  "robust_vgg16_bn_epsilon_3": {
+    "name": "Robust VGG-16 BN (ε=3)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust VGG-16 BN (ε=3)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – VGG-16 with BatchNorm (adversarially trained)",
+      "Parameters": "~138M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=3)",
+      "Pre-training": "PGD adversarial training with ε=3"
+    },
+    "about": [
+      "VGG-16 with batch normalization adversarially trained with ε=3. The simple stacked-convolution architecture of VGG with adversarial training tests whether classic architectures can match modern models in brain alignment when robustness is enforced."
+    ],
+    "docsUrl": "https://github.com/MadryLab/robustness"
+  },
+  "robust_vgg19_blur_strong": {
+    "name": "Robust VGG-19 (Blur – Strong)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust VGG-19 (Blur – Strong)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – VGG-19 (blur-augmented)",
+      "Parameters": "~144M",
+      "Training Data": "ImageNet-1K (with heavy Gaussian blur)",
+      "Pre-training": "Supervised classification with heavy blur augmentation"
+    },
+    "about": [
+      "VGG-19 with heavy blur augmentation, maximizing coarse spatial feature learning in the deeper VGG architecture."
+    ],
+    "docsUrl": "https://github.com/bethgelab/game-of-noise"
+  },
+  "robust_vgg19_blur_weak": {
+    "name": "Robust VGG-19 (Blur – Weak)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust VGG-19 (Blur – Weak)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – VGG-19 (blur-augmented)",
+      "Parameters": "~144M",
+      "Training Data": "ImageNet-1K (with mild Gaussian blur)",
+      "Pre-training": "Supervised classification with mild blur augmentation"
+    },
+    "about": [
+      "VGG-19 trained with mild blur augmentation, testing whether the deeper VGG-19 architecture benefits similarly from low-frequency emphasis as VGG-16."
+    ],
+    "docsUrl": "https://github.com/bethgelab/game-of-noise"
+  },
+  "robust_wideresnet50_epsilon_003": {
+    "name": "Robust WideResNet-50 (ε=0.003)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust WideResNet-50 (ε=0.003)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – WideResNet-50-2 (adversarially trained)",
+      "Parameters": "~69M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=0.003)",
+      "Pre-training": "PGD adversarial training with ε=0.003"
+    },
+    "about": [
+      "WideResNet-50 with minimal adversarial training (ε=0.003). Tests whether width combined with minimal robustness training changes brain predictivity compared to standard WideResNet-50."
+    ],
+    "docsUrl": "https://github.com/MadryLab/robustness"
+  },
+  "robust_wideresnet50_epsilon_01": {
+    "name": "Robust WideResNet-50 (ε=0.01)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust WideResNet-50 (ε=0.01)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – WideResNet-50-2 (adversarially trained)",
+      "Parameters": "~69M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=0.01)",
+      "Pre-training": "PGD adversarial training with ε=0.01"
+    },
+    "about": [
+      "WideResNet-50 with mild adversarial training (ε=0.01), beginning to improve shape-bias and brain alignment."
+    ],
+    "docsUrl": "https://github.com/MadryLab/robustness"
+  },
+  "robust_wideresnet50_epsilon_025": {
+    "name": "Robust WideResNet-50 (ε=0.025)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust WideResNet-50 (ε=0.025)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – WideResNet-50-2 (adversarially trained)",
+      "Parameters": "~69M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=0.025)",
+      "Pre-training": "PGD adversarial training with ε=0.025"
+    },
+    "about": [
+      "WideResNet-50 with ε=0.025 adversarial training. This epsilon often represents a sweet spot between robustness and natural accuracy."
+    ],
+    "docsUrl": "https://github.com/MadryLab/robustness"
+  },
+  "robust_wideresnet50_epsilon_3": {
+    "name": "Robust WideResNet-50 (ε=3)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust WideResNet-50 (ε=3)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – WideResNet-50-2 (adversarially trained)",
+      "Parameters": "~69M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=3)",
+      "Pre-training": "PGD adversarial training with ε=3"
+    },
+    "about": [
+      "WideResNet-50 with strong adversarial training (ε=3). The wide architecture combined with strong adversarial regularization may yield among the most brain-like CNN representations."
+    ],
+    "docsUrl": "https://github.com/MadryLab/robustness"
+  },
+  "robust_wideresnet50_epsilon_5": {
+    "name": "Robust WideResNet-50 (ε=5)",
+    "category": "Adversarially Robust CNN",
+    "info": {
+      "Model Name": "Robust WideResNet-50 (ε=5)",
+      "Category": "Adversarially Robust CNN",
+      "Architecture": "CNN – WideResNet-50-2 (adversarially trained)",
+      "Parameters": "~69M",
+      "Training Data": "ImageNet-1K (adversarially trained, ε=5)",
+      "Pre-training": "PGD adversarial training with ε=5"
+    },
+    "about": [
+      "WideResNet-50 with the largest adversarial perturbation budget (ε=5). Maximum robustness constraint on a wide, deep network."
+    ],
+    "docsUrl": "https://github.com/MadryLab/robustness"
+  },
+  "siglip": {
+    "name": "SigLIP",
+    "category": "Vision-Language Model",
+    "info": {
+      "Model Name": "SigLIP",
+      "Category": "Vision-Language Model",
+      "Architecture": "Vision Transformer – ViT-B/16",
+      "Parameters": "~86M (image encoder)",
+      "Training Data": "Large-scale image-text pairs (WebLI)",
+      "Pre-training": "Sigmoid loss language-image pre-training"
+    },
+    "about": [
+      "SigLIP (Zhai et al., 2023) replaces CLIP's softmax contrastive loss with a sigmoid loss, enabling efficient training without large batch sizes. Trained on WebLI (web-scraped image-language pairs), it achieves strong zero-shot performance and rich semantic representations."
+    ],
+    "docsUrl": "https://huggingface.co/google/siglip-base-patch16-224"
+  },
+  "siglip2": {
+    "name": "SigLIP 2",
+    "category": "Vision-Language Model",
+    "info": {
+      "Model Name": "SigLIP 2",
+      "Category": "Vision-Language Model",
+      "Architecture": "Vision Transformer – ViT-B/16 (improved)",
+      "Parameters": "~86M (image encoder)",
+      "Training Data": "Large-scale image-text pairs (WebLI, improved curation)",
+      "Pre-training": "Improved sigmoid loss language-image pre-training"
+    },
+    "about": [
+      "SigLIP 2 improves upon the original SigLIP with better data curation, training recipes, and architecture refinements. Enhanced vision-language alignment may produce representations even more predictive of high-level visual cortex."
+    ],
+    "docsUrl": "https://huggingface.co/google/siglip2-base-patch16-224"
+  },
+  "taskonomy_autoencoding": {
+    "name": "Taskonomy – Autoencoding",
+    "category": "Taskonomy (Task-Specific)",
+    "info": {
+      "Model Name": "Taskonomy – Autoencoding",
+      "Category": "Taskonomy (Task-Specific)",
+      "Architecture": "CNN Encoder-Decoder",
+      "Parameters": "~57M",
+      "Training Data": "Taskonomy indoor scenes (4M+ images)",
+      "Pre-training": "Pixel-level image reconstruction (autoencoding)"
+    },
+    "about": [
+      "Taskonomy Autoencoding trains a ResNet encoder to reconstruct its own input, learning to preserve all spatial information. Unlike classification models, the encoder has no label pressure—only reconstruction fidelity. This task probes what low-level features are needed for pixel reconstruction."
+    ],
+    "docsUrl": "https://github.com/StanfordVL/taskonomy"
+  },
+  "taskonomy_class_object": {
+    "name": "Taskonomy – Object Classification",
+    "category": "Taskonomy (Task-Specific)",
+    "info": {
+      "Model Name": "Taskonomy – Object Classification",
+      "Category": "Taskonomy (Task-Specific)",
+      "Architecture": "CNN Encoder + Classifier",
+      "Parameters": "~57M",
+      "Training Data": "Taskonomy indoor scenes (object labels)",
+      "Pre-training": "Object category classification"
+    },
+    "about": [
+      "Taskonomy Object Classification trains an encoder for recognizing object categories within indoor scenes. This semantic task drives the network to learn object-level features, making it a useful comparison to general ImageNet models."
+    ],
+    "docsUrl": "https://github.com/StanfordVL/taskonomy"
+  },
+  "taskonomy_class_scene": {
+    "name": "Taskonomy – Scene Classification",
+    "category": "Taskonomy (Task-Specific)",
+    "info": {
+      "Model Name": "Taskonomy – Scene Classification",
+      "Category": "Taskonomy (Task-Specific)",
+      "Architecture": "CNN Encoder + Classifier",
+      "Parameters": "~57M",
+      "Training Data": "Taskonomy indoor scenes (scene labels)",
+      "Pre-training": "Scene category classification"
+    },
+    "about": [
+      "Taskonomy Scene Classification trains an encoder to recognize indoor scene categories. Scene-level training may produce representations especially aligned with scene-selective cortex (PPA)."
+    ],
+    "docsUrl": "https://github.com/StanfordVL/taskonomy"
+  },
+  "taskonomy_colorization": {
+    "name": "Taskonomy Colorization",
+    "category": "Taskonomy (Task-Specific Vision)",
+    "info": {
+      "Model Name": "Taskonomy Colorization",
+      "Category": "Taskonomy (Task-Specific Vision)"
+    },
+    "about": [],
+    "docsUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  "taskonomy_curvature": {
+    "name": "Taskonomy – Surface Curvature",
+    "category": "Taskonomy (Task-Specific)",
+    "info": {
+      "Model Name": "Taskonomy – Surface Curvature",
+      "Category": "Taskonomy (Task-Specific)",
+      "Architecture": "CNN Encoder-Decoder",
+      "Parameters": "~57M",
+      "Training Data": "Taskonomy indoor scenes (curvature maps)",
+      "Pre-training": "Surface curvature estimation"
+    },
+    "about": [
+      "Taskonomy Curvature trains an encoder to predict the curvature of surfaces in indoor scenes. This geometry-sensitive task forces the network to represent 3D shape properties rather than texture or color."
+    ],
+    "docsUrl": "https://github.com/StanfordVL/taskonomy"
+  },
+  "taskonomy_denoising": {
+    "name": "Taskonomy – Image Denoising",
+    "category": "Taskonomy (Task-Specific)",
+    "info": {
+      "Model Name": "Taskonomy – Image Denoising",
+      "Category": "Taskonomy (Task-Specific)",
+      "Architecture": "CNN Encoder-Decoder",
+      "Parameters": "~57M",
+      "Training Data": "Taskonomy indoor scenes (noisy/clean pairs)",
+      "Pre-training": "Image denoising"
+    },
+    "about": [
+      "Taskonomy Denoising trains an encoder-decoder to remove synthetic noise from images. The task drives learning of spatial structure and texture statistics without any semantic labels."
+    ],
+    "docsUrl": "https://github.com/StanfordVL/taskonomy"
+  },
+  "taskonomy_depth_euclidean": {
+    "name": "Taskonomy – Depth (Euclidean)",
+    "category": "Taskonomy (Task-Specific)",
+    "info": {
+      "Model Name": "Taskonomy – Depth (Euclidean)",
+      "Category": "Taskonomy (Task-Specific)",
+      "Architecture": "CNN Encoder-Decoder",
+      "Parameters": "~57M",
+      "Training Data": "Taskonomy indoor scenes (Euclidean depth maps)",
+      "Pre-training": "Euclidean distance depth estimation"
+    },
+    "about": [
+      "Taskonomy Depth Euclidean estimates the absolute 3D distance from the camera to each surface point. Depth-sensitive representations may align with dorsal stream areas that support spatial navigation and object manipulation."
+    ],
+    "docsUrl": "https://github.com/StanfordVL/taskonomy"
+  },
+  "taskonomy_depth_zbuffer": {
+    "name": "Taskonomy – Depth (Z-buffer)",
+    "category": "Taskonomy (Task-Specific)",
+    "info": {
+      "Model Name": "Taskonomy – Depth (Z-buffer)",
+      "Category": "Taskonomy (Task-Specific)",
+      "Architecture": "CNN Encoder-Decoder",
+      "Parameters": "~57M",
+      "Training Data": "Taskonomy indoor scenes (z-buffer depth maps)",
+      "Pre-training": "Z-buffer depth estimation"
+    },
+    "about": [
+      "Taskonomy Depth Z-buffer estimates depth in the camera-aligned z-buffer format. Compared to Euclidean depth, z-buffer depth is measured perpendicular to the camera plane, capturing different geometric cues."
+    ],
+    "docsUrl": "https://github.com/StanfordVL/taskonomy"
+  },
+  "taskonomy_edge_occlusion": {
+    "name": "Taskonomy – Occlusion Edges",
+    "category": "Taskonomy (Task-Specific)",
+    "info": {
+      "Model Name": "Taskonomy – Occlusion Edges",
+      "Category": "Taskonomy (Task-Specific)",
+      "Architecture": "CNN Encoder-Decoder",
+      "Parameters": "~57M",
+      "Training Data": "Taskonomy indoor scenes (occlusion edge maps)",
+      "Pre-training": "Occlusion boundary detection"
+    },
+    "about": [
+      "Taskonomy Occlusion Edges detects the boundaries where one surface occludes another—a geometric signal that corresponds to object outlines. This captures figure-ground separation relevant to early visual processing."
+    ],
+    "docsUrl": "https://github.com/StanfordVL/taskonomy"
+  },
+  "taskonomy_edge_texture": {
+    "name": "Taskonomy – Texture Edges",
+    "category": "Taskonomy (Task-Specific)",
+    "info": {
+      "Model Name": "Taskonomy – Texture Edges",
+      "Category": "Taskonomy (Task-Specific)",
+      "Architecture": "CNN Encoder-Decoder",
+      "Parameters": "~57M",
+      "Training Data": "Taskonomy indoor scenes (texture edge maps)",
+      "Pre-training": "Texture gradient edge detection"
+    },
+    "about": [
+      "Taskonomy Texture Edges detects boundaries defined by texture changes rather than depth discontinuities. Texture-based edge detection captures mid-level visual features that may correlate with V2/V4 processing."
+    ],
+    "docsUrl": "https://github.com/StanfordVL/taskonomy"
+  },
+  "taskonomy_ego_motion": {
+    "name": "Taskonomy Ego Motion",
+    "category": "Taskonomy (Task-Specific Vision)",
+    "info": {
+      "Model Name": "Taskonomy Ego Motion",
+      "Category": "Taskonomy (Task-Specific Vision)"
+    },
+    "about": [],
+    "docsUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  "taskonomy_inpainting": {
+    "name": "Taskonomy – Image Inpainting",
+    "category": "Taskonomy (Task-Specific)",
+    "info": {
+      "Model Name": "Taskonomy – Image Inpainting",
+      "Category": "Taskonomy (Task-Specific)",
+      "Architecture": "CNN Encoder-Decoder",
+      "Parameters": "~57M",
+      "Training Data": "Taskonomy indoor scenes (masked/complete image pairs)",
+      "Pre-training": "Missing region reconstruction"
+    },
+    "about": [
+      "Taskonomy Inpainting trains an encoder-decoder to predict missing image regions given context. This requires understanding scene statistics and object structure, driving the encoder to learn rich scene-level representations."
+    ],
+    "docsUrl": "https://github.com/StanfordVL/taskonomy"
+  },
+  "taskonomy_jigsaw": {
+    "name": "Taskonomy Jigsaw",
+    "category": "Taskonomy (Task-Specific Vision)",
+    "info": {
+      "Model Name": "Taskonomy Jigsaw",
+      "Category": "Taskonomy (Task-Specific Vision)"
+    },
+    "about": [],
+    "docsUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  "taskonomy_keypoints2d": {
+    "name": "Taskonomy – 2D Keypoints",
+    "category": "Taskonomy (Task-Specific)",
+    "info": {
+      "Model Name": "Taskonomy – 2D Keypoints",
+      "Category": "Taskonomy (Task-Specific)",
+      "Architecture": "CNN Encoder-Decoder",
+      "Parameters": "~57M",
+      "Training Data": "Taskonomy indoor scenes (2D keypoint maps)",
+      "Pre-training": "2D keypoint detection"
+    },
+    "about": [
+      "Taskonomy 2D Keypoints detects distinctive 2D image points (corners, junctions, salient points). This low-level feature detection task drives sensitivity to image structure without semantic labeling."
+    ],
+    "docsUrl": "https://github.com/StanfordVL/taskonomy"
+  },
+  "taskonomy_keypoints3d": {
+    "name": "Taskonomy – 3D Keypoints",
+    "category": "Taskonomy (Task-Specific)",
+    "info": {
+      "Model Name": "Taskonomy – 3D Keypoints",
+      "Category": "Taskonomy (Task-Specific)",
+      "Architecture": "CNN Encoder-Decoder",
+      "Parameters": "~57M",
+      "Training Data": "Taskonomy indoor scenes (3D keypoint maps)",
+      "Pre-training": "3D keypoint detection"
+    },
+    "about": [
+      "Taskonomy 3D Keypoints detects 3D structural keypoints in indoor scenes, capturing geometric salient points in depth-aware coordinates. This extends 2D keypoint detection to three dimensions."
+    ],
+    "docsUrl": "https://github.com/StanfordVL/taskonomy"
+  },
+  "taskonomy_non_fixated": {
+    "name": "Taskonomy Non Fixated",
+    "category": "Taskonomy (Task-Specific Vision)",
+    "info": {
+      "Model Name": "Taskonomy Non Fixated",
+      "Category": "Taskonomy (Task-Specific Vision)"
+    },
+    "about": [],
+    "docsUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  "taskonomy_normal": {
+    "name": "Taskonomy – Surface Normals",
+    "category": "Taskonomy (Task-Specific)",
+    "info": {
+      "Model Name": "Taskonomy – Surface Normals",
+      "Category": "Taskonomy (Task-Specific)",
+      "Architecture": "CNN Encoder-Decoder",
+      "Parameters": "~57M",
+      "Training Data": "Taskonomy indoor scenes (surface normal maps)",
+      "Pre-training": "Surface normal estimation"
+    },
+    "about": [
+      "Taskonomy Surface Normals predicts the orientation of surfaces at each pixel—a geometric task that requires understanding 3D shape. This is a rich signal for scene geometry understanding related to spatial processing in dorsal cortex."
+    ],
+    "docsUrl": "https://github.com/StanfordVL/taskonomy"
+  },
+  "taskonomy_point_matching": {
+    "name": "Taskonomy Point Matching",
+    "category": "Taskonomy (Task-Specific Vision)",
+    "info": {
+      "Model Name": "Taskonomy Point Matching",
+      "Category": "Taskonomy (Task-Specific Vision)"
+    },
+    "about": [],
+    "docsUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  "taskonomy_reshading": {
+    "name": "Taskonomy – Reshading",
+    "category": "Taskonomy (Task-Specific)",
+    "info": {
+      "Model Name": "Taskonomy – Reshading",
+      "Category": "Taskonomy (Task-Specific)",
+      "Architecture": "CNN Encoder-Decoder",
+      "Parameters": "~57M",
+      "Training Data": "Taskonomy indoor scenes (shading maps)",
+      "Pre-training": "Scene reshading / shading estimation"
+    },
+    "about": [
+      "Taskonomy Reshading trains the network to predict how a scene should look under different illumination conditions. Intrinsic image decomposition into shading requires understanding 3D geometry and material properties."
+    ],
+    "docsUrl": "https://github.com/StanfordVL/taskonomy"
+  },
+  "taskonomy_rgb2depth": {
+    "name": "Taskonomy Rgb2Depth",
+    "category": "Taskonomy (Task-Specific Vision)",
+    "info": {
+      "Model Name": "Taskonomy Rgb2Depth",
+      "Category": "Taskonomy (Task-Specific Vision)"
+    },
+    "about": [],
+    "docsUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  "taskonomy_rgb2mist": {
+    "name": "Taskonomy Rgb2Mist",
+    "category": "Taskonomy (Task-Specific Vision)",
+    "info": {
+      "Model Name": "Taskonomy Rgb2Mist",
+      "Category": "Taskonomy (Task-Specific Vision)"
+    },
+    "about": [],
+    "docsUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  "taskonomy_rgb2sfnorm": {
+    "name": "Taskonomy Rgb2Sfnorm",
+    "category": "Taskonomy (Task-Specific Vision)",
+    "info": {
+      "Model Name": "Taskonomy Rgb2Sfnorm",
+      "Category": "Taskonomy (Task-Specific Vision)"
+    },
+    "about": [],
+    "docsUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  "taskonomy_room_layout": {
+    "name": "Taskonomy Room Layout",
+    "category": "Taskonomy (Task-Specific Vision)",
+    "info": {
+      "Model Name": "Taskonomy Room Layout",
+      "Category": "Taskonomy (Task-Specific Vision)"
+    },
+    "about": [],
+    "docsUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  "taskonomy_segment_semantic": {
+    "name": "Taskonomy – Semantic Segmentation",
+    "category": "Taskonomy (Task-Specific)",
+    "info": {
+      "Model Name": "Taskonomy – Semantic Segmentation",
+      "Category": "Taskonomy (Task-Specific)",
+      "Architecture": "CNN Encoder-Decoder",
+      "Parameters": "~57M",
+      "Training Data": "Taskonomy indoor scenes (semantic labels)",
+      "Pre-training": "Semantic segmentation"
+    },
+    "about": [
+      "Taskonomy Semantic Segmentation assigns a semantic category label to every pixel. This drives the encoder to learn high-level object and region representations, potentially aligning with category-selective cortical areas."
+    ],
+    "docsUrl": "https://github.com/StanfordVL/taskonomy"
+  },
+  "taskonomy_segment_unsup25d": {
+    "name": "Taskonomy – Unsupervised Segmentation (2.5D)",
+    "category": "Taskonomy (Task-Specific)",
+    "info": {
+      "Model Name": "Taskonomy – Unsupervised Segmentation (2.5D)",
+      "Category": "Taskonomy (Task-Specific)",
+      "Architecture": "CNN Encoder-Decoder",
+      "Parameters": "~57M",
+      "Training Data": "Taskonomy indoor scenes (depth-guided grouping)",
+      "Pre-training": "Unsupervised 2.5D segmentation"
+    },
+    "about": [
+      "Taskonomy Unsupervised 2.5D Segmentation groups pixels based on depth discontinuities and appearance, without semantic labels. The 2.5D signal integrates 2D appearance with depth cues."
+    ],
+    "docsUrl": "https://github.com/StanfordVL/taskonomy"
+  },
+  "taskonomy_segment_unsup2d": {
+    "name": "Taskonomy – Unsupervised Segmentation (2D)",
+    "category": "Taskonomy (Task-Specific)",
+    "info": {
+      "Model Name": "Taskonomy – Unsupervised Segmentation (2D)",
+      "Category": "Taskonomy (Task-Specific)",
+      "Architecture": "CNN Encoder-Decoder",
+      "Parameters": "~57M",
+      "Training Data": "Taskonomy indoor scenes (appearance-guided grouping)",
+      "Pre-training": "Unsupervised 2D segmentation"
+    },
+    "about": [
+      "Taskonomy Unsupervised 2D Segmentation groups pixels purely by visual similarity without depth or semantic information. This purely appearance-driven task is a mid-level vision signal without category or 3D supervision."
+    ],
+    "docsUrl": "https://github.com/StanfordVL/taskonomy"
+  },
+  "taskonomy_surface_normals": {
+    "name": "Taskonomy Surface Normals",
+    "category": "Taskonomy (Task-Specific Vision)",
+    "info": {
+      "Model Name": "Taskonomy Surface Normals",
+      "Category": "Taskonomy (Task-Specific Vision)"
+    },
+    "about": [],
+    "docsUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  "taskonomy_vanishing_points": {
+    "name": "Taskonomy Vanishing Points",
+    "category": "Taskonomy (Task-Specific Vision)",
+    "info": {
+      "Model Name": "Taskonomy Vanishing Points",
+      "Category": "Taskonomy (Task-Specific Vision)"
+    },
+    "about": [],
+    "docsUrl": "https://arxiv.org/abs/1808.07573"
+  },
+  "tdann_simclr": {
+    "name": "TDANN (SimCLR)",
+    "category": "Brain-Optimized Model",
+    "info": {
+      "Model Name": "TDANN (SimCLR)",
+      "Category": "Brain-Optimized Model",
+      "Architecture": "CNN (ResNet) + Topographic Loss",
+      "Parameters": "~25M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "SimCLR self-supervised + Topographic Dissimilarity Minimization"
+    },
+    "about": [
+      "TDANN (Topographic Deep Artificial Neural Network) adds a spatial smoothness constraint on top of SimCLR self-supervised training to model the topographic organization of visual cortex. Units that are spatially nearby in the network learn to prefer similar stimuli, mimicking the cortical layout."
+    ],
+    "docsUrl": "https://github.com/neuroai-arena/tdann"
+  },
+  "tdann_simclr_alpha_10": {
+    "name": "TDANN (SimCLR, α=10)",
+    "category": "Brain-Optimized Model",
+    "info": {
+      "Model Name": "TDANN (SimCLR, α=10)",
+      "Category": "Brain-Optimized Model",
+      "Architecture": "CNN + Topographic Loss (α=10)",
+      "Parameters": "~25M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "SimCLR + Topographic Dissimilarity Minimization (α=10)"
+    },
+    "about": [
+      "TDANN with topographic loss weight α=10, applying strong spatial organization pressure. Higher α encourages stronger cortical-like topographic maps, potentially improving voxel-by-voxel brain predictivity."
+    ],
+    "docsUrl": "https://github.com/neuroai-arena/tdann"
+  },
+  "tdann_simclr_alpha_100": {
+    "name": "TDANN (SimCLR, α=100)",
+    "category": "Brain-Optimized Model",
+    "info": {
+      "Model Name": "TDANN (SimCLR, α=100)",
+      "Category": "Brain-Optimized Model",
+      "Architecture": "CNN + Topographic Loss (α=100)",
+      "Parameters": "~25M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "SimCLR + Topographic Dissimilarity Minimization (α=100)"
+    },
+    "about": [
+      "TDANN with the strongest topographic loss weight α=100. Maximum spatial organization constraint; may sacrifice task accuracy to achieve highly regular topographic structure."
+    ],
+    "docsUrl": "https://github.com/neuroai-arena/tdann"
+  },
+  "tdann_simclr_alpha_2": {
+    "name": "TDANN (SimCLR, α=2)",
+    "category": "Brain-Optimized Model",
+    "info": {
+      "Model Name": "TDANN (SimCLR, α=2)",
+      "Category": "Brain-Optimized Model",
+      "Architecture": "CNN + Topographic Loss (α=2)",
+      "Parameters": "~25M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "SimCLR + Topographic Dissimilarity Minimization (α=2)"
+    },
+    "about": [
+      "TDANN with topographic loss weight α=2. Lower α means weaker spatial organization pressure, allowing more flexibility in learned features while still encouraging some topographic structure."
+    ],
+    "docsUrl": "https://github.com/neuroai-arena/tdann"
+  },
+  "tdann_simclr_alpha_5": {
+    "name": "TDANN (SimCLR, α=5)",
+    "category": "Brain-Optimized Model",
+    "info": {
+      "Model Name": "TDANN (SimCLR, α=5)",
+      "Category": "Brain-Optimized Model",
+      "Architecture": "CNN + Topographic Loss (α=5)",
+      "Parameters": "~25M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "SimCLR + Topographic Dissimilarity Minimization (α=5)"
+    },
+    "about": [
+      "TDANN with topographic loss weight α=5, providing moderate spatial organization pressure. This intermediate setting balances brain-inspired topographic structure with task performance."
+    ],
+    "docsUrl": "https://github.com/neuroai-arena/tdann"
+  },
+  "toponets_rn18": {
+    "name": "TopoNet (ResNet-18)",
+    "category": "Brain-Optimized Model",
+    "info": {
+      "Model Name": "TopoNet (ResNet-18)",
+      "Category": "Brain-Optimized Model",
+      "Architecture": "CNN – ResNet-18 + Topographic Loss",
+      "Parameters": "~11M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification + Topographic organization constraint"
+    },
+    "about": [
+      "TopoNets apply a topographic organization loss on top of supervised training, enforcing spatial smoothness analogous to how orientation preference maps appear in visual cortex. The ResNet-18 backbone keeps the model compact while the topographic constraint improves brain alignment."
+    ],
+    "docsUrl": "https://github.com/gyyang/topology_brain"
+  },
+  "toponets_rn18_tau_0.5": {
+    "name": "TopoNet RN18 (τ=0.5)",
+    "category": "Brain-Optimized Model",
+    "info": {
+      "Model Name": "TopoNet RN18 (τ=0.5)",
+      "Category": "Brain-Optimized Model",
+      "Architecture": "CNN – ResNet-18 + Topographic Loss (τ=0.5)",
+      "Parameters": "~11M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised + Topographic Loss (τ=0.5, strong locality)"
+    },
+    "about": [
+      "TopoNet ResNet-18 with τ=0.5, the strongest locality constraint (sharp Gaussian smoothing). This setting enforces fine-grained topographic structure, most closely mimicking the local preference maps seen in cortex."
+    ],
+    "docsUrl": "https://github.com/gyyang/topology_brain"
+  },
+  "toponets_rn18_tau_1": {
+    "name": "TopoNet RN18 (τ=1)",
+    "category": "Brain-Optimized Model",
+    "info": {
+      "Model Name": "TopoNet RN18 (τ=1)",
+      "Category": "Brain-Optimized Model",
+      "Architecture": "CNN – ResNet-18 + Topographic Loss (τ=1)",
+      "Parameters": "~11M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised + Topographic Loss (τ=1)"
+    },
+    "about": [
+      "TopoNet ResNet-18 with τ=1. A moderate-strength topographic constraint that enforces spatial smoothness over a slightly wider neighborhood than τ=0.5."
+    ],
+    "docsUrl": "https://github.com/gyyang/topology_brain"
+  },
+  "toponets_rn18_tau_20": {
+    "name": "TopoNet RN18 (τ=20)",
+    "category": "Brain-Optimized Model",
+    "info": {
+      "Model Name": "TopoNet RN18 (τ=20)",
+      "Category": "Brain-Optimized Model",
+      "Architecture": "CNN – ResNet-18 + Topographic Loss (τ=20)",
+      "Parameters": "~11M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised + Topographic Loss (τ=20)"
+    },
+    "about": [
+      "TopoNet ResNet-18 with τ=20. Very weak topographic constraint; the model is close to standard supervised training with minimal cortical topography imposed."
+    ],
+    "docsUrl": "https://github.com/gyyang/topology_brain"
+  },
+  "toponets_rn18_tau_5": {
+    "name": "TopoNet RN18 (τ=5)",
+    "category": "Brain-Optimized Model",
+    "info": {
+      "Model Name": "TopoNet RN18 (τ=5)",
+      "Category": "Brain-Optimized Model",
+      "Architecture": "CNN – ResNet-18 + Topographic Loss (τ=5)",
+      "Parameters": "~11M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised + Topographic Loss (τ=5)"
+    },
+    "about": [
+      "TopoNet ResNet-18 with τ=5. A weaker topographic constraint, enforcing broad spatial smoothness over large neighborhoods."
+    ],
+    "docsUrl": "https://github.com/gyyang/topology_brain"
+  },
+  "toponets_rn18_tau_50": {
+    "name": "TopoNet RN18 (τ=50)",
+    "category": "Brain-Optimized Model",
+    "info": {
+      "Model Name": "TopoNet RN18 (τ=50)",
+      "Category": "Brain-Optimized Model",
+      "Architecture": "CNN – ResNet-18 + Topographic Loss (τ=50)",
+      "Parameters": "~11M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised + Topographic Loss (τ=50)"
+    },
+    "about": [
+      "TopoNet ResNet-18 with τ=50. The weakest topographic constraint in the τ sweep, essentially functioning as supervised ResNet-18 with minimal spatial organization pressure."
+    ],
+    "docsUrl": "https://github.com/gyyang/topology_brain"
+  },
+  "toponets_rn50": {
+    "name": "TopoNet (ResNet-50)",
+    "category": "Brain-Optimized Model",
+    "info": {
+      "Model Name": "TopoNet (ResNet-50)",
+      "Category": "Brain-Optimized Model",
+      "Architecture": "CNN – ResNet-50 + Topographic Loss",
+      "Parameters": "~25M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification + Topographic organization constraint"
+    },
+    "about": [
+      "TopoNet with the larger ResNet-50 backbone, applying topographic organization constraints during supervised training. The larger capacity combined with brain-inspired topographic structure aims to improve predictions across multiple visual ROIs."
+    ],
+    "docsUrl": "https://github.com/gyyang/topology_brain"
+  },
+  "toponets_vit": {
+    "name": "TopoNet (ViT)",
+    "category": "Brain-Optimized Model",
+    "info": {
+      "Model Name": "TopoNet (ViT)",
+      "Category": "Brain-Optimized Model",
+      "Architecture": "Vision Transformer + Topographic Loss",
+      "Parameters": "~86M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised + Topographic organization constraint on ViT"
+    },
+    "about": [
+      "TopoNet with a Vision Transformer backbone, applying topographic organization constraints to attention-based features. Combining transformer global attention with cortical topographic structure is a novel approach to brain-inspired visual modeling."
+    ],
+    "docsUrl": "https://github.com/gyyang/topology_brain"
+  },
+  "vgg16_imagenet1kv1": {
+    "name": "VGG-16",
+    "category": "Classic CNN",
+    "info": {
+      "Model Name": "VGG-16",
+      "Category": "Classic CNN",
+      "Architecture": "CNN – VGG-16",
+      "Parameters": "~138M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "VGG-16 (Simonyan & Zisserman, 2014) uses a simple but effective architecture of 3×3 convolutions stacked in increasing depth. Its straightforward hierarchy has been extensively used in computational neuroscience as a predictor of ventral stream representations."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_vgg/"
+  },
+  "vgg16_imagenet1kv1_random": {
+    "name": "VGG-16 (Random Weights)",
+    "category": "Baseline (Random Weights)",
+    "info": {
+      "Model Name": "VGG-16 (Random Weights)",
+      "Category": "Baseline (Random Weights)",
+      "Architecture": "CNN – VGG-16",
+      "Parameters": "~138M",
+      "Training Data": "None (randomly initialized)",
+      "Pre-training": "No pre-training"
+    },
+    "about": [
+      "VGG-16 with random weights, used as a baseline to measure the contribution of ImageNet training versus the stacked convolutional architecture alone."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_vgg/"
+  },
+  "vgg19_imagenet1kv1": {
+    "name": "VGG-19",
+    "category": "Classic CNN",
+    "info": {
+      "Model Name": "VGG-19",
+      "Category": "Classic CNN",
+      "Architecture": "CNN – VGG-19",
+      "Parameters": "~144M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "VGG-19 extends VGG-16 with three additional convolutional layers, increasing depth and representational capacity. The larger hierarchy can capture more complex visual features across the ventral visual stream."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_vgg/"
+  },
+  "vgg19_imagenet1kv1_random": {
+    "name": "VGG-19 (Random Weights)",
+    "category": "Baseline (Random Weights)",
+    "info": {
+      "Model Name": "VGG-19 (Random Weights)",
+      "Category": "Baseline (Random Weights)",
+      "Architecture": "CNN – VGG-19",
+      "Parameters": "~144M",
+      "Training Data": "None (randomly initialized)",
+      "Pre-training": "No pre-training"
+    },
+    "about": [
+      "VGG-19 with random weights, a baseline for isolating the contribution of ImageNet training from the deep convolutional architecture."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_vgg/"
+  },
+  "vone_alexnet": {
+    "name": "VOneNet (AlexNet)",
+    "category": "Brain-Optimized Model",
+    "info": {
+      "Model Name": "VOneNet (AlexNet)",
+      "Category": "Brain-Optimized Model",
+      "Architecture": "CNN – AlexNet with V1-like front-end",
+      "Parameters": "~61M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification with fixed V1 Gabor front-end"
+    },
+    "about": [
+      "VOneNet AlexNet (Dapello et al., 2020) replaces the first convolutional layer with a fixed bank of Gabor filters that model V1 simple cells, complete with noise injection. This biologically-constrained front-end improves robustness to adversarial perturbations and distortions."
+    ],
+    "docsUrl": "https://github.com/dicarlolab/vonenet"
+  },
+  "vone_cornet_s": {
+    "name": "VOneNet (CORnet-S)",
+    "category": "Brain-Optimized Model",
+    "info": {
+      "Model Name": "VOneNet (CORnet-S)",
+      "Category": "Brain-Optimized Model",
+      "Architecture": "Recurrent CNN with V1-like front-end",
+      "Parameters": "~18M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification with fixed V1 Gabor front-end"
+    },
+    "about": [
+      "VOneNet CORnet-S combines the V1-like Gabor front-end from VOneNet with the brain-constrained recurrent architecture of CORnet-S. This combination aims to simultaneously model both V1 processing and the recurrent dynamics of higher visual areas."
+    ],
+    "docsUrl": "https://github.com/dicarlolab/vonenet"
+  },
+  "vone_rn50": {
+    "name": "VOneNet (ResNet-50)",
+    "category": "Brain-Optimized Model",
+    "info": {
+      "Model Name": "VOneNet (ResNet-50)",
+      "Category": "Brain-Optimized Model",
+      "Architecture": "CNN – ResNet-50 with V1-like front-end",
+      "Parameters": "~25M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification with fixed V1 Gabor front-end"
+    },
+    "about": [
+      "VOneNet ResNet-50 uses a ResNet-50 backbone with a biologically-constrained V1 front-end (fixed Gabor filters + noise). The combination of a strong ImageNet-trained backbone with a brain-inspired first stage produces robust, brain-like visual representations."
+    ],
+    "docsUrl": "https://github.com/dicarlolab/vonenet"
+  },
+  "webssl_dino300m": {
+    "name": "WebSSL DINO (300M)",
+    "category": "Self-Supervised Vision Transformer",
+    "info": {
+      "Model Name": "WebSSL DINO (300M)",
+      "Category": "Self-Supervised Vision Transformer",
+      "Architecture": "Vision Transformer – ViT-L (DINO-style)",
+      "Parameters": "~300M",
+      "Training Data": "3 billion internet images (web-scale)",
+      "Pre-training": "DINO self-supervised distillation at web scale"
+    },
+    "about": [
+      "WebSSL DINO 300M scales DINO self-supervised training to 300M parameters trained on 3 billion web images. Web-scale training without curated datasets tests whether sheer data and model scale alone can match curated pipelines for predicting brain activity."
+    ],
+    "docsUrl": "https://github.com/facebookresearch/dinov2"
+  },
+  "webssl_mae300m": {
+    "name": "WebSSL MAE (300M)",
+    "category": "Self-Supervised Vision Transformer",
+    "info": {
+      "Model Name": "WebSSL MAE (300M)",
+      "Category": "Self-Supervised Vision Transformer",
+      "Architecture": "Vision Transformer – ViT-L (MAE-style)",
+      "Parameters": "~300M",
+      "Training Data": "3 billion internet images (web-scale)",
+      "Pre-training": "Masked Autoencoding at web scale"
+    },
+    "about": [
+      "WebSSL MAE 300M scales Masked Autoencoding (He et al., 2022) to 300M parameters on 3 billion web images. MAE trains a ViT encoder to reconstruct masked patches, and at web scale it tests how reconstruction-based self-supervision compares to distillation-based approaches for brain predictivity."
+    ],
+    "docsUrl": "https://github.com/facebookresearch/mae"
+  },
+  "wideresnet101": {
+    "name": "WideResNet-101",
+    "category": "CNN",
+    "info": {
+      "Model Name": "WideResNet-101",
+      "Category": "CNN",
+      "Architecture": "CNN – Wide ResNet-101-2",
+      "Parameters": "~127M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "WideResNet-101 combines increased depth (101 layers) with increased width, providing the largest standard WideResNet in this benchmark. Its combination of depth and width gives it among the richest feature hierarchies in the CNN family."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_wide_resnet/"
+  },
+  "wideresnet50": {
+    "name": "WideResNet-50",
+    "category": "CNN",
+    "info": {
+      "Model Name": "WideResNet-50",
+      "Category": "CNN",
+      "Architecture": "CNN – Wide ResNet-50-2",
+      "Parameters": "~69M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "WideResNet-50 (Zagoruyko & Komodakis, 2016) trades depth for width, doubling the number of channels in each residual block. Wider networks can sometimes achieve higher accuracy than deeper networks, and broader filters may capture different visual features than deep narrow networks."
+    ],
+    "docsUrl": "https://pytorch.org/hub/pytorch_vision_wide_resnet/"
+  },
+  "xception": {
+    "name": "Xception",
+    "category": "CNN",
+    "info": {
+      "Model Name": "Xception",
+      "Category": "CNN",
+      "Architecture": "CNN – Xception (Extreme Inception)",
+      "Parameters": "~23M",
+      "Training Data": "ImageNet-1K",
+      "Pre-training": "Supervised classification"
+    },
+    "about": [
+      "Xception (Chollet, 2017) replaces Inception modules with depthwise separable convolutions, which fully decouple spatial feature learning from channel mixing. This extreme version of Inception achieves better accuracy than Inception-V3 with similar parameter count."
+    ],
+    "docsUrl": "https://keras.io/api/applications/xception/"
+  }
+}

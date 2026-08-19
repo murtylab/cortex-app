@@ -350,6 +350,13 @@
     }, 620);
   }
 
+  function markScoresUnavailable() {
+    const tbody = document.querySelector('.model-page table tbody');
+    if (tbody && /Loading scores/.test(tbody.textContent || '')) {
+      tbody.innerHTML = '<tr><td colspan="4">Performance scores are not available for this model.</td></tr>';
+    }
+  }
+
   function initModelPagePerformanceToggle() {
     const pageSlug = getModelPageSlugFromPath(window.location.pathname);
     const modelPage = document.querySelector('.model-page');
@@ -409,6 +416,7 @@
         const resolvedModelKey = resolveModelPageModelKey(pageSlug, entries.map(([, , data]) => data));
 
         if (!resolvedModelKey) {
+          markScoresUnavailable();
           return;
         }
 
@@ -424,6 +432,7 @@
         }, {});
 
         if (!payloads.univariate?.nsd || !payloads.univariate?.murty || !payloads.multivariate?.nsd || !payloads.multivariate?.murty) {
+          markScoresUnavailable();
           return;
         }
 
@@ -478,8 +487,11 @@
       })
       .catch((error) => {
         console.warn('Standalone model page performance toggle failed to initialize.', error);
+        markScoresUnavailable();
       });
   }
+
+  window.initModelPagePerformanceToggle = initModelPagePerformanceToggle;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initModelPagePerformanceToggle);

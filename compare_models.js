@@ -1,7 +1,6 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
 
-const pagesDir = 'cortex-web-app/model-pages';
+const catalogPath = 'assets/data/model-pages.json';
 const file1 = 'assets/data/new/standardized_results_nsd_1000_models_univariate.json';
 const file2 = 'assets/data/new/standardized_results_murty185_models_univariate.json';
 
@@ -20,7 +19,8 @@ function getModelKeys(filePath) {
     return keys;
 }
 
-const pageDirs = fs.readdirSync(pagesDir).filter(f => fs.statSync(path.join(pagesDir, f)).isDirectory());
+const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
+const pageDirs = Object.keys(catalog);
 const keys1 = getModelKeys(file1);
 const keys2 = getModelKeys(file2);
 const allKeys = new Set([...keys1, ...keys2]);
@@ -40,8 +40,8 @@ const unmatchedKeys = Array.from(allKeys).filter(key => {
     return !lowerDirMap.has(key.toLowerCase());
 });
 
-console.log(`Total page directories: ${pageDirs.length}`);
+console.log(`Total catalog models: ${pageDirs.length}`);
 console.log(`Exact slug matches: ${exactMatches.length}`);
 console.log(`Case-insensitive matches: ${caseInsensitiveMatches.length}`);
-console.log(`Unmatched directories (up to 25): ${unmatchedDirs.slice(0, 25).join(', ')}`);
-console.log(`Data keys with no directory (up to 25): ${unmatchedKeys.slice(0, 25).join(', ')}`);
+console.log(`Unmatched catalog models (up to 25): ${unmatchedDirs.slice(0, 25).join(', ')}`);
+console.log(`Data keys with no catalog entry (up to 25): ${unmatchedKeys.slice(0, 25).join(', ')}`);

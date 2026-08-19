@@ -663,6 +663,62 @@ body.lab-page .navmenu .dropdown ul {
   }
 }
 
+.model-page-status {
+  max-width: 1100px;
+  margin: 2rem auto 0;
+  padding: 1.25rem 1.5rem;
+  color: var(--text-sub);
+  font-family: var(--sans-font);
+}
+
+.model-page-status.is-error {
+  color: #8a3a3a;
+}
+
+.model-page-index-title {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--heading);
+  font-family: var(--serif-font);
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.model-page-index-copy {
+  display: block;
+  margin-bottom: 1.25rem;
+}
+
+.model-page-index-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.65rem 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+
+.model-page-index-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.model-page-index-list a {
+  color: var(--accent);
+  font-family: var(--mono-font);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.model-page-index-list a:hover {
+  text-decoration: underline;
+}
+
+.model-page-index-list span {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .performance-source-button,
   .performance-grid-enhanced .metric-card,
