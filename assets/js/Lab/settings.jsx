@@ -28,10 +28,9 @@ const Settings = ({
   participantName,
   setParticipantName,
   variant = 'default',
+  disabled = false,
 }) => {
   const isLab = variant === 'lab';
-  const isWholeBrain = variant === 'wholebrain';
-  const locked = isWholeBrain;
   const accent = isLab ? 'var(--lab-accent, #4A2E5C)' : 'var(--solid-pink)';
   const hairline = isLab ? 'var(--lab-hairline, #D6D2C6)' : 'rgba(0,0,0,0.2)';
   const bg = isLab ? 'var(--lab-panel, #FBFAF6)' : 'var(--background-color)';
@@ -47,26 +46,14 @@ const Settings = ({
       borderWidth: isLab ? '0.5px' : '1px',
     },
     '&:hover .MuiOutlinedInput-notchedOutline': {
-      borderColor: locked ? hairline : accent,
+      borderColor: accent,
     },
     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: locked ? hairline : accent,
+      borderColor: accent,
       borderWidth: '1px',
     },
     '& .MuiSelect-select': {
       fontSize: isLab ? 15 : undefined,
-    },
-  };
-
-  const disabledSelectSx = {
-    ...sharedSelectSx,
-    '& .MuiInputBase-input.Mui-disabled': {
-      WebkitTextFillColor: '#888',
-      opacity: 1,
-      cursor: 'not-allowed',
-    },
-    '&.Mui-disabled': {
-      backgroundColor: '#f0f0f0',
     },
   };
 
@@ -122,7 +109,9 @@ const Settings = ({
         borderRadius: '8px',
         width: '100%',
         marginRight: '0 auto',
-        flexDirection: { xs: 'column !important', md: 'row !important', lg: 'row !important', xl: 'row !important' }
+        flexDirection: { xs: 'column !important', md: 'row !important', lg: 'row !important', xl: 'row !important' },
+        opacity: disabled ? 0.55 : 1,
+        pointerEvents: disabled ? 'none' : 'auto',
       }}
     >
       {isLab ? (
@@ -135,15 +124,14 @@ const Settings = ({
           Advanced settings
         </Typography>
       ) : (
-        <Typography variant="body2" sx={{ textAlign: 'left', color: 'black', mt: 1, px: 2 }}>
-          Advanced Settings:
+        <Typography variant="body2" sx={{ textAlign: 'left', color: disabled ? '#888' : 'black', mt: 1, px: 2 }}>
+          Advanced Settings:{disabled ? ' not supported for Whole Brain' : ''}
         </Typography>
       )}
 
       {/* Model Selection */}
       <FormControl data-tutorial="lab-settings-model" sx={{ m: 1, minWidth: 120, textAlign: 'left'}} fullWidth size="small">
         <InputLabel
-          shrink={locked || undefined}
           sx={sharedLabelSx}
           id="model-select-label"
         >
@@ -152,33 +140,26 @@ const Settings = ({
         <Select
           labelId="model-select-label"
           id="model-select"
-          value={locked ? 'clip_rn50' : model}
-          onChange={locked ? undefined : (e) => setModel(e.target.value)}
-          disabled={locked}
-          sx={locked ? disabledSelectSx : sharedSelectSx}
+          value={model}
+          onChange={(e) => setModel(e.target.value)}
+          disabled={disabled}
+          sx={sharedSelectSx}
           MenuProps={sharedMenuProps}
         >
-          {locked ? (
-            <MenuItem value="clip_rn50">CLIP</MenuItem>
-          ) : (
-            [
-              <MenuItem key="none" value="">
-                <em>None</em>
-              </MenuItem>,
-              ...MODEL_OPTIONS.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              )),
-            ]
-          )}
+          <MenuItem value="">
+            <em>None</em>
+          </MenuItem>
+          {MODEL_OPTIONS.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 
       {/* Dataset Selection */}
       <FormControl data-tutorial="lab-settings-training" sx={{ m: 1, minWidth: 120, textAlign: 'left'}} fullWidth size="small">
         <InputLabel
-          shrink={locked || undefined}
           sx={sharedLabelSx}
           id="dataset-select-label"
         >
@@ -187,26 +168,20 @@ const Settings = ({
         <Select
           labelId="dataset-select-label"
           id="dataset-select"
-          value={locked ? 'nsd_1000' : dataset}
-          onChange={locked ? undefined : (e) => setDataset(e.target.value)}
-          disabled={locked}
-          sx={locked ? disabledSelectSx : sharedSelectSx}
+          value={dataset}
+          onChange={(e) => setDataset(e.target.value)}
+          disabled={disabled}
+          sx={sharedSelectSx}
           MenuProps={sharedMenuProps}
         >
-          {locked ? (
-            <MenuItem value="nsd_1000">NSD</MenuItem>
-          ) : (
-            [
-              <MenuItem key="none" value="">
-                <em>None</em>
-              </MenuItem>,
-              ...DATASET_OPTIONS.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              )),
-            ]
-          )}
+          <MenuItem value="">
+            <em>None</em>
+          </MenuItem>
+          {DATASET_OPTIONS.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 
@@ -217,15 +192,17 @@ const Settings = ({
         </InputLabel>
         <Select
           labelId="voxel-select-label"
-          value={locked ? 'subject1' : 'all-participants'}
+          value="all-participants"
           disabled
-          sx={disabledSelectSx}
+          sx={{
+            ...sharedSelectSx,
+            '& .MuiInputBase-input.Mui-disabled': {
+              WebkitTextFillColor: disabled ? '#888' : 'var(--text-main)',
+              opacity: 1,
+            },
+          }}
         >
-          {locked ? (
-            <MenuItem value="subject1">subject1</MenuItem>
-          ) : (
-            <MenuItem value="all-participants">{isLab ? 'All participants' : 'All Participants'}</MenuItem>
-          )}
+          <MenuItem value="all-participants">{isLab ? 'All participants' : 'All Participants'}</MenuItem>
         </Select>
       </FormControl>
 
