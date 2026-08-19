@@ -641,6 +641,7 @@ const downloadData = async () => {
           </div>
 
            <Settings
+            variant="wholebrain"
             model={model}
             setModel={setModel}
             dataset={dataset}
