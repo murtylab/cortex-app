@@ -801,9 +801,9 @@ const downloadData = async () => {
             onClick={() => {
               runInference();
             }}
-            disabled={loading || files.length === 0}
+            disabled={predictionLoading || files.length === 0}
           >
-            {loading ? "Running Inference..." : "Run Inference"}
+            {predictionLoading ? "Processing..." : "Run Inference"}
           </Button>
         )}
 
