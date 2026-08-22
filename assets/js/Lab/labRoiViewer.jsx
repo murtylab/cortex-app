@@ -7,18 +7,6 @@ import { LAB_COLORS } from "./labTheme";
 
 const MODEL_PATH = "/assets/brainModel/whole_brain_draco.glb";
 
-function createFallbackBrain() {
-  const geometry = new THREE.IcosahedronGeometry(1.55, 3);
-  geometry.scale(0.82, 1.02, 1.18);
-  const material = new THREE.MeshStandardMaterial({
-    color: 0xcfc8bc,
-    roughness: 0.72,
-    metalness: 0.04,
-    flatShading: true,
-  });
-  return new THREE.Mesh(geometry, material);
-}
-
 function centerObject(object, targetSize) {
   const box = new THREE.Box3().setFromObject(object);
   const size = box.getSize(new THREE.Vector3());
@@ -74,37 +62,26 @@ export default function LabRoiViewer() {
     const brainGroup = new THREE.Group();
     scene.add(brainGroup);
 
-    const fallback = createFallbackBrain();
-    centerObject(fallback, 1.9);
-    brainGroup.add(fallback);
-
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.5.6/");
     const loader = new GLTFLoader();
     loader.setDRACOLoader(dracoLoader);
 
-    loader.load(
-      MODEL_PATH,
-      (gltf) => {
-        fallback.visible = false;
-        const model = gltf.scene;
-        model.traverse((child) => {
-          if (child.isMesh) {
-            child.material = new THREE.MeshStandardMaterial({
-              color: 0xcfc8bc,
-              roughness: 0.78,
-              metalness: 0.02,
-            });
-          }
-        });
-        centerObject(model, 1.9);
-        brainGroup.add(model);
-      },
-      undefined,
-      () => {
-        fallback.visible = true;
-      }
-    );
+    loader.load(MODEL_PATH, (gltf) => {
+      if (!mount.isConnected) return;
+      const model = gltf.scene;
+      model.traverse((child) => {
+        if (child.isMesh) {
+          child.material = new THREE.MeshStandardMaterial({
+            color: 0xcfc8bc,
+            roughness: 0.78,
+            metalness: 0.02,
+          });
+        }
+      });
+      centerObject(model, 1.9);
+      brainGroup.add(model);
+    });
 
     const setSize = () => {
       const width = Math.max(mount.clientWidth, 1);
