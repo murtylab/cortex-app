@@ -595,7 +595,7 @@ export default function ImagePreviewGroupedDnD({
         }}
       >
         {isLab ? (
-          <div className="lab-eyebrow">{eyebrow || title}</div>
+          <div className="lab-section-label">{eyebrow || title}</div>
         ) : (
           <div style={{ fontWeight: 700, color: "black" }}>{title}</div>
         )}
@@ -622,7 +622,7 @@ export default function ImagePreviewGroupedDnD({
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
         {isLab ? (
-          <div className="lab-eyebrow">{eyebrow || title}</div>
+          <div className="lab-section-label">{eyebrow || title}</div>
         ) : (
           <div style={{ fontWeight: 700, color: "black" }}>
             {title} <span style={{ fontWeight: 450, color: "rgba(0,0,0,0.55)" }}>({files.length})</span>

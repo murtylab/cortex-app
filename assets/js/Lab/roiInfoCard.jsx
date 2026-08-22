@@ -37,7 +37,7 @@ const RoiInfoCard = ({ region }) => {
         }}
       >
         <CardContent className="lab-model-card lab-roi-card">
-          <p className="lab-eyebrow">ROI Card</p>
+          <p className="lab-section-label">ROI Card</p>
           <span className="lab-model-card-name">{abbrev || "—"}</span>
           <p className="lab-model-card-type">{info.stream}</p>
 

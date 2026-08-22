@@ -40,8 +40,8 @@ const RegionSelector = ({
       <FormControl data-tutorial={tutorialRootKey} sx={{ minWidth: 0 }} fullWidth>
         <div
           id="region-buttons-group-label"
-          className="lab-eyebrow"
-          style={{ marginBottom: 10, fontSize: 12 }}
+          className="lab-section-label"
+          style={{ marginBottom: 10 }}
         >
           fROIs
         </div>

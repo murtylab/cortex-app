@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Button, message, Spin } from 'antd';
 import { Images } from 'lucide-react';
-import { SERVER_URL } from './services/config';
-import { runFroiPrediction, wrapPredictionResult } from './services/froiPredict.js';
+import { getFroiUserErrorMessage, runFroiPrediction, wrapPredictionResult } from './services/froiPredict.js';
 import { ConfigProvider } from 'antd';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
@@ -85,8 +84,6 @@ const getExt = (name: string) => {
 
 const safe = (s: string) =>
   s.replaceAll("\\", "/").replaceAll("/", "__").replaceAll(" ", "_");
-
-const SERVER_BASE_URL = SERVER_URL;
 
 const useBarchartData = (predictionResult: any) => {
   return useMemo(() => {
@@ -2025,13 +2022,7 @@ useEffect(() => {
       return true;
     } catch (e: any) {
       console.error("fROI prediction failed", e);
-      const detail =
-        e?.response?.data?.error ||
-        e?.response?.data?.message ||
-        e?.message ||
-        "Prediction failed. Check server connection.";
-      const status = e?.response?.status ? ` (HTTP ${e.response.status})` : "";
-      const text = `${detail}${status}. Server: ${SERVER_BASE_URL}`;
+      const text = getFroiUserErrorMessage(e);
       setPredictError(text);
       message.error(text);
       return false;
@@ -2128,7 +2119,7 @@ useEffect(() => {
       } catch (e) {
         console.error(e);
         if (!cancelled) {
-          message.error("Failed to load advanced insights.");
+          message.error(getFroiUserErrorMessage(e));
           setInsightLoading(false);
         }
       }
@@ -2374,6 +2365,9 @@ useEffect(() => {
               data-tutorial="lab-upload-uploader"
               className="lab-upload-column-panel"
             >
+              <div className="lab-section-label" style={{ marginBottom: 10 }}>
+                Upload stimuli
+              </div>
               <Uploader
                 key={uploaderKey}
                 onAddFiles={(newFiles) => addIncomingFiles(newFiles)}
@@ -2381,7 +2375,7 @@ useEffect(() => {
             </div>
 
             <div className="lab-preload-inline">
-              <div className="lab-eyebrow" style={{ marginBottom: 8 }}>
+              <div className="lab-section-label" style={{ marginBottom: 8 }}>
                 Or load a published dataset
               </div>
               <PreloadDatasetPicker
@@ -2489,7 +2483,7 @@ useEffect(() => {
             >
               <div className="lab-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 12 }}>
                 <div>
-                  <span className="lab-eyebrow">Prediction results</span>
+                  <span className="lab-section-label">Prediction results</span>
                   <h3 className="lab-heading">Readout for {region?.toUpperCase()}</h3>
                 </div>
                 <Button type="primary" onClick={downloadData} disabled={!currentRegionPredictionResult}>

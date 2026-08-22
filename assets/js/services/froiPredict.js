@@ -9,6 +9,23 @@ const http = axios.create({
   withCredentials: false,
 });
 
+export const GPU_OFFLINE_MESSAGE =
+  "Our GPU server is offline right now. Please come back later.";
+
+const CLIENT_SETUP_ERRORS = [
+  "no files uploaded",
+  "roi, mapping dataset, and model are required",
+  "missing file data",
+];
+
+export function getFroiUserErrorMessage(error) {
+  const raw = String(error?.message || "").toLowerCase();
+  if (CLIENT_SETUP_ERRORS.some((prefix) => raw.startsWith(prefix))) {
+    return error.message;
+  }
+  return GPU_OFFLINE_MESSAGE;
+}
+
 export function normalizeUploadPaths(raw) {
   const list = Array.isArray(raw) ? raw : raw?.files || raw?.data || [];
   return list

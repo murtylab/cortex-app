@@ -360,10 +360,24 @@
       margin: 0;
     }
 
-    body.lab-page #container #region-buttons-group-label.lab-eyebrow,
-    body.lab-page #container #lab-advanced-settings-label.lab-eyebrow {
-      font-size: 12px !important;
-      color: var(--lab-secondary) !important;
+    body.lab-page #container .lab-section-label,
+    body.lab-page #container .MuiFormLabel-root.lab-section-label,
+    body.lab-page #container .MuiTypography-root.lab-section-label {
+      display: block;
+      font-family: var(--lab-mono) !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      letter-spacing: 0.04em !important;
+      text-transform: uppercase !important;
+      color: var(--lab-text, #211F1C) !important;
+      line-height: 1.3 !important;
+      margin: 0;
+    }
+
+    body.lab-page #container .lab-settings-rail-inner > * + * {
+      margin-top: 4px;
+      padding-top: 18px;
+      border-top: 0.5px solid var(--lab-hairline, #D6D2C6);
     }
 
     body.lab-page #container .lab-heading {

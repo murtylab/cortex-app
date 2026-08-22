@@ -43,7 +43,7 @@ const ModelCard = ({ region, dataset, model, variant = 'default' }) => {
           }}
         >
           <CardContent className="lab-model-card">
-            <p className="lab-eyebrow">Model Card</p>
+            <p className="lab-section-label">Model Card</p>
             <a
               className="lab-model-card-name"
               data-tutorial="lab-results-model-card-link"

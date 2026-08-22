@@ -127,7 +127,7 @@ const Settings = ({
         <Typography
           id="lab-advanced-settings-label"
           component="div"
-          className="lab-eyebrow"
+          className="lab-section-label"
           sx={{ textAlign: 'left', mt: 0, mb: 0.5, px: 0, width: '100%' }}
         >
           Advanced settings
