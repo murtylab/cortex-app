@@ -2,7 +2,17 @@
   'use strict';
 
   const CATALOG_PATH = '/assets/data/model-pages.json?v=20260819-model-page-v1';
+  const OPTIMAL_LAYER_PATH = '/assets/data/modelcard-info-lookup.json?v=20260821-optimal-layers';
   const SKIP_SLUGS = new Set(['index.html']);
+  const OPTIMAL_LAYER_DATASETS = [
+    { key: 'nsd_1000', label: 'nsd_1000' },
+    { key: 'murty185', label: 'murty185' },
+  ];
+  const OPTIMAL_LAYER_ROIS = [
+    { key: 'ffa', label: 'FFA' },
+    { key: 'eba', label: 'EBA' },
+    { key: 'ppa', label: 'PPA' },
+  ];
 
   function getModelPageSlugFromPath(pathname) {
     const segments = pathname
@@ -98,6 +108,90 @@
     return ordered;
   }
 
+  function resolveLookupModelKey(lookup, slug) {
+    const modelKeys = new Set();
+
+    Object.values(lookup || {}).forEach((datasetEntry) => {
+      Object.values(datasetEntry || {}).forEach((roiEntry) => {
+        Object.keys(roiEntry || {}).forEach((modelKey) => modelKeys.add(modelKey));
+      });
+    });
+
+    if (modelKeys.has(slug)) {
+      return slug;
+    }
+
+    const lowerSlug = slug.toLowerCase();
+    const caseMatch = Array.from(modelKeys).find((key) => key.toLowerCase() === lowerSlug);
+    if (caseMatch) {
+      return caseMatch;
+    }
+
+    const normalizedSlug = normalizeKey(slug);
+    return Array.from(modelKeys).find((key) => normalizeKey(key) === normalizedSlug) || null;
+  }
+
+  function formatCorrScore(value) {
+    const score = Number(value);
+    return Number.isFinite(score) ? score.toFixed(2) : '—';
+  }
+
+  function renderOptimalLayers(slug, lookup) {
+    const root = document.getElementById('model-page-optimal-layers');
+    if (!root) {
+      return;
+    }
+
+    const modelKey = resolveLookupModelKey(lookup, slug);
+    if (!modelKey) {
+      root.innerHTML = '<p class="optimal-layers-empty">Optimal-layer scores are not available for this model.</p>';
+      return;
+    }
+
+    const rows = OPTIMAL_LAYER_DATASETS.flatMap((dataset) => (
+      OPTIMAL_LAYER_ROIS.map((roi) => {
+        const info = lookup?.[dataset.key]?.[roi.key]?.[modelKey];
+        return {
+          dataset: dataset.label,
+          roi: roi.label,
+          bestLayer: info?.bestLayer || '—',
+          corrScore: formatCorrScore(info?.corrScore),
+        };
+      })
+    ));
+
+    const hasScores = rows.some((row) => row.bestLayer !== '—' || row.corrScore !== '—');
+    if (!hasScores) {
+      root.innerHTML = '<p class="optimal-layers-empty">Optimal-layer scores are not available for this model.</p>';
+      return;
+    }
+
+    root.innerHTML = `
+      <div style="overflow-x: auto;">
+        <table class="optimal-layers-table">
+          <thead>
+            <tr>
+              <th>Mapping dataset</th>
+              <th>ROI</th>
+              <th>Optimal layer</th>
+              <th>Highest correlation (r)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((row) => `
+              <tr>
+                <td>${escapeHtml(row.dataset)}</td>
+                <td>${escapeHtml(row.roi)}</td>
+                <td class="optimal-layer-name">${escapeHtml(row.bestLayer)}</td>
+                <td>${escapeHtml(row.corrScore)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
   function setStatus(message, isError) {
     const status = document.getElementById('model-page-status');
     if (!status) {
@@ -173,6 +267,7 @@
     page.hidden = false;
     page.dataset.modelSlug = slug;
     setStatus('');
+    renderOptimalLayers(slug, window.__MODEL_PAGE_OPTIMAL_LAYERS || {});
 
     if (typeof window.initModelPagePerformanceToggle === 'function') {
       window.initModelPagePerformanceToggle();
@@ -258,6 +353,15 @@
       if (!slug) {
         renderIndex(catalog);
         return;
+      }
+
+      try {
+        const lookupResponse = await fetch(OPTIMAL_LAYER_PATH);
+        if (lookupResponse.ok) {
+          window.__MODEL_PAGE_OPTIMAL_LAYERS = await lookupResponse.json();
+        }
+      } catch (lookupError) {
+        console.warn('Optimal-layer lookup failed to load.', lookupError);
       }
 
       renderModel(slug, resolveCatalogEntry(catalog, slug) || fallbackEntry(slug));

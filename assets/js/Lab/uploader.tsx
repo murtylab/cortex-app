@@ -3,66 +3,17 @@ import "../../css/main.css";
 import { InboxOutlined, FolderOpenOutlined } from "@ant-design/icons";
 import type { UploadProps, UploadFile } from "antd";
 import { Upload, Progress, message } from "antd";
-
-// --- WebKit directory drop type defs (TS) ---
-interface FileSystemEntry {
-  isFile: boolean;
-  isDirectory: boolean;
-  name: string;
-  fullPath: string;
-}
-interface FileSystemFileEntry extends FileSystemEntry {
-  file: (successCallback: (file: File) => void) => void;
-}
-interface FileSystemDirectoryEntry extends FileSystemEntry {
-  createReader: () => FileSystemDirectoryReader;
-}
-interface FileSystemDirectoryReader {
-  readEntries: (successCallback: (entries: FileSystemEntry[]) => void) => void;
-}
-type AnyEntry = FileSystemFileEntry | FileSystemDirectoryEntry;
+import { collectDroppedImageFiles } from "./collectDroppedFiles";
 
 const { Dragger } = Upload;
 
 interface UploaderProps {
-  onAddFiles: (files: File[]) => void; // ✅ parent owns state
+  onAddFiles: (files: File[]) => void;
   fillHeight?: boolean;
 }
 
-async function traverseEntry(entry: AnyEntry): Promise<File[]> {
-  if ("file" in entry) {
-    const file: File = await new Promise((resolve) =>
-      (entry as FileSystemFileEntry).file(resolve)
-    );
-    (file as any).webkitRelativePath = entry.fullPath.replace(/^\//, "");
-    return [file];
-  }
-
-  if ("createReader" in entry) {
-    const dirReader = (entry as FileSystemDirectoryEntry).createReader();
-    const entries: AnyEntry[] = await new Promise((resolve) => {
-      const all: AnyEntry[] = [];
-      const read = () =>
-        dirReader.readEntries((batch: FileSystemEntry[]) => {
-          const typed = batch as AnyEntry[];
-          if (!typed.length) resolve(all);
-          else {
-            all.push(...typed);
-            read();
-          }
-        });
-      read();
-    });
-
-    const nested = await Promise.all(entries.map(traverseEntry));
-    return nested.flat();
-  }
-
-  return [];
-}
-
 function fileKey(f: File) {
-  const rel = (f as any).webkitRelativePath || "";
+  const rel = (f as File & { webkitRelativePath?: string }).webkitRelativePath || "";
   return `${rel}::${f.name}::${f.size}::${f.lastModified}`;
 }
 
@@ -127,19 +78,8 @@ const Uploader: React.FC<UploaderProps> = ({ onAddFiles, fillHeight = false }) =
 
       async onDrop(e: React.DragEvent<HTMLDivElement>) {
         e.preventDefault();
-
-        const items = Array.from(e.dataTransfer.items || []);
-        const entries: AnyEntry[] = items
-          .map((i: any) => i.webkitGetAsEntry?.())
-          .filter(Boolean);
-
-        if (!entries.length) {
-          addFiles(Array.from(e.dataTransfer.files || []) as File[], "drop");
-          return;
-        }
-
-        const nestedFiles = (await Promise.all(entries.map(traverseEntry))).flat();
-        addFiles(nestedFiles, "dropped folder(s)");
+        const nestedFiles = await collectDroppedImageFiles(e);
+        addFiles(nestedFiles.length ? nestedFiles : Array.from(e.dataTransfer.files || []) as File[], "drop");
       },
 
       onDragOver: (e: React.DragEvent<HTMLDivElement>) => e.preventDefault(),
@@ -186,10 +126,10 @@ const Uploader: React.FC<UploaderProps> = ({ onAddFiles, fillHeight = false }) =
         showUploadList={false}
       >
         <p className="ant-upload-drag-icon"><InboxOutlined /></p>
-        <p className="ant-upload-text">Click or drag files to upload</p>
+        <p className="ant-upload-text">Click to upload a file or files</p>
 
         <div className="ant-upload-hint" style={{ lineHeight: 1.6 }}>
-          Or{" "}
+          Drag in images or a folder, or{" "}
           <span
             className="gradient-link"
             onClick={(e) => {
@@ -201,10 +141,10 @@ const Uploader: React.FC<UploaderProps> = ({ onAddFiles, fillHeight = false }) =
           >
             <FolderOpenOutlined className="highlight-icon" style={{ transform: "translateY(3px)" }} />
             <span className="gradient-text" style={{ transform: "translateY(3px)" }}>
-              choose a whole folder here
+              choose a folder
             </span>
-          </span>{" "}
-          to upload everything inside.
+          </span>
+          . Please upload at most 100 images.
         </div>
       </Dragger>
 

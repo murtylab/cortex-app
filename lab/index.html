@@ -105,12 +105,239 @@
     }
 
     /* Lab tool surface */
+    body.lab-page .main,
+    body.lab-page #container {
+      overflow: visible;
+    }
+
     body.lab-page #container {
       font-family: var(--lab-sans);
       font-size: 14px;
       font-weight: 400;
       line-height: 1.6;
       color: var(--lab-text);
+      max-width: 1400px;
+    }
+
+    body.lab-page #container .lab-workspace {
+      display: grid;
+      grid-template-columns: 248px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    body.lab-page #container .lab-settings-rail {
+      width: 248px;
+    }
+
+    body.lab-page #container .lab-settings-rail-inner {
+      position: fixed;
+      top: 100px;
+      width: 248px;
+      max-height: calc(100vh - 116px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding-right: 16px;
+      padding-bottom: 8px;
+      border-right: 0.5px solid var(--lab-hairline, #D6D2C6);
+      background: var(--lab-page-bg);
+      z-index: 2;
+    }
+
+    body.lab-page #container .lab-main-column {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    body.lab-page #container .lab-roi-stage {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 16px;
+      height: 280px;
+    }
+
+    body.lab-page #container .lab-roi-viewer,
+    body.lab-page #container .lab-roi-card-wrap {
+      min-height: 0;
+      height: 100%;
+    }
+
+    body.lab-page #container .lab-roi-viewer-coming-soon {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      font-family: var(--lab-serif);
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--lab-text);
+      text-align: center;
+      padding: 0 16px;
+      text-shadow: 0 0 16px var(--lab-panel), 0 0 8px var(--lab-panel);
+    }
+
+    body.lab-page #container .lab-roi-card-wrap .MuiCard-root,
+    body.lab-page #container .lab-model-card-wrap .MuiCard-root {
+      aspect-ratio: auto;
+      height: 100%;
+    }
+
+    body.lab-page #container .lab-model-card-wrap {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    body.lab-page #container .lab-model-card-wrap .MuiCard-root {
+      aspect-ratio: 1 / 1;
+      height: auto;
+    }
+
+    body.lab-page #container .lab-model-card {
+      height: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      padding: 18px 16px 14px !important;
+    }
+
+    body.lab-page #container .lab-model-card-name {
+      display: block;
+      margin: 10px 0 0;
+      font-family: var(--lab-mono);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.25;
+      background: var(--highlight-color);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: underline;
+      text-decoration-color: color-mix(in srgb, var(--lab-accent) 45%, transparent);
+      text-underline-offset: 3px;
+    }
+
+    body.lab-page #container .lab-model-card-name:hover {
+      text-decoration-color: var(--lab-accent);
+    }
+
+    body.lab-page #container .lab-model-card-type {
+      margin: 6px 0 0;
+      font-family: var(--lab-sans);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 1.35;
+      color: var(--lab-secondary);
+    }
+
+    body.lab-page #container .lab-model-card-rank {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 0;
+      padding: 10px 0 8px;
+    }
+
+    body.lab-page #container .lab-stat-number {
+      display: block;
+      font-family: var(--lab-script);
+      font-style: italic;
+      font-size: 3rem;
+      font-weight: 600;
+      color: var(--lab-accent);
+      line-height: 0.95;
+    }
+
+    body.lab-page #container .lab-model-card-rank-lines {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      text-align: right;
+      margin-top: 6px;
+    }
+
+    body.lab-page #container .lab-model-card-rank-meta,
+    body.lab-page #container .lab-model-card-rank-scope,
+    body.lab-page #container .lab-model-card-rank-fallback,
+    body.lab-page #container .lab-model-card-link {
+      font-family: var(--lab-mono);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      line-height: 1.4;
+    }
+
+    body.lab-page #container .lab-model-card-rank-meta {
+      color: var(--lab-text);
+    }
+
+    body.lab-page #container .lab-model-card-rank-scope {
+      margin-top: 2px;
+      color: var(--lab-muted);
+      text-transform: uppercase;
+    }
+
+    body.lab-page #container .lab-model-card-rank-fallback {
+      margin: 0;
+      color: var(--lab-secondary);
+    }
+
+    body.lab-page #container .lab-model-card-link {
+      margin-top: 8px;
+      color: var(--lab-accent);
+      text-decoration: none;
+    }
+
+    body.lab-page #container .lab-model-card-link:hover {
+      text-decoration: underline;
+    }
+
+    body.lab-page #container .lab-roi-card-description {
+      margin: 0;
+      font-family: var(--lab-sans);
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 1.55;
+      color: var(--lab-text);
+    }
+
+    body.lab-page #container .lab-roi-card .lab-model-card-rank-lines {
+      margin-top: auto;
+    }
+
+    body.lab-page #container .lab-stimuli-canvas {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    body.lab-page #container .lab-preload-inline {
+      padding: 12px;
+      border: 0.5px solid var(--lab-hairline, #D6D2C6);
+      border-radius: 8px;
+      background: var(--lab-panel, #FBFAF6);
+    }
+
+    body.lab-page #container .lab-run-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    body.lab-page #container .lab-froi-grid {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
     }
 
     body.lab-page #container .lab-eyebrow,
@@ -373,16 +600,22 @@
       background: var(--lab-page-bg);
     }
 
-    /* Sit small scroll-top just above the Tutorials FAB (both bottom-right) */
     body.lab-page .scroll-top {
       width: 28px;
       height: 28px;
-      right: 28px;
-      bottom: 68px;
+      left: auto;
+      right: 24px;
+      bottom: 24px;
       border-radius: 5px;
       z-index: 2147483643;
       background-color: var(--lab-secondary, #57534A);
       box-shadow: 0 4px 12px rgba(34, 30, 26, 0.12);
+    }
+
+    body.lab-page .cortex-tutorial-card {
+      background: rgba(251, 250, 246, 0.72) !important;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
     }
 
     body.lab-page .scroll-top i {
@@ -395,10 +628,10 @@
       filter: none;
     }
 
-    /* Desktop: keep ROI chips in one equal-width row */
+    /* Desktop: keep fROI chips in a 3-column grid */
     @media (min-width: 769px) {
-      body.lab-page #container [role="group"][aria-labelledby="region-buttons-group-label"] {
-        flex-wrap: nowrap !important;
+      body.lab-page #container .lab-froi-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
       }
     }
 
@@ -429,6 +662,46 @@
         font-size: 12px !important;
       }
 
+      body.lab-page #container .lab-workspace {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      body.lab-page #container .lab-settings-rail {
+        width: auto;
+        min-height: 0;
+        padding-right: 0;
+        border-right: none;
+        border-bottom: 0.5px solid var(--lab-hairline, #D6D2C6);
+        padding-bottom: 16px;
+      }
+
+      body.lab-page #container .lab-settings-rail-inner {
+        position: static;
+        top: auto;
+        width: auto;
+        max-height: none;
+        overflow: visible;
+        padding-right: 0;
+        padding-bottom: 0;
+        border-right: none;
+        background: transparent;
+      }
+
+      body.lab-page #container .lab-roi-stage {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+
+      body.lab-page #container .lab-roi-viewer {
+        height: 260px;
+      }
+
+      body.lab-page #container .lab-roi-card-wrap .MuiCard-root {
+        aspect-ratio: 1 / 1;
+        height: auto;
+      }
+
       body.lab-page #container .lab-step-title {
         font-size: 12px;
         line-height: 1.2;
@@ -439,26 +712,20 @@
       }
 
       body.lab-page #container [data-tutorial="lab-stepper-nav"] {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+        overflow-x: visible;
       }
 
-      body.lab-page #container [data-tutorial="lab-stepper-nav"] > button {
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 2px;
-        padding: 10px 6px;
-        min-width: 0;
+      body.lab-page #container .lab-run-row .ant-btn-primary {
+        width: auto;
+        margin-left: auto;
       }
 
-      body.lab-page #container [role="group"][aria-labelledby="region-buttons-group-label"] {
-        flex-wrap: wrap !important;
+      body.lab-page #container .lab-froi-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
       }
 
-      body.lab-page #container [role="group"][aria-labelledby="region-buttons-group-label"] > button {
-        flex: 1 1 calc(33.33% - 6px) !important;
-        min-width: 72px !important;
+      body.lab-page #container .lab-froi-grid > button {
+        min-width: 0 !important;
         font-size: 12px !important;
         padding: 10px 4px !important;
       }
@@ -585,7 +852,7 @@
   <script src="/assets/vendor/swiper/swiper-bundle.min.js"></script>
 
   <!-- Main JS File -->
-  <script src="/assets/js/main.js"></script>
+  <script src="/assets/js/main.js?v=20260821-lab-tutorial"></script>
 
   <!-- Ask Cortex (disabled for now)
   <link rel="stylesheet" href="/assets/js/chatbot/chatbot-widget.css">

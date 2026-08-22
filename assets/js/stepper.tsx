@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import axios from 'axios';
-import { Button, message, Spin, Steps, theme } from 'antd';
+import { Button, message, Spin } from 'antd';
 import { Images } from 'lucide-react';
-import { uploadImages } from './services/imageUploader.js';
 import { SERVER_URL } from './services/config';
+import { runFroiPrediction, wrapPredictionResult } from './services/froiPredict.js';
 import { ConfigProvider } from 'antd';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
@@ -27,10 +26,13 @@ import Heatmap from './Lab/heatmap.jsx';
 import BoxPlot from './Lab/boxplot.jsx';
 
 import DatasetCardLab from './Lab/datasetcard-lab.jsx';
+import LabRoiViewer from './Lab/labRoiViewer.jsx';
+import RoiInfoCard from './Lab/roiInfoCard.jsx';
 import {
   REGION_OPTIONS,
   MURTY185_INCLUDED_REGIONS,
   NSD_1000_INCLUDED_REGIONS,
+  regionSupportsMurty185,
 } from './constants';
 
 
@@ -84,7 +86,6 @@ const getExt = (name: string) => {
 const safe = (s: string) =>
   s.replaceAll("\\", "/").replaceAll("/", "__").replaceAll(" ", "_");
 
-const { Step } = Steps;
 const SERVER_BASE_URL = SERVER_URL;
 
 const useBarchartData = (predictionResult: any) => {
@@ -161,9 +162,11 @@ const muiLabTheme = createTheme({
 });
 
 const Stepper: React.FC = () => {
-  const { token } = theme.useToken();
   const [current, setCurrent] = useState(0);
   const [predictstep, setPredictstep] = useState(1);
+  const [showResults, setShowResults] = useState(false);
+  const [predictError, setPredictError] = useState<string | null>(null);
+  const resultsRef = useRef<HTMLDivElement | null>(null);
 
 
 
@@ -176,6 +179,12 @@ const Stepper: React.FC = () => {
   const [model, setModel] = useState(DEFAULT_MODEL);
   const [dataset, setDataset] = useState(DEFAULT_DATASET);
   const [region, setRegion] = useState(DEFAULT_REGION);
+  const selectRegion = (nextRegion: string) => {
+    setRegion(nextRegion);
+    if (!regionSupportsMurty185(nextRegion) && dataset !== "nsd_1000") {
+      setDataset("nsd_1000");
+    }
+  };
   const [voxelOption, setVoxelOption] = useState(DEFAULT_VOXEL);
   const [voxelNumber, setVoxelNumber] = useState("");
   const [paper, setPaper] = useState("");
@@ -460,6 +469,7 @@ const Stepper: React.FC = () => {
       }
 
       setCurrent(2);
+      setShowResults(true);
       setTutorialHighlightedResultGroups(null);
 
       if (mode === 'region') {
@@ -490,21 +500,6 @@ const Stepper: React.FC = () => {
       }
 
       if (mode === 'preview') {
-        if (resultsPreviewCollapsed) {
-          const toggleAnimated = await pulseTutorialButton({
-            selector: '[data-tutorial="lab-results-upload-preview-toggle"]',
-            requestId,
-          });
-          if (!toggleAnimated || !(await waitForTutorialDelay(120, requestId))) {
-            return;
-          }
-
-          setResultsPreviewCollapsed(false);
-          if (!(await waitForTutorialDelay(260, requestId))) {
-            return;
-          }
-        }
-
         await pulseTutorialSurface({
           selector: '[data-tutorial="lab-results-upload-preview"]',
           requestId,
@@ -640,6 +635,53 @@ const Stepper: React.FC = () => {
     }, 180);
   };
 
+  const buildTutorialPredictionFromFiles = (items: PreviewFile[]) => {
+    const keys = items.map((file) => file.serverKey || file.label || file.uid);
+    const groups = items.map((file) => file.groupKey || "Ungrouped");
+    const uniqueGroups = Array.from(new Set(groups));
+    const groupScore = Object.fromEntries(
+      uniqueGroups.map((group, index) => [group, 0.82 - index * 0.16])
+    );
+
+    const mean: Record<string, number> = {};
+    const sem: Record<string, number> = {};
+    keys.forEach((key, index) => {
+      const base = groupScore[groups[index]] ?? 0.4;
+      mean[key] = Number((base + ((index % 5) - 2) * 0.035).toFixed(3));
+      sem[key] = 0.04;
+    });
+
+    const rdm = keys.map((leftKey, i) =>
+      keys.map((rightKey, j) => (i === j ? 0 : Number(Math.abs(mean[leftKey] - mean[rightKey]).toFixed(3))))
+    );
+
+    return [{ mean, sem, rdm }];
+  };
+
+  const ensureTutorialResultsReady = async () => {
+    let items = files;
+    if (!items.length) {
+      items = await loadPrestoredDataset("reza", { silent: true });
+    }
+    if (!items.length) {
+      return;
+    }
+
+    let result = null;
+    if (prestoreDataset) {
+      result = wrapPredictionResult(
+        await loadPreloadedPredictionByRegion(prestoreDataset, region)
+      );
+    }
+    if (!result) {
+      result = buildTutorialPredictionFromFiles(items);
+    }
+
+    setPredictionResult(result);
+    setInsightRegionCache((prev) => ({ ...prev, [region]: result }));
+    setShowResults(true);
+  };
+
   const setResultsTutorialDemo = (mode: string = 'default') => {
     tutorialUploadDemoRequestRef.current += 1;
     const requestId = tutorialUploadDemoRequestRef.current;
@@ -648,13 +690,16 @@ const Stepper: React.FC = () => {
     captureOriginalResultsTutorialState();
 
     setCurrent(2);
-
-    if (mode === 'default') {
-      setTutorialHighlightedResultGroups(null);
-      return;
-    }
-
-    startAnimatedResultsDemo({ requestId, mode });
+    void ensureTutorialResultsReady().then(() => {
+      if (tutorialUploadDemoRequestRef.current !== requestId) {
+        return;
+      }
+      if (mode === 'default') {
+        setTutorialHighlightedResultGroups(null);
+        return;
+      }
+      startAnimatedResultsDemo({ requestId, mode });
+    });
   };
 
   const startLoopingUploadDemo = ({
@@ -722,18 +767,21 @@ const Stepper: React.FC = () => {
 
     const fromGroup = groups[0];
     const toGroup = groups[1];
-    const movingItem = baseFiles.find((file) => file.groupKey === fromGroup);
-    if (!movingItem) {
+    const movingItems = baseFiles.filter((file) => file.groupKey === fromGroup).slice(0, 3);
+    if (!movingItems.length) {
       return null;
     }
+
+    const movingUids = movingItems.map((item) => item.uid);
+    const movingUidSet = new Set(movingUids);
 
     return {
       fromGroup,
       toGroup,
-      movingUid: movingItem.uid,
-      previewSrc: movingItem.blobURL,
+      movingUids,
+      previewSrcs: movingItems.map((item) => item.blobURL),
       demoFiles: baseFiles.map((file) =>
-        file.uid === movingItem.uid ? { ...file, groupKey: toGroup } : { ...file }
+        movingUidSet.has(file.uid) ? { ...file, groupKey: toGroup } : { ...file }
       ),
     };
   };
@@ -1003,36 +1051,42 @@ const Stepper: React.FC = () => {
 
   const playTutorialDragTransition = ({
     requestId,
-    movingUid,
+    movingUids,
     targetGroup,
-    previewSrc,
+    previewSrcs,
     commitState,
   }: {
     requestId: number;
-    movingUid: string;
+    movingUids: string[];
     targetGroup: string;
-    previewSrc: string;
+    previewSrcs: string[];
     commitState: () => void;
   }) =>
     new Promise<boolean>((resolve) => {
       clearUploadDemoVisuals();
 
-      const sourceElement = Array.from(document.querySelectorAll('[data-tutorial-item-uid]')).find(
-        (node) => node.getAttribute('data-tutorial-item-uid') === movingUid
-      ) as HTMLElement | undefined;
+      const sourceElements = movingUids
+        .map((uid) =>
+          Array.from(document.querySelectorAll('[data-tutorial-item-uid]')).find(
+            (node) => node.getAttribute('data-tutorial-item-uid') === uid
+          )
+        )
+        .filter((node): node is HTMLElement => node instanceof HTMLElement);
 
       const targetElement = Array.from(document.querySelectorAll('[data-tutorial-group-key]')).find(
         (node) => node.getAttribute('data-tutorial-group-key') === targetGroup
       ) as HTMLElement | undefined;
 
-      if (!sourceElement || !targetElement) {
+      if (!sourceElements.length || !targetElement) {
         commitState();
         resolve(true);
         return;
       }
 
+      const sourceElement = sourceElements[0];
       const sourceRect = sourceElement.getBoundingClientRect();
       const targetRect = targetElement.getBoundingClientRect();
+      const stackOffset = sourceElements.length > 1 ? 7 : 0;
       const durationMs = 2500;
       let targetLeft = targetRect.left + 24;
       let targetTop = targetRect.top + 82;
@@ -1050,42 +1104,86 @@ const Stepper: React.FC = () => {
       preview.style.position = 'fixed';
       preview.style.left = `${sourceRect.left}px`;
       preview.style.top = `${sourceRect.top}px`;
-      preview.style.width = `${sourceRect.width}px`;
-      preview.style.height = `${sourceRect.height}px`;
-      preview.style.borderRadius = '12px';
-      preview.style.overflow = 'hidden';
+      preview.style.width = `${sourceRect.width + stackOffset * (previewSrcs.length - 1)}px`;
+      preview.style.height = `${sourceRect.height + stackOffset * (previewSrcs.length - 1)}px`;
       preview.style.pointerEvents = 'none';
       preview.style.zIndex = '2147483646';
-      preview.style.boxShadow = '0 18px 40px rgba(36, 31, 27, 0.24)';
-      preview.style.background = 'rgba(255, 255, 255, 0.92)';
       preview.style.transition = 'opacity 180ms ease';
       preview.style.transform = 'translate3d(0, 0, 0) scale(1)';
 
-      const previewImage = document.createElement('img');
-      previewImage.src = previewSrc;
-      previewImage.alt = '';
-      previewImage.style.width = '100%';
-      previewImage.style.height = '100%';
-      previewImage.style.display = 'block';
-      previewImage.style.objectFit = 'cover';
-      preview.appendChild(previewImage);
+      previewSrcs.forEach((src, index) => {
+        const card = document.createElement('div');
+        card.style.position = 'absolute';
+        card.style.left = `${index * stackOffset}px`;
+        card.style.top = `${index * stackOffset}px`;
+        card.style.width = `${sourceRect.width}px`;
+        card.style.height = `${sourceRect.height}px`;
+        card.style.borderRadius = '12px';
+        card.style.overflow = 'hidden';
+        card.style.boxShadow = '0 18px 40px rgba(36, 31, 27, 0.24)';
+        card.style.background = 'rgba(255, 255, 255, 0.92)';
+        card.style.transform = `rotate(${index * 3 - Math.min(3, previewSrcs.length - 1)}deg)`;
+        card.style.zIndex = String(index + 1);
 
-      const previousSourceOpacity = sourceElement.style.opacity;
-      const previousSourceTransition = sourceElement.style.transition;
+        const previewImage = document.createElement('img');
+        previewImage.src = src;
+        previewImage.alt = '';
+        previewImage.style.width = '100%';
+        previewImage.style.height = '100%';
+        previewImage.style.display = 'block';
+        previewImage.style.objectFit = 'cover';
+        card.appendChild(previewImage);
+        preview.appendChild(card);
+      });
+
+      if (previewSrcs.length > 1) {
+        const badge = document.createElement('div');
+        badge.textContent = String(previewSrcs.length);
+        badge.style.position = 'absolute';
+        badge.style.right = '-6px';
+        badge.style.top = '-8px';
+        badge.style.minWidth = '28px';
+        badge.style.height = '28px';
+        badge.style.padding = '0 8px';
+        badge.style.borderRadius = '999px';
+        badge.style.background = 'rgba(33, 31, 28, 0.92)';
+        badge.style.color = '#fff';
+        badge.style.display = 'flex';
+        badge.style.alignItems = 'center';
+        badge.style.justifyContent = 'center';
+        badge.style.fontFamily = "var(--lab-mono, 'IBM Plex Mono', monospace)";
+        badge.style.fontSize = '13px';
+        badge.style.fontWeight = '600';
+        badge.style.zIndex = '20';
+        preview.appendChild(badge);
+      }
+
+      const previousSourceStyles = sourceElements.map((element) => ({
+        element,
+        opacity: element.style.opacity,
+        transition: element.style.transition,
+        border: element.style.border,
+        boxShadow: element.style.boxShadow,
+        background: element.style.background,
+      }));
       const previousTargetBoxShadow = targetElement.style.boxShadow;
       const previousTargetTransition = targetElement.style.transition;
       const previousTargetBorderColor = targetElement.style.borderColor;
 
-      sourceElement.style.transition = 'opacity 180ms ease';
-      sourceElement.style.opacity = '0.16';
+      sourceElements.forEach((element) => {
+        element.style.transition = 'opacity 180ms ease, box-shadow 180ms ease, border-color 180ms ease';
+        element.style.border = '2px solid #5B7CFA';
+        element.style.boxShadow = '0 0 0 1px rgba(91, 124, 250, 0.25)';
+        element.style.background = 'rgba(91, 124, 250, 0.08)';
+      });
       targetElement.style.transition = 'box-shadow 220ms ease, border-color 220ms ease';
       targetElement.style.boxShadow = '0 0 0 3px rgba(176, 132, 92, 0.42), 0 16px 36px rgba(74, 57, 42, 0.12)';
       targetElement.style.borderColor = 'rgba(176, 132, 92, 0.68)';
 
-      document.body.appendChild(preview);
-
       let finishTimeout = 0;
       let cleanupTimeout = 0;
+      let selectTimeout = 0;
+      let previewMounted = false;
 
       const cleanup = () => {
         if (tutorialUploadDemoAnimationFrameRef.current !== null) {
@@ -1099,10 +1197,20 @@ const Stepper: React.FC = () => {
         if (cleanupTimeout) {
           window.clearTimeout(cleanupTimeout);
         }
+        if (selectTimeout) {
+          window.clearTimeout(selectTimeout);
+        }
 
-        preview.remove();
-        sourceElement.style.opacity = previousSourceOpacity;
-        sourceElement.style.transition = previousSourceTransition;
+        if (previewMounted) {
+          preview.remove();
+        }
+        previousSourceStyles.forEach(({ element, opacity, transition, border, boxShadow, background }) => {
+          element.style.opacity = opacity;
+          element.style.transition = transition;
+          element.style.border = border;
+          element.style.boxShadow = boxShadow;
+          element.style.background = background;
+        });
         targetElement.style.boxShadow = previousTargetBoxShadow;
         targetElement.style.transition = previousTargetTransition;
         targetElement.style.borderColor = previousTargetBorderColor;
@@ -1114,40 +1222,56 @@ const Stepper: React.FC = () => {
 
       tutorialUploadDemoVisualCleanupRef.current = cleanup;
 
-      const easeOutQuart = (value: number) => 1 - Math.pow(1 - value, 4);
-      const animationStart = window.performance.now();
-
-      const stepAnimation = (now: number) => {
+      const startFlight = () => {
         if (tutorialUploadDemoRequestRef.current !== requestId) {
           cleanup();
           resolve(false);
           return;
         }
 
-        const progress = Math.min(1, (now - animationStart) / durationMs);
-        const eased = easeOutQuart(progress);
-        const currentX = deltaX * eased;
-        const currentY = deltaY * eased;
-        const currentScale = 1 - 0.04 * eased;
+        sourceElements.forEach((element) => {
+          element.style.opacity = '0.16';
+        });
+        document.body.appendChild(preview);
+        previewMounted = true;
 
-        preview.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) scale(${currentScale})`;
+        const easeOutQuart = (value: number) => 1 - Math.pow(1 - value, 4);
+        const animationStart = window.performance.now();
 
-        if (progress < 1) {
-          tutorialUploadDemoAnimationFrameRef.current = window.requestAnimationFrame(stepAnimation);
-          return;
-        }
+        const stepAnimation = (now: number) => {
+          if (tutorialUploadDemoRequestRef.current !== requestId) {
+            cleanup();
+            resolve(false);
+            return;
+          }
 
-        tutorialUploadDemoAnimationFrameRef.current = null;
-        commitState();
-        preview.style.opacity = '0';
+          const progress = Math.min(1, (now - animationStart) / durationMs);
+          const eased = easeOutQuart(progress);
+          const currentX = deltaX * eased;
+          const currentY = deltaY * eased;
+          const currentScale = 1 - 0.04 * eased;
 
-        cleanupTimeout = window.setTimeout(() => {
-          cleanup();
-          resolve(true);
-        }, 180);
+          preview.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) scale(${currentScale})`;
+
+          if (progress < 1) {
+            tutorialUploadDemoAnimationFrameRef.current = window.requestAnimationFrame(stepAnimation);
+            return;
+          }
+
+          tutorialUploadDemoAnimationFrameRef.current = null;
+          commitState();
+          preview.style.opacity = '0';
+
+          cleanupTimeout = window.setTimeout(() => {
+            cleanup();
+            resolve(true);
+          }, 180);
+        };
+
+        tutorialUploadDemoAnimationFrameRef.current = window.requestAnimationFrame(stepAnimation);
       };
 
-      tutorialUploadDemoAnimationFrameRef.current = window.requestAnimationFrame(stepAnimation);
+      selectTimeout = window.setTimeout(startFlight, previewSrcs.length > 1 ? 560 : 0);
     });
 
   const startAnimatedDragUploadDemo = ({
@@ -1182,9 +1306,9 @@ const Stepper: React.FC = () => {
 
         const completed = await playTutorialDragTransition({
           requestId,
-          movingUid: dragSpec.movingUid,
+          movingUids: dragSpec.movingUids,
           targetGroup: dragSpec.toGroup,
-          previewSrc: dragSpec.previewSrc,
+          previewSrcs: dragSpec.previewSrcs,
           commitState: () => {
             syncUploadTutorialState(dragSpec.demoFiles, 'reza', [], mode);
           },
@@ -1206,9 +1330,9 @@ const Stepper: React.FC = () => {
 
         const completed = await playTutorialDragTransition({
           requestId,
-          movingUid: dragSpec.movingUid,
+          movingUids: dragSpec.movingUids,
           targetGroup: dragSpec.fromGroup,
-          previewSrc: dragSpec.previewSrc,
+          previewSrcs: dragSpec.previewSrcs,
           commitState: () => {
             syncUploadTutorialState(baseFiles, 'reza', [], mode);
           },
@@ -1377,6 +1501,7 @@ const Stepper: React.FC = () => {
 
         const safeStep = Math.max(0, Math.min(stepIndex, 2));
         setCurrent(safeStep);
+        if (safeStep === 2) setShowResults(true);
       },
       loadDataset: async (datasetKey: string) => {
         if (!datasetKey) return;
@@ -1472,14 +1597,6 @@ const Stepper: React.FC = () => {
       }
     };
   }, [files, prestoreDataset, preloadLoadingKey, resultsPreviewCollapsed, vizOrder]);
-
-  const next = () => setCurrent((prev) => prev + 1);
-  const prev = () => setCurrent((prev) => prev - 1);
-
-  const onChange = (value: number) => {
-    setCurrent(value);
-  };
-
 
 const clearRegionPredictionCache = () => {
   setInsightRegionCache({});
@@ -1632,7 +1749,7 @@ const loadPrestoredDataset = async (datasetKey: string, options: { silent?: bool
 };
 
  
-const addIncomingFiles = (newFiles: File[]) => {
+const addIncomingFiles = (newFiles: File[], groupKey?: string) => {
   if (!newFiles?.length) return;
 
   const nextAdd: PreviewFile[] = newFiles
@@ -1641,12 +1758,12 @@ const addIncomingFiles = (newFiles: File[]) => {
       const ff = f as FileWithPath;
       const uid = buildOrgName(ff);
       const label = ff.webkitRelativePath?.split("/").pop() || ff.name;
-      const groupKey = buildGroupKey(ff, 1);
+      const assignedGroup = groupKey || buildGroupKey(ff, 1);
 
       return {
         uid,
         label,
-        groupKey,
+        groupKey: assignedGroup,
         file: ff,
         blobURL: URL.createObjectURL(ff),
       };
@@ -1663,6 +1780,7 @@ const addIncomingFiles = (newFiles: File[]) => {
     clearRegionPredictionCache();
     setShowInsights(false);
     setPredictstep(1);
+    setShowResults(false);
     setPrestoreDataset(null);
 
     return next;
@@ -1684,6 +1802,7 @@ const removeOne = (uid: string) => {
     clearRegionPredictionCache();
     setPredictstep(1);
     setShowInsights(false);
+    setShowResults(false);
     setPrestoreDataset(null);
 
     if (next.length === 0) {
@@ -1711,6 +1830,7 @@ const clearGroup = (uidsToRemove: string[]) => {
     clearRegionPredictionCache();
     setPredictstep(1);
     setShowInsights(false);
+    setShowResults(false);
     if (next.length === 0) {
       setUploaderKey((k) => k + 1); 
     }
@@ -1732,15 +1852,16 @@ const clearAll = () => {
   setPredictionResult(null);
   clearRegionPredictionCache();
   setShowInsights(false);
+  setShowResults(false);
   setPredictstep(1);
   setUploaderKey((k) => k + 1); 
   setPrestoreDataset(null);
 };
 
-const moveItemToGroup = (uid: string, toGroupKey: string) => {
-  setFiles(prev => prev.map(f => (f.uid === uid ? { ...f, groupKey: toGroupKey } : f)));
-  setFileMappings(prev => prev.map(f => (f.uid === uid ? { ...f, groupKey: toGroupKey } : f)));
-  
+const moveItemToGroup = (uid: string | string[], toGroupKey: string) => {
+  const uids = new Set(Array.isArray(uid) ? uid : [uid]);
+  setFiles(prev => prev.map(f => (uids.has(f.uid) ? { ...f, groupKey: toGroupKey } : f)));
+  setFileMappings(prev => prev.map(f => (uids.has(f.uid) ? { ...f, groupKey: toGroupKey } : f)));
 };
 
 const renameGroupKey = (oldKey: string, newKey: string) => {
@@ -1754,8 +1875,8 @@ useEffect(() => {
   setPredictstep(1);
   clearRegionPredictionCache();
   setShowInsights(false);
-
-  if (!prestoreDataset) return;
+  setShowResults(false);
+  setPredictError(null);
 }, [
   model,
   dataset,
@@ -1766,17 +1887,6 @@ useEffect(() => {
   prestoreDataset,
   region,
 ]);
-
-  useEffect(() => {
-    if (current !== 2 || files.length === 0) return;
-
-    const cached = getCachedResultByRegion(region);
-    if (cached) return;
-
-    setPredictionResult(null);
-    setPredictstep(1);
-    handlePrediction();
-  }, [region, current, files.length, insightRegionCache]);
 
   useEffect(() => {
     if (import.meta.env.DEV) console.log("🔄 predictionResult updated:", predictionResult);
@@ -1824,6 +1934,12 @@ useEffect(() => {
     return allInsightRegionValues.filter((r) => included.includes(r));
   }, [dataset]);
 
+  useEffect(() => {
+    if (!regionSupportsMurty185(region) && dataset === "murty185") {
+      setDataset("nsd_1000");
+    }
+  }, [region, dataset]);
+
   // Bottom Across-regions selection follows the top ROI selector.
   useEffect(() => {
     if (availableInsightRegions.includes(region)) {
@@ -1857,10 +1973,16 @@ useEffect(() => {
       return false;
     }
 
+    if (!targetRegion || !dataset || !model) {
+      message.error("Select an fROI, mapping dataset, and model before running inference.");
+      return false;
+    }
+
+    setPredictError(null);
+
     if (prestoreDataset) {
-      const localResult = await loadPreloadedPredictionByRegion(
-        prestoreDataset,
-        targetRegion
+      const localResult = wrapPredictionResult(
+        await loadPreloadedPredictionByRegion(prestoreDataset, targetRegion)
       );
 
       if (localResult) {
@@ -1868,6 +1990,7 @@ useEffect(() => {
         setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: localResult }));
 
         setPredictstep(2);
+        setShowResults(true);
         message.success("Loaded precomputed prediction.");
         return true;
       }
@@ -1877,39 +2000,40 @@ useEffect(() => {
 
     try {
       const uploadFiles = files.map((x) => {
-        const ext = getExt(x.file.name);
+        if (!x.file) {
+          throw new Error(`Missing file data for ${x.label || x.uid}`);
+        }
+        const ext = getExt(x.file.name || x.label || "");
         const newName = `${safe(x.uid)}${ext}`;
-        return new File([x.file], newName, { type: x.file.type });
+        return new File([x.file], newName, { type: x.file.type || "image/jpeg" });
       });
 
-      const serverKeys = uploadFiles.map((f) => f.name);
+      const { resultData, serverKeys } = await runFroiPrediction({
+        uploadFiles,
+        region: targetRegion,
+        dataset,
+        model,
+      });
 
       setFiles((prev) => prev.map((x, i) => ({ ...x, serverKey: serverKeys[i] })));
       setFileMappings((prev) => prev.map((x, i) => ({ ...x, serverKey: serverKeys[i] })));
-
-      const paths: string[] = await uploadImages(uploadFiles);
-
-      const items = paths.map((path, i) => ({
-        path,
-        org_name: serverKeys[i],
-      }));
-
-      const result = await axios.post(`${SERVER_BASE_URL}/api/predict`, {
-        data: [items, targetRegion, dataset, model, true, true, true],
-      });
-
-      const resultData = result.data.data;
-
- 
       setPredictionResult(resultData);
-
       setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: resultData }));
-
+      setPredictError(null);
+      setShowResults(true);
       message.success("Prediction complete!");
       return true;
-    } catch (e) {
-      console.error(e);
-      message.error("Prediction failed. Check server connection.");
+    } catch (e: any) {
+      console.error("fROI prediction failed", e);
+      const detail =
+        e?.response?.data?.error ||
+        e?.response?.data?.message ||
+        e?.message ||
+        "Prediction failed. Check server connection.";
+      const status = e?.response?.status ? ` (HTTP ${e.response.status})` : "";
+      const text = `${detail}${status}. Server: ${SERVER_BASE_URL}`;
+      setPredictError(text);
+      message.error(text);
       return false;
     } finally {
       setPredictionLoading(false);
@@ -1923,9 +2047,8 @@ useEffect(() => {
     if (cached) return cached;
 
     if (prestoreDataset) {
-      const localResult = await loadPreloadedPredictionByRegion(
-        prestoreDataset,
-        targetRegion
+      const localResult = wrapPredictionResult(
+        await loadPreloadedPredictionByRegion(prestoreDataset, targetRegion)
       );
 
       if (localResult) {
@@ -1940,30 +2063,22 @@ useEffect(() => {
       return new File([x.file], newName, { type: x.file.type });
     });
 
-    const serverKeys = uploadFiles.map((f) => f.name);
+    const { resultData, serverKeys } = await runFroiPrediction({
+      uploadFiles,
+      region: targetRegion,
+      dataset,
+      model,
+    });
 
     setFiles((prev) => prev.map((x, i) => ({ ...x, serverKey: serverKeys[i] })));
     setFileMappings((prev) => prev.map((x, i) => ({ ...x, serverKey: serverKeys[i] })));
-
-    const paths: string[] = await uploadImages(uploadFiles);
-
-    const items = paths.map((path, i) => ({
-      path,
-      org_name: serverKeys[i],
-    }));
-
-    const result = await axios.post(`${SERVER_BASE_URL}/api/predict`, {
-      data: [items, targetRegion, dataset, model, true, true, true],
-    });
-
-    const resultData = result.data.data;
     setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: resultData }));
     return resultData;
   };
 
   // Auto-load and show insights whenever the selection is ready (no Get Insights button).
   useEffect(() => {
-    if (current !== 2 || files.length === 0) return;
+    if (!showResults || files.length === 0 || !currentRegionPredictionResult) return;
     if (selectedInsightRegions.length === 0) {
       setShowInsights(false);
       setInsightLoading(false);
@@ -2024,7 +2139,8 @@ useEffect(() => {
       cancelled = true;
     };
   }, [
-    current,
+    showResults,
+    currentRegionPredictionResult,
     files.length,
     selectedInsightRegions,
     insightRegionCache,
@@ -2105,16 +2221,6 @@ useEffect(() => {
   return barchartData.map((d) => d.filename);
 }, [barchartData, fileMappings, vizOrder]);
 
-  const contentStyle: React.CSSProperties = {
-    textAlign: 'center',
-    color: token.colorTextTertiary,
-    backgroundColor: 'transparent',
-    borderRadius: 0,
-    border: 'none',
-    marginTop: 16,
-    padding: 0,
-  };
-
   //support csv download
   const downloadData = () => {
     if (currentRegionPredictionResult) {
@@ -2187,319 +2293,13 @@ useEffect(() => {
           return parts[1] || "Ungrouped";
         };
   
-  const steps = [
-    {
-      title: 'Upload stimuli',
-      // content: <Uploader onFilesUploaded={handleFilesUploaded} onFileMappingsUpdate={handleFileMappingsUpdate} />,
-          content: (
-            <div data-tutorial="lab-upload-panel" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div
-                className="lab-upload-columns"
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'minmax(0, 1fr) 220px',
-                  gap: 16,
-                  alignItems: 'stretch',
-                }}
-              >
-                <div
-                  data-tutorial="lab-upload-uploader"
-                  className="lab-upload-column-panel"
-                >
-                  <Uploader
-                    key={uploaderKey}
-                    fillHeight
-                    onAddFiles={(newFiles) => addIncomingFiles(newFiles)}
-                  />
-                </div>
-
-                <div className="lab-upload-column-panel lab-preload-column-panel">
-                  <div className="lab-eyebrow" style={{ marginBottom: 12 }}>
-                    Preloaded datasets from published studies
-                  </div>
-
-                 <PreloadDatasetPicker
-                  selectedKey={prestoreDataset}
-                  isLoading={preloadLoading}
-                  loadingKey={preloadLoadingKey}
-                  onSelectDataset={(key: string | null) => {
-                    if (!key) {
-                      // 取消选择
-                      setPrestoreDataset(null);
-                      setPreloadLoading(false);
-                      setPreloadLoadingKey(null);
-                      setFiles([]);
-                      setFileMappings([]);
-                      setPredictionResult(null);
-                      clearRegionPredictionCache();
-                      setShowInsights(false);
-                      setPredictstep(1);
-                      return;
-                    }
-
-                    loadPrestoredDataset(key);
-                  }}
-                />
-
-                {preloadLoading && (
-                  <div
-                    style={{
-                      marginTop: 8,
-                      fontSize: 13,
-                      fontFamily: "var(--lab-sans, 'Inter', sans-serif)",
-                      color: "var(--lab-muted, #8A8378)",
-                    }}
-                  >
-                    Loading stimuli…
-                  </div>
-                )}
-                </div>
-              </div>
-
-              {isPreloadMode && <DatasetCardLab dataset={prestoreDataset} />}
-
-              <div data-tutorial="lab-upload-images-panel">
-                <ImagePreviewGroupedDnD
-                  files={files}
-                  variant="lab"
-                  eyebrow="Uploaded stimuli"
-                  title={inputMode === "preload" ? "Preloaded Images" : "Uploaded Images"}
-                  groupDepth={1}
-                  isPreload={isPreloadMode}
-                  allowPreloadEditing={true}
-                  tutorialCustomGroups={tutorialCustomGroups}
-                  tutorialStateKey={tutorialUploadDemoMode}
-                  onMoveItemToGroup={moveItemToGroup}
-                  onRenameGroupKey={renameGroupKey}
-                  onRemove={(uid: string) => removeOne(uid)}
-                  onClear={() => clearAll()}
-                  onClearGroup={(groupKey, uids) => clearGroup(uids)}
-                  onGroupOrderChange={(order: string[]) => console.log("Group order:", order)}
-                />
-              </div>
-
-              <div style={{ textAlign: 'right', color: 'var(--lab-secondary, #57534A)', fontWeight: 500, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6 }}>
-                <Images size={16} strokeWidth={1.5} aria-hidden="true" color="currentColor" />
-                <span className="lab-mono-num" style={{ fontFamily: "var(--lab-mono, 'IBM Plex Mono', monospace)", fontWeight: 500 }}>{files.length}</span>
-                <span>images loaded</span>
-              </div>
-            </div>
-          ),
-    },
-    {
-      title: 'Training settings',
-      content: (
-        <div data-tutorial="lab-settings-panel" style={{ display: 'flex', flexDirection: 'column', gap: '10px'}}>
-          <RegionSelector region={region} setRegion={setRegion} dataset={dataset} variant="lab" />
-          <Settings
-            variant="lab"
-            model={model}
-            setModel={setModel}
-            dataset={dataset}
-            setDataset={setDataset}
-            voxelOption={voxelOption}
-            setVoxelOption={setVoxelOption}
-            voxelNumber={voxelNumber}
-            setVoxelNumber={setVoxelNumber}
-            participantName={participantName}
-            setParticipantName={setParticipantName}
-          />
-          {predictionLoading && <LinearIndeterminate />}
-        </div>
-      ),
-    },
-    {
-      title: 'Prediction results',
-      content: (
-        <div data-tutorial="lab-results-panel" style={{ display: 'flex', flexDirection: 'column'}}>
-          <RegionSelector
-            region={region}
-            setRegion={setRegion}
-            dataset={dataset}
-            tutorialRootKey="lab-results-region"
-            activeTutorialKey="lab-results-region-active"
-            variant="lab"
-          />
-
-          <ModelCard
-            variant="lab"
-            region={region}
-            dataset={dataset}
-            model={model}
-          />
-
-          <div data-tutorial="lab-results-upload-preview">
-            <ImagePreviewGroupedDnD
-              files={files}
-              variant="lab"
-              eyebrow="Uploaded stimuli"
-              title="Uploaded Images Preview"
-              groupDepth={1}
-              isPreload={isPreloadMode}
-              onMoveItemToGroup={moveItemToGroup}
-              onRenameGroupKey={renameGroupKey}
-              onRemove={(uid: string) => removeOne(uid)}
-              onClear={() => clearAll()}
-              onClearGroup={(groupKey, uids) => clearGroup(uids)}
-              onGroupOrderChange={(order: string[]) => console.log("Group order:", order)}
-              foldable={true}
-              panelCollapsed={resultsPreviewCollapsed}
-              onPanelCollapsedChange={setResultsPreviewCollapsed}
-              tutorialCollapseToggleKey="lab-results-upload-preview-toggle"
-              viewOnly={true}
-            />
-          </div>
-
-          {predictionLoading && <LinearIndeterminate />}
-          <div className="lab-section-header">
-            <span className="lab-eyebrow">Univariate analysis</span>
-            <h3 className="lab-heading">Predicted voxel average responses</h3>
-          </div>
-            {barchartData.length > 0 && (
-              <BarChart
-                barChartData={barchartData}
-                height={600}
-                fileMappings={fileMappings}
-                order={vizOrder}
-                setOrder={setVizOrder}
-                tutorialSelectedGroups={tutorialHighlightedResultGroups}
-                labChart
-              />
-            )}
-          <div className="lab-section-header">
-            <span className="lab-eyebrow">Multivariate analysis</span>
-            <h3 className="lab-heading">Representational dissimilarity matrix (RDM) from predicted voxel responses</h3>
-          </div>
-          {barchartData.length <= 1 ? (
-            <div style={{ textAlign: 'left', fontSize: '14px', color: 'var(--lab-muted, #8A8378)', fontStyle: 'italic', lineHeight: 1.6 }}>
-              RDM unavailable for one image. Please upload more than 2 images to see the visualization.
-            </div>
-          ) : (
-            <Heatmap
-              heatmapData={heatmapData}
-              originalFilenames={originalFilenames}
-              sortedFilenames={orderedFilenames}
-              width={800}
-              height={800}
-              fileMappings={fileMappings}
-              order={vizOrder}
-              labChart
-            />
-          )}
-
-          <div
-            className="lab-section-header"
-            data-tutorial="lab-results-get-insights"
-          >
-            <span className="lab-eyebrow">Advanced insights</span>
-            <h3 className="lab-heading">Across regions</h3>
-          </div>
-
-          <div
-            style={{
-              marginTop: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              flexWrap: 'wrap',
-            }}
-          >
-            <span
-              style={{
-                fontWeight: 500,
-                whiteSpace: 'nowrap',
-                fontSize: 13,
-                fontFamily: "var(--lab-sans, 'Inter', sans-serif)",
-                color: 'var(--lab-text, #211F1C)',
-              }}
-            >
-              ROI selection
-            </span>
-
-            {availableInsightRegions.map((r) => {
-              const selected = selectedInsightRegions.includes(r);
-              const label = REGION_OPTIONS.find((x) => x.value === r)?.label || r.toUpperCase();
-
-              return (
-                <label
-                  key={r}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    cursor: 'pointer',
-                    fontSize: '13px',
-                    whiteSpace: 'nowrap',
-                    padding: '4px 8px',
-                    borderRadius: '5px',
-                    border: selected
-                      ? '1px solid rgba(107, 99, 88, 0.35)'
-                      : '1px solid transparent',
-                    background: selected
-                      ? 'rgba(247, 242, 238, 0.95)'
-                      : 'transparent',
-                    boxShadow: 'none',
-                    opacity:
-                      selectedInsightRegions.length > 0 && !selected ? 0.55 : 1,
-                    transition: 'all 220ms ease',
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selected}
-                    onChange={() => toggleInsightRegion(r)}
-                  />
-                  <span
-                    style={{
-                      fontFamily: "var(--lab-mono, 'IBM Plex Mono', monospace)",
-                      fontSize: '12px',
-                      fontWeight: 400,
-                      color: 'var(--lab-text, #211F1C)',
-                    }}
-                  >
-                    {label}
-                  </span>
-                </label>
-              );
-            })}
-          </div>
-
-          {insightLoading && (
-            <div
-              style={{
-                marginTop: 16,
-                width: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 10,
-                minHeight: 120,
-                color: 'var(--lab-secondary, #57534A)',
-              }}
-            >
-              <Spin size="large" />
-              <span style={{ fontSize: 13, fontFamily: "var(--lab-sans, 'Inter', sans-serif)" }}>
-                Loading cross-region insights…
-              </span>
-            </div>
-          )}
-
-          {!insightLoading && showInsights && (
-            <div style={{ marginTop: "5px" }}>
-              <BoxPlot
-                regionDataMap={insightRegionDataMap}
-                fileMappings={fileMappings}
-                regionOrder={selectedInsightRegions}
-                height={560}
-                labChart
-              />
-            </div>
-          )}
-        </div>
-      ),
-    },
-  ];
+  const runInference = async () => {
+    const ok = await handlePrediction(region);
+    window.requestAnimationFrame(() => {
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return ok;
+  };
 
  return (
   <>
@@ -2526,100 +2326,326 @@ useEffect(() => {
       }}
     >
     <ThemeProvider theme={muiLabTheme}>
-      <div
-        data-tutorial="lab-stepper-nav"
-        style={{
-          display: "flex",
-          borderBottom: "1px solid var(--lab-hairline, #D6D2C6)",
-        }}
-      >
-        {steps.map((item, idx) => {
-          const active = idx === current;
-          const done = idx < current;
-          const tabClass = [
-            "lab-step-tab",
-            active ? "is-active" : "",
-            done ? "is-done" : "",
-            !active && !done ? "is-upcoming" : "",
-          ]
-            .filter(Boolean)
-            .join(" ");
+      <div className="lab-workspace">
+        <aside
+          className="lab-settings-rail"
+          data-tutorial="lab-stepper-nav"
+        >
+          <div data-tutorial="lab-settings-panel" className="lab-settings-rail-inner">
+            <RegionSelector
+              region={region}
+              setRegion={selectRegion}
+              dataset={dataset}
+              variant="lab"
+              tutorialRootKey="lab-settings-region"
+              activeTutorialKey="lab-results-region-active"
+            />
+            <Settings
+              variant="lab"
+              region={region}
+              model={model}
+              setModel={setModel}
+              dataset={dataset}
+              setDataset={setDataset}
+              voxelOption={voxelOption}
+              setVoxelOption={setVoxelOption}
+              voxelNumber={voxelNumber}
+              setVoxelNumber={setVoxelNumber}
+              participantName={participantName}
+              setParticipantName={setParticipantName}
+            />
+            <ModelCard
+              variant="lab"
+              region={region}
+              dataset={dataset}
+              model={model}
+            />
+          </div>
+        </aside>
 
-          return (
-            <button
-              key={item.title}
-              type="button"
-              className={tabClass}
-              onClick={() => onChange(idx)}
-              style={{
-                flex: 1,
-                display: "flex",
-                alignItems: "baseline",
-                justifyContent: "center",
-                gap: 10,
-                padding: "12px 14px",
-                background: "transparent",
-                border: "none",
-                borderBottom: active
-                  ? "2px solid var(--lab-accent, #4A2E5C)"
-                  : "2px solid transparent",
-                marginBottom: -1,
-                cursor: "pointer",
-                textAlign: "center",
-                transition: "color 0.2s ease, border-color 0.2s ease",
-                boxShadow: "none",
-              }}
+        <div className="lab-main-column">
+          <div className="lab-roi-stage">
+            <LabRoiViewer region={region} />
+            <RoiInfoCard region={region} />
+          </div>
+
+          <div data-tutorial="lab-upload-panel" className="lab-stimuli-canvas">
+            <div
+              data-tutorial="lab-upload-uploader"
+              className="lab-upload-column-panel"
             >
-              <span className="lab-step-num">
-                {idx + 1}
-              </span>
-              <span className="lab-step-title">
-                {item.title}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+              <Uploader
+                key={uploaderKey}
+                onAddFiles={(newFiles) => addIncomingFiles(newFiles)}
+              />
+            </div>
 
-      <div style={contentStyle}>{steps[current].content}</div>
+            <div className="lab-preload-inline">
+              <div className="lab-eyebrow" style={{ marginBottom: 8 }}>
+                Or load a published dataset
+              </div>
+              <PreloadDatasetPicker
+                layout="row"
+                selectedKey={prestoreDataset}
+                isLoading={preloadLoading}
+                loadingKey={preloadLoadingKey}
+                onSelectDataset={(key: string | null) => {
+                  if (!key) {
+                    setPrestoreDataset(null);
+                    setPreloadLoading(false);
+                    setPreloadLoadingKey(null);
+                    setFiles([]);
+                    setFileMappings([]);
+                    setPredictionResult(null);
+                    clearRegionPredictionCache();
+                    setShowInsights(false);
+                    setShowResults(false);
+                    setPredictstep(1);
+                    return;
+                  }
 
-      <div style={{ marginTop: 24, display: "flex", justifyContent: "flex-end", gap: "8px" }}>
-        {current === 0 && (
-          <Button
-            type="primary"
-            onClick={() => {
-              message.success("Image Upload complete!");
-              next();
-            }}
-            disabled={loading || files.length === 0}
-          >
-            {loading ? "Uploading..." : "Proceed to settings"}
-          </Button>
-        )}
+                  loadPrestoredDataset(key);
+                }}
+              />
+              {preloadLoading && (
+                <div
+                  style={{
+                    marginTop: 8,
+                    fontSize: 13,
+                    fontFamily: "var(--lab-sans, 'Inter', sans-serif)",
+                    color: "var(--lab-muted, #8A8378)",
+                  }}
+                >
+                  Loading stimuli…
+                </div>
+              )}
+            </div>
 
-        {current === 1 && (
-          <Button
-            type="primary"
-            onClick={async () => {
-              if (predictstep !== 1) {
-                next();
-                return;
-              }
+            {isPreloadMode && <DatasetCardLab dataset={prestoreDataset} />}
 
-              const ok = await handlePrediction(region);
-              if (ok) next();
-            }}
-            disabled={loading || predictionLoading || files.length === 0}
-          >
-            {loading || predictionLoading ? "Processing..." : "Check prediction results"}
-          </Button>
-        )}
+            <div data-tutorial="lab-upload-images-panel">
+              <div data-tutorial="lab-results-upload-preview">
+                <ImagePreviewGroupedDnD
+                  files={files}
+                  variant="lab"
+                  eyebrow="Uploaded stimuli"
+                  title={inputMode === "preload" ? "Preloaded Images" : "Uploaded Images"}
+                  groupDepth={1}
+                  isPreload={isPreloadMode}
+                  allowPreloadEditing={true}
+                  tutorialCustomGroups={tutorialCustomGroups}
+                  tutorialStateKey={tutorialUploadDemoMode}
+                  onMoveItemToGroup={moveItemToGroup}
+                  onRenameGroupKey={renameGroupKey}
+                  onAddExternalFiles={(incoming, groupKey) => addIncomingFiles(incoming, groupKey)}
+                  onRemove={(uid: string) => removeOne(uid)}
+                  onClear={() => clearAll()}
+                  onClearGroup={(groupKey, uids) => clearGroup(uids)}
+                  onGroupOrderChange={(order: string[]) => console.log("Group order:", order)}
+                />
+              </div>
+            </div>
 
-        {current === steps.length - 1 && (
-          <Button type="primary" onClick={downloadData} disabled={!currentRegionPredictionResult}>
-            Download data
-          </Button>
-        )}
+            <div className="lab-run-row">
+              <div style={{ color: 'var(--lab-secondary, #57534A)', fontWeight: 500, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Images size={16} strokeWidth={1.5} aria-hidden="true" color="currentColor" />
+                <span className="lab-mono-num" style={{ fontFamily: "var(--lab-mono, 'IBM Plex Mono', monospace)", fontWeight: 500 }}>{files.length}</span>
+                <span>images loaded</span>
+              </div>
+              <Button
+                type="primary"
+                data-tutorial="lab-run-inference"
+                onClick={runInference}
+                disabled={loading || predictionLoading || files.length === 0}
+              >
+                {loading || predictionLoading ? "Processing..." : "Run Inference"}
+              </Button>
+            </div>
+            {predictError && (
+              <div
+                style={{
+                  marginTop: 8,
+                  padding: "10px 12px",
+                  border: "0.5px solid var(--lab-hairline, #D6D2C6)",
+                  borderRadius: 8,
+                  background: "var(--lab-panel, #FBFAF6)",
+                  color: "var(--lab-text, #211F1C)",
+                  fontSize: 13,
+                  lineHeight: 1.5,
+                  textAlign: "left",
+                }}
+              >
+                {predictError}
+              </div>
+            )}
+          </div>
+
+          {(showResults || predictionLoading || !!currentRegionPredictionResult) && (
+            <div
+              ref={resultsRef}
+              data-tutorial="lab-results-panel"
+              className="lab-results-panel"
+              style={{ display: 'flex', flexDirection: 'column', marginTop: 8 }}
+            >
+              <div className="lab-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 12 }}>
+                <div>
+                  <span className="lab-eyebrow">Prediction results</span>
+                  <h3 className="lab-heading">Readout for {region?.toUpperCase()}</h3>
+                </div>
+                <Button type="primary" onClick={downloadData} disabled={!currentRegionPredictionResult}>
+                  Download data
+                </Button>
+              </div>
+
+              {predictionLoading && <LinearIndeterminate />}
+              <div className="lab-section-header">
+                <span className="lab-eyebrow">Univariate analysis</span>
+                <h3 className="lab-heading">Predicted voxel average responses</h3>
+              </div>
+                {barchartData.length > 0 && (
+                  <BarChart
+                    barChartData={barchartData}
+                    height={600}
+                    fileMappings={fileMappings}
+                    order={vizOrder}
+                    setOrder={setVizOrder}
+                    tutorialSelectedGroups={tutorialHighlightedResultGroups}
+                    labChart
+                  />
+                )}
+              <div className="lab-section-header">
+                <span className="lab-eyebrow">Multivariate analysis</span>
+                <h3 className="lab-heading">Representational dissimilarity matrix (RDM) from predicted voxel responses</h3>
+              </div>
+              {barchartData.length <= 1 ? (
+                <div style={{ textAlign: 'left', fontSize: '14px', color: 'var(--lab-muted, #8A8378)', fontStyle: 'italic', lineHeight: 1.6 }}>
+                  RDM unavailable for one image. Please upload more than 2 images to see the visualization.
+                </div>
+              ) : (
+                <Heatmap
+                  heatmapData={heatmapData}
+                  originalFilenames={originalFilenames}
+                  sortedFilenames={orderedFilenames}
+                  width={800}
+                  height={800}
+                  fileMappings={fileMappings}
+                  order={vizOrder}
+                  labChart
+                />
+              )}
+
+              <div
+                className="lab-section-header"
+                data-tutorial="lab-results-get-insights"
+              >
+                <span className="lab-eyebrow">Advanced insights</span>
+                <h3 className="lab-heading">Across regions</h3>
+              </div>
+
+              <div
+                style={{
+                  marginTop: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <span
+                  style={{
+                    fontWeight: 500,
+                    whiteSpace: 'nowrap',
+                    fontSize: 13,
+                    fontFamily: "var(--lab-sans, 'Inter', sans-serif)",
+                    color: 'var(--lab-text, #211F1C)',
+                  }}
+                >
+                  ROI selection
+                </span>
+
+                {availableInsightRegions.map((r) => {
+                  const selected = selectedInsightRegions.includes(r);
+                  const label = REGION_OPTIONS.find((x) => x.value === r)?.label || r.toUpperCase();
+
+                  return (
+                    <label
+                      key={r}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        cursor: 'pointer',
+                        fontSize: '13px',
+                        whiteSpace: 'nowrap',
+                        padding: '4px 8px',
+                        borderRadius: '5px',
+                        border: selected
+                          ? '1px solid rgba(107, 99, 88, 0.35)'
+                          : '1px solid transparent',
+                        background: selected
+                          ? 'rgba(247, 242, 238, 0.95)'
+                          : 'transparent',
+                        boxShadow: 'none',
+                        opacity:
+                          selectedInsightRegions.length > 0 && !selected ? 0.55 : 1,
+                        transition: 'all 220ms ease',
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() => toggleInsightRegion(r)}
+                      />
+                      <span
+                        style={{
+                          fontFamily: "var(--lab-mono, 'IBM Plex Mono', monospace)",
+                          fontSize: '12px',
+                          fontWeight: 400,
+                          color: 'var(--lab-text, #211F1C)',
+                        }}
+                      >
+                        {label}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+
+              {insightLoading && (
+                <div
+                  style={{
+                    marginTop: 16,
+                    width: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 10,
+                    minHeight: 120,
+                    color: 'var(--lab-secondary, #57534A)',
+                  }}
+                >
+                  <Spin size="large" />
+                  <span style={{ fontSize: 13, fontFamily: "var(--lab-sans, 'Inter', sans-serif)" }}>
+                    Loading cross-region insights…
+                  </span>
+                </div>
+              )}
+
+              {!insightLoading && showInsights && (
+                <div style={{ marginTop: "5px" }}>
+                  <BoxPlot
+                    regionDataMap={insightRegionDataMap}
+                    fileMappings={fileMappings}
+                    regionOrder={selectedInsightRegions}
+                    height={560}
+                    labChart
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </ThemeProvider>
     </ConfigProvider>

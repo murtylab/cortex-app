@@ -290,9 +290,10 @@ const clearAll = () => {
   setUploaderKey((k) => k + 1); 
 };
 
-const moveItemToGroup = (uid: string, toGroupKey: string) => {
-  setFiles(prev => prev.map(f => (f.uid === uid ? { ...f, groupKey: toGroupKey } : f)));
-  setFileMappings(prev => prev.map(f => (f.uid === uid ? { ...f, groupKey: toGroupKey } : f)));
+const moveItemToGroup = (uid: string | string[], toGroupKey: string) => {
+  const uids = new Set(Array.isArray(uid) ? uid : [uid]);
+  setFiles(prev => prev.map(f => (uids.has(f.uid) ? { ...f, groupKey: toGroupKey } : f)));
+  setFileMappings(prev => prev.map(f => (uids.has(f.uid) ? { ...f, groupKey: toGroupKey } : f)));
 };
 
 const renameGroupKey = (oldKey: string, newKey: string) => {

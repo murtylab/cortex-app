@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="/assets/vendor/glightbox/css/glightbox.min.css">
     <link rel="stylesheet" href="/assets/vendor/swiper/swiper-bundle.min.css">
     <link rel="stylesheet" href="/assets/css/main.css">
-    <link rel="stylesheet" href="/assets/css/model-pages.css?v=20260819-model-page-v1">
+    <link rel="stylesheet" href="/assets/css/model-pages.css?v=20260821-optimal-layers">
 </head>
 <body class="lab-page">
   <header id="header" class="header d-flex align-items-center sticky-top">
@@ -129,6 +129,14 @@
                     </a>
                 </div>
 
+                <div class="context-section" id="model-page-optimal-layers-section">
+                    <h2>Optimal Mapping Layers</h2>
+                    <p>
+                        The layer with the highest correlation to each ROI on the fMRI mapping datasets used to fit this encoding model.
+                    </p>
+                    <div id="model-page-optimal-layers">Loading optimal-layer scores…</div>
+                </div>
+
                 <div class="context-section" style="margin-top: 1.5rem;">
                     <h2>Per-Dataset Breakdown (Pearson r)</h2>
                     <p style="color: var(--text-sub); margin-bottom: 1rem; font-size: 0.95rem;">
@@ -169,7 +177,7 @@
     <script src="/assets/vendor/swiper/swiper-bundle.min.js"></script>
     <script src="/assets/js/main.js?v=20260819-model-page-v1"></script>
     <script src="/assets/js/model-page-performance-toggle.js?v=20260819-model-page-v1"></script>
-    <script src="/assets/js/model-page.js?v=20260819-model-page-v1"></script>
+    <script src="/assets/js/model-page.js?v=20260821-optimal-layers"></script>
 
   <canvas id="neuralCanvas"></canvas>
 

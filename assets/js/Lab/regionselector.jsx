@@ -20,6 +20,8 @@ const RegionSelector = ({
   variant = "default",
 }) => {
   const isEnabled = (option) => {
+    if (variant === "lab") return true;
+
     const value = (option?.value || "").toLowerCase();
 
     if (dataset === "murty185") {
@@ -35,21 +37,23 @@ const RegionSelector = ({
 
   if (variant === "lab") {
     return (
-      <FormControl data-tutorial={tutorialRootKey} sx={{ minWidth: 120 }} fullWidth>
+      <FormControl data-tutorial={tutorialRootKey} sx={{ minWidth: 0 }} fullWidth>
         <div
           id="region-buttons-group-label"
           className="lab-eyebrow"
-          style={{ marginBottom: 12, fontSize: 12 }}
+          style={{ marginBottom: 10, fontSize: 12 }}
         >
-          Region of interest
+          fROIs
         </div>
 
         <div
           role="group"
           aria-labelledby="region-buttons-group-label"
+          className="lab-froi-grid"
+          data-tutorial="lab-results-region"
           style={{
-            display: "flex",
-            flexWrap: "wrap",
+            display: "grid",
+            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
             gap: 6,
             width: "100%",
           }}
@@ -67,18 +71,17 @@ const RegionSelector = ({
                 onClick={() => enabled && setRegion(option.value)}
                 disabled={!enabled}
                 style={{
-                  flex: "1 1 0",
                   minWidth: 0,
                   fontFamily: "var(--lab-mono, 'IBM Plex Mono', monospace)",
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: 400,
-                  padding: "12px 6px",
+                  padding: "8px 4px",
                   borderRadius: 5,
                   border: selected
                     ? "0.5px solid transparent"
                     : `0.5px solid ${LAB_COLORS.hairline}`,
                   background: selected
-                    ? "var(--highlight-color-button, linear-gradient(135deg, #c98d9a 0%, #b8a4bc 50%, #c4b4cc 100%))"
+                    ? "var(--highlight-color-button, #5b3a6e)"
                     : "transparent",
                   color: selected ? "#ffffff" : LAB_COLORS.text,
                   cursor: enabled ? "pointer" : "not-allowed",

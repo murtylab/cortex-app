@@ -19,6 +19,7 @@ import { LAB_CHART, LAB_COLORS, styleLabAxis, applyLabAxisTitle } from "./labThe
  * @property {FileMapping[] | undefined} fileMappings
  * @property {string[] | undefined} regionOrder
  * @property {number | undefined} height
+ * @property {boolean | undefined} labChart
  */
 
 const GROUP_ORDER_FALLBACK = ["body", "face", "object", "scene"];

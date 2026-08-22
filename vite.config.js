@@ -5,19 +5,25 @@ import modelPagesPlugin from './scripts/vite-plugin-model-pages.js';
 
 const ngrokHost = process.env.NGROK_HOST || null;
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   root: '.',
   plugins: [
     react(),
     modelPagesPlugin(),
-    viteStaticCopy({
-      targets: [
-        {
-          src: 'assets',
-          dest: '.'
-        }
-      ]
-    })
+    // Copy assets into dist for production. In dev this middleware would
+    // serve raw /assets/js/*.tsx and skip Vite's transform, blanking Lab pages.
+    ...(command === 'build'
+      ? [
+          viteStaticCopy({
+            targets: [
+              {
+                src: 'assets',
+                dest: '.',
+              },
+            ],
+          }),
+        ]
+      : []),
   ],
   build: {
     outDir: 'dist',
@@ -54,4 +60,4 @@ export default defineConfig({
       '@assets': '/assets'
     },
   },
-});
+}));

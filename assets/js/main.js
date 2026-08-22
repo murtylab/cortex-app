@@ -619,7 +619,7 @@
   const TUTORIALS = {
     labCategorySelective: {
       label: 'The Lab - Functional Regions (fROIs)',
-      description: 'Start on the Lab landing page, then move into the experiment builder.',
+      description: 'Walk through the single-page Lab: left settings, ROI context, stimuli, then inference.',
       steps: [
         {
           path: '/labLanding/',
@@ -631,24 +631,52 @@
         },
         {
           path: '/lab/',
-          selector: '[data-tutorial="lab-stepper-nav"]',
-          title: 'Understand the Lab Flow',
-          body: 'The Lab is organized as a stepper: upload stimuli, configure settings, then inspect prediction results.',
-          nextLabel: 'Show Upload Step',
-          prepare: { type: 'lab-step', value: 0 },
+          selector: '[data-tutorial="lab-settings-panel"]',
+          title: 'The left menu stays put',
+          body: 'fROIs, mapping settings, and the model card live in this left rail. They stay on screen while you scroll the rest of the page.',
+          nextLabel: 'Show fROIs',
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-results-region"]',
+          title: 'Pick an fROI',
+          body: 'Choose a category-selective region here. FFA is selected by default. FBA, OFA, OPA, RSC, and VWFA use nsd_1000 only.',
+          nextLabel: 'Show ROI Card',
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-roi-card"]',
+          title: 'Read the ROI Card',
+          body: 'The card on the right updates with the selected region: what it prefers, where it sits, and a link to the original paper.',
+          nextLabel: 'Show Advanced Settings',
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-advanced-settings"]',
+          title: 'Advanced settings',
+          body: 'Set the fMRI mapping dataset, voxels, and base-model architecture. These stay in the left menu while you organize stimuli.',
+          nextLabel: 'Show Model Card',
+          prepare: { type: 'lab-settings-demo' },
+        },
+        {
+          path: '/lab/',
+          selector: '[data-tutorial="lab-results-model-card"]',
+          title: 'Check the model card',
+          body: 'This card shows the model’s current scoreboard rank for the selected mapping dataset and fROI. Click the name to open the model page.',
+          nextLabel: 'Show Upload',
         },
         {
           path: '/lab/',
           selector: '[data-tutorial="lab-upload-uploader"]',
-          title: 'Upload Your Own Stimuli',
-          body: 'Use the uploader to test your own image set by dragging files in or choosing them manually.',
+          title: 'Upload your own stimuli',
+          body: 'Click to upload a file or files, choose a folder, or drag images onto the canvas.',
           nextLabel: 'Show Preloaded Datasets',
           prepare: { type: 'lab-upload-demo', value: 'restore-original' },
         },
         {
           path: '/lab/',
           selector: '[data-tutorial="lab-upload-dataset-selector"]',
-          title: 'Load a Preloaded Dataset',
+          title: 'Or load a published dataset',
           body: 'You can also start from one of the built-in datasets instead of uploading your own stimuli.',
           nextLabel: 'Show Reza Example',
           prepare: { type: 'lab-upload-demo', value: 'restore-original' },
@@ -656,7 +684,7 @@
         {
           path: '/lab/',
           selector: '[data-tutorial="lab-preload-reza"]',
-          title: 'Use Reza as an Example',
+          title: 'Use Reza as an example',
           body: 'Pick Reza to load a ready-made grouped image set for the next few tutorial steps.',
           nextLabel: 'Show Grouped Images',
           prepare: { type: 'lab-upload-demo', value: 'restore-original' },
@@ -664,23 +692,23 @@
         {
           path: '/lab/',
           selector: '[data-tutorial="lab-upload-images-panel"]',
-          title: 'Review the Loaded Images',
-          body: 'With Reza loaded, the image panel shows groups you can reorganize directly inside the Lab.',
+          title: 'Organize the loaded images',
+          body: 'Groups appear here so you can rename them and keep related images together before running inference.',
           nextLabel: 'Show Drag to Regroup',
           prepare: { type: 'lab-upload-demo', value: 'reza-base' },
         },
         {
           path: '/lab/',
           selector: '[data-tutorial="lab-upload-group-grid"]',
-          title: 'Drag Images to Change Groups',
-          body: 'Drag an image thumbnail from one group into another to regroup the stimuli.',
+          title: 'Select and drag images',
+          body: 'Click one thumbnail, or Shift / ⌘-click several. Then drag the selection into another group. You can also drop files from your computer into a group.',
           nextLabel: 'Show Add Group',
           prepare: { type: 'lab-upload-demo', value: 'drag-demo' },
         },
         {
           path: '/lab/',
           selector: '[data-tutorial="lab-upload-add-group"]',
-          title: 'Add a New Group',
+          title: 'Add a new group',
           body: 'Use Add Group to create a new bucket before moving images into it.',
           nextLabel: 'Show Remove Group',
           prepare: { type: 'lab-upload-demo', value: 'add-group-demo' },
@@ -688,55 +716,31 @@
         {
           path: '/lab/',
           selector: '[data-tutorial="lab-upload-clear-group"]',
-          title: 'Remove a Group',
+          title: 'Clear a group',
           body: 'Use Clear Group to remove the images currently inside one group when you want to simplify the set.',
-          nextLabel: 'Show Settings',
+          nextLabel: 'Show Run Inference',
           prepare: { type: 'lab-upload-demo', value: 'clear-group-demo' },
         },
         {
           path: '/lab/',
-          selector: '[data-tutorial="lab-settings-panel"]',
-          title: 'Training Settings',
-          body: 'Select the ROI, dataset, and model configuration before asking the Lab for predictions.',
+          selector: '[data-tutorial="lab-run-inference"]',
+          title: 'Run Inference',
+          body: 'When the image set is ready, run inference here. Predicted responses appear below the organize canvas.',
           nextLabel: 'Show Results',
-          prepare: { type: 'lab-settings-demo' },
-        },
-        {
-          path: '/lab/',
-          selector: '[data-tutorial="lab-results-panel"]',
-          title: 'Prediction Results',
-          body: 'This section shows univariate responses, RDM structure, and optional cross-region insights after a run finishes.',
-          nextLabel: 'Show ROI Switch',
           prepare: { type: 'lab-results-demo', value: 'default' },
         },
         {
           path: '/lab/',
-          selector: '[data-tutorial="lab-results-region"]',
-          title: 'Switch the ROI',
-          body: 'Use the ROI selector in the results view to recompute the readout for a different visual region.',
-          nextLabel: 'Show Model Card',
-          prepare: { type: 'lab-results-demo', value: 'region' },
-        },
-        {
-          path: '/lab/',
-          selector: '[data-tutorial="lab-results-model-card-link"]',
-          title: 'Open the Model Card',
-          body: 'Click CLIP-ResNet50 here to jump directly to its model page for architecture details, training context, and related notes.',
-          nextLabel: 'Show Uploaded Preview',
-          prepare: { type: 'lab-results-demo', value: 'model-card' },
-        },
-        {
-          path: '/lab/',
-          selector: '[data-tutorial="lab-results-upload-preview"]',
-          title: 'Review the Uploaded Images',
-          body: 'Use Unfold to open the preview again so you can match each response back to the uploaded images while reading the charts.',
+          selector: '[data-tutorial="lab-results-panel"]',
+          title: 'Prediction results',
+          body: 'Univariate bars and the RDM show the readout for the current fROI, mapping dataset, and model.',
           nextLabel: 'Show Ranking Control',
-          prepare: { type: 'lab-results-demo', value: 'preview' },
+          prepare: { type: 'lab-results-demo', value: 'default' },
         },
         {
           path: '/lab/',
           selector: '[data-tutorial="lab-results-barchart-order"]',
-          title: 'Switch to Rank View',
+          title: 'Switch to rank view',
           body: 'Change the bar chart order to Rank when you want the strongest predicted responses sorted from high to low.',
           nextLabel: 'Show Group Highlight',
           prepare: { type: 'lab-results-demo', value: 'ranking' },
@@ -744,7 +748,7 @@
         {
           path: '/lab/',
           selector: '[data-tutorial="lab-results-barchart-highlight"]',
-          title: 'Highlight One Group',
+          title: 'Highlight one group',
           body: 'In ranking view, filter the chart by group to focus the comparison on one image set at a time.',
           nextLabel: 'Show Across Regions',
           prepare: { type: 'lab-results-demo', value: 'highlight-group' },
@@ -752,8 +756,8 @@
         {
           path: '/lab/',
           selector: '[data-tutorial="lab-results-get-insights"]',
-          title: 'Across-Region Insights',
-          body: 'Across regions follows your ROI selection and loads side-by-side comparisons automatically once the base result is ready.',
+          title: 'Across-region insights',
+          body: 'Across regions follows your ROI selection and loads side-by-side comparisons once the base result is ready.',
           nextLabel: 'Finish',
           prepare: { type: 'lab-results-demo', value: 'insights' },
         },
@@ -1063,6 +1067,19 @@
         box-shadow: 0 8px 18px rgba(34, 30, 26, 0.14);
       }
 
+      body.lab-page .cortex-tutorial-fab,
+      body.lab-page .cortex-tutorial-card {
+        left: max(12px, calc((100vw - min(1400px, 100vw)) / 2 + 12px));
+        right: auto;
+      }
+
+      body.lab-page .cortex-tutorial-card {
+        bottom: 72px;
+        background: rgba(251, 250, 246, 0.72);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+      }
+
       .cortex-tutorial-backdrop {
         position: fixed;
         inset: 0;
@@ -1263,6 +1280,12 @@
           right: 12px;
           bottom: 12px;
         }
+
+        body.lab-page .cortex-tutorial-fab,
+        body.lab-page .cortex-tutorial-card {
+          left: 12px;
+          right: auto;
+        }
       }
     `;
     document.head.appendChild(style);
@@ -1289,6 +1312,15 @@
     return null;
   }
 
+  function isLabTutorialPage() {
+    return document.body.classList.contains('lab-page');
+  }
+
+  function getLabMenuLeftOffset() {
+    const sidePad = window.innerWidth <= 720 ? 12 : 12;
+    return Math.max(sidePad, (window.innerWidth - Math.min(1400, window.innerWidth)) / 2 + sidePad);
+  }
+
   function positionTutorialButton() {
     if (!tutorialUiState.button) {
       return;
@@ -1297,6 +1329,13 @@
     const sideOffset = window.innerWidth <= 720 ? 12 : 24;
     const defaultBottom = window.innerWidth <= 720 ? 12 : 24;
     let bottom = defaultBottom;
+
+    if (isLabTutorialPage()) {
+      tutorialUiState.button.style.left = `${Math.round(getLabMenuLeftOffset())}px`;
+      tutorialUiState.button.style.right = 'auto';
+      tutorialUiState.button.style.bottom = `${defaultBottom}px`;
+      return;
+    }
 
     const chatAnchor = getVisibleChatAnchor();
     if (chatAnchor) {
@@ -1321,6 +1360,13 @@
     const buttonRect = tutorialUiState.button?.getBoundingClientRect();
     if (buttonRect) {
       bottom = Math.max(defaultBottom, window.innerHeight - buttonRect.top + 12);
+    }
+
+    if (isLabTutorialPage()) {
+      tutorialUiState.card.style.left = `${Math.round(getLabMenuLeftOffset())}px`;
+      tutorialUiState.card.style.right = 'auto';
+      tutorialUiState.card.style.bottom = `${Math.round(bottom)}px`;
+      return;
     }
 
     tutorialUiState.card.style.left = 'auto';

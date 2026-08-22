@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Pencil, X } from "lucide-react";
+import { collectDroppedImageFiles, hasExternalFileDrag } from "./collectDroppedFiles";
 
 type FileWithPath = File & { webkitRelativePath?: string };
 
@@ -40,8 +41,9 @@ type ImagePreviewGroupedDnDProps = {
   onClearGroup?: (groupKey: string, uidsToRemove: string[]) => void;
   onGroupOrderChange?: (order: string[]) => void;
   onRenameGroup?: (groupKey: string, newDisplayName: string) => void;
-  onMoveItemToGroup?: (uid: string, toGroupKey: string) => void;
+  onMoveItemToGroup?: (uid: string | string[], toGroupKey: string) => void;
   onRenameGroupKey?: (oldKey: string, newKey: string) => void;
+  onAddExternalFiles?: (files: File[], groupKey?: string) => void;
 };
 
 export default function ImagePreviewGroupedDnD({
@@ -56,6 +58,7 @@ export default function ImagePreviewGroupedDnD({
   onRenameGroup,
   onMoveItemToGroup,
   onRenameGroupKey,
+  onAddExternalFiles,
   groupDepth = 1,
   maxThumbsPerGroup = 100,
   showPathDebug = false,
@@ -87,7 +90,11 @@ export default function ImagePreviewGroupedDnD({
   };
 
   const [itemGroupMap, setItemGroupMap] = useState<Record<string, string>>({});
-  const [dragItem, setDragItem] = useState<{ uid: string; fromKey: string } | null>(null);
+  const [dragItem, setDragItem] = useState<{ uids: string[]; fromKey: string } | null>(null);
+  const [selectedUids, setSelectedUids] = useState<Set<string>>(() => new Set());
+  const [selectionAnchor, setSelectionAnchor] = useState<{ uid: string; groupKey: string } | null>(null);
+  const didDragRef = useRef(false);
+  const dragGhostRef = useRef<HTMLDivElement | null>(null);
 
 
   const [internalPanelCollapsed, setInternalPanelCollapsed] = useState<boolean>(foldable);
@@ -187,6 +194,26 @@ export default function ImagePreviewGroupedDnD({
       return next;
     });
   }, [files, groupDepth]);
+
+  useEffect(() => {
+    setSelectedUids((prev) => {
+      const keep = [...prev].filter((uid) => files.some((file) => file.uid === uid));
+      if (keep.length === prev.size) return prev;
+      return new Set(keep);
+    });
+  }, [files]);
+
+  useEffect(() => {
+    if (!selectedUids.size) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSelectedUids(new Set());
+        setSelectionAnchor(null);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [selectedUids.size]);
 
   const grouped: GroupedMap = useMemo(() => {
     const map = new Map<string, GroupedItem[]>();
@@ -385,6 +412,123 @@ export default function ImagePreviewGroupedDnD({
     setDraftName("");
   };
 
+  const applyMoveToGroup = (uids: string[], toGroupKey: string) => {
+    const unique = [...new Set(uids)].filter(Boolean);
+    if (!unique.length) return;
+
+    setItemGroupMap((prev) => {
+      const next = { ...prev };
+      unique.forEach((uid) => {
+        next[uid] = toGroupKey;
+      });
+      return next;
+    });
+    onMoveItemToGroup?.(unique.length === 1 ? unique[0] : unique, toGroupKey);
+    setSelectedUids(new Set());
+    setSelectionAnchor(null);
+  };
+
+  const clearDragGhost = () => {
+    dragGhostRef.current?.remove();
+    dragGhostRef.current = null;
+  };
+
+  const beginItemDrag = (event: React.DragEvent, uid: string, groupKey: string) => {
+    const uids = selectedUids.has(uid) && selectedUids.size > 0 ? [...selectedUids] : [uid];
+    if (!selectedUids.has(uid)) {
+      setSelectedUids(new Set([uid]));
+      setSelectionAnchor({ uid, groupKey });
+    }
+
+    didDragRef.current = true;
+    setDragItem({ uids, fromKey: groupKey });
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", uids.join(","));
+
+    if (uids.length > 1) {
+      clearDragGhost();
+      const ghost = document.createElement("div");
+      ghost.textContent = String(uids.length);
+      Object.assign(ghost.style, {
+        position: "absolute",
+        top: "-1200px",
+        left: "-1200px",
+        minWidth: "28px",
+        height: "28px",
+        padding: "0 8px",
+        borderRadius: "999px",
+        background: "rgba(33, 31, 28, 0.92)",
+        color: "#fff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "var(--lab-mono, 'IBM Plex Mono', monospace)",
+        fontSize: "13px",
+        fontWeight: "600",
+        pointerEvents: "none",
+      });
+      document.body.appendChild(ghost);
+      dragGhostRef.current = ghost;
+      event.dataTransfer.setDragImage(ghost, 14, 14);
+    }
+  };
+
+  const endItemDrag = () => {
+    setDragItem(null);
+    setOverKey(null);
+    clearDragGhost();
+    window.setTimeout(() => {
+      didDragRef.current = false;
+    }, 0);
+  };
+
+  const toggleItemSelection = (
+    event: React.MouseEvent,
+    uid: string,
+    groupKey: string,
+    groupItems: GroupedItem[],
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (groupEditingDisabled || didDragRef.current) return;
+
+    const additive = event.metaKey || event.ctrlKey;
+
+    if (event.shiftKey) {
+      const anchorUid = selectionAnchor?.groupKey === groupKey ? selectionAnchor.uid : uid;
+      const from = groupItems.findIndex((item) => item.id === anchorUid);
+      const to = groupItems.findIndex((item) => item.id === uid);
+      if (from === -1 || to === -1) {
+        setSelectedUids(new Set([uid]));
+      } else {
+        const start = Math.min(from, to);
+        const end = Math.max(from, to);
+        const range = groupItems.slice(start, end + 1).map((item) => item.id);
+        setSelectedUids((prev) => {
+          const next = additive ? new Set(prev) : new Set<string>();
+          range.forEach((id) => next.add(id));
+          return next;
+        });
+      }
+      setSelectionAnchor({ uid, groupKey });
+      return;
+    }
+
+    if (additive) {
+      setSelectedUids((prev) => {
+        const next = new Set(prev);
+        if (next.has(uid)) next.delete(uid);
+        else next.add(uid);
+        return next;
+      });
+      setSelectionAnchor({ uid, groupKey });
+      return;
+    }
+
+    setSelectedUids(new Set([uid]));
+    setSelectionAnchor({ uid, groupKey });
+  };
+
   function btnStyle(disabled = false): React.CSSProperties {
     if (isLab) {
       return {
@@ -417,11 +561,32 @@ export default function ImagePreviewGroupedDnD({
     };
   }
 
+  const acceptExternalDrops = Boolean(onAddExternalFiles) && !viewOnly && !groupEditingDisabled;
+
+  const handleExternalDrop = async (e: React.DragEvent, groupKey?: string) => {
+    if (!acceptExternalDrops || !hasExternalFileDrag(e) || dragItem) return false;
+    e.preventDefault();
+    e.stopPropagation();
+    const dropped = await collectDroppedImageFiles(e);
+    if (dropped.length) onAddExternalFiles?.(dropped, groupKey);
+    return true;
+  };
+
+  const externalDragOver = (e: React.DragEvent) => {
+    if (!acceptExternalDrops || !hasExternalFileDrag(e) || dragItem) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  };
+
 
 
   if (!files.length) {
     return (
       <div
+        onDragOver={externalDragOver}
+        onDrop={(e) => {
+          void handleExternalDrop(e);
+        }}
         style={{
           border: isLab ? "0.5px solid var(--lab-hairline, #D6D2C6)" : "1px dashed rgba(0,0,0,0.25)",
           borderRadius: isLab ? 8 : 12,
@@ -443,6 +608,10 @@ export default function ImagePreviewGroupedDnD({
 
   return (
     <div
+      onDragOver={externalDragOver}
+      onDrop={(e) => {
+        void handleExternalDrop(e);
+      }}
       style={{
         border: isLab ? "0.5px solid var(--lab-hairline, #D6D2C6)" : "1px solid rgba(0,0,0,0.12)",
         borderRadius: isLab ? 8 : 10,
@@ -472,6 +641,7 @@ export default function ImagePreviewGroupedDnD({
               }}
             >
               {files.length}
+              {selectedUids.size > 1 ? ` · ${selectedUids.size} selected` : ""}
             </span>
           )}
           {foldable && (
@@ -515,6 +685,8 @@ export default function ImagePreviewGroupedDnD({
               if (groupEditingDisabled) return;
               onClear?.();
               setCustomGroups([]);
+              setSelectedUids(new Set());
+              setSelectionAnchor(null);
             }}
             style={btnStyle(groupEditingDisabled)}
           >
@@ -612,11 +784,31 @@ export default function ImagePreviewGroupedDnD({
             </div>
           )}
 
+          {!groupEditingDisabled && files.length > 1 && (
+            <div
+              style={{
+                marginTop: 8,
+                color: isLab ? "var(--lab-muted, #8A8378)" : "rgba(0,0,0,0.55)",
+                fontSize: 12,
+                fontFamily: isLab ? "var(--lab-mono, 'IBM Plex Mono', monospace)" : undefined,
+              }}
+            >
+              {selectedUids.size > 1
+                ? `${selectedUids.size} selected — drag them into a group`
+                : "Click to select · Shift or ⌘/Ctrl-click for more · drag together"}
+            </div>
+          )}
+
           <div style={{ height: 12 }} />
 
           <div
             className="lab-groups-grid"
             data-tutorial="lab-upload-group-grid"
+            onClick={() => {
+              if (didDragRef.current) return;
+              setSelectedUids(new Set());
+              setSelectionAnchor(null);
+            }}
             style={{
               display: "grid",
               gridTemplateColumns: orderedKeys.length <= 1 ? "minmax(0, 1fr)" : "repeat(2, minmax(0, 1fr))",
@@ -626,7 +818,13 @@ export default function ImagePreviewGroupedDnD({
           >
             {orderedKeys.map((k, groupIndex) => {
               const items = grouped[k] || [];
-              const isOver = overKey === k && dragKey && dragKey !== k;
+              const isGroupReorderOver = Boolean(overKey === k && dragKey && dragKey !== k);
+              const isItemMoveOver = Boolean(
+                overKey === k &&
+                  dragItem &&
+                  dragItem.uids.some((uid) => !(grouped[k] || []).some((item) => item.id === uid)),
+              );
+              const isOver = isGroupReorderOver || isItemMoveOver;
     
 
               return (
@@ -635,17 +833,31 @@ export default function ImagePreviewGroupedDnD({
                   data-tutorial-group-key={k}
                   onDragOver={(e: React.DragEvent<HTMLDivElement>) => {
                     if (groupEditingDisabled) return;
-                    if (dragItem) e.preventDefault();
+                    if (acceptExternalDrops && hasExternalFileDrag(e) && !dragItem) {
+                      e.preventDefault();
+                      e.dataTransfer.dropEffect = "copy";
+                      return;
+                    }
+                    if (dragItem) {
+                      e.preventDefault();
+                      setOverKey(k);
+                      e.dataTransfer.dropEffect = "move";
+                    }
                   }}
                   onDrop={(e: React.DragEvent<HTMLDivElement>) => {
                     if (groupEditingDisabled) return;
+                    if (acceptExternalDrops && hasExternalFileDrag(e) && !dragItem) {
+                      void handleExternalDrop(e, k);
+                      return;
+                    }
                     e.preventDefault();
-                    if (!dragItem?.uid) return;
+                    if (!dragItem?.uids.length) return;
 
-                    onMoveItemToGroup?.(dragItem.uid, k);
+                    applyMoveToGroup(dragItem.uids, k);
 
                     setDragItem(null);
                     setOverKey(null);
+                    clearDragGhost();
                   }}
                   style={{
                     border: isOver ? "2px solid var(--highlight-color-button, #7aa7ff)" : "1px solid rgba(0,0,0,0.10)",
@@ -791,39 +1003,55 @@ export default function ImagePreviewGroupedDnD({
                           gap: 8,
                         }}
                       >
-                        {items.slice(0, maxThumbsPerGroup).map((it) => (
+                        {items.slice(0, maxThumbsPerGroup).map((it) => {
+                          const isSelected = selectedUids.has(it.id);
+                          const isBeingDragged = Boolean(dragItem?.uids.includes(it.id));
+                          return (
                           <div
                             key={`${k}::${it.id}::${it.idx}`}
                             data-tutorial-item-uid={it.id}
                             draggable={!groupEditingDisabled}
+                            onClick={(e) => toggleItemSelection(e, it.id, k, items)}
                             onDragStart={(e) => {
                               if (groupEditingDisabled) return;
-                              setDragItem({ uid: it.id, fromKey: k });
-                              e.dataTransfer.effectAllowed = "move";
+                              beginItemDrag(e, it.id, k);
                             }}
-                            onDragEnd={() => {
-                              setDragItem(null);
-                            }}
+                            onDragEnd={endItemDrag}
                             style={{
-                              border: "1px solid rgba(0,0,0,0.10)",
+                              border: isSelected
+                                ? "2px solid var(--highlight-color-button, #5B7CFA)"
+                                : "1px solid rgba(0,0,0,0.10)",
                               borderRadius: 10,
                               overflow: "hidden",
-                              background: "rgba(0,0,0,0.02)",
-                              cursor: "grab",
+                              background: isSelected ? "rgba(91, 124, 250, 0.08)" : "rgba(0,0,0,0.02)",
+                              cursor: groupEditingDisabled ? "default" : "grab",
+                              opacity: isBeingDragged && (dragItem?.uids.length || 0) > 1 ? 0.55 : 1,
+                              boxShadow: isSelected ? "0 0 0 1px rgba(91, 124, 250, 0.25)" : "none",
+                              userSelect: "none",
                             }}
                           >
                             <div style={{ aspectRatio: "1 / 1", position: "relative" }}>
                               <img
                                 src={it.blobURL}
                                 alt={it.file?.name || "image"}
-                                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                                draggable={false}
+                                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }}
                               />
                                 {(!viewOnly && !isPreload)  && (
                                 <button
                                   type="button"
+                                  onMouseDown={(e) => {
+                                    e.stopPropagation();
+                                  }}
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
+                                    setSelectedUids((prev) => {
+                                      if (!prev.has(it.id)) return prev;
+                                      const next = new Set(prev);
+                                      next.delete(it.id);
+                                      return next;
+                                    });
                                     onRemove?.(it.id);
                                   }}
                                   style={{
@@ -848,7 +1076,8 @@ export default function ImagePreviewGroupedDnD({
                                 )}
                             </div>
                           </div>
-                        ))}
+                          );
+                        })}
                       </div>
 
                       {!items.length && (
