@@ -647,7 +647,7 @@
           path: '/lab/',
           selector: '[data-tutorial="lab-roi-card"]',
           title: 'Read the ROI Card',
-          body: 'The card on the right updates with the selected region: what it prefers, where it sits, and a link to the original paper.',
+          body: 'The card on the right updates with the selected region: what it prefers and where it sits in visual cortex.',
           nextLabel: 'Show Advanced Settings',
         },
         {
