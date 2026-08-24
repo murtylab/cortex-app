@@ -507,6 +507,114 @@
             transition: opacity 0.2s ease, transform 0.2s ease;
         }
 
+        .news-item-main {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .cite-us-highlight {
+            font-family: var(--script-font);
+            font-style: italic;
+            font-size: 0.92rem;
+            font-weight: 600;
+            line-height: 1.1;
+            letter-spacing: 0.01em;
+            color: var(--accent-strong);
+            background: var(--accent-muted);
+            border: 1px solid rgba(91, 58, 110, 0.22);
+            border-radius: 999px;
+            padding: 0 8px 1px;
+            cursor: pointer;
+        }
+
+        .cite-us-highlight:hover,
+        .cite-us-highlight[aria-expanded="true"] {
+            background: rgba(91, 58, 110, 0.16);
+        }
+
+        .cite-us-panel {
+            margin-top: 12px;
+        }
+
+        .cite-us-toolbar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 8px;
+        }
+
+        .cite-copy-btn {
+            font-family: var(--mono-font);
+            font-size: 0.68rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            color: var(--accent-strong);
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(107, 99, 88, 0.22);
+            border-radius: var(--radius-control);
+            padding: 4px 10px;
+            cursor: pointer;
+        }
+
+        .cite-copy-btn:hover {
+            border-color: rgba(91, 58, 110, 0.4);
+        }
+
+        .cite-us-bibtex {
+            margin: 0;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: rgba(245, 244, 240, 0.9);
+            border: 1px solid rgba(107, 99, 88, 0.14);
+            font-family: var(--mono-font);
+            font-size: 0.72rem;
+            line-height: 1.5;
+            color: var(--text-main);
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+
+        .home-footer {
+            margin: 8px 8% 48px;
+            padding: 22px 28px 28px;
+            text-align: center;
+            color: var(--text-sub);
+            font-size: 0.82rem;
+        }
+
+        .home-footer .copyright p {
+            margin: 0;
+        }
+
+        .home-footer .copyright a {
+            color: var(--text-main);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .home-footer .footer-cite-us {
+            margin-top: 12px;
+        }
+
+        .home-footer .footer-cite-us-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 8px 10px;
+        }
+
+        .home-footer .footer-cite-us-line {
+            font-size: 0.7rem;
+            color: var(--text-sub);
+        }
+
+        .home-footer .cite-us-panel {
+            margin: 10px auto 0;
+            max-width: 720px;
+            text-align: left;
+        }
+
         .news-item:hover .news-item-arrow {
             opacity: 1;
             transform: translateX(0);
@@ -580,7 +688,8 @@
             .faq-section,
             .team-section,
             .latest-news-section,
-            .feedback-section {
+            .feedback-section,
+            .home-footer {
                 margin-left: 4%;
                 margin-right: 4%;
                 padding: 28px 18px;
@@ -833,14 +942,23 @@
                     <h3 class="news-item-title">Using cognitive tests to reveal the strengths and limits of brain encoding models<span class="news-item-arrow">→</span></h3>
                 </a>
 
-                <a class="news-item" href="/chi-poster/">
+                <article class="news-item news-item-cite">
                     <span class="news-item-time">April 13, 2026</span>
                     <div class="news-item-meta">
                         <span class="news-item-conf">CHI 2026</span>
                         <span class="news-item-kind">Poster</span>
+                        <button type="button" class="cite-us-highlight" data-cite-toggle aria-expanded="false" aria-controls="home-chi-bibtex">Cite us!</button>
                     </div>
-                    <h3 class="news-item-title">Cortex-Canvas: An Interactive Web Interface for Executing and Evaluating Models of Category-Selective Regions in Human Visual Cortex<span class="news-item-arrow">→</span></h3>
-                </a>
+                    <a class="news-item-main" href="/chi-poster/">
+                        <h3 class="news-item-title">Cortex-Canvas: An Interactive Web Interface for Executing and Evaluating Models of Category-Selective Regions in Human Visual Cortex<span class="news-item-arrow">→</span></h3>
+                    </a>
+                    <div id="home-chi-bibtex" class="cite-us-panel" hidden>
+                        <div class="cite-us-toolbar">
+                            <button type="button" class="cite-copy-btn" data-cite-copy>Copy</button>
+                        </div>
+                        <pre class="cite-us-bibtex" data-cite-bibtex></pre>
+                    </div>
+                </article>
             </div>
         </div>
 
@@ -946,6 +1064,12 @@
               rel="noopener noreferrer"
             >Send us your feedback here!</a>
         </section>
+
+        <footer id="footer" class="home-footer">
+            <div class="copyright">
+                <p>© <span>Copyright</span> <strong><a href="https://www.murtylab.com" target="_blank" rel="noopener noreferrer">Murty Lab @ Georgia Tech</a></strong> <span>All Rights Reserved</span></p>
+            </div>
+        </footer>
 
     </div>
 
@@ -1301,11 +1425,7 @@
 
     </script>
 
-    <!-- Ask Cortex (disabled for now)
-    <link rel="stylesheet" href="/assets/js/chatbot/chatbot-widget.css">
-    <script>window.CORTEX_CHAT_API_BASE = "https://cortex-chatbot-production.up.railway.app";</script>
-    <script src="/assets/js/chatbot/chatbot-widget.js"></script>
-    -->
+    <script src="/assets/js/citeUs.js"></script>
 
 </body>
 </html>
