@@ -1,7 +1,15 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Button, message, Spin } from 'antd';
+import { Button, message, Modal, Select, Spin } from 'antd';
 import { Images } from 'lucide-react';
 import { getFroiUserErrorMessage, runFroiPrediction, wrapPredictionResult } from './services/froiPredict.js';
+import {
+  createVisualizationSession,
+  canExplorePrediction,
+  getComparisonCapabilities,
+  getComparisonErrorMessage,
+  navigateToInfoViz,
+  uploadComparisonStimuli,
+} from './services/visualizationSession.js';
 import { ConfigProvider } from 'antd';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
@@ -43,6 +51,18 @@ type PreviewFile = {
   label: string;     
   groupKey: string;  
   serverKey?: string; 
+};
+
+type ComparisonStimulusRef = {
+  path: string;
+  display_name: string;
+};
+
+type SuccessfulPredictionSnapshot = {
+  model: string;
+  dataset: string;
+  roi: string;
+  stimuli: ComparisonStimulusRef[];
 };
 
 
@@ -192,9 +212,19 @@ const Stepper: React.FC = () => {
 
   const [files, setFiles] = useState<PreviewFile[]>([]);
   const [fileMappings, setFileMappings] = useState<PreviewFile[]>([]);
+  const fileIdentity = useMemo(() => files.map((file) => file.uid).join("\u0000"), [files]);
 
   const [predictionResult, setPredictionResult] = useState<any>(null);
   const [insightRegionCache, setInsightRegionCache] = useState<Record<string, any>>({});
+  const [comparisonSnapshot, setComparisonSnapshot] = useState<SuccessfulPredictionSnapshot | null>(null);
+  const [comparisonCapabilities, setComparisonCapabilities] = useState<any>(null);
+  const [comparisonLoading, setComparisonLoading] = useState(false);
+  const [comparisonError, setComparisonError] = useState<string | null>(null);
+  const [unsupportedModelOpen, setUnsupportedModelOpen] = useState(false);
+  const [alternateComparisonModel, setAlternateComparisonModel] = useState<string | undefined>();
+  const [lastComparisonModel, setLastComparisonModel] = useState<string | null>(null);
+  const comparisonRequestActive = useRef(false);
+  const capabilityRequestActive = useRef(false);
 
 
   // basic visulization and prediction states
@@ -1874,6 +1904,11 @@ useEffect(() => {
   setShowInsights(false);
   setShowResults(false);
   setPredictError(null);
+  setComparisonSnapshot(null);
+  setComparisonError(null);
+  setLastComparisonModel(null);
+  setUnsupportedModelOpen(false);
+  setAlternateComparisonModel(undefined);
 }, [
   model,
   dataset,
@@ -1883,6 +1918,7 @@ useEffect(() => {
   participantName,
   prestoreDataset,
   region,
+  fileIdentity,
 ]);
 
   useEffect(() => {
@@ -1985,6 +2021,15 @@ useEffect(() => {
       if (localResult) {
         setPredictionResult(localResult);
         setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: localResult }));
+        setComparisonSnapshot({
+          model,
+          dataset,
+          roi: targetRegion,
+          // Preloaded results have no Gradio references yet. The existing
+          // in-memory File objects are uploaded only if Explore is requested.
+          stimuli: [],
+        });
+        setComparisonError(null);
 
         setPredictstep(2);
         setShowResults(true);
@@ -2005,7 +2050,7 @@ useEffect(() => {
         return new File([x.file], newName, { type: x.file.type || "image/jpeg" });
       });
 
-      const { resultData, serverKeys } = await runFroiPrediction({
+      const { resultData, serverKeys, paths } = await runFroiPrediction({
         uploadFiles,
         region: targetRegion,
         dataset,
@@ -2016,6 +2061,16 @@ useEffect(() => {
       setFileMappings((prev) => prev.map((x, i) => ({ ...x, serverKey: serverKeys[i] })));
       setPredictionResult(resultData);
       setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: resultData }));
+      setComparisonSnapshot({
+        model,
+        dataset,
+        roi: targetRegion,
+        stimuli: paths.map((path: string, index: number) => ({
+          path,
+          display_name: files[index]?.label || serverKeys[index] || `stimulus-${index + 1}`,
+        })),
+      });
+      setComparisonError(null);
       setPredictError(null);
       setShowResults(true);
       message.success("Prediction complete!");
@@ -2159,6 +2214,12 @@ useEffect(() => {
   const barchartData = useBarchartData(currentRegionPredictionResult);
 
   const { heatmapData, originalFilenames } = useHeatmapData(currentRegionPredictionResult);
+  const canExplore = canExplorePrediction({
+    showResults,
+    predictionResult: currentRegionPredictionResult,
+    predictionLoading,
+    snapshot: comparisonSnapshot,
+  });
 
   const orderedFilenames = useMemo(() => {
   if (!barchartData || barchartData.length === 0) return [];
@@ -2276,6 +2337,86 @@ useEffect(() => {
     }
   };
 
+  const buildComparisonUploadFiles = () => files.map((item) => {
+    if (!item.file) {
+      throw new Error(`Missing file data for ${item.label || item.uid}`);
+    }
+    const ext = getExt(item.file.name || item.label || "");
+    return new File([item.file], `${safe(item.uid)}${ext}`, {
+      type: item.file.type || "image/jpeg",
+    });
+  });
+
+  const prepareComparison = async (comparisonModel: string, forceReupload = false) => {
+    if (comparisonRequestActive.current || capabilityRequestActive.current || !comparisonSnapshot) return;
+
+    comparisonRequestActive.current = true;
+    setComparisonLoading(true);
+    setComparisonError(null);
+    setLastComparisonModel(comparisonModel);
+
+    try {
+      let stimuli = comparisonSnapshot.stimuli;
+      if (forceReupload || stimuli.length !== files.length) {
+        stimuli = await uploadComparisonStimuli(
+          buildComparisonUploadFiles(),
+          files.map((item) => item.label),
+        );
+        setComparisonSnapshot((current) => current ? { ...current, stimuli } : current);
+      }
+
+      const session = await createVisualizationSession({
+        stimuli,
+        model: comparisonModel,
+        sourceRequest: {
+          model: comparisonSnapshot.model,
+          dataset: comparisonSnapshot.dataset,
+          roi: comparisonSnapshot.roi,
+        },
+      });
+      navigateToInfoViz(session.session_id);
+    } catch (error: any) {
+      const text = getComparisonErrorMessage(error);
+      setComparisonError(text);
+      message.error(text);
+    } finally {
+      comparisonRequestActive.current = false;
+      setComparisonLoading(false);
+    }
+  };
+
+  const exploreInVisualization = async () => {
+    if (comparisonRequestActive.current || capabilityRequestActive.current || !comparisonSnapshot) return;
+
+    capabilityRequestActive.current = true;
+    setComparisonLoading(true);
+    try {
+      const capabilities = comparisonCapabilities ?? await getComparisonCapabilities();
+      setComparisonCapabilities(capabilities);
+
+      if (capabilities.available === false) {
+        throw new Error(capabilities.reason || "Historical comparison artifacts are unavailable on Cortex Core.");
+      }
+
+      if (capabilities.supported_models.includes(comparisonSnapshot.model)) {
+        capabilityRequestActive.current = false;
+        setComparisonLoading(false);
+        await prepareComparison(comparisonSnapshot.model);
+        return;
+      }
+
+      setAlternateComparisonModel(undefined);
+      setUnsupportedModelOpen(true);
+    } catch (error: any) {
+      const text = getComparisonErrorMessage(error);
+      setComparisonError(text);
+      message.error(text);
+    } finally {
+      capabilityRequestActive.current = false;
+      if (!comparisonRequestActive.current) setComparisonLoading(false);
+    }
+  };
+
   const getGroupKey = (file: File) => {
           const rel = file?.webkitRelativePath || "";
           if (!rel) return "Ungrouped";
@@ -2356,7 +2497,7 @@ useEffect(() => {
 
         <div className="lab-main-column">
           <div className="lab-roi-stage">
-            <LabRoiViewer region={region} />
+            <LabRoiViewer />
             <RoiInfoCard region={region} />
           </div>
 
@@ -2486,10 +2627,62 @@ useEffect(() => {
                   <span className="lab-section-label">Prediction results</span>
                   <h3 className="lab-heading">Readout for {region?.toUpperCase()}</h3>
                 </div>
-                <Button type="primary" onClick={downloadData} disabled={!currentRegionPredictionResult}>
-                  Download data
-                </Button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                  <Button type="primary" onClick={downloadData} disabled={!currentRegionPredictionResult}>
+                    Download data
+                  </Button>
+                  {canExplore && (
+                    <Button
+                      type="primary"
+                      onClick={exploreInVisualization}
+                      disabled={comparisonLoading}
+                      loading={comparisonLoading}
+                    >
+                      Explore in Visualization
+                    </Button>
+                  )}
+                </div>
               </div>
+
+              {canExplore && (
+                <div
+                  style={{
+                    marginTop: 10,
+                    padding: '10px 12px',
+                    border: '0.5px solid var(--lab-hairline, #D6D2C6)',
+                    borderRadius: 8,
+                    background: 'var(--lab-panel, #FBFAF6)',
+                    color: 'var(--lab-secondary, #57534A)',
+                    fontSize: 13,
+                    lineHeight: 1.5,
+                  }}
+                  aria-live="polite"
+                >
+                  <div>
+                    Your original result uses the settings you selected. For comparison with the historical image set,
+                    the visualization will use the same model with NSD-1000 predictions across FFA, PPA, and EBA.
+                  </div>
+                  {comparisonLoading && (
+                    <div style={{ marginTop: 6, fontWeight: 500 }}>
+                      Preparing NSD comparison across FFA, PPA, and EBA…
+                    </div>
+                  )}
+                  {comparisonError && !comparisonLoading && (
+                    <div style={{ marginTop: 8, color: 'var(--lab-text, #211F1C)' }}>
+                      <span>{comparisonError}</span>{' '}
+                      {lastComparisonModel && (
+                        <Button
+                          size="small"
+                          onClick={() => prepareComparison(lastComparisonModel, true)}
+                          disabled={comparisonLoading}
+                        >
+                          Retry
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {predictionLoading && <LinearIndeterminate />}
               <div className="lab-section-header">
@@ -2641,6 +2834,50 @@ useEffect(() => {
           )}
         </div>
       </div>
+      <Modal
+        title="Historical image evidence unavailable"
+        open={unsupportedModelOpen}
+        okText="Create comparison"
+        cancelText="Cancel"
+        confirmLoading={comparisonLoading}
+        okButtonProps={{ disabled: !alternateComparisonModel || comparisonLoading }}
+        onCancel={() => {
+          if (!comparisonLoading) {
+            setUnsupportedModelOpen(false);
+            setAlternateComparisonModel(undefined);
+          }
+        }}
+        onOk={() => {
+          if (!alternateComparisonModel) return;
+          setUnsupportedModelOpen(false);
+          void prepareComparison(alternateComparisonModel);
+        }}
+      >
+        <p>
+          The selected model <strong>{comparisonSnapshot?.model}</strong> does not have historical image-level
+          evidence for the 185-image reference set. Cortex will never substitute another model automatically.
+        </p>
+        <label style={{ display: 'grid', gap: 6, marginTop: 14 }}>
+          Explicit comparison model
+          <Select
+            value={alternateComparisonModel}
+            placeholder="Choose a supported model"
+            showSearch
+            optionFilterProp="label"
+            options={(comparisonCapabilities?.supported_models ?? []).map((supportedModel: string) => ({
+              value: supportedModel,
+              label: supportedModel,
+            }))}
+            onChange={setAlternateComparisonModel}
+          />
+        </label>
+        {alternateComparisonModel && (
+          <p style={{ marginTop: 12 }}>
+            The original result remains labeled <strong>{comparisonSnapshot?.model}</strong>; the standardized
+            visualization comparison will be labeled <strong>{alternateComparisonModel}</strong>.
+          </p>
+        )}
+      </Modal>
     </ThemeProvider>
     </ConfigProvider>
   </>

@@ -1,0 +1,112 @@
+# NSD stimulus-context development runbook
+
+This runbook starts the three sibling repositories for local development. It does not deploy or modify either production site.
+
+## Prerequisites and artifact build
+
+Start in the parent directory that contains `cortex-app`, `cortex-core`, and `InfoViz-Prototype-Edition`:
+
+```bash
+export VC_WORKSPACE="$(pwd)"
+mkdir -p "$VC_WORKSPACE/.runtime/gradio" \
+  "$VC_WORKSPACE/.runtime/core-cache" \
+  "$VC_WORKSPACE/.runtime/comparison-sessions"
+
+cd "$VC_WORKSPACE/InfoViz-Prototype-Edition"
+conda run -n cortex-core python scripts/data/validate_model_registries.py
+conda run -n cortex-core python scripts/data/build_reference_artifacts.py
+```
+
+The builder validates exactly 26 models, their 78 FFA/PPA/EBA CSVs, 185 ordered image IDs, ROI voxel dimensions, finite numeric data, and the checked-in image means. It writes the server-only bundle to `artifacts/reference/` and the browser-safe identity to `public/data/reference_manifest.json`. Generated NPZ files remain ignored by Git.
+
+## Terminal 1: Cortex Core (port 5556)
+
+```bash
+cd "$VC_WORKSPACE/cortex-core"
+conda activate cortex-core
+
+export CORTEX_REFERENCE_ARTIFACT_DIR="$VC_WORKSPACE/InfoViz-Prototype-Edition/artifacts/reference"
+export CORTEX_COMPARISON_SESSION_DIR="$VC_WORKSPACE/.runtime/comparison-sessions"
+export CORTEX_COMPARISON_SESSION_TTL_SECONDS=3600
+export CORTEX_ALLOWED_ORIGINS="http://localhost:5173,http://localhost:5174"
+export CORTEX_APP_CACHE_DIR="$VC_WORKSPACE/.runtime/core-cache"
+export GRADIO_TEMP_DIR="$VC_WORKSPACE/.runtime/gradio"
+export CORTEX_CHECKPOINT_DIR="/research/cortex-paper/cortex_best_checkpoints"
+export CORTEX_BACKBONE_DIR="/research/cortex-paper/backbones"
+export CUDA_VISIBLE_DEVICES=1
+
+python app.py
+```
+
+Verify the service in another terminal:
+
+```bash
+curl --fail http://localhost:5556/healthz
+curl --fail http://localhost:5556/comparison/capabilities
+```
+
+The session janitor removes expired JSON and copied PNG assets. The default TTL is 3,600 seconds. DreamSim MMD resources are loaded lazily and are not required for startup or comparison sessions.
+
+## Terminal 2: InfoViz (port 5174)
+
+```bash
+cd "$VC_WORKSPACE/InfoViz-Prototype-Edition"
+VITE_CORTEX_CORE_URL=http://localhost:5556 \
+VITE_CORTEX_APP_URL=http://localhost:5173 \
+npm run dev
+```
+
+A direct visit to `http://localhost:5174` is standalone static mode. Session mode is entered only through a `#session=<opaque-token>` handoff.
+
+## Terminal 3: Virtual Cortex App (port 5173)
+
+```bash
+cd "$VC_WORKSPACE/cortex-app"
+VITE_CORTEX_CORE_URL=http://localhost:5556 \
+VITE_CORTEX_INFOVIZ_URL=http://localhost:5174 \
+VITE_CORTEX_WHOLE_BRAIN_URL=http://localhost:5557 \
+npm run dev
+```
+
+Open `http://localhost:5173/lab/` for the fROI workflow. The whole-brain URL is independent of the NSD comparison service.
+
+For access from a different machine, replace `localhost` consistently with the university-machine hostname in both Vite variables and `CORTEX_ALLOWED_ORIGINS`. Keep the Core port at 5556, Cortex App at 5173, and InfoViz at 5174 unless all three configurations are changed together.
+
+## Automated checks
+
+```bash
+cd "$VC_WORKSPACE/InfoViz-Prototype-Edition"
+conda run -n cortex-core python -m unittest discover -s tests -v
+npm test
+npm run build
+
+cd "$VC_WORKSPACE/cortex-core"
+conda run -n cortex-core python -m pytest -q tests/test_rdm.py tests/test_comparison_*.py tests/test_visual_features.py
+
+cd "$VC_WORKSPACE/cortex-app"
+npm test
+npx tsc --noEmit --pretty false
+npm run build
+```
+
+## Manual smoke matrix
+
+For each supported case, first confirm that the existing Cortex result and download action still work. Then choose **Explore in Visualization** and verify that InfoViz labels the original request separately from the NSD-1000 comparison.
+
+| Primary request | Uploads | Expected session behavior |
+| --- | ---: | --- |
+| NSD-1000 / FFA / supported model | 1 | Same comparison model; FFA, PPA, and EBA present |
+| Murty185 / EBA / supported model | 1 | Original remains Murty185/EBA; comparison is NSD-1000/all ROIs |
+| Murty185 / PPA / supported model | 2+ | Every upload has reference percentile and combined rank in all ROIs |
+| Any dataset/ROI / unsupported model | 1 | No substitution; the user must explicitly select a supported comparison model or cancel |
+| Any valid session after TTL | any | Safe expired-session page and return link to Cortex |
+
+In InfoViz, also verify:
+
+- the URL fragment disappears after a successful session load;
+- uploaded markers appear in rankings, the fixed-domain distribution, voxel PCA, and the 77-feature visual PCA without moving historical points;
+- K-means uses saved centroids and hierarchy is labelled as a nearest-medoid assignment;
+- heatmap scores/ranks remain unchanged and uploads never become model rows;
+- DreamSim upload placement is explicitly unavailable because the archived 1,792-dimensional references do not match the current 768-dimensional runtime encoder;
+- measured ground-truth fMRI views never show an uploaded stimulus.
+

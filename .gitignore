@@ -1,5 +1,6 @@
 node_modules/
 dist/*
+dummy-non-existing-folder/
 vite.log
 .DS_Store
 .env*

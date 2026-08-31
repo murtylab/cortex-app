@@ -8,6 +8,8 @@ Dev setup:
 
 ```bash
 VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+VITE_CORTEX_CORE_URL=http://localhost:5556
+VITE_CORTEX_INFOVIZ_URL=http://localhost:5174
 ```
 
 2. Run the app:
@@ -29,7 +31,13 @@ Analytics setup:
 - The measurement ID is read from `VITE_GA_MEASUREMENT_ID`
 - Do not commit real GA keys; keep them in `.env.local`
 
-To update backend url, change the url here: [`assets/js/services/config.js`](https://github.com/murtylab/cortex-app/blob/demo/assets/js/services/config.js)
+The fROI backend and InfoViz handoff URLs are configured through `.env.local`.
+Do not put temporary tunnel URLs or secrets in source control. After a successful
+fROI prediction, the result panel can create a temporary NSD-1000 comparison
+session and navigate to InfoViz using only its opaque token.
+
+The complete three-service startup, artifact generation, validation, and smoke-test procedure is in
+[`docs/NSD_STIMULUS_CONTEXT_DEVELOPMENT.md`](docs/NSD_STIMULUS_CONTEXT_DEVELOPMENT.md).
 
 Model pages:
 

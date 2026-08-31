@@ -84,7 +84,9 @@ export async function runFroiPrediction({
   const images = paths.map((path, i) => toFileData(path, serverKeys[i] || path.split("/").pop()));
 
   const payload = {
-    data: [images, region, dataset, model, true, true, true],
+    // Explicitly keep MMD disabled. Core's eighth input has a default, but
+    // sending it makes the cross-repository contract stable and unambiguous.
+    data: [images, region, dataset, model, true, true, true, false],
   };
 
   if (import.meta.env.DEV) {
