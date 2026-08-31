@@ -51,7 +51,8 @@ The session janitor removes expired JSON and copied PNG assets. The default TTL 
 
 ```bash
 cd "$VC_WORKSPACE/InfoViz-Prototype-Edition"
-VITE_CORTEX_CORE_URL=http://localhost:5556 \
+VITE_CORTEX_CORE_URL=/cortex-core \
+CORTEX_CORE_PROXY_TARGET=http://127.0.0.1:5556 \
 VITE_CORTEX_APP_URL=http://localhost:5173 \
 npm run dev
 ```
@@ -62,7 +63,8 @@ A direct visit to `http://localhost:5174` is standalone static mode. Session mod
 
 ```bash
 cd "$VC_WORKSPACE/cortex-app"
-VITE_CORTEX_CORE_URL=http://localhost:5556 \
+VITE_CORTEX_CORE_URL=/cortex-core \
+CORTEX_CORE_PROXY_TARGET=http://127.0.0.1:5556 \
 VITE_CORTEX_INFOVIZ_URL=http://localhost:5174 \
 VITE_CORTEX_WHOLE_BRAIN_URL=http://localhost:5557 \
 npm run dev
@@ -70,7 +72,11 @@ npm run dev
 
 Open `http://localhost:5173/lab/` for the fROI workflow. The whole-brain URL is independent of the NSD comparison service.
 
-For access from a different machine, replace `localhost` consistently with the university-machine hostname in both Vite variables and `CORTEX_ALLOWED_ORIGINS`. Keep the Core port at 5556, Cortex App at 5173, and InfoViz at 5174 unless all three configurations are changed together.
+For VS Code Remote SSH, forward ports 5173 and 5174 and keep
+`VITE_CORTEX_CORE_URL=/cortex-core`; each Vite server proxies Core requests to
+the machine-local port 5556. For direct network access without port forwarding,
+use the university-machine hostname in the browser-facing Vite URLs and include
+the resulting App and InfoViz origins in `CORTEX_ALLOWED_ORIGINS`.
 
 ## Automated checks
 
@@ -109,4 +115,3 @@ In InfoViz, also verify:
 - heatmap scores/ranks remain unchanged and uploads never become model rows;
 - DreamSim upload placement is explicitly unavailable because the archived 1,792-dimensional references do not match the current 768-dimensional runtime encoder;
 - measured ground-truth fMRI views never show an uploaded stimulus.
-

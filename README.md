@@ -8,9 +8,14 @@ Dev setup:
 
 ```bash
 VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
-VITE_CORTEX_CORE_URL=http://localhost:5556
+VITE_CORTEX_CORE_URL=/cortex-core
+CORTEX_CORE_PROXY_TARGET=http://127.0.0.1:5556
 VITE_CORTEX_INFOVIZ_URL=http://localhost:5174
 ```
+
+The relative Core URL uses the Vite development proxy, so Cortex also works
+when port 5173 is opened through VS Code Remote SSH without separately
+forwarding Core's port 5556.
 
 2. Run the app:
 
