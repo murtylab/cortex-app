@@ -4,18 +4,21 @@ fontend for the cortex app
 
 Dev setup:
 
-1. Create `.env.local` in the repo root with:
+1. Optional: create `.env.local` in the repo root to override the built-in
+service-routing defaults or configure analytics:
 
 ```bash
 VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 VITE_CORTEX_CORE_URL=/cortex-core
 CORTEX_CORE_PROXY_TARGET=http://127.0.0.1:5556
-VITE_CORTEX_INFOVIZ_URL=http://localhost:5174
+VITE_CORTEX_INFOVIZ_URL=/infoviz
+INFOVIZ_PROXY_TARGET=http://127.0.0.1:5174
 ```
 
-The relative Core URL uses the Vite development proxy, so Cortex also works
-when port 5173 is opened through VS Code Remote SSH without separately
-forwarding Core's port 5556.
+The relative Core and InfoViz defaults use Vite development proxies, so Cortex and
+the visualization both work when port 5173 is opened through VS Code Remote
+SSH. Ports 5556 and 5174 do not need separate browser forwarding. InfoViz's
+development base defaults to `/infoviz/` as shown in the runbook.
 
 2. Run the app:
 

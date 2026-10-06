@@ -10,6 +10,10 @@ export default defineConfig(({ command, mode }) => {
     process.env.CORTEX_CORE_PROXY_TARGET ||
     environment.CORTEX_CORE_PROXY_TARGET ||
     'http://127.0.0.1:5556';
+  const infoVizProxyTarget =
+    process.env.INFOVIZ_PROXY_TARGET ||
+    environment.INFOVIZ_PROXY_TARGET ||
+    'http://127.0.0.1:5174';
 
   return {
     root: '.',
@@ -65,6 +69,14 @@ export default defineConfig(({ command, mode }) => {
           target: cortexCoreProxyTarget,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/cortex-core/, ''),
+        },
+        // Keep the visualization on Cortex App's forwarded browser port. The
+        // sibling InfoViz Vite server is configured with base `/infoviz/`, so
+        // its modules, data files, images, and HMR websocket stay in scope.
+        '/infoviz': {
+          target: infoVizProxyTarget,
+          changeOrigin: true,
+          ws: true,
         },
       },
       ...(ngrokHost ? { hmr: { host: ngrokHost, clientPort: 443 } } : {}),

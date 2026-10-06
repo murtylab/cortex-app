@@ -61,15 +61,14 @@ describe("visualization session contract", () => {
 
   it("puts only the encoded token in the InfoViz fragment", () => {
     const url = buildInfoVizSessionUrl("opaque token/with?chars");
-    expect(url).toMatch(/\/#session=opaque%20token%2Fwith%3Fchars$/);
+    expect(url).toBe("/infoviz/#session=opaque%20token%2Fwith%3Fchars");
     expect(url).not.toContain("path=");
   });
 
   it("navigates only after receiving a token", () => {
     const calls = [];
     navigateToInfoViz("opaque-token", { assign: (url) => calls.push(url) });
-    expect(calls).toHaveLength(1);
-    expect(calls[0]).toMatch(/#session=opaque-token$/);
+    expect(calls).toEqual(["/infoviz/#session=opaque-token"]);
   });
 
   it("shows Explore only for a completed prediction with a request snapshot", () => {

@@ -51,9 +51,6 @@ The session janitor removes expired JSON and copied PNG assets. The default TTL 
 
 ```bash
 cd "$VC_WORKSPACE/InfoViz-Prototype-Edition"
-VITE_CORTEX_CORE_URL=/cortex-core \
-CORTEX_CORE_PROXY_TARGET=http://127.0.0.1:5556 \
-VITE_CORTEX_APP_URL=http://localhost:5173 \
 npm run dev
 ```
 
@@ -63,20 +60,21 @@ A direct visit to `http://localhost:5174` is standalone static mode. Session mod
 
 ```bash
 cd "$VC_WORKSPACE/cortex-app"
-VITE_CORTEX_CORE_URL=/cortex-core \
-CORTEX_CORE_PROXY_TARGET=http://127.0.0.1:5556 \
-VITE_CORTEX_INFOVIZ_URL=http://localhost:5174 \
-VITE_CORTEX_WHOLE_BRAIN_URL=http://localhost:5557 \
 npm run dev
 ```
 
 Open `http://localhost:5173/lab/` for the fROI workflow. The whole-brain URL is independent of the NSD comparison service.
 
-For VS Code Remote SSH, forward ports 5173 and 5174 and keep
-`VITE_CORTEX_CORE_URL=/cortex-core`; each Vite server proxies Core requests to
-the machine-local port 5556. For direct network access without port forwarding,
-use the university-machine hostname in the browser-facing Vite URLs and include
-the resulting App and InfoViz origins in `CORTEX_ALLOWED_ORIGINS`.
+For VS Code Remote SSH, forward only port 5173. Cortex App proxies `/infoviz/`
+to the machine-local InfoViz server and both apps proxy Core requests to the
+machine-local port 5556. For direct network access without port forwarding, use
+the university-machine hostname in browser-facing URLs and include the resulting
+origin in `CORTEX_ALLOWED_ORIGINS`.
+
+These two Vite commands use checked-in development fallbacks for the sibling
+layout. Environment variables remain available when Core or InfoViz runs on a
+different host or port. Restart both Vite servers after changing any `VITE_*`
+variable.
 
 ## Automated checks
 

@@ -6,12 +6,12 @@ function configuredUrl(value, fallback) {
 // repository development layout; deployments should set the Vite variables.
 export const SERVER_URL = configuredUrl(
   import.meta.env.VITE_CORTEX_CORE_URL,
-  "http://localhost:5556",
+  "/cortex-core",
 );
 
 export const INFOVIZ_URL = configuredUrl(
   import.meta.env.VITE_CORTEX_INFOVIZ_URL,
-  "http://localhost:5174",
+  "/infoviz",
 );
 
 // Whole-brain inference is a separate service and remains independently
