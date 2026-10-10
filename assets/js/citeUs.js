@@ -19,13 +19,11 @@
     "}";
 
   function copyText(text, btn) {
+    var label = btn && btn.querySelector(".cite-copy-label");
     var done = function () {
       if (!btn) return;
-      var original = btn.textContent;
-      btn.textContent = "Copied";
-      window.setTimeout(function () {
-        btn.textContent = original;
-      }, 1600);
+      if (label) label.textContent = "Copied";
+      else btn.textContent = "Copied";
     };
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -62,9 +60,52 @@
       btn.addEventListener("click", function (event) {
         event.preventDefault();
         event.stopPropagation();
-        var scope = btn.closest(".cite-us-panel, .footer-cite-us") || document;
-        var block = scope.querySelector("[data-cite-bibtex]");
+        var targetId = btn.getAttribute("data-cite-for");
+        var block = null;
+        if (targetId) {
+          var panel = document.getElementById(targetId);
+          block = panel && panel.querySelector("[data-cite-bibtex]");
+        } else {
+          var scope = btn.closest(".cite-us-panel, .footer-cite-us") || document;
+          block = scope.querySelector("[data-cite-bibtex]");
+        }
         copyText((block && block.textContent) || BIBTEX, btn);
+        var panelId = btn.getAttribute("aria-controls");
+        if (!panelId) return;
+        var citePanel = document.getElementById(panelId);
+        if (!citePanel) return;
+        btn.setAttribute("aria-expanded", "true");
+        citePanel.hidden = false;
+      });
+    });
+  }
+
+  function ensureCloseButtons(root) {
+    (root || document).querySelectorAll(".cite-us-panel").forEach(function (panel) {
+      if (panel.querySelector("[data-cite-close]")) return;
+      var close = document.createElement("button");
+      close.type = "button";
+      close.className = "cite-close";
+      close.setAttribute("data-cite-close", "");
+      close.setAttribute("aria-label", "Close citation");
+      close.textContent = "×";
+      panel.insertBefore(close, panel.firstChild);
+    });
+  }
+
+  function bindClose(root) {
+    (root || document).querySelectorAll("[data-cite-close]").forEach(function (btn) {
+      if (btn.dataset.citeBound === "true") return;
+      btn.dataset.citeBound = "true";
+      btn.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        var panel = btn.closest(".cite-us-panel");
+        if (!panel) return;
+        panel.hidden = true;
+        if (!panel.id) return;
+        var opener = document.querySelector('[aria-controls="' + panel.id + '"]');
+        if (opener) opener.setAttribute("aria-expanded", "false");
       });
     });
   }
@@ -85,6 +126,40 @@
     });
   }
 
+  function injectSiteFooter() {
+    var footer = document.getElementById("footer");
+    if (!footer || footer.querySelector(".site-footer-nav")) return;
+
+    var nav = document.createElement("nav");
+    nav.className = "site-footer-nav";
+    nav.setAttribute("aria-label", "Site");
+    nav.innerHTML =
+      '<div class="site-footer-mark">Cortex</div>' +
+      "<hr>" +
+      '<ul class="site-footer-menu">' +
+      '<li><a href="/">Home</a></li>' +
+      "<li>" +
+      '<a href="/labLanding/">The Lab</a>' +
+      "<ul>" +
+      '<li><a href="/lab/">Functional Regions</a></li>' +
+      '<li><a href="/lab-whole-brain/">Whole Brain</a></li>' +
+      "</ul>" +
+      "</li>" +
+      "<li>" +
+      '<a href="/scoreboardLanding/">The Scoreboard</a>' +
+      "<ul>" +
+      '<li><a href="/scoreboardQuantitative/?view=rank">Quantitative-leaderboard</a></li>' +
+      '<li><a href="/scoreboardQuantitative/?view=2">Quantitative-Advanced Insights</a></li>' +
+      '<li><a href="/scoreboardQualitative/">Qualitative-leaderboard</a></li>' +
+      "</ul>" +
+      "</li>" +
+      "</ul>";
+
+    var copyright = footer.querySelector(".copyright");
+    if (copyright) footer.insertBefore(nav, copyright);
+    else footer.appendChild(nav);
+  }
+
   function injectFooter() {
     var copyright = document.querySelector("#footer .copyright");
     if (!copyright || copyright.querySelector(".footer-cite-us")) return;
@@ -93,11 +168,13 @@
     wrap.className = "footer-cite-us";
     wrap.innerHTML =
       '<div class="footer-cite-us-row">' +
-      '<button type="button" class="cite-us-highlight" data-cite-toggle aria-expanded="false" aria-controls="footer-cite-bibtex">Cite us!</button>' +
+      '<button type="button" class="cite-copy-btn" data-cite-copy data-cite-for="footer-cite-bibtex" aria-expanded="false" aria-controls="footer-cite-bibtex">' +
+      '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M7.2 17.2c-1.9 0-3.3-1.5-3.3-3.5 0-2.7 2.2-5.3 5.4-6.8l.8 1.4c-1.9.9-3.1 2.3-3.5 3.8.4-.2.9-.3 1.4-.3 1.6 0 2.7 1.2 2.7 2.7s-1.2 2.7-3.5 2.7zm9.2 0c-1.9 0-3.3-1.5-3.3-3.5 0-2.7 2.2-5.3 5.4-6.8l.8 1.4c-1.9.9-3.1 2.3-3.5 3.8.4-.2.9-.3 1.4-.3 1.6 0 2.7 1.2 2.7 2.7s-1.2 2.7-3.5 2.7z"/></svg>' +
+      '<span class="cite-copy-label">Copy BibTeX</span>' +
+      "</button>" +
       '<span class="footer-cite-us-line">Please cite Wang et al., CHI EA 2026, if you use this platform.</span>' +
       "</div>" +
       '<div id="footer-cite-bibtex" class="cite-us-panel" hidden>' +
-      '<div class="cite-us-toolbar"><button type="button" class="cite-copy-btn" data-cite-copy>Copy</button></div>' +
       '<pre class="cite-us-bibtex" data-cite-bibtex></pre>' +
       "</div>";
 
@@ -115,9 +192,12 @@
 
   function start() {
     fillBibtexBlocks(document);
+    injectSiteFooter();
     injectFooter();
+    ensureCloseButtons(document);
     bindToggles(document);
     bindCopy(document);
+    bindClose(document);
   }
 
   if (document.readyState === "loading") {

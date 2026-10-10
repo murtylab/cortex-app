@@ -128,15 +128,21 @@
       align-items: start;
     }
 
+    body.lab-page #header.sticky-top {
+      position: relative;
+      top: auto;
+    }
+
     body.lab-page #container .lab-settings-rail {
       width: 248px;
+      align-self: stretch;
     }
 
     body.lab-page #container .lab-settings-rail-inner {
-      position: fixed;
-      top: 100px;
+      position: sticky;
+      top: 16px;
       width: 248px;
-      max-height: calc(100vh - 116px);
+      max-height: calc(100vh - 32px);
       overflow-y: auto;
       overscroll-behavior: contain;
       display: flex;
