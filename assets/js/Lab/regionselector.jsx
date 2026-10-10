@@ -43,7 +43,7 @@ const RegionSelector = ({
           className="lab-section-label"
           style={{ marginBottom: 10 }}
         >
-          fROIs
+          Functional ROIs
         </div>
 
         <div
