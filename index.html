@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/assets/js/paperTheme.js"></script>
     <title>Virtual Visual Cortex</title>
     <link href="/assets/img/logo.svg" rel="icon" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -688,7 +689,6 @@
             .faq-section,
             .team-section,
             .latest-news-section,
-            .feedback-section,
             .home-footer {
                 margin-left: 4%;
                 margin-right: 4%;
@@ -798,48 +798,8 @@
             border-bottom: none;
         }
 
-        .feedback-section {
-            margin: 48px 10% 150px 10%;
-            padding: 48px 60px;
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            box-shadow: var(--card-shadow);
-            pointer-events: auto;
-            text-align: center;
-        }
-
-        .feedback-section .section-header {
-            margin-bottom: 28px;
-        }
-
-        .feedback-section .feedback-link {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 12px 28px;
-            border-radius: var(--radius-control);
-            background: var(--tungsten);
-            color: #fff;
-            font-size: 0.95rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: background 0.2s ease;
-        }
-
-        .feedback-section .feedback-link:hover {
-            background: linear-gradient(135deg, #c98d9a 0%, #b8a4bc 50%, #c4b4cc 100%);
-        }
-
-        @media (max-width: 768px) {
-            .feedback-section {
-                margin: 32px 5% 100px 5%;
-                padding: 36px 28px;
-            }
-        }
-
     </style>
+    <link rel="stylesheet" href="/assets/css/paper-theme.css">
 </head>
 <body>
 
@@ -1052,19 +1012,6 @@
             </ul>
         </div>
 
-        <section class="feedback-section" aria-label="Feedback">
-            <div class="section-header">
-                <span class="tag-pill">Feedback</span>
-                <h2 class="section-title">We’d love your feedback</h2>
-            </div>
-            <a
-              class="feedback-link"
-              href="https://forms.office.com/r/nT01GfLtZs"
-              target="_blank"
-              rel="noopener noreferrer"
-            >Send us your feedback here!</a>
-        </section>
-
         <footer id="footer" class="home-footer">
             <div class="copyright">
                 <p>© <span>Copyright</span> <strong><a href="https://www.murtylab.com" target="_blank" rel="noopener noreferrer">Murty Lab @ Georgia Tech</a></strong> <span>All Rights Reserved</span></p>
@@ -1195,7 +1142,8 @@
         // --- Scene Setup ---
         const container = document.getElementById('vis-container');
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0xf7f7f4, 0.02); 
+        const PAGE_BG = document.documentElement.classList.contains('theme-white') ? 0xffffff : 0xf7f7f4;
+        scene.fog = new THREE.FogExp2(PAGE_BG, 0.02); 
         const clock = new THREE.Clock();
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
