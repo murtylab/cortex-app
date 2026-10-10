@@ -25,6 +25,7 @@ import Heatmap from './Lab/heatmap.jsx';
 import BoxPlot from './Lab/boxplot.jsx';
 
 import DatasetCardLab from './Lab/datasetcard-lab.jsx';
+import StepHeading from './Lab/stepHeading.jsx';
 import LabRoiViewer from './Lab/labRoiViewer.jsx';
 import RoiInfoCard from './Lab/roiInfoCard.jsx';
 import {
@@ -2362,25 +2363,24 @@ useEffect(() => {
           </div>
 
           <div data-tutorial="lab-upload-panel" className="lab-stimuli-canvas">
+            <StepHeading step={3}>Define the stimuli set</StepHeading>
+
+            <div className="lab-stimuli-sources">
             <div
               data-tutorial="lab-upload-uploader"
               className="lab-upload-column-panel"
             >
-              <div className="lab-section-label" style={{ marginBottom: 10 }}>
-                Upload stimuli
-              </div>
+              <div className="lab-subheading">Upload stimuli</div>
               <Uploader
                 key={uploaderKey}
+                fillHeight
                 onAddFiles={(newFiles) => addIncomingFiles(newFiles)}
               />
             </div>
 
             <div className="lab-preload-inline">
-              <div className="lab-section-label" style={{ marginBottom: 8 }}>
-                Or load a published dataset
-              </div>
+              <div className="lab-subheading">Or load a stimuli set from published papers</div>
               <PreloadDatasetPicker
-                layout="row"
                 selectedKey={prestoreDataset}
                 isLoading={preloadLoading}
                 loadingKey={preloadLoadingKey}
@@ -2402,28 +2402,22 @@ useEffect(() => {
                   loadPrestoredDataset(key);
                 }}
               />
-              {preloadLoading && (
-                <div
-                  style={{
-                    marginTop: 8,
-                    fontSize: 13,
-                    fontFamily: "var(--lab-sans, 'Inter', sans-serif)",
-                    color: "var(--lab-muted, #8A8378)",
-                  }}
-                >
-                  Loading stimuli…
+              {isPreloadMode ? (
+                <DatasetCardLab dataset={prestoreDataset} />
+              ) : (
+                <div className="lab-paper-placeholder">
+                  Pick a paper to load its stimuli and see its Paper Card.
                 </div>
               )}
             </div>
-
-            {isPreloadMode && <DatasetCardLab dataset={prestoreDataset} />}
+            </div>
 
             <div data-tutorial="lab-upload-images-panel">
               <div data-tutorial="lab-results-upload-preview">
                 <ImagePreviewGroupedDnD
                   files={files}
                   variant="lab"
-                  eyebrow="Uploaded stimuli"
+                  eyebrow="Examine the uploaded stimuli"
                   title={inputMode === "preload" ? "Preloaded Images" : "Uploaded Images"}
                   groupDepth={1}
                   isPreload={isPreloadMode}

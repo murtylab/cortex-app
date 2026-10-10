@@ -16,6 +16,7 @@ import {
   VOXEL_OPTIONS,
   regionSupportsMurty185,
 } from '../constants';
+import StepHeading from './stepHeading.jsx';
 
 const Settings = ({
   model,
@@ -124,14 +125,9 @@ const Settings = ({
       }}
     >
       {isLab ? (
-        <Typography
-          id="lab-advanced-settings-label"
-          component="div"
-          className="lab-section-label"
-          sx={{ textAlign: 'left', mt: 0, mb: 0.5, px: 0, width: '100%' }}
-        >
-          Advanced settings
-        </Typography>
+        <StepHeading step={2} id="lab-advanced-settings-label">
+          Configure the model
+        </StepHeading>
       ) : (
         <Typography variant="body2" sx={{ textAlign: 'left', color: disabled ? '#888' : 'black', mt: 1, px: 2 }}>
           Advanced Settings:{disabled ? ' not supported for Whole Brain' : ''}
