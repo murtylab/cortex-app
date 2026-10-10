@@ -722,7 +722,7 @@ body.lab-page #footer:has(.site-footer-nav) {
   margin: 0 auto;
   padding: 0 24px 4px;
   border-top: none;
-  text-align: center !important;
+  text-align: right !important;
   color: rgba(255, 255, 255, 0.72);
 }
 
@@ -732,7 +732,7 @@ body.lab-page #footer:has(.site-footer-nav) {
 }
 
 .footer:has(.site-footer-nav) .footer-cite-us-row {
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .footer:has(.site-footer-nav) .cite-copy-btn {
@@ -741,6 +741,14 @@ body.lab-page #footer:has(.site-footer-nav) {
   font-size: 11px;
   line-height: 1.3;
   border-radius: 4px;
+  color: #4a2e5c;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(107, 99, 88, 0.22);
+}
+
+.footer:has(.site-footer-nav) .cite-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(91, 58, 110, 0.4);
 }
 
 .footer:has(.site-footer-nav) .cite-copy-btn svg {
@@ -750,7 +758,7 @@ body.lab-page #footer:has(.site-footer-nav) {
 
 .footer:has(.site-footer-nav) .cite-us-panel {
   margin-left: auto;
-  margin-right: auto;
+  margin-right: 0;
 }
 
 @media (max-width: 768px) {
