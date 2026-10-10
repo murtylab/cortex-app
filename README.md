@@ -29,7 +29,39 @@ Analytics setup:
 - The measurement ID is read from `VITE_GA_MEASUREMENT_ID`
 - Do not commit real GA keys; keep them in `.env.local`
 
-To update backend url, change the url here: [`assets/js/services/config.js`](https://github.com/murtylab/cortex-app/blob/demo/assets/js/services/config.js)
+To override the inference backend locally, set `VITE_SERVER_URL` in `.env.local`.
+This is a public endpoint, not a secret. If unset, the deployed default in
+`assets/js/services/config.js` is used. The inference API contract is unchanged.
+
+### Uploaded-image brain response
+
+After Run Inference, a fourth result panel displays the selected uploaded image's
+raw NSD Subject 1 predictions for the chosen ROI on the existing cortical surface.
+The image picker and voxel hover comparison use only that run's uploads. Hover
+previews do not change which image colors the brain. Colors share a fixed response
+scale across the run; gray cortex has no predictions in this view.
+
+The map requires NSD-1000 readouts (not Murty-185 or preloaded/demo results).
+It uses the training voxel selection and order: cortical mask in z/y/x C-order,
+strict fLoc t > 7, then ROI-local response indexing. Models may be trained jointly
+across subjects, but only the API's separated `s1` vector is shown. Surface colors
+are weighted interpolations; hover reports the dominant source voxel and its raw
+response, with native zero-based x/y/z volume indices. No reference dataset is loaded.
+
+All eight Lab ROIs are supported. Unmapped voxels are explicitly omitted:
+EBA 3/518, OFA 1/13, VWFA 6/232; the other ROIs have full surface support.
+`scripts/build_subject1_prediction_mapping.py --help` describes rebuilding the
+small lookup from training masks/t-values and a pycortex mapper. The builder
+verifies the existing GLB's exact source vertex correspondence and face ordering;
+it does not export MRI or new geometry. Dependencies: NumPy and SciPy.
+
+Checks:
+
+```bash
+node --test assets/js/services/uploadBrainData.test.js
+python -B scripts/test_subject1_prediction_mapping.py -v
+npm run build
+```
 
 Model pages:
 

@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useMemo, useRef } from 'react';
 import { Button, message, Spin } from 'antd';
 import { Images } from 'lucide-react';
 import { getFroiUserErrorMessage, runFroiPrediction, wrapPredictionResult } from './services/froiPredict.js';
+import { getInferenceContextKey } from './services/uploadBrainData.js';
 import { ConfigProvider } from 'antd';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
@@ -34,6 +35,8 @@ import {
   NSD_1000_INCLUDED_REGIONS,
   regionSupportsMurty185,
 } from './constants';
+
+const UploadBrainMap = lazy(() => import('./Lab/uploadBrainMap.jsx'));
 
 
 
@@ -217,6 +220,13 @@ const Stepper: React.FC = () => {
   const [preloadLoadingKey, setPreloadLoadingKey] = useState<string | null>(null);
   const isPreloadMode = !!prestoreDataset;
   const inputMode = isPreloadMode ? "preload" : "upload";
+  // Bind spatial predictions to the exact settings and images that produced them.
+  const inferenceContextKey = getInferenceContextKey({ model, dataset, region,
+    voxelOption, voxelNumber, paper, participantName, prestoreDataset }, files);
+  const inferenceContextRef = useRef(inferenceContextKey);
+  inferenceContextRef.current = inferenceContextKey;
+  const inferenceRequestRef = useRef(0);
+  const [brainRun, setBrainRun] = useState<{ contextKey: string; result: any; files: PreviewFile[] } | null>(null);
   const tutorialOriginalUploadStateRef = useRef<{ files: PreviewFile[]; prestoreDataset: string | null } | null>(null);
   const tutorialRezaBaselineRef = useRef<PreviewFile[] | null>(null);
   const tutorialUploadDemoTimerRef = useRef<number | null>(null);
@@ -1598,6 +1608,10 @@ const Stepper: React.FC = () => {
 
 const clearRegionPredictionCache = () => {
   setInsightRegionCache({});
+  setBrainRun(null);
+  inferenceRequestRef.current += 1;
+  setPredictionLoading(false);
+  setLoading(false);
 };
 
 const allInsightRegionValues = REGION_OPTIONS.map((r) => r.value);
@@ -1978,25 +1992,33 @@ useEffect(() => {
 
     setPredictError(null);
 
-    if (prestoreDataset) {
-      const localResult = wrapPredictionResult(
-        await loadPreloadedPredictionByRegion(prestoreDataset, targetRegion)
-      );
-
-      if (localResult) {
-        setPredictionResult(localResult);
-        setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: localResult }));
-
-        setPredictstep(2);
-        setShowResults(true);
-        message.success("Loaded precomputed prediction.");
-        return true;
-      }
-    }
-
+    const requestId = ++inferenceRequestRef.current;
+    const requestContext = inferenceContextKey;
+    const requestFiles = files;
+    const isCurrentRequest = () => inferenceRequestRef.current === requestId &&
+      inferenceContextRef.current === requestContext;
+    setBrainRun(null);
     setPredictionLoading(true);
 
     try {
+      if (prestoreDataset) {
+        const localResult = wrapPredictionResult(
+          await loadPreloadedPredictionByRegion(prestoreDataset, targetRegion)
+        );
+
+        if (!isCurrentRequest()) return false;
+
+        if (localResult) {
+          setPredictionResult(localResult);
+          setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: localResult }));
+
+          setPredictstep(2);
+          setShowResults(true);
+          message.success("Loaded precomputed prediction.");
+          return true;
+        }
+      }
+
       const uploadFiles = files.map((x) => {
         if (!x.file) {
           throw new Error(`Missing file data for ${x.label || x.uid}`);
@@ -2013,8 +2035,13 @@ useEffect(() => {
         model,
       });
 
-      setFiles((prev) => prev.map((x, i) => ({ ...x, serverKey: serverKeys[i] })));
-      setFileMappings((prev) => prev.map((x, i) => ({ ...x, serverKey: serverKeys[i] })));
+      if (!isCurrentRequest()) return false;
+      const keysByUid = new Map(requestFiles.map((file, index) => [file.uid, serverKeys[index]]));
+      const withServerKeys = (currentFiles: PreviewFile[]) => currentFiles.map((file) =>
+        ({ ...file, serverKey: keysByUid.get(file.uid) }));
+      setFiles(withServerKeys);
+      setFileMappings(withServerKeys);
+      setBrainRun({ contextKey: requestContext, result: resultData, files: withServerKeys(requestFiles) });
       setPredictionResult(resultData);
       setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: resultData }));
       setPredictError(null);
@@ -2022,15 +2049,18 @@ useEffect(() => {
       message.success("Prediction complete!");
       return true;
     } catch (e: any) {
+      if (!isCurrentRequest()) return false;
       console.error("fROI prediction failed", e);
       const text = getFroiUserErrorMessage(e);
       setPredictError(text);
       message.error(text);
       return false;
     } finally {
-      setPredictionLoading(false);
-      setLoading(false);
-      setPredictstep(2);
+      if (isCurrentRequest()) {
+        setPredictionLoading(false);
+        setLoading(false);
+        setPredictstep(2);
+      }
     }
   };
 
@@ -2038,10 +2068,17 @@ useEffect(() => {
     const cached = getCachedResultByRegion(targetRegion);
     if (cached) return cached;
 
+    const generation = inferenceRequestRef.current;
+    const context = inferenceContextKey;
+    const requestFiles = files;
+    const isCurrentRequest = () => generation === inferenceRequestRef.current &&
+      context === inferenceContextRef.current;
+
     if (prestoreDataset) {
       const localResult = wrapPredictionResult(
         await loadPreloadedPredictionByRegion(prestoreDataset, targetRegion)
       );
+      if (!isCurrentRequest()) return null;
 
       if (localResult) {
         setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: localResult }));
@@ -2062,8 +2099,12 @@ useEffect(() => {
       model,
     });
 
-    setFiles((prev) => prev.map((x, i) => ({ ...x, serverKey: serverKeys[i] })));
-    setFileMappings((prev) => prev.map((x, i) => ({ ...x, serverKey: serverKeys[i] })));
+    if (!isCurrentRequest()) return null;
+    const keysByUid = new Map(requestFiles.map((file, index) => [file.uid, serverKeys[index]]));
+    const withServerKeys = (currentFiles: PreviewFile[]) => currentFiles.map((file) =>
+      ({ ...file, serverKey: keysByUid.get(file.uid) }));
+    setFiles(withServerKeys);
+    setFileMappings(withServerKeys);
     setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: resultData }));
     return resultData;
   };
@@ -2632,6 +2673,13 @@ useEffect(() => {
                   />
                 </div>
               )}
+              <Suspense fallback={<p role="status">Loading brain response panel…</p>}>
+                <UploadBrainMap
+                  predictionResult={brainRun?.contextKey === inferenceContextKey ? brainRun.result : null}
+                  files={brainRun?.contextKey === inferenceContextKey ? brainRun.files : files}
+                  dataset={dataset} region={region} model={model} isPreloadMode={isPreloadMode}
+                />
+              </Suspense>
             </div>
           )}
         </div>
