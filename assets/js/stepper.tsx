@@ -2356,8 +2356,9 @@ useEffect(() => {
 
         <div className="lab-main-column">
           <div className="lab-roi-stage">
-            <LabRoiViewer region={region} />
-            <RoiInfoCard region={region} />
+            <RoiInfoCard region={region}>
+              <LabRoiViewer region={region} />
+            </RoiInfoCard>
           </div>
 
           <div data-tutorial="lab-upload-panel" className="lab-stimuli-canvas">
