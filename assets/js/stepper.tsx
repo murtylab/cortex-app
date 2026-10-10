@@ -33,6 +33,7 @@ import {
   REGION_OPTIONS,
   MURTY185_INCLUDED_REGIONS,
   NSD_1000_INCLUDED_REGIONS,
+  PRELOAD_DATASETS,
   regionSupportsMurty185,
 } from './constants';
 
@@ -2011,6 +2012,7 @@ useEffect(() => {
         if (localResult) {
           setPredictionResult(localResult);
           setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: localResult }));
+          setBrainRun({ contextKey: requestContext, result: localResult, files: requestFiles });
 
           setPredictstep(2);
           setShowResults(true);
@@ -2677,7 +2679,9 @@ useEffect(() => {
                 <UploadBrainMap
                   predictionResult={brainRun?.contextKey === inferenceContextKey ? brainRun.result : null}
                   files={brainRun?.contextKey === inferenceContextKey ? brainRun.files : files}
-                  dataset={dataset} region={region} model={model} isPreloadMode={isPreloadMode}
+                  displayFiles={files}
+                  dataset={dataset} region={region} model={model}
+                  stimulusSetLabel={prestoreDataset ? PRELOAD_DATASETS[prestoreDataset]?.label ?? prestoreDataset : 'Uploaded images'}
                 />
               </Suspense>
             </div>

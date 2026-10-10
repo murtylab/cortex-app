@@ -33,15 +33,18 @@ To override the inference backend locally, set `VITE_SERVER_URL` in `.env.local`
 This is a public endpoint, not a secret. If unset, the deployed default in
 `assets/js/services/config.js` is used. The inference API contract is unchanged.
 
-### Uploaded-image brain response
+### Stimulus brain response
 
-After Run Inference, a fourth result panel displays the selected uploaded image's
+After Run Inference, a fourth result panel displays the selected image's
 raw NSD Subject 1 predictions for the chosen ROI on the existing cortical surface.
-The image picker and voxel hover comparison use only that run's uploads. Hover
+It supports uploads and the built-in Reza2011, Brandman2016, Josephs2020 and Kamps2019
+stimulus sets, using the chosen model's cached predictions when available or live
+inference otherwise. The image picker and voxel hover comparison use only the
+currently loaded images from that run (including any edits to a predefined set). Hover
 previews do not change which image colors the brain. Colors share a fixed response
 scale across the run; gray cortex has no predictions in this view.
 
-The map requires NSD-1000 readouts (not Murty-185 or preloaded/demo results).
+The map requires NSD-1000 readouts (not Murty-185 mapping or fabricated demo results).
 It uses the training voxel selection and order: cortical mask in z/y/x C-order,
 strict fLoc t > 7, then ROI-local response indexing. Models may be trained jointly
 across subjects, but only the API's separated `s1` vector is shown. Surface colors
@@ -59,6 +62,7 @@ Checks:
 
 ```bash
 node --test assets/js/services/uploadBrainData.test.js
+node --test assets/js/services/preloadedBrainData.test.js
 python -B scripts/test_subject1_prediction_mapping.py -v
 npm run build
 ```

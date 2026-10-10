@@ -167,3 +167,38 @@ export function getVoxelWinner(images, responseIndex) {
   }
   return winner;
 }
+
+/** Disambiguate previews using current groups without changing prediction IDs. */
+export function getBrainImageLabels(images, files) {
+  const currentImages = Array.isArray(images) ? images : [];
+  const filesById = new Map((Array.isArray(files) ? files : []).map((file) => [file.uid, file]));
+  const nameCounts = new Map();
+  for (const image of currentImages) nameCounts.set(image.name, (nameCounts.get(image.name) || 0) + 1);
+
+  const proposed = currentImages.map((image, index) => {
+    if (nameCounts.get(image.name) === 1) return image.name;
+    const group = filesById.get(image.id)?.groupKey;
+    return `${group && group !== "Ungrouped" ? group : `Image ${index + 1}`} · ${image.name}`;
+  });
+  const labelCounts = new Map();
+  for (const label of proposed) labelCounts.set(label, (labelCounts.get(label) || 0) + 1);
+  const reserved = new Set(proposed);
+  const used = new Set();
+  const labels = new Map();
+  for (const [index, image] of currentImages.entries()) {
+    const proposal = proposed[index];
+    let label = proposal;
+    if (labelCounts.get(proposal) > 1) {
+      const suffix = `${proposal} · Image ${index + 1}`;
+      label = suffix;
+      let collision = 2;
+      while (reserved.has(label) || used.has(label)) {
+        label = `${suffix} (${collision})`;
+        collision += 1;
+      }
+    }
+    used.add(label);
+    labels.set(image.id, label);
+  }
+  return labels;
+}
