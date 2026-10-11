@@ -65,10 +65,57 @@ describe("visualization session contract", () => {
     expect(url).not.toContain("path=");
   });
 
-  it("navigates only after receiving a token", () => {
+  it("falls back to the internal Cortex page when no mounted workspace handles the token", () => {
     const calls = [];
     navigateToInfoViz("opaque-token", { assign: (url) => calls.push(url) });
-    expect(calls).toEqual(["/infoviz/#session=opaque-token"]);
+    expect(calls).toEqual(["/cortex-compass/#session=opaque-token"]);
+  });
+
+  it("opens the mounted workspace without unloading the original Lab result", () => {
+    const calls = [];
+    const events = [];
+    class TestCustomEvent extends Event {
+      constructor(type, options) {
+        super(type, options);
+        this.detail = options.detail;
+      }
+    }
+    const windowObject = {
+      CustomEvent: TestCustomEvent,
+      dispatchEvent: (event) => {
+        events.push(event);
+        event.preventDefault();
+        return !event.defaultPrevented;
+      },
+    };
+    navigateToInfoViz("opaque-token", { assign: (url) => calls.push(url) }, windowObject);
+    expect(calls).toEqual([]);
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe("cortex:open-compass");
+    expect(events[0].cancelable).toBe(true);
+    expect(events[0].detail).toEqual({ sessionId: "opaque-token" });
+  });
+
+  it("still navigates if the mounted workspace does not accept the handoff", () => {
+    const calls = [];
+    class TestCustomEvent extends Event {
+      constructor(type, options) {
+        super(type, options);
+        this.detail = options.detail;
+      }
+    }
+    navigateToInfoViz("opaque-token", { assign: (url) => calls.push(url) }, {
+      CustomEvent: TestCustomEvent,
+      dispatchEvent: () => true,
+    });
+    expect(calls).toEqual(["/cortex-compass/#session=opaque-token"]);
+  });
+
+  it("does not dispatch or navigate without a token", () => {
+    const calls = [];
+    const windowObject = { dispatchEvent: () => calls.push("event") };
+    expect(() => navigateToInfoViz("", { assign: (url) => calls.push(url) }, windowObject)).toThrow(/token/i);
+    expect(calls).toEqual([]);
   });
 
   it("shows Open Cortex-Compass only for a completed prediction with a request snapshot", () => {

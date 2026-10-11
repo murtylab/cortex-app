@@ -2,6 +2,7 @@ import axios from "axios";
 import { INFOVIZ_URL, SERVER_URL } from "./config.js";
 import { uploadImages } from "./imageUploader.js";
 import { normalizeUploadPaths } from "./froiPredict.js";
+import { buildCortexCompassSessionUrl, COMPASS_OPEN_EVENT } from "./cortexCompassNavigation.js";
 
 const http = axios.create({
   timeout: 10 * 60 * 1000,
@@ -114,8 +115,22 @@ export function buildInfoVizSessionUrl(sessionId) {
   return `${INFOVIZ_URL}/#session=${encodeURIComponent(sessionId)}`;
 }
 
-export function navigateToInfoViz(sessionId, locationObject = window.location) {
-  locationObject.assign(buildInfoVizSessionUrl(sessionId));
+export function navigateToInfoViz(
+  sessionId,
+  locationObject = globalThis.window?.location,
+  windowObject = globalThis.window,
+) {
+  const hostUrl = buildCortexCompassSessionUrl(sessionId);
+  const CustomEventConstructor = windowObject?.CustomEvent ?? globalThis.CustomEvent;
+  if (typeof windowObject?.dispatchEvent === "function" && typeof CustomEventConstructor === "function") {
+    const event = new CustomEventConstructor(COMPASS_OPEN_EVENT, {
+      detail: { sessionId },
+      cancelable: true,
+    });
+    const shouldNavigate = windowObject.dispatchEvent(event);
+    if (!shouldNavigate || event.defaultPrevented) return;
+  }
+  locationObject.assign(hostUrl);
 }
 
 export function canExplorePrediction({ showResults, predictionResult, predictionLoading, snapshot }) {

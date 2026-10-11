@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 import modelPagesPlugin from './scripts/vite-plugin-model-pages.js';
+import cortexCompassPlugin from './scripts/vite-plugin-cortex-compass.js';
 
 export default defineConfig(({ command, mode }) => {
   const environment = loadEnv(mode, '.', '');
@@ -20,6 +21,7 @@ export default defineConfig(({ command, mode }) => {
     plugins: [
       react(),
       modelPagesPlugin(),
+      cortexCompassPlugin(),
       // Copy assets into dist for production. In dev this middleware would
       // serve raw /assets/js/*.tsx and skip Vite's transform, blanking Lab pages.
       ...(command === 'build'

@@ -41,11 +41,22 @@ Analytics setup:
 
 The fROI backend and Cortex-Compass handoff URLs are configured through `.env.local`.
 Do not put temporary tunnel URLs or secrets in source control. After a successful
-fROI prediction, the result panel can create a temporary NSD-1000 comparison
-session and navigate to Cortex-Compass using only its opaque token through the
-**Open Cortex-Compass** action. The visualization remains in the
-`InfoViz-Prototype-Edition` repository; its `/infoviz/` route and existing
-`INFOVIZ` environment-variable names are unchanged.
+fROI prediction, **Open Cortex-Compass** creates a temporary NSD-1000 comparison
+and opens `/cortex-compass/` inside Virtual Cortex's navigation. The Lab remains
+mounted, so **Back to the Lab** restores its results without another inference.
+The workspace embeds the same-origin `/infoviz/?embedded=1` page without a card
+border or duplicate site masthead. Only the opaque session token crosses the
+handoff; model settings and image paths are not put in the URL.
+
+The visualization source remains in the sibling `InfoViz-Prototype-Edition`
+repository. Its standalone `/infoviz/` route and existing `INFOVIZ` environment
+names are unchanged; no source-folder move is needed. `npm run build` produces
+the host's `/cortex-compass/` HTML entry, but does not bundle the sibling app.
+A combined release must also serve Cortex-Compass's compiled output at
+`/infoviz/` and route `/cortex-core/` to the matching backend. Development proxies
+are not a production deployment configuration. The embedded URL must remain
+same-origin (normally `VITE_CORTEX_INFOVIZ_URL=/infoviz`), rather than pointing
+directly at another site's visualization URL.
 
 The complete three-service startup, artifact generation, validation, and smoke-test procedure is in
 [`docs/NSD_STIMULUS_CONTEXT_DEVELOPMENT.md`](docs/NSD_STIMULUS_CONTEXT_DEVELOPMENT.md).

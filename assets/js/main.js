@@ -186,9 +186,9 @@
    */
   window.addEventListener('load', function(e) {
     if (window.location.hash) {
-      if (document.querySelector(window.location.hash)) {
+      if (document.getElementById(window.location.hash.slice(1))) {
         setTimeout(() => {
-          let section = document.querySelector(window.location.hash);
+          let section = document.getElementById(window.location.hash.slice(1));
           let scrollMarginTop = getComputedStyle(section).scrollMarginTop;
           window.scrollTo({
             top: section.offsetTop - parseInt(scrollMarginTop),
@@ -1995,5 +1995,3 @@ var TxtType = function(el, toRotate, period) {
         css.innerHTML = ".typewrite > .wrap { border-right: 2px solid #4154f1; animation: blinking 0.8s infinite;}";
         document.body.appendChild(css);
     };
-
-  

@@ -783,6 +783,102 @@
       }
     }
 
+    /* Cortex-Compass shares this shell; its own styles stay inside the workspace. */
+    body.cortex-compass-open {
+      overflow: hidden;
+    }
+
+    body.cortex-compass-open #container {
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    body.cortex-compass-open #footer,
+    body.cortex-compass-open #scroll-top,
+    body.cortex-compass-open #cortex-tutorial-root {
+      display: none !important;
+    }
+
+    .cortex-lab-workspace[hidden],
+    .cortex-compass-workspace[hidden] {
+      display: none !important;
+    }
+
+    .cortex-compass-workspace {
+      display: grid;
+      grid-template-rows: 40px minmax(0, 1fr);
+      padding: 0;
+      height: calc(100vh - var(--cortex-shell-header-height, 80px));
+      height: calc(100dvh - var(--cortex-shell-header-height, 80px));
+      width: 100%;
+      background: var(--lab-page-bg);
+    }
+
+    .cortex-compass-workspace-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 32px;
+      border-top: 1px solid var(--lab-hairline);
+      border-bottom: 1px solid var(--lab-hairline);
+      color: var(--lab-muted);
+      font-size: 12px;
+    }
+
+    .cortex-compass-breadcrumb {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cortex-compass-breadcrumb strong {
+      color: var(--lab-accent);
+      font-weight: 500;
+    }
+
+    .cortex-compass-loading-label {
+      font-size: 11px;
+    }
+
+    .cortex-compass-return {
+      margin-left: auto;
+      padding: 4px 0;
+      border: 0;
+      background: transparent;
+      color: var(--lab-secondary);
+      font-size: 12px;
+    }
+
+    .cortex-compass-return:hover {
+      color: var(--lab-accent);
+    }
+
+    .cortex-compass-return:focus-visible {
+      outline: 2px solid var(--lab-accent);
+      outline-offset: 3px;
+    }
+
+    .cortex-compass-frame {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      border: 0;
+      border-radius: 0;
+      background: var(--lab-page-bg);
+    }
+
+    .cortex-compass-link-error {
+      padding: 40px 32px;
+    }
+
+    @media (max-width: 600px) {
+      .cortex-compass-workspace-bar { padding: 0 14px; gap: 8px; }
+      .cortex-compass-loading-label { display: none; }
+      .cortex-compass-breadcrumb { gap: 6px; font-size: 11px; }
+    }
   </style>
 
 </head>
@@ -810,6 +906,7 @@
               <li><a href="/lab-whole-brain/">Whole Brain</a></li>
             </ul>
           </li>
+          <li><a href="/cortex-compass/" data-cortex-compass-link>Cortex-Compass</a></li>
           <li class="dropdown">
             <a href="/scoreboardLanding/">
               <span>The Scoreboard</span>

@@ -2,7 +2,7 @@
 
 This runbook starts the three sibling repositories for local development. It does not deploy or modify either production site.
 
-## Prerequisites and artifact build
+## Prerequisites and reference bundle
 
 Start in the parent directory that contains `cortex-app`, `cortex-core`, and `InfoViz-Prototype-Edition`:
 
@@ -11,13 +11,15 @@ export VC_WORKSPACE="$(pwd)"
 mkdir -p "$VC_WORKSPACE/.runtime/gradio" \
   "$VC_WORKSPACE/.runtime/core-cache" \
   "$VC_WORKSPACE/.runtime/comparison-sessions"
-
-cd "$VC_WORKSPACE/InfoViz-Prototype-Edition"
-conda run -n cortex-core python scripts/data/validate_model_registries.py
-conda run -n cortex-core python scripts/data/build_reference_artifacts.py
 ```
 
-The builder validates exactly 26 models, their 78 FFA/PPA/EBA CSVs, 185 ordered image IDs, ROI voxel dimensions, finite numeric data, and the checked-in image means. It writes the server-only bundle to `artifacts/reference/` and the browser-safe identity to `public/data/reference_manifest.json`. Generated NPZ files remain ignored by Git.
+Use the verified 126-model reference release already installed in the
+visualization repository. Its browser assets are tracked, but the matching
+server-only `artifacts/reference/` bundle is not. For another machine, follow
+the visualization README's **Moving the standardized release to another
+machine** instructions. Do not run the legacy 26-model artifact builder over
+the current expanded release. No reference generation is needed for shell/UI
+changes.
 
 ## Terminal 1: Cortex Core (port 5556)
 
@@ -65,6 +67,14 @@ npm run dev
 
 Open `http://localhost:5173/lab/` for the fROI workflow. The whole-brain URL is independent of the NSD comparison service.
 
+After inference, **Open Cortex-Compass** opens `/cortex-compass/` within the
+Virtual Cortex shell rather than replacing the entire site. Its full-page
+workspace hosts `/infoviz/?embedded=1`; **Back to the Lab** preserves the mounted
+Lab's results. Opening `/cortex-compass/` directly starts reference-only mode.
+The opaque comparison token is retained in the current tab's history state for
+refresh, not in a query string or browser storage. Refreshing the Lab itself
+still resets its in-memory inference results.
+
 For VS Code Remote SSH, forward only port 5173. Cortex App proxies `/infoviz/`
 to the machine-local Cortex-Compass server and both apps proxy Core requests to the
 machine-local port 5556. For direct network access without port forwarding, use
@@ -75,6 +85,22 @@ These two Vite commands use checked-in development fallbacks for the sibling
 layout. Environment variables remain available when Core or Cortex-Compass runs on a
 different host or port. Restart both Vite servers after changing any `VITE_*`
 variable.
+
+## Combined release layout
+
+Keep the two frontend source repositories separate. The Cortex App build emits
+the `/cortex-compass/` host page using the compiled Lab entry; it does not copy
+InfoViz source or its build automatically. For a combined release, serve the
+InfoViz build (with base `/infoviz/`) under that path on the same origin, and
+configure the Core backend route separately. Alternatively, the same-origin
+path can be reverse-proxied to a separately hosted visualization build.
+
+Do not copy `node_modules`, private `artifacts/reference`, upload sessions, or
+trained checkpoints into the frontend output. Upload comparison support also
+requires the matching Core code and audited private reference release; a fresh
+frontend clone is not sufficient. Consult the visualization README's release
+transfer instructions before deployment. The local IUI workspace changes do
+not change the separate VSS worktree or publish either app.
 
 ## Automated checks
 
@@ -109,7 +135,16 @@ In Cortex-Compass, also verify:
 
 - the URL fragment disappears after a successful session load;
 - uploaded markers appear in rankings, the fixed-domain distribution, voxel PCA, and the 77-feature visual PCA without moving historical points;
-- K-means uses saved centroids and hierarchy is labelled as a nearest-medoid assignment;
+- K-means uses saved centroids; hierarchical correlation-distance views use the
+  session's joint reference-plus-upload fit, while legacy sessions without a
+  joint tree remain reference-only;
 - heatmap scores/ranks remain unchanged and uploads never become model rows;
 - DreamSim upload placement is explicitly unavailable because the archived 1,792-dimensional references do not match the current 768-dimensional runtime encoder;
 - measured ground-truth fMRI views never show an uploaded stimulus.
+
+For the integrated workspace, also verify that Virtual Cortex's navigation
+stays visible, the duplicate visualization masthead is absent, and one click on
+**Back to the Lab** restores the existing results. Repeat with a second
+comparison session and confirm that the first session's frame history does not
+intercept the Back action. Open the standalone visualization separately to
+confirm its original masthead and navigation are unchanged.

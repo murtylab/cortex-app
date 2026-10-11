@@ -3,12 +3,13 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import Stepper from './stepper.js';
+import CortexCompassWorkspace from './Lab/cortexCompassWorkspace';
 
 function App() {
   return (
-    <div>
+    <CortexCompassWorkspace>
       <Stepper />
-    </div>
+    </CortexCompassWorkspace>
   );
 }
 
