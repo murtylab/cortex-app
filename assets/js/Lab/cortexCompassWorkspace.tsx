@@ -87,13 +87,17 @@ export default function CortexCompassWorkspace({ children }: { children: ReactNo
         showLab();
         return;
       }
+      const hash = window.location.hash;
+      const suppliedToken = new URLSearchParams(hash.replace(/^#/, '')).has('session');
+      const token = readCompassSessionToken(hash);
       const saved = window.history.state?.cortexCompassSession;
-      const sessionId = readCompassSessionToken() ?? (typeof saved === 'string'
+      const sessionId = token ?? (typeof saved === 'string'
         ? readCompassSessionToken(`#session=${encodeURIComponent(saved)}`)
         : null);
       if (sessionId !== currentSession.current) setFrameStatus('loading');
       currentSession.current = sessionId;
-      setWorkspace((previous) => ({ ...previous, open: true, sessionId, invalidLink: false, hasCompass: true }));
+      setWorkspace((previous) => ({ ...previous, open: true, sessionId, invalidLink: suppliedToken && !token, hasCompass: true }));
+      if (hash) window.history.replaceState({ cortexCompassSession: sessionId }, '', '/cortex-compass/');
       window.scrollTo(0, 0);
     }
 
