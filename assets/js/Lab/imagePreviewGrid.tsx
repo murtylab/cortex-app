@@ -587,15 +587,14 @@ export default function ImagePreviewGroupedDnD({
         onDrop={(e) => {
           void handleExternalDrop(e);
         }}
-        style={{
-          border: isLab ? "0.5px solid var(--lab-hairline, #D6D2C6)" : "1px dashed rgba(0,0,0,0.25)",
-          borderRadius: isLab ? 8 : 12,
+        style={isLab ? undefined : {
+          border: "1px dashed rgba(0,0,0,0.25)",
+          borderRadius: 12,
           padding: 12,
-          background: isLab ? "var(--lab-panel, #FBFAF6)" : undefined,
         }}
       >
         {isLab ? (
-          <div className="lab-section-label">{eyebrow || title}</div>
+          <div className="lab-subheading">{eyebrow || title}</div>
         ) : (
           <div style={{ fontWeight: 700, color: "black" }}>{title}</div>
         )}
@@ -612,17 +611,17 @@ export default function ImagePreviewGroupedDnD({
       onDrop={(e) => {
         void handleExternalDrop(e);
       }}
-      style={{
-        border: isLab ? "0.5px solid var(--lab-hairline, #D6D2C6)" : "1px solid rgba(0,0,0,0.12)",
-        borderRadius: isLab ? 8 : 10,
+      style={isLab ? undefined : {
+        border: "1px solid rgba(0,0,0,0.12)",
+        borderRadius: 10,
         padding: 10,
-        background: isLab ? "var(--lab-panel, #FBFAF6)" : "rgba(0,0,0,0.02)",
+        background: "rgba(0,0,0,0.02)",
         boxShadow: "none",
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
         {isLab ? (
-          <div className="lab-section-label">{eyebrow || title}</div>
+          <div className="lab-subheading" style={{ marginBottom: 0 }}>{eyebrow || title}</div>
         ) : (
           <div style={{ fontWeight: 700, color: "black" }}>
             {title} <span style={{ fontWeight: 450, color: "rgba(0,0,0,0.55)" }}>({files.length})</span>

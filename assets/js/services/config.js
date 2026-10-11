@@ -5,7 +5,7 @@ function configuredUrl(value, fallback) {
 // Browser-facing Cortex services. Keep local defaults useful for the sibling
 // repository development layout; deployments should set the Vite variables.
 export const SERVER_URL = configuredUrl(
-  import.meta.env.VITE_CORTEX_CORE_URL,
+  import.meta.env.VITE_CORTEX_CORE_URL || import.meta.env.VITE_SERVER_URL,
   "/cortex-core",
 );
 

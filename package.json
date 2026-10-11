@@ -34,6 +34,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run && npm run test:brain",
+    "test:brain": "node --test assets/js/services/uploadBrainData.test.js assets/js/services/preloadedBrainData.test.js assets/js/services/uploadBrainProjection.test.js"
   }
 }

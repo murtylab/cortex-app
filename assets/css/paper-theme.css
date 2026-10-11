@@ -1,0 +1,39 @@
+/* Paper / screenshot theme: pure white page surfaces. Enabled via html.theme-white. */
+
+html.theme-white,
+html.theme-white body,
+html.theme-white body.lab-page {
+  --background-color: #ffffff;
+  --surface-color: #ffffff;
+  --bg-color: #ffffff;
+  --bg: #ffffff;
+  --panel: #ffffff;
+  --lab-page-bg: #ffffff;
+  --lab-panel: #ffffff;
+  --card-bg: #ffffff;
+  --nav-dropdown-background-color: #ffffff;
+  --nav-mobile-background-color: #ffffff;
+  background-color: #ffffff;
+}
+
+html.theme-white #vis-container {
+  background-color: #ffffff !important;
+}
+
+html.theme-white .light-background {
+  --background-color: #ffffff;
+  --surface-color: #ffffff;
+}
+
+html.theme-white .cite-us-bibtex {
+  background: #ffffff;
+}
+
+html.theme-white .performance-dataset-table-comparison thead .performance-dataset-header-sub th,
+html.theme-white .navbar {
+  background: #ffffff;
+}
+
+html.theme-white .btn-primary {
+  color: #ffffff;
+}

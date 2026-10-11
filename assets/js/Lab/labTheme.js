@@ -1,8 +1,16 @@
 /** Lab-page-only typography / chart tokens. Do not import from Scoreboard or home. */
 
+function isWhiteTheme() {
+  return typeof document !== "undefined" && document.documentElement.classList.contains("theme-white");
+}
+
 export const LAB_COLORS = {
-  pageBg: "#f7f7f4",
-  panel: "#FBFAF6",
+  get pageBg() {
+    return isWhiteTheme() ? "#ffffff" : "#f7f7f4";
+  },
+  get panel() {
+    return isWhiteTheme() ? "#ffffff" : "#FBFAF6";
+  },
   text: "#211F1C",
   secondary: "#57534A",
   muted: "#8A8378",

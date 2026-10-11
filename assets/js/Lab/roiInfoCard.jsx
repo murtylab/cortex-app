@@ -4,7 +4,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import { LAB_ROI_INFO, REGION_OPTIONS } from "../constants";
 
-const RoiInfoCard = ({ region }) => {
+const RoiInfoCard = ({ region, variant = "stage", children }) => {
   const abbrev =
     REGION_OPTIONS.find(
       (option) => (option.value || "").toLowerCase() === (region || "").toLowerCase()
@@ -18,10 +18,10 @@ const RoiInfoCard = ({ region }) => {
 
   return (
     <Box
-      className="lab-roi-card-wrap"
+      className={`lab-roi-card-wrap${variant === "rail" ? " is-rail" : ""}${children ? " has-viewer" : ""}`}
       data-tutorial="lab-roi-card"
       sx={{
-        height: "100%",
+        height: variant === "rail" || children ? "auto" : "100%",
         minHeight: 0,
         borderRadius: "8px",
       }}
@@ -29,7 +29,7 @@ const RoiInfoCard = ({ region }) => {
       <Card
         variant="outlined"
         sx={{
-          height: "100%",
+          height: variant === "rail" || children ? "auto" : "100%",
           borderRadius: "8px",
           boxShadow: "none",
           border: "0.5px solid var(--lab-hairline, #D6D2C6)",
@@ -37,13 +37,15 @@ const RoiInfoCard = ({ region }) => {
         }}
       >
         <CardContent className="lab-model-card lab-roi-card">
-          <p className="lab-section-label">ROI Card</p>
-          <span className="lab-model-card-name">{abbrev || "—"}</span>
-          <p className="lab-model-card-type">{info.stream}</p>
-
-          <div className="lab-model-card-rank">
+          <div className="lab-roi-card-head">
+            <div className="lab-roi-card-identity">
+              <p className="lab-section-label">ROI Card</p>
+              <span className="lab-model-card-name">{abbrev || "—"}</span>
+              <p className="lab-model-card-type">{info.stream}</p>
+            </div>
             <p className="lab-roi-card-description">{info.description}</p>
           </div>
+          {children ? <div className="lab-roi-card-viewer">{children}</div> : null}
         </CardContent>
       </Card>
     </Box>

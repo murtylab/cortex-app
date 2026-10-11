@@ -58,10 +58,11 @@ const ModelCard = ({ region, dataset, model, variant = 'default' }) => {
             <div className="lab-model-card-rank">
               {ranking.status === 'ok' ? (
                 <>
+                  <span className="lab-stat-kicker">Rank</span>
                   <span className="lab-stat-number">{ranking.rank}</span>
                   <div className="lab-model-card-rank-lines">
                     <span className="lab-model-card-rank-meta">
-                      /{ranking.total} models
+                      of {ranking.total} models
                     </span>
                     <span className="lab-model-card-rank-scope">
                       {regionLabel} · {datasetLabel}

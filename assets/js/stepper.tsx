@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useMemo, useRef } from 'react';
 import { Button, message, Modal, Select, Spin } from 'antd';
 import { Images } from 'lucide-react';
 import { getFroiUserErrorMessage, runFroiPrediction, wrapPredictionResult } from './services/froiPredict.js';
@@ -10,6 +10,7 @@ import {
   navigateToInfoViz,
   uploadComparisonStimuli,
 } from './services/visualizationSession.js';
+import { getInferenceContextKey } from './services/uploadBrainData.js';
 import { ConfigProvider } from 'antd';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
@@ -33,14 +34,18 @@ import Heatmap from './Lab/heatmap.jsx';
 import BoxPlot from './Lab/boxplot.jsx';
 
 import DatasetCardLab from './Lab/datasetcard-lab.jsx';
+import StepHeading from './Lab/stepHeading.jsx';
 import LabRoiViewer from './Lab/labRoiViewer.jsx';
 import RoiInfoCard from './Lab/roiInfoCard.jsx';
 import {
   REGION_OPTIONS,
   MURTY185_INCLUDED_REGIONS,
   NSD_1000_INCLUDED_REGIONS,
+  PRELOAD_DATASETS,
   regionSupportsMurty185,
 } from './constants';
+
+const UploadBrainMap = lazy(() => import('./Lab/uploadBrainMap.jsx'));
 
 
 
@@ -246,6 +251,13 @@ const Stepper: React.FC = () => {
   const [preloadLoadingKey, setPreloadLoadingKey] = useState<string | null>(null);
   const isPreloadMode = !!prestoreDataset;
   const inputMode = isPreloadMode ? "preload" : "upload";
+  // Bind spatial predictions to the exact settings and images that produced them.
+  const inferenceContextKey = getInferenceContextKey({ model, dataset, region,
+    voxelOption, voxelNumber, paper, participantName, prestoreDataset }, files);
+  const inferenceContextRef = useRef(inferenceContextKey);
+  inferenceContextRef.current = inferenceContextKey;
+  const inferenceRequestRef = useRef(0);
+  const [brainRun, setBrainRun] = useState<{ contextKey: string; result: any; files: PreviewFile[] } | null>(null);
   const tutorialOriginalUploadStateRef = useRef<{ files: PreviewFile[]; prestoreDataset: string | null } | null>(null);
   const tutorialRezaBaselineRef = useRef<PreviewFile[] | null>(null);
   const tutorialUploadDemoTimerRef = useRef<number | null>(null);
@@ -1627,6 +1639,10 @@ const Stepper: React.FC = () => {
 
 const clearRegionPredictionCache = () => {
   setInsightRegionCache({});
+  setBrainRun(null);
+  inferenceRequestRef.current += 1;
+  setPredictionLoading(false);
+  setLoading(false);
 };
 
 const allInsightRegionValues = REGION_OPTIONS.map((r) => r.value);
@@ -2013,34 +2029,42 @@ useEffect(() => {
 
     setPredictError(null);
 
-    if (prestoreDataset) {
-      const localResult = wrapPredictionResult(
-        await loadPreloadedPredictionByRegion(prestoreDataset, targetRegion)
-      );
-
-      if (localResult) {
-        setPredictionResult(localResult);
-        setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: localResult }));
-        setComparisonSnapshot({
-          model,
-          dataset,
-          roi: targetRegion,
-          // Preloaded results have no Gradio references yet. The existing
-          // in-memory File objects are uploaded only if Explore is requested.
-          stimuli: [],
-        });
-        setComparisonError(null);
-
-        setPredictstep(2);
-        setShowResults(true);
-        message.success("Loaded precomputed prediction.");
-        return true;
-      }
-    }
-
+    const requestId = ++inferenceRequestRef.current;
+    const requestContext = inferenceContextKey;
+    const requestFiles = files;
+    const isCurrentRequest = () => inferenceRequestRef.current === requestId &&
+      inferenceContextRef.current === requestContext;
+    setBrainRun(null);
     setPredictionLoading(true);
 
     try {
+      if (prestoreDataset) {
+        const localResult = wrapPredictionResult(
+          await loadPreloadedPredictionByRegion(prestoreDataset, targetRegion)
+        );
+
+        if (!isCurrentRequest()) return false;
+
+        if (localResult) {
+          setPredictionResult(localResult);
+          setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: localResult }));
+          setBrainRun({ contextKey: requestContext, result: localResult, files: requestFiles });
+          setComparisonSnapshot({
+            model,
+            dataset,
+            roi: targetRegion,
+            // Upload the original File objects only when Compass is requested.
+            stimuli: [],
+          });
+          setComparisonError(null);
+
+          setPredictstep(2);
+          setShowResults(true);
+          message.success("Loaded precomputed prediction.");
+          return true;
+        }
+      }
+
       const uploadFiles = files.map((x) => {
         if (!x.file) {
           throw new Error(`Missing file data for ${x.label || x.uid}`);
@@ -2057,8 +2081,13 @@ useEffect(() => {
         model,
       });
 
-      setFiles((prev) => prev.map((x, i) => ({ ...x, serverKey: serverKeys[i] })));
-      setFileMappings((prev) => prev.map((x, i) => ({ ...x, serverKey: serverKeys[i] })));
+      if (!isCurrentRequest()) return false;
+      const keysByUid = new Map(requestFiles.map((file, index) => [file.uid, serverKeys[index]]));
+      const withServerKeys = (currentFiles: PreviewFile[]) => currentFiles.map((file) =>
+        ({ ...file, serverKey: keysByUid.get(file.uid) }));
+      setFiles(withServerKeys);
+      setFileMappings(withServerKeys);
+      setBrainRun({ contextKey: requestContext, result: resultData, files: withServerKeys(requestFiles) });
       setPredictionResult(resultData);
       setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: resultData }));
       setComparisonSnapshot({
@@ -2067,7 +2096,7 @@ useEffect(() => {
         roi: targetRegion,
         stimuli: paths.map((path: string, index: number) => ({
           path,
-          display_name: files[index]?.label || serverKeys[index] || `stimulus-${index + 1}`,
+          display_name: requestFiles[index]?.label || serverKeys[index] || `stimulus-${index + 1}`,
         })),
       });
       setComparisonError(null);
@@ -2076,15 +2105,18 @@ useEffect(() => {
       message.success("Prediction complete!");
       return true;
     } catch (e: any) {
+      if (!isCurrentRequest()) return false;
       console.error("fROI prediction failed", e);
       const text = getFroiUserErrorMessage(e);
       setPredictError(text);
       message.error(text);
       return false;
     } finally {
-      setPredictionLoading(false);
-      setLoading(false);
-      setPredictstep(2);
+      if (isCurrentRequest()) {
+        setPredictionLoading(false);
+        setLoading(false);
+        setPredictstep(2);
+      }
     }
   };
 
@@ -2092,10 +2124,17 @@ useEffect(() => {
     const cached = getCachedResultByRegion(targetRegion);
     if (cached) return cached;
 
+    const generation = inferenceRequestRef.current;
+    const context = inferenceContextKey;
+    const requestFiles = files;
+    const isCurrentRequest = () => generation === inferenceRequestRef.current &&
+      context === inferenceContextRef.current;
+
     if (prestoreDataset) {
       const localResult = wrapPredictionResult(
         await loadPreloadedPredictionByRegion(prestoreDataset, targetRegion)
       );
+      if (!isCurrentRequest()) return null;
 
       if (localResult) {
         setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: localResult }));
@@ -2116,8 +2155,12 @@ useEffect(() => {
       model,
     });
 
-    setFiles((prev) => prev.map((x, i) => ({ ...x, serverKey: serverKeys[i] })));
-    setFileMappings((prev) => prev.map((x, i) => ({ ...x, serverKey: serverKeys[i] })));
+    if (!isCurrentRequest()) return null;
+    const keysByUid = new Map(requestFiles.map((file, index) => [file.uid, serverKeys[index]]));
+    const withServerKeys = (currentFiles: PreviewFile[]) => currentFiles.map((file) =>
+      ({ ...file, serverKey: keysByUid.get(file.uid) }));
+    setFiles(withServerKeys);
+    setFileMappings(withServerKeys);
     setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: resultData }));
     return resultData;
   };
@@ -2497,30 +2540,30 @@ useEffect(() => {
 
         <div className="lab-main-column">
           <div className="lab-roi-stage">
-            <LabRoiViewer />
-            <RoiInfoCard region={region} />
+            <RoiInfoCard region={region}>
+              <LabRoiViewer region={region} />
+            </RoiInfoCard>
           </div>
 
           <div data-tutorial="lab-upload-panel" className="lab-stimuli-canvas">
+            <StepHeading step={3} id="stimuli-set-heading">Define the stimuli set</StepHeading>
+
+            <div className="lab-stimuli-sources">
             <div
               data-tutorial="lab-upload-uploader"
               className="lab-upload-column-panel"
             >
-              <div className="lab-section-label" style={{ marginBottom: 10 }}>
-                Upload stimuli
-              </div>
+              <div className="lab-subheading">Upload stimuli</div>
               <Uploader
                 key={uploaderKey}
+                fillHeight
                 onAddFiles={(newFiles) => addIncomingFiles(newFiles)}
               />
             </div>
 
             <div className="lab-preload-inline">
-              <div className="lab-section-label" style={{ marginBottom: 8 }}>
-                Or load a published dataset
-              </div>
+              <div className="lab-subheading">Or load a stimuli set from published papers</div>
               <PreloadDatasetPicker
-                layout="row"
                 selectedKey={prestoreDataset}
                 isLoading={preloadLoading}
                 loadingKey={preloadLoadingKey}
@@ -2542,28 +2585,22 @@ useEffect(() => {
                   loadPrestoredDataset(key);
                 }}
               />
-              {preloadLoading && (
-                <div
-                  style={{
-                    marginTop: 8,
-                    fontSize: 13,
-                    fontFamily: "var(--lab-sans, 'Inter', sans-serif)",
-                    color: "var(--lab-muted, #8A8378)",
-                  }}
-                >
-                  Loading stimuli…
+              {isPreloadMode ? (
+                <DatasetCardLab dataset={prestoreDataset} />
+              ) : (
+                <div className="lab-paper-placeholder">
+                  Pick a paper to load its stimuli and see its Paper Card.
                 </div>
               )}
             </div>
-
-            {isPreloadMode && <DatasetCardLab dataset={prestoreDataset} />}
+            </div>
 
             <div data-tutorial="lab-upload-images-panel">
               <div data-tutorial="lab-results-upload-preview">
                 <ImagePreviewGroupedDnD
                   files={files}
                   variant="lab"
-                  eyebrow="Uploaded stimuli"
+                  eyebrow="Examine the uploaded stimuli"
                   title={inputMode === "preload" ? "Preloaded Images" : "Uploaded Images"}
                   groupDepth={1}
                   isPreload={isPreloadMode}
@@ -2831,6 +2868,15 @@ useEffect(() => {
                   />
                 </div>
               )}
+              <Suspense fallback={<p role="status">Loading brain response panel…</p>}>
+                <UploadBrainMap
+                  predictionResult={brainRun?.contextKey === inferenceContextKey ? brainRun.result : null}
+                  files={brainRun?.contextKey === inferenceContextKey ? brainRun.files : files}
+                  displayFiles={files}
+                  dataset={dataset} region={region} model={model}
+                  stimulusSetLabel={prestoreDataset ? PRELOAD_DATASETS[prestoreDataset as keyof typeof PRELOAD_DATASETS]?.label ?? prestoreDataset : 'Uploaded images'}
+                />
+              </Suspense>
             </div>
           )}
         </div>

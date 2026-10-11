@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/assets/js/paperTheme.js"></script>
     <title>Virtual Visual Cortex</title>
     <link href="/assets/img/logo.svg" rel="icon" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -208,13 +209,121 @@
             box-shadow: 0 6px 16px rgba(184, 164, 188, 0.28);
         }
 
-        .btn-primary span {
-            font-size: 1rem;
-            margin-left: 0.4em;
-            transition: transform 0.3s;
+        .btn-primary .btn-label {
+            position: relative;
+            background-image: linear-gradient(
+                90deg,
+                #f7f7f4 0%,
+                #f7f7f4 32%,
+                #c98d9a 38%,
+                #b8a4bc 48%,
+                #c4b4cc 60%,
+                #f7f7f4 68%,
+                #f7f7f4 100%
+            );
+            background-size: 340% 100%;
+            background-repeat: no-repeat;
+            background-position: 100% 50%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
         }
-        .btn-primary:hover span {
-            transform: translateX(3px);
+
+        .btn-primary .btn-label::after {
+            content: attr(data-label);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background-image: linear-gradient(
+                90deg,
+                transparent 0%,
+                transparent 78%,
+                rgba(255, 255, 255, 0.35) 90%,
+                #fff 100%
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+            opacity: 0;
+            pointer-events: none;
+            filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.95));
+        }
+
+        .btn-group .btn-primary:first-child .btn-label {
+            animation: btn-text-shine-left 6.2s linear infinite;
+        }
+
+        .btn-group .btn-primary:last-child .btn-label {
+            animation: btn-text-shine-right 6.2s linear infinite;
+        }
+
+        .btn-group .btn-primary:first-child .btn-label::after {
+            animation: btn-text-flash-left 6.2s linear infinite;
+        }
+
+        .btn-group .btn-primary:last-child .btn-label::after {
+            animation: btn-text-flash-right 6.2s linear infinite;
+        }
+
+        .btn-group:hover .btn-label,
+        .btn-group:hover .btn-label::after {
+            animation: none;
+        }
+
+        .btn-group:hover .btn-label {
+            background-image: none;
+            color: #f7f7f4;
+            -webkit-text-fill-color: #f7f7f4;
+        }
+
+        .btn-group:hover .btn-label::after {
+            opacity: 0;
+        }
+
+        @keyframes btn-text-shine-left {
+            0% { background-position: 100% 50%; }
+            40% { background-position: 0% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes btn-text-shine-right {
+            0%, 50% { background-position: 100% 50%; }
+            90% { background-position: 0% 50%; }
+            99.9% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        @keyframes btn-text-flash-left {
+            0%, 28% { opacity: 0; }
+            35% { opacity: 1; }
+            42% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes btn-text-flash-right {
+            0%, 78% { opacity: 0; }
+            85% { opacity: 1; }
+            92% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .btn-primary .btn-label,
+            .btn-primary .btn-label::after {
+                animation: none;
+            }
+
+            .btn-primary .btn-label {
+                background-image: none;
+                color: #f7f7f4;
+                -webkit-text-fill-color: #f7f7f4;
+            }
+
+            .btn-primary .btn-label::after {
+                opacity: 0;
+            }
         }
 
         .scroll-indicator {
@@ -513,6 +622,25 @@
             color: inherit;
         }
 
+        .cite-symbol {
+            width: 26px;
+            height: 26px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-strong);
+            background: var(--accent-muted);
+            border: 1px solid rgba(91, 58, 110, 0.22);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .cite-symbol:hover,
+        .cite-symbol[aria-expanded="true"] {
+            background: rgba(91, 58, 110, 0.16);
+        }
+
         .cite-us-highlight {
             font-family: var(--script-font);
             font-style: italic;
@@ -534,16 +662,36 @@
         }
 
         .cite-us-panel {
+            position: relative;
             margin-top: 12px;
         }
 
-        .cite-us-toolbar {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 8px;
+        .cite-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 1;
+            width: 22px;
+            height: 22px;
+            padding: 0;
+            border: none;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--text-sub);
+            font-size: 16px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .cite-close:hover {
+            color: var(--text-main);
+            background: rgba(107, 99, 88, 0.1);
         }
 
         .cite-copy-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             font-family: var(--mono-font);
             font-size: 0.68rem;
             font-weight: 500;
@@ -562,7 +710,7 @@
 
         .cite-us-bibtex {
             margin: 0;
-            padding: 14px 16px;
+            padding: 14px 36px 14px 16px;
             border-radius: 12px;
             background: rgba(245, 244, 240, 0.9);
             border: 1px solid rgba(107, 99, 88, 0.14);
@@ -575,11 +723,70 @@
         }
 
         .home-footer {
-            margin: 8px 8% 48px;
-            padding: 22px 28px 28px;
-            text-align: center;
-            color: var(--text-sub);
+            margin: 48px 0 0;
+            padding: 32px 8% 36px;
+            background: rgba(33, 31, 28, 0.82);
+            color: rgba(255, 255, 255, 0.78);
             font-size: 0.82rem;
+            text-align: left;
+        }
+
+        .home-footer .site-footer-mark {
+            font-family: var(--heading-font);
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .home-footer .site-footer-nav hr {
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+            margin: 1rem 0 1.25rem;
+        }
+
+        .home-footer .site-footer-menu,
+        .home-footer .site-footer-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .home-footer .site-footer-menu {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+            padding-bottom: 1.5rem;
+        }
+
+        .home-footer .site-footer-menu > li > a {
+            font-weight: 600;
+        }
+
+        .home-footer .site-footer-menu a {
+            color: #fff;
+            font-size: 0.8rem;
+            line-height: 1.2;
+            text-decoration: none;
+        }
+
+        .home-footer .site-footer-menu a:hover {
+            text-decoration: underline;
+        }
+
+        .home-footer .site-footer-menu li ul {
+            margin-top: 0.8rem;
+        }
+
+        .home-footer .site-footer-menu li ul li {
+            padding-left: 1ex;
+        }
+
+        .home-footer .site-footer-menu li ul li + li {
+            margin-top: 0.8rem;
+        }
+
+        .home-footer .copyright {
+            text-align: right;
         }
 
         .home-footer .copyright p {
@@ -587,7 +794,7 @@
         }
 
         .home-footer .copyright a {
-            color: var(--text-main);
+            color: #fff;
             font-weight: 600;
             text-decoration: none;
         }
@@ -600,19 +807,43 @@
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-end;
             gap: 8px 10px;
+        }
+
+        .home-footer .cite-copy-btn {
+            gap: 4px;
+            padding: 1px 6px;
+            font-size: 0.7rem;
+            line-height: 1.3;
+            border-radius: 4px;
+        }
+
+        .home-footer .cite-copy-btn svg {
+            width: 11px;
+            height: 11px;
         }
 
         .home-footer .footer-cite-us-line {
             font-size: 0.7rem;
-            color: var(--text-sub);
+            color: rgba(255, 255, 255, 0.72);
         }
 
         .home-footer .cite-us-panel {
-            margin: 10px auto 0;
+            margin: 10px 0 0 auto;
             max-width: 720px;
             text-align: left;
+        }
+
+        @media (max-width: 768px) {
+            .home-footer {
+                padding: 28px 6% 32px;
+            }
+
+            .home-footer .site-footer-menu {
+                display: flex;
+                flex-direction: column;
+            }
         }
 
         .news-item:hover .news-item-arrow {
@@ -687,9 +918,7 @@
 
             .faq-section,
             .team-section,
-            .latest-news-section,
-            .feedback-section,
-            .home-footer {
+            .latest-news-section {
                 margin-left: 4%;
                 margin-right: 4%;
                 padding: 28px 18px;
@@ -798,48 +1027,8 @@
             border-bottom: none;
         }
 
-        .feedback-section {
-            margin: 48px 10% 150px 10%;
-            padding: 48px 60px;
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            box-shadow: var(--card-shadow);
-            pointer-events: auto;
-            text-align: center;
-        }
-
-        .feedback-section .section-header {
-            margin-bottom: 28px;
-        }
-
-        .feedback-section .feedback-link {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 12px 28px;
-            border-radius: var(--radius-control);
-            background: var(--tungsten);
-            color: #fff;
-            font-size: 0.95rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: background 0.2s ease;
-        }
-
-        .feedback-section .feedback-link:hover {
-            background: linear-gradient(135deg, #c98d9a 0%, #b8a4bc 50%, #c4b4cc 100%);
-        }
-
-        @media (max-width: 768px) {
-            .feedback-section {
-                margin: 32px 5% 100px 5%;
-                padding: 36px 28px;
-            }
-        }
-
     </style>
+    <link rel="stylesheet" href="/assets/css/paper-theme.css">
 </head>
 <body>
 
@@ -861,13 +1050,11 @@
 
                 <div class="btn-group">
                 <a href="/labLanding/" class="btn-primary">
-                    Predict Brain Responses 
-                    <span>→</span>
+                    <span class="btn-label" data-label="Predict Brain Responses">Predict Brain Responses</span>
                 </a>
 
                 <a href="/scoreboardLanding/" class="btn-primary">
-                    Check Model Performance 
-                    <span>→</span>
+                    <span class="btn-label" data-label="Check Model Performance">Check Model Performance</span>
                 </a>
                 </div>
             </div>
@@ -906,6 +1093,32 @@
             </div>
 
             <div class="news-timeline">
+                <article class="news-item news-item-cite">
+                    <span class="news-item-time">September 21, 2026</span>
+                    <div class="news-item-meta">
+                        <span class="news-item-conf">bioRxiv 2026</span>
+                        <span class="news-item-kind">Preprint</span>
+                        <button type="button" class="cite-copy-btn" data-cite-copy data-cite-for="home-biorxiv-bibtex" aria-expanded="false" aria-controls="home-biorxiv-bibtex"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M7.2 17.2c-1.9 0-3.3-1.5-3.3-3.5 0-2.7 2.2-5.3 5.4-6.8l.8 1.4c-1.9.9-3.1 2.3-3.5 3.8.4-.2.9-.3 1.4-.3 1.6 0 2.7 1.2 2.7 2.7s-1.2 2.7-3.5 2.7zm9.2 0c-1.9 0-3.3-1.5-3.3-3.5 0-2.7 2.2-5.3 5.4-6.8l.8 1.4c-1.9.9-3.1 2.3-3.5 3.8.4-.2.9-.3 1.4-.3 1.6 0 2.7 1.2 2.7 2.7s-1.2 2.7-3.5 2.7z"/></svg><span class="cite-copy-label">Copy BibTeX</span></button>
+                    </div>
+                    <a class="news-item-main" href="https://www.biorxiv.org/content/10.64898/2026.09.15.751562v1" target="_blank" rel="noopener noreferrer">
+                        <h3 class="news-item-title">Zero-shot evaluations expose structured generalization limits in predictive models of the brain<span class="news-item-arrow">→</span></h3>
+                    </a>
+                    <div id="home-biorxiv-bibtex" class="cite-us-panel" hidden>
+                        <pre class="cite-us-bibtex" data-cite-bibtex>@article{zeroshot2026,
+  title = {Zero-shot evaluations expose structured generalization limits in predictive models of the brain},
+  author = {Wang, Ruolin and Deb, Mayukh and Abate, Alex and Dipani, Alish and Dudipala, Kushal R and Chillarege, Sanjana and Ravikanti, Kruthik and Li, Yuxuan and Al-Tahan, Haider and Koushik, Ranjani and Mieczkowski, Elizabeth and Fung, Herrick and Kanwisher, Nancy and Murty, N. Apurva Ratan},
+  year = {2026},
+  venue = {bioRxiv},
+  venueshort = {bioRxiv},
+  status = {preprint},
+  tags = {Analysis, Benchmark},
+  url = {https://www.biorxiv.org/content/10.64898/2026.09.15.751562v1},
+  doi = {10.64898/2026.09.15.751562},
+  takeaway = {Scoring brain encoding models on experiments they were never fitted to exposes generalization limits that standard within-dataset evaluation hides.}
+}</pre>
+                    </div>
+                </article>
+
                 <a class="news-item" href="/ccn-satellite/">
                     <span class="news-item-time">August 2, 2026</span>
                     <div class="news-item-meta">
@@ -947,15 +1160,12 @@
                     <div class="news-item-meta">
                         <span class="news-item-conf">CHI 2026</span>
                         <span class="news-item-kind">Poster</span>
-                        <button type="button" class="cite-us-highlight" data-cite-toggle aria-expanded="false" aria-controls="home-chi-bibtex">Cite us!</button>
+                        <button type="button" class="cite-copy-btn" data-cite-copy data-cite-for="home-chi-bibtex" aria-expanded="false" aria-controls="home-chi-bibtex"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M7.2 17.2c-1.9 0-3.3-1.5-3.3-3.5 0-2.7 2.2-5.3 5.4-6.8l.8 1.4c-1.9.9-3.1 2.3-3.5 3.8.4-.2.9-.3 1.4-.3 1.6 0 2.7 1.2 2.7 2.7s-1.2 2.7-3.5 2.7zm9.2 0c-1.9 0-3.3-1.5-3.3-3.5 0-2.7 2.2-5.3 5.4-6.8l.8 1.4c-1.9.9-3.1 2.3-3.5 3.8.4-.2.9-.3 1.4-.3 1.6 0 2.7 1.2 2.7 2.7s-1.2 2.7-3.5 2.7z"/></svg><span class="cite-copy-label">Copy BibTeX</span></button>
                     </div>
                     <a class="news-item-main" href="/chi-poster/">
                         <h3 class="news-item-title">Cortex-Canvas: An Interactive Web Interface for Executing and Evaluating Models of Category-Selective Regions in Human Visual Cortex<span class="news-item-arrow">→</span></h3>
                     </a>
                     <div id="home-chi-bibtex" class="cite-us-panel" hidden>
-                        <div class="cite-us-toolbar">
-                            <button type="button" class="cite-copy-btn" data-cite-copy>Copy</button>
-                        </div>
                         <pre class="cite-us-bibtex" data-cite-bibtex></pre>
                     </div>
                 </article>
@@ -1052,19 +1262,6 @@
             </ul>
         </div>
 
-        <section class="feedback-section" aria-label="Feedback">
-            <div class="section-header">
-                <span class="tag-pill">Feedback</span>
-                <h2 class="section-title">We’d love your feedback</h2>
-            </div>
-            <a
-              class="feedback-link"
-              href="https://forms.office.com/r/nT01GfLtZs"
-              target="_blank"
-              rel="noopener noreferrer"
-            >Send us your feedback here!</a>
-        </section>
-
         <footer id="footer" class="home-footer">
             <div class="copyright">
                 <p>© <span>Copyright</span> <strong><a href="https://www.murtylab.com" target="_blank" rel="noopener noreferrer">Murty Lab @ Georgia Tech</a></strong> <span>All Rights Reserved</span></p>
@@ -1092,11 +1289,11 @@
             if (isDeleting) {
                 textElement.textContent = currentPhrase.substring(0, charIndex - 1);
                 charIndex--;
-                typeSpeed = 50; 
+                typeSpeed = 65;
             } else {
                 textElement.textContent = currentPhrase.substring(0, charIndex + 1);
                 charIndex++;
-                typeSpeed = 80; 
+                typeSpeed = 105; 
             }
 
             if (!isDeleting && charIndex === currentPhrase.length) {
@@ -1195,7 +1392,8 @@
         // --- Scene Setup ---
         const container = document.getElementById('vis-container');
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0xf7f7f4, 0.02); 
+        const PAGE_BG = document.documentElement.classList.contains('theme-white') ? 0xffffff : 0xf7f7f4;
+        scene.fog = new THREE.FogExp2(PAGE_BG, 0.02); 
         const clock = new THREE.Clock();
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);

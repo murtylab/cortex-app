@@ -9,7 +9,7 @@ import {
   MURTY185_INCLUDED_REGIONS,
   NSD_1000_INCLUDED_REGIONS,
 } from "../constants";
-import { LAB_COLORS } from "./labTheme";
+import StepHeading from "./stepHeading.jsx";
 
 const RegionSelector = ({
   region,
@@ -38,13 +38,9 @@ const RegionSelector = ({
   if (variant === "lab") {
     return (
       <FormControl data-tutorial={tutorialRootKey} sx={{ minWidth: 0 }} fullWidth>
-        <div
-          id="region-buttons-group-label"
-          className="lab-section-label"
-          style={{ marginBottom: 10 }}
-        >
-          fROIs
-        </div>
+        <StepHeading step={1} id="region-buttons-group-label">
+          Select a fROI
+        </StepHeading>
 
         <div
           role="group"
@@ -70,26 +66,8 @@ const RegionSelector = ({
                 data-tutorial={selected ? activeTutorialKey : undefined}
                 onClick={() => enabled && setRegion(option.value)}
                 disabled={!enabled}
-                style={{
-                  minWidth: 0,
-                  fontFamily: "var(--lab-mono, 'IBM Plex Mono', monospace)",
-                  fontSize: 12,
-                  fontWeight: 400,
-                  padding: "8px 4px",
-                  borderRadius: 5,
-                  border: selected
-                    ? "0.5px solid transparent"
-                    : `0.5px solid ${LAB_COLORS.hairline}`,
-                  background: selected
-                    ? "var(--highlight-color-button, #5b3a6e)"
-                    : "transparent",
-                  color: selected ? "#ffffff" : LAB_COLORS.text,
-                  cursor: enabled ? "pointer" : "not-allowed",
-                  opacity: enabled ? 1 : 0.4,
-                  lineHeight: 1.2,
-                  boxShadow: "none",
-                  textAlign: "center",
-                }}
+                aria-pressed={selected}
+                className={`lab-choice-btn${selected ? " is-selected" : ""}`}
               >
                 {option.label}
               </button>
