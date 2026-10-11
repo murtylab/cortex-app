@@ -1,18 +1,31 @@
-import { Color, MathUtils } from "three";
+import { Color, MathUtils, SRGBColorSpace } from "three";
 
-const NEGATIVE = new Color("#766096");
-const NEUTRAL = new Color("#f4f0e6");
-const POSITIVE = new Color("#c36e39");
+const NEGATIVE = [42 / 255, 92 / 255, 158 / 255];
+const NEUTRAL = [242 / 255, 239 / 255, 232 / 255];
+const POSITIVE = [180 / 255, 48 / 255, 42 / 255];
 
-/** The scale is fixed across uploads, with zero between its two color arms. */
-export function uploadResponseColor(value, range, target = new Color()) {
-  if (!Number.isFinite(value) || !Array.isArray(range) || range.length !== 2
-    || !range.every(Number.isFinite) || range[0] > range[1]) {
+/** Keep equally strong signed responses equally far from the neutral color. */
+export function displayResponseExtent(range) {
+  if (!Array.isArray(range) || range.length !== 2
+    || !Number.isFinite(range[0]) || !Number.isFinite(range[1]) || range[0] > range[1]) {
     throw new Error("The predicted-response color range is invalid.");
   }
-  const extent = (value < 0 ? Math.abs(Math.min(range[0], 0)) : Math.max(range[1], 0)) || 1;
+  return Math.max(Math.abs(range[0]), Math.abs(range[1])) || 1;
+}
+
+/** Interpolate the displayed sRGB palette, then convert for Three vertex colors. */
+export function uploadResponseColor(value, range, target = new Color()) {
+  if (!Number.isFinite(value)) throw new Error("The predicted-response color value is invalid.");
+  const extent = displayResponseExtent(range);
   const normalized = MathUtils.clamp(value / extent, -1, 1);
-  return target.copy(NEUTRAL).lerp(normalized < 0 ? NEGATIVE : POSITIVE, Math.abs(normalized));
+  const endpoint = normalized < 0 ? NEGATIVE : POSITIVE;
+  const amount = Math.abs(normalized);
+  return target.setRGB(
+    NEUTRAL[0] + (endpoint[0] - NEUTRAL[0]) * amount,
+    NEUTRAL[1] + (endpoint[1] - NEUTRAL[1]) * amount,
+    NEUTRAL[2] + (endpoint[2] - NEUTRAL[2]) * amount,
+    SRGBColorSpace,
+  );
 }
 
 /** Project signed raw responses; vertex identities are never approximated. */

@@ -7,18 +7,15 @@ import { dominantUploadVoxel, projectUploadResponses, uploadResponseColor } from
 export { projectUploadResponses, uploadResponseColor } from "../services/uploadBrainProjection.js";
 
 const HEMISPHERES = ["lh", "rh"];
-const DEFAULT_VIEWS = {
-  FFA: "ventral", FBA: "ventral", PPA: "ventral", VWFA: "ventral",
-  EBA: "lateral", OFA: "lateral", OPA: "lateral", RSC: "medial",
-};
-// The published surface already uses glTF Y-up coordinates. Do not rotate or
-// reorder its vertices: the sparse mapper refers to their original indices.
+// Display transforms never reorder the verified mapper's surface vertices.
 const VIEWS = {
-  lateral: { lh: [-1, 0, 0], rh: [1, 0, 0], up: [0, 1, 0] },
-  medial: { lh: [1, 0, 0], rh: [-1, 0, 0], up: [0, 1, 0] },
-  ventral: { lh: [0, -1, 0], rh: [0, -1, 0], up: [0, 0, -1] },
-  dorsal: { lh: [0, 1, 0], rh: [0, 1, 0], up: [0, 0, -1] },
+  overview: { direction: [0.9, 0.28, 1.35], up: [0, 1, 0] },
+  lateral: { direction: [1, 0, 0], up: [0, 1, 0] },
+  medial: { direction: [-1, 0, 0], up: [0, 1, 0] },
+  ventral: { direction: [0, -1, 0], up: [0, 0, -1] },
+  dorsal: { direction: [0, 1, 0], up: [0, 0, -1] },
 };
+
 function disposeTree(root) {
   const geometries = new Set();
   const materials = new Set();
@@ -28,9 +25,7 @@ function disposeTree(root) {
     for (const material of Array.isArray(child.material) ? child.material : [child.material]) {
       if (!material) continue;
       materials.add(material);
-      for (const value of Object.values(material)) {
-        if (value?.isTexture) textures.add(value);
-      }
+      for (const value of Object.values(material)) if (value?.isTexture) textures.add(value);
     }
   });
   geometries.forEach((geometry) => geometry.dispose());
@@ -79,33 +74,57 @@ function supportedTriangles(mesh, contributors) {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", mesh.geometry.getAttribute("position"));
   geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(supported), 1));
-  // This proxy is never rendered. It cheaply rejects pointer positions outside
-  // the ROI before the complete surface is tested for front-surface occlusion.
+  // Never rendered: first reject pointers outside the mapped ROI, then check
+  // the complete shared surface for nearer, occluding cortex.
   return new THREE.Mesh(geometry, mesh.material);
 }
 
-function dominantSource(hit, contributors) {
+function hoverDatum(hit, object, canvasX, canvasY) {
   const position = hit.object.geometry.getAttribute("position");
   const point = hit.object.worldToLocal(hit.point.clone());
   const vertices = [hit.face.a, hit.face.b, hit.face.c];
   const triangle = vertices.map((vertex) => new THREE.Vector3().fromBufferAttribute(position, vertex));
   const barycentric = THREE.Triangle.getBarycoord(point, ...triangle, new THREE.Vector3());
   if (!barycentric) return null;
-  return dominantUploadVoxel(vertices, [barycentric.x, barycentric.y, barycentric.z], contributors);
+  const weights = [barycentric.x, barycentric.y, barycentric.z];
+  const responseIndex = dominantUploadVoxel(vertices, weights, object.contributors);
+  if (responseIndex === null) return null;
+  let surfaceValue = 0;
+  let mappedWeight = 0;
+  let vertexIndex = null;
+  let strongestVertexWeight = -1;
+  vertices.forEach((vertex, index) => {
+    if (!object.contributors.has(vertex)) return;
+    const weight = Math.max(0, weights[index]);
+    surfaceValue += object.projectedValues[vertex] * weight;
+    mappedWeight += weight;
+    if (weight > strongestVertexWeight) {
+      strongestVertexWeight = weight;
+      vertexIndex = vertex;
+    }
+  });
+  return {
+    responseIndex, hemisphere: object.hemisphere, canvasX, canvasY,
+    surfaceValue: mappedWeight > 0 ? surfaceValue / mappedWeight : null,
+    vertexIndex,
+  };
 }
 
-export default function UploadBrainViewer({ mapping, roi, values, range, onVoxelHover }) {
+export default function UploadBrainViewer({ mapping, roi, values, range, onVoxelHover, onViewInteraction, view = "overview", resetKey = 0, hemisphereMode = "both" }) {
   const mountRef = useRef(null);
-  const leftRef = useRef(null);
-  const rightRef = useRef(null);
   const runtimeRef = useRef(null);
   const callbackRef = useRef(onVoxelHover);
+  const interactionRef = useRef(onViewInteraction);
   const dataRef = useRef({ roi, values, range });
+  const viewRef = useRef(view);
+  const modeRef = useRef(hemisphereMode);
   const [status, setStatus] = useState("loading");
   const [error, setError] = useState("");
-  const [view, setView] = useState(DEFAULT_VIEWS[roi?.label] || "lateral");
 
   useEffect(() => { callbackRef.current = onVoxelHover; }, [onVoxelHover]);
+  useEffect(() => { interactionRef.current = onViewInteraction; }, [onViewInteraction]);
+  useEffect(() => { viewRef.current = view; }, [view]);
+  useEffect(() => { modeRef.current = hemisphereMode; }, [hemisphereMode]);
 
   useEffect(() => {
     dataRef.current = { roi, values, range };
@@ -116,7 +135,7 @@ export default function UploadBrainViewer({ mapping, roi, values, range, onVoxel
       setStatus("ready");
       setError("");
     } catch (cause) {
-      // Invalid new data must not leave a previous image's colors on screen.
+      // Never leave the previous image's colors visible after invalid new data.
       runtime.clearData();
       setStatus("error");
       setError(cause instanceof Error ? cause.message : "The prediction could not be projected.");
@@ -125,34 +144,43 @@ export default function UploadBrainViewer({ mapping, roi, values, range, onVoxel
 
   useEffect(() => {
     const mount = mountRef.current;
-    const pads = { lh: leftRef.current, rh: rightRef.current };
-    if (!mount || !pads.lh || !pads.rh) return undefined;
+    if (!mount) return undefined;
     let cancelled = false;
+    let graphicsLost = false;
     let frameId = 0;
     let needsRender = true;
     let lastHover = null;
     let pointerEvent = null;
     let lastPointerTime = 0;
     let dragging = false;
+    let radius = 0;
+    let fittedDistance = 0;
     const abortController = new AbortController();
     const scene = new THREE.Scene();
-    const objects = {};
+    scene.background = new THREE.Color("#F1EFE9");
+    const surfaceRoot = new THREE.Group();
+    scene.add(surfaceRoot);
+    const objects = [];
     const pointer = new THREE.Vector2();
     const raycaster = new THREE.Raycaster();
+    const center = new THREE.Vector3();
     const entries = [];
     let renderer;
     setStatus("loading");
     setError("");
 
-    const reportHover = (responseIndex) => {
-      if (lastHover === responseIndex) return;
-      lastHover = responseIndex;
-      callbackRef.current?.(responseIndex);
+    const reportHover = (datum) => {
+      if (!datum && !lastHover) return;
+      if (datum && lastHover && datum.responseIndex === lastHover.responseIndex
+        && datum.hemisphere === lastHover.hemisphere
+        && datum.canvasX === lastHover.canvasX && datum.canvasY === lastHover.canvasY) return;
+      lastHover = datum;
+      callbackRef.current?.(datum);
     };
     callbackRef.current?.(null);
 
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     } catch {
       setStatus("error");
       setError("This browser cannot display the 3D brain. Enable WebGL or hardware acceleration and reload.");
@@ -160,95 +188,92 @@ export default function UploadBrainViewer({ mapping, roi, values, range, onVoxel
     }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.setClearColor(0x000000, 0);
-    Object.assign(renderer.domElement.style, {
-      position: "absolute", inset: "0", width: "100%", height: "100%", pointerEvents: "none",
-    });
-    renderer.domElement.setAttribute("aria-hidden", "true");
+    renderer.domElement.className = "upload-brain-webgl-canvas";
+    renderer.domElement.tabIndex = 0;
+    renderer.domElement.setAttribute("role", "img");
+    renderer.domElement.setAttribute("aria-label", "Interactive Subject 1 cortical surface. Drag to rotate, scroll to zoom, or use arrow keys and plus or minus.");
     mount.appendChild(renderer.domElement);
-    // Keep response colors visible when inspecting the ventral (underside) view.
-    scene.add(new THREE.AmbientLight(0xffffff, 2));
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x77736c, 2));
-    const light = new THREE.DirectionalLight(0xffffff, 2.4);
-    light.position.set(0, 2, 3);
-    scene.add(light);
 
-    for (const hemisphere of HEMISPHERES) {
-      const camera = new THREE.PerspectiveCamera(34, 1, 0.05, 100);
-      const controls = new OrbitControls(camera, pads[hemisphere]);
-      controls.enableDamping = true;
-      controls.dampingFactor = 0.1;
-      controls.minDistance = 1;
-      controls.maxDistance = 12;
-      controls.screenSpacePanning = true;
-      controls.addEventListener("change", () => {
-        needsRender = true;
-        pointerEvent = null;
-        reportHover(null);
-      });
-      const group = new THREE.Group();
-      scene.add(group);
-      objects[hemisphere] = { camera, controls, group, mesh: null, proxy: null, radius: 1, fittedDistance: 0 };
-    }
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x827a70, 2.4));
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.6);
+    keyLight.position.set(1, 1.4, 1.8);
+    scene.add(keyLight);
+    const fillLight = new THREE.DirectionalLight(0xa8b7dc, 1.2);
+    fillLight.position.set(-1.5, 0.2, -1);
+    scene.add(fillLight);
 
-    const layout = () => {
-      const width = Math.max(mount.clientWidth, 1);
-      const height = Math.max(mount.clientHeight, 1);
-      const gap = 8;
-      const hemisphereWidth = Math.max((width - gap) / 2, 1);
-      return { width, height, gap, hemisphereWidth };
-    };
-
-    const fitDistance = (object) => {
-      const verticalHalfAngle = THREE.MathUtils.degToRad(object.camera.fov / 2);
-      const horizontalHalfAngle = Math.atan(Math.tan(verticalHalfAngle) * object.camera.aspect);
-      return object.radius / Math.sin(Math.min(verticalHalfAngle, horizontalHalfAngle)) * 1.12;
-    };
-
-    const applyView = (name) => {
-      const specification = VIEWS[name];
-      if (!specification) return;
-      for (const hemisphere of HEMISPHERES) {
-        const object = objects[hemisphere];
-        const { camera, controls } = object;
-        const distance = fitDistance(object);
-        object.fittedDistance = distance;
-        controls.maxDistance = Math.max(12, distance * 3);
-        camera.far = Math.max(100, distance * 5);
-        camera.position.fromArray(specification[hemisphere]).multiplyScalar(distance);
-        camera.up.fromArray(specification.up);
-        controls.target.set(0, 0, 0);
-        camera.lookAt(controls.target);
-        controls.update();
-      }
-      reportHover(null);
-      pointerEvent = null;
+    const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 3000);
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.minDistance = 35;
+    controls.maxDistance = 850;
+    controls.addEventListener("change", () => {
       needsRender = true;
-      setView(name);
+      pointerEvent = null;
+      reportHover(null);
+      interactionRef.current?.();
+    });
+
+    const fitDistance = () => {
+      const verticalHalfAngle = THREE.MathUtils.degToRad(camera.fov / 2);
+      const horizontalHalfAngle = Math.atan(Math.tan(verticalHalfAngle) * camera.aspect);
+      return radius / Math.sin(Math.min(verticalHalfAngle, horizontalHalfAngle)) * 1.1;
+    };
+    const applyView = (name) => {
+      if (!radius) return;
+      const specification = VIEWS[name] || VIEWS.overview;
+      const distance = fitDistance();
+      fittedDistance = distance;
+      controls.minDistance = Math.max(5, radius * 0.25);
+      controls.maxDistance = Math.max(850, distance * 2);
+      camera.far = Math.max(3000, distance + radius * 4);
+      camera.up.fromArray(specification.up);
+      camera.position.copy(center).add(new THREE.Vector3().fromArray(specification.direction).normalize().multiplyScalar(distance));
+      controls.target.copy(center);
+      camera.updateProjectionMatrix();
+      controls.update();
+      pointerEvent = null;
+      reportHover(null);
+      needsRender = true;
+    };
+    const applyMode = (mode) => {
+      if (!objects.length) return;
+      const selectedMode = HEMISPHERES.includes(mode) ? mode : "both";
+      const box = new THREE.Box3();
+      for (const object of objects) {
+        object.mesh.visible = selectedMode === "both" || object.hemisphere === selectedMode;
+        if (object.mesh.visible) box.expandByObject(object.mesh);
+      }
+      box.getCenter(center);
+      radius = box.getBoundingSphere(new THREE.Sphere()).radius;
+      if (!Number.isFinite(radius) || radius <= 0) throw new Error("The cortical surface bounds are invalid.");
+      applyView(viewRef.current);
     };
 
     const clearData = () => {
-      for (const object of Object.values(objects)) {
-        if (!object.mesh) continue;
-        object.mesh.geometry.getAttribute("color").array.set(object.baseColors);
-        object.mesh.geometry.getAttribute("color").needsUpdate = true;
+      for (const object of objects) {
+        const attribute = object.mesh.geometry.getAttribute("color");
+        attribute.array.set(object.baseColors);
+        attribute.needsUpdate = true;
         object.proxy?.geometry.dispose();
         object.proxy = null;
         object.contributors = new Map();
+        object.projectedValues = null;
       }
+      pointerEvent = null;
       reportHover(null);
       needsRender = true;
     };
-
     const applyData = (data) => {
       if (!Array.isArray(data.range) || data.range.length !== 2 || !data.range.every(Number.isFinite)) {
         throw new Error("The predicted-response color range is invalid.");
       }
-      const projected = HEMISPHERES.map((hemisphere) => projectUploadResponses(
-        data.roi, hemisphere, data.values, objects[hemisphere].mesh.geometry.getAttribute("position").count,
+      // Validate both projections before changing either hemisphere.
+      const projected = objects.map((object) => projectUploadResponses(
+        data.roi, object.hemisphere, data.values, object.mesh.geometry.getAttribute("position").count,
       ));
-      HEMISPHERES.forEach((hemisphere, index) => {
-        const object = objects[hemisphere];
+      objects.forEach((object, index) => {
         const projection = projected[index];
         const attribute = object.mesh.geometry.getAttribute("color");
         attribute.array.set(object.baseColors);
@@ -258,130 +283,126 @@ export default function UploadBrainViewer({ mapping, roi, values, range, onVoxel
         }
         attribute.needsUpdate = true;
         object.contributors = projection.contributors;
+        object.projectedValues = projection.values;
         object.proxy?.geometry.dispose();
         object.proxy = supportedTriangles(object.mesh, projection.contributors);
       });
-      reportHover(null);
       pointerEvent = null;
+      reportHover(null);
       needsRender = true;
     };
 
     const resize = () => {
-      const { width, height, gap, hemisphereWidth } = layout();
+      const width = Math.max(mount.clientWidth, 1);
+      const height = Math.max(mount.clientHeight, 1);
       renderer.setSize(width, height, false);
-      HEMISPHERES.forEach((hemisphere, index) => {
-        pads[hemisphere].style.left = `${index * (hemisphereWidth + gap)}px`;
-        pads[hemisphere].style.width = `${hemisphereWidth}px`;
-        const object = objects[hemisphere];
-        object.camera.aspect = hemisphereWidth / height;
-        if (object.fittedDistance > 0) {
-          const distance = fitDistance(object);
-          object.camera.position.sub(object.controls.target)
-            .multiplyScalar(distance / object.fittedDistance).add(object.controls.target);
-          object.fittedDistance = distance;
-          object.controls.maxDistance = Math.max(12, distance * 3);
-          object.camera.far = Math.max(100, distance * 5);
-          object.controls.update();
-        }
-        object.camera.updateProjectionMatrix();
-      });
-      // Resize is a framing change, not a new stimulus. Keep the active view.
+      camera.aspect = width / height;
+      if (fittedDistance > 0) {
+        const distance = fitDistance();
+        camera.position.sub(controls.target).multiplyScalar(distance / fittedDistance).add(controls.target);
+        fittedDistance = distance;
+        controls.maxDistance = Math.max(850, distance * 2);
+        camera.far = Math.max(3000, distance + radius * 4);
+        controls.update();
+      }
+      camera.updateProjectionMatrix();
+      pointerEvent = null;
+      reportHover(null);
+      interactionRef.current?.();
       needsRender = true;
     };
     resize();
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(mount);
 
-    const contextLost = (event) => {
+    const listen = (element, name, handler) => {
+      element.addEventListener(name, handler);
+      entries.push([element, name, handler]);
+    };
+    const leave = () => { pointerEvent = null; reportHover(null); };
+    listen(renderer.domElement, "pointermove", (event) => {
+      if (document.activeElement?.closest(".upload-brain-tooltip")) return;
+      pointerEvent = { x: event.clientX, y: event.clientY };
+    });
+    listen(renderer.domElement, "pointerleave", leave);
+    listen(renderer.domElement, "pointerdown", () => { dragging = true; leave(); });
+    const pointerUp = () => { dragging = false; };
+    listen(window, "pointerup", pointerUp);
+    listen(window, "pointercancel", pointerUp);
+    listen(renderer.domElement, "keydown", (event) => {
+      const offset = camera.position.clone().sub(controls.target);
+      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
+        const horizontal = event.key === "ArrowLeft" || event.key === "ArrowRight";
+        const axis = horizontal ? camera.up.clone().normalize() : offset.clone().cross(camera.up).normalize();
+        const sign = event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1;
+        offset.applyAxisAngle(axis, sign * Math.PI / 36);
+      } else if (["+", "=", "-", "_"].includes(event.key)) {
+        offset.multiplyScalar(event.key === "+" || event.key === "=" ? 0.9 : 1.1);
+      } else if (event.key === "Home") {
+        applyView(viewRef.current);
+      } else if (event.key === "Escape") {
+        leave();
+        return;
+      } else return;
       event.preventDefault();
+      if (event.key !== "Home") camera.position.copy(controls.target).add(offset);
+      controls.update();
+      leave();
+      needsRender = true;
+    });
+    listen(renderer.domElement, "webglcontextlost", (event) => {
+      event.preventDefault();
+      graphicsLost = true;
+      if (runtimeRef.current?.renderer === renderer) runtimeRef.current.ready = false;
       window.cancelAnimationFrame(frameId);
-      reportHover(null);
+      leave();
       setStatus("error");
       setError("The browser lost its 3D graphics context. Reload to restore the brain view.");
-    };
-    renderer.domElement.addEventListener("webglcontextlost", contextLost);
-
-    for (const hemisphere of HEMISPHERES) {
-      const pad = pads[hemisphere];
-      const move = (event) => { pointerEvent = { hemisphere, x: event.clientX, y: event.clientY }; };
-      const leave = () => { pointerEvent = null; reportHover(null); };
-      const down = () => { dragging = true; leave(); };
-      const key = (event) => {
-        const { camera, controls } = objects[hemisphere];
-        const offset = camera.position.clone().sub(controls.target);
-        if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
-          const horizontal = event.key === "ArrowLeft" || event.key === "ArrowRight";
-          const axis = horizontal ? camera.up.clone().normalize() : offset.clone().cross(camera.up).normalize();
-          const sign = event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 1;
-          offset.applyAxisAngle(axis, sign * Math.PI / 36);
-        } else if (["+", "=", "-", "_"].includes(event.key)) {
-          offset.multiplyScalar(event.key === "+" || event.key === "=" ? 0.9 : 1.1);
-        } else if (event.key === "Home") {
-          applyView(DEFAULT_VIEWS[dataRef.current.roi?.label] || "lateral");
-        } else if (event.key === "Escape") {
-          leave();
-          return;
-        } else return;
-        event.preventDefault();
-        if (event.key !== "Home") camera.position.copy(controls.target).add(offset);
-        controls.update();
-        leave();
-        needsRender = true;
-      };
-      for (const [name, handler] of [["pointermove", move], ["pointerleave", leave], ["pointerdown", down], ["keydown", key]]) {
-        pad.addEventListener(name, handler);
-        entries.push([pad, name, handler]);
-      }
-    }
-    const pointerUp = () => { dragging = false; };
-    window.addEventListener("pointerup", pointerUp);
-    window.addEventListener("pointercancel", pointerUp);
+    });
 
     const inspectPointer = () => {
       if (!pointerEvent || dragging) return;
-      const { hemisphere, x, y } = pointerEvent;
-      const object = objects[hemisphere];
-      if (!object.proxy) return;
-      const rect = pads[hemisphere].getBoundingClientRect();
+      const rect = renderer.domElement.getBoundingClientRect();
+      const { x, y } = pointerEvent;
       pointer.set(((x - rect.left) / rect.width) * 2 - 1, -((y - rect.top) / rect.height) * 2 + 1);
-      object.group.updateMatrixWorld(true);
-      object.proxy.matrixWorld.copy(object.mesh.matrixWorld);
-      raycaster.setFromCamera(pointer, object.camera);
-      if (!raycaster.intersectObject(object.proxy, false).length) {
+      surfaceRoot.updateMatrixWorld(true);
+      camera.updateMatrixWorld(true);
+      raycaster.setFromCamera(pointer, camera);
+      const visible = objects.filter((object) => object.mesh.visible);
+      const proxies = visible.filter((object) => object.proxy).map((object) => {
+        object.proxy.matrixWorld.copy(object.mesh.matrixWorld);
+        return object.proxy;
+      });
+      if (!raycaster.intersectObjects(proxies, false).length) {
         reportHover(null);
+        renderer.domElement.style.cursor = "grab";
         return;
       }
-      const hit = raycaster.intersectObject(object.mesh, false)[0];
-      reportHover(hit?.face ? dominantSource(hit, object.contributors) : null);
+      // All displayed cortex participates: a hidden ROI cannot be inspected
+      // through unpredicted cortex or through the other visible hemisphere.
+      const hit = raycaster.intersectObjects(visible.map((object) => object.mesh), false)[0];
+      const object = hit && visible.find((candidate) => candidate.mesh === hit.object);
+      const datum = object && hit.face ? hoverDatum(hit, object, x - rect.left, y - rect.top) : null;
+      renderer.domElement.style.cursor = datum ? "crosshair" : "grab";
+      reportHover(datum);
     };
-
     const animate = (time) => {
       if (cancelled) return;
-      for (const object of Object.values(objects)) object.controls.update();
+      controls.update();
       if (pointerEvent && time - lastPointerTime > 100) {
         lastPointerTime = time;
         inspectPointer();
-        // Inspect each pointer position once, rather than continuously scanning
-        // the high-resolution cortex while the pointer rests over a voxel.
         pointerEvent = null;
       }
       if (needsRender) {
-        const { height, gap, hemisphereWidth } = layout();
-        renderer.setScissorTest(true);
-        HEMISPHERES.forEach((hemisphere, index) => {
-          for (const name of HEMISPHERES) objects[name].group.visible = name === hemisphere;
-          const x = index * (hemisphereWidth + gap);
-          renderer.setViewport(x, 0, hemisphereWidth, height);
-          renderer.setScissor(x, 0, hemisphereWidth, height);
-          renderer.render(scene, objects[hemisphere].camera);
-        });
+        renderer.render(scene, camera);
         needsRender = false;
       }
       frameId = window.requestAnimationFrame(animate);
     };
     frameId = window.requestAnimationFrame(animate);
 
-    const runtime = { ready: false, applyData, clearData, applyView };
+    const runtime = { ready: false, renderer, applyData, clearData, applyView, applyMode };
     runtimeRef.current = runtime;
     const load = async () => {
       let gltf;
@@ -396,52 +417,58 @@ export default function UploadBrainViewer({ mapping, roi, values, range, onVoxel
         if (await sha256(bytes) !== surface.sha256) {
           throw new Error("The cortical surface failed its integrity check; no predictions were plotted.");
         }
-        if (cancelled) return;
+        if (cancelled || graphicsLost) return;
         gltf = await new GLTFLoader().parseAsync(bytes, new URL(".", new URL(surface.url, window.location.href)).href);
-        if (cancelled) { disposeTree(gltf.scene); return; }
+        if (cancelled || graphicsLost) { disposeTree(gltf.scene); return; }
         gltf.scene.updateMatrixWorld(true);
         for (const hemisphere of HEMISPHERES) {
-          const source = matchingMesh(gltf, surface.hemispheres[hemisphere], hemisphere);
+          const specification = surface.hemispheres[hemisphere];
+          const source = matchingMesh(gltf, specification, hemisphere);
           const geometry = source.geometry.clone();
           if (!geometry.getAttribute("normal")) geometry.computeVertexNormals();
-          const sourceColors = geometry.getAttribute("color");
-          const colors = new Float32Array(geometry.getAttribute("position").count * 3);
-          const grey = new THREE.Color("#cbc6bd");
-          for (let vertex = 0; vertex < colors.length / 3; vertex += 1) {
-            const shade = sourceColors ? THREE.MathUtils.clamp(sourceColors.getX(vertex), 0.35, 0.85) : 0.7;
-            colors[vertex * 3] = grey.r * shade;
-            colors[vertex * 3 + 1] = grey.g * shade;
-            colors[vertex * 3 + 2] = grey.b * shade;
-          }
-          geometry.setAttribute("color", new THREE.BufferAttribute(colors.slice(), 3));
+          const baseColors = new Float32Array(geometry.getAttribute("position").count * 3);
+          const grey = new THREE.Color("#d8d3ca");
+          for (let vertex = 0; vertex < baseColors.length / 3; vertex += 1) grey.toArray(baseColors, vertex * 3);
+          geometry.setAttribute("color", new THREE.BufferAttribute(baseColors.slice(), 3));
           const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({
-            color: "#ffffff", roughness: 0.95, metalness: 0, vertexColors: true, side: THREE.DoubleSide,
+            color: "#ffffff", roughness: 0.94, metalness: 0, vertexColors: true, side: THREE.DoubleSide,
           }));
           mesh.applyMatrix4(source.matrixWorld);
-          const object = objects[hemisphere];
-          object.mesh = mesh;
-          object.baseColors = colors;
-          object.group.add(mesh);
-          const box = new THREE.Box3().setFromObject(object.group);
-          const radius = box.getBoundingSphere(new THREE.Sphere()).radius;
-          object.group.position.sub(box.getCenter(new THREE.Vector3()));
-          object.group.scale.setScalar(1.1 / radius);
-          object.group.position.multiplyScalar(1.1 / radius);
-          object.radius = 1.1;
+          // Restore native inflated hemisphere alignment before applying an
+          // explicit display gap; this is translation only, not resampling.
+          const translation = specification.sourceToGlbTranslationMm;
+          if (!Array.isArray(translation) || translation.length !== 3 || !translation.every(Number.isFinite)) {
+            geometry.dispose();
+            mesh.material.dispose();
+            throw new Error("The cortical hemisphere alignment metadata is invalid.");
+          }
+          mesh.position.sub(new THREE.Vector3().fromArray(translation));
+          surfaceRoot.add(mesh);
+          objects.push({ hemisphere, mesh, baseColors, proxy: null, contributors: new Map(), projectedValues: null });
         }
-        // Only copied base meshes enter the scene. Categorical roi_* nodes from
-        // the existing anatomical explainer are deliberately never displayed.
+        surfaceRoot.updateMatrixWorld(true);
+        const bounds = objects.map((object) => new THREE.Box3().setFromObject(object.mesh));
+        const gap = 8;
+        bounds.forEach((box, index) => {
+          const width = box.max.x - box.min.x;
+          const targetCenter = index === 0 ? -(gap / 2 + width / 2) : gap / 2 + width / 2;
+          objects[index].mesh.position.x += targetCenter - (box.min.x + box.max.x) / 2;
+        });
+        surfaceRoot.updateMatrixWorld(true);
+        const leftBox = new THREE.Box3().setFromObject(objects[0].mesh);
+        const rightBox = new THREE.Box3().setFromObject(objects[1].mesh);
+        if (rightBox.min.x - leftBox.max.x < 7.99) throw new Error("Cortical hemisphere separation could not be validated.");
+        // Categorical roi_* nodes from the explainer never enter this scene.
         disposeTree(gltf.scene);
         gltf = null;
         runtime.ready = true;
         applyData(dataRef.current);
-        const initialView = DEFAULT_VIEWS[dataRef.current.roi?.label] || "lateral";
-        applyView(initialView);
-        setView(initialView);
+        applyMode(modeRef.current);
         setStatus("ready");
       } catch (cause) {
         if (gltf) disposeTree(gltf.scene);
         if (cancelled || cause?.name === "AbortError") return;
+        runtime.ready = false;
         clearData();
         setStatus("error");
         setError(cause instanceof Error ? cause.message : "The cortical surface could not be prepared.");
@@ -455,58 +482,25 @@ export default function UploadBrainViewer({ mapping, roi, values, range, onVoxel
       window.cancelAnimationFrame(frameId);
       resizeObserver.disconnect();
       entries.forEach(([element, name, handler]) => element.removeEventListener(name, handler));
-      window.removeEventListener("pointerup", pointerUp);
-      window.removeEventListener("pointercancel", pointerUp);
-      renderer.domElement.removeEventListener("webglcontextlost", contextLost);
-      for (const object of Object.values(objects)) {
-        object.controls.dispose();
-        object.proxy?.geometry.dispose();
-      }
+      controls.dispose();
+      objects.forEach((object) => object.proxy?.geometry.dispose());
       disposeTree(scene);
       renderer.dispose();
       renderer.forceContextLoss();
       renderer.domElement.remove();
       if (runtimeRef.current === runtime) runtimeRef.current = null;
+      callbackRef.current?.(null);
     };
   }, [mapping]);
 
-  const changeView = (nextView) => {
-    setView(nextView);
-    runtimeRef.current?.applyView(nextView);
-  };
+  useEffect(() => { runtimeRef.current?.applyView(view); }, [view, resetKey]);
+  useEffect(() => { runtimeRef.current?.applyMode(hemisphereMode); }, [hemisphereMode]);
 
   return (
-    <div className="upload-brain-viewer" style={{ position: "relative", width: "100%" }}>
-      <div ref={mountRef} className="upload-brain-canvas" style={{ position: "relative", height: 400 }}>
-        {[leftRef, rightRef].map((ref, index) => (
-          <div
-            key={index}
-            ref={ref}
-            className="upload-brain-pad"
-            tabIndex={0}
-            role="img"
-            aria-label={`${index === 0 ? "Left" : "Right"} cortical hemisphere. Drag to rotate, scroll to zoom, or use arrow keys and plus or minus.`}
-            style={{ position: "absolute", top: 0, bottom: 0, cursor: "grab", touchAction: "none" }}
-          >
-            <span style={{ position: "absolute", top: 10, left: "50%", transform: "translateX(-50%)", pointerEvents: "none", fontSize: 12 }}>
-              {index === 0 ? "Left hemisphere" : "Right hemisphere"}
-            </span>
-          </div>
-        ))}
-      </div>
-      <div className="upload-brain-view-controls" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-        <label>
-          View{" "}
-          <select aria-label="Brain view" value={view} disabled={status !== "ready"} onChange={(event) => changeView(event.target.value)}>
-            {Object.keys(VIEWS).map((name) => <option key={name} value={name}>{name[0].toUpperCase() + name.slice(1)}</option>)}
-          </select>
-        </label>
-        <button type="button" disabled={status !== "ready"} onClick={() => changeView(DEFAULT_VIEWS[roi?.label] || "lateral")}>
-          Reset view
-        </button>
-      </div>
+    <div className="upload-brain-viewer">
+      <div ref={mountRef} className="upload-brain-canvas" />
       {status !== "ready" && (
-        <div className="upload-brain-status" role="status" style={{ position: "absolute", top: 160, left: 20, right: 20, padding: 16, textAlign: "center", background: "var(--surface, #f7f5ef)" }}>
+        <div className="upload-brain-status" role="status">
           {status === "error" ? error : "Loading Subject 1 cortical surface…"}
         </div>
       )}

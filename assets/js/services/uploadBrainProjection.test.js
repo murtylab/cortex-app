@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { Color } from "three";
-import { dominantUploadVoxel, projectUploadResponses, uploadResponseColor } from "./uploadBrainProjection.js";
+import { Color, SRGBColorSpace } from "three";
+import { displayResponseExtent, dominantUploadVoxel, projectUploadResponses, uploadResponseColor } from "./uploadBrainProjection.js";
 
 const mapping = JSON.parse(readFileSync(new URL("../../brainModel/subject1-prediction-mapping.json", import.meta.url)));
 const example = () => ({
@@ -93,23 +93,52 @@ test("requires per-vertex normalization rather than silently accepting different
   assert.doesNotThrow(() => projectUploadResponses(roi, "lh", [-4, 2, 7], 6));
 });
 
-test("asymmetric negative and positive endpoints match the zero-centered legend", () => {
+test("the symmetric display extent preserves signed magnitudes across asymmetric data", () => {
   const range = [-2, 6];
-  assert.equal(uploadResponseColor(-2, range).getHexString(), "766096");
-  assert.equal(uploadResponseColor(0, range).getHexString(), "f4f0e6");
-  assert.equal(uploadResponseColor(6, range).getHexString(), "c36e39");
-  const neutral = new Color("#f4f0e6");
-  assert.ok(uploadResponseColor(-1, range).equals(neutral.clone().lerp(new Color("#766096"), 0.5)));
-  assert.ok(uploadResponseColor(3, range).equals(neutral.clone().lerp(new Color("#c36e39"), 0.5)));
+  assert.equal(displayResponseExtent(range), 6);
+  assert.equal(displayResponseExtent([-6, 2]), 6);
+  assert.equal(displayResponseExtent([0, 0]), 1);
+  assert.equal(uploadResponseColor(-6, range).getHexString(), "2a5c9e");
+  assert.equal(uploadResponseColor(0, range).getHexString(), "f2efe8");
+  assert.equal(uploadResponseColor(6, range).getHexString(), "b4302a");
+  assert.notEqual(uploadResponseColor(-2, range).getHexString(), "2a5c9e");
+  assert.ok(uploadResponseColor(-2, range).equals(uploadResponseColor(-2, [-6, 2])));
+  assert.ok(uploadResponseColor(2, range).equals(uploadResponseColor(2, [-6, 2])));
+});
+
+test("interpolates palette channels in sRGB before converting to linear vertex colors", () => {
+  const blend = (endpoint, amount) => {
+    const neutral = [242, 239, 232];
+    const channels = neutral.map((channel, index) => (channel + (endpoint[index] - channel) * amount) / 255);
+    return new Color().setRGB(...channels, SRGBColorSpace);
+  };
+  for (const amount of [0.1, 1 / 3, 0.5, 0.9]) {
+    const negative = uploadResponseColor(-6 * amount, [-2, 6]);
+    const positive = uploadResponseColor(6 * amount, [-2, 6]);
+    const expectedNegative = blend([42, 92, 158], amount);
+    const expectedPositive = blend([180, 48, 42], amount);
+    for (const channel of ["r", "g", "b"]) {
+      assert.ok(Math.abs(negative[channel] - expectedNegative[channel]) < 1e-12);
+      assert.ok(Math.abs(positive[channel] - expectedPositive[channel]) < 1e-12);
+    }
+  }
+  const target = new Color();
+  assert.equal(uploadResponseColor(0, [-2, 6], target), target);
+  assert.equal(target.getHexString(), "f2efe8");
 });
 
 test("one-sided and zero-response sets preserve zero and safely clamp values", () => {
-  assert.equal(uploadResponseColor(0, [0, 0]).getHexString(), "f4f0e6");
-  assert.equal(uploadResponseColor(3, [1, 3]).getHexString(), "c36e39");
-  assert.equal(uploadResponseColor(-5, [-5, -1]).getHexString(), "766096");
-  assert.equal(uploadResponseColor(300, [-2, 6]).getHexString(), "c36e39");
-  assert.throws(() => uploadResponseColor(1, [5, -1]));
+  assert.equal(uploadResponseColor(0, [0, 0]).getHexString(), "f2efe8");
+  assert.equal(uploadResponseColor(3, [1, 3]).getHexString(), "b4302a");
+  assert.equal(uploadResponseColor(-5, [-5, -1]).getHexString(), "2a5c9e");
+  assert.equal(uploadResponseColor(300, [-2, 6]).getHexString(), "b4302a");
+  assert.equal(uploadResponseColor(-300, [-2, 6]).getHexString(), "2a5c9e");
+  for (const range of [undefined, null, [], [1], [1, 2, 3], [5, -1], [NaN, 2], [-1, Infinity], ["-1", 2], new Array(2)]) {
+    assert.throws(() => displayResponseExtent(range), /invalid/);
+    assert.throws(() => uploadResponseColor(1, range), /invalid/);
+  }
   assert.throws(() => uploadResponseColor(NaN, [-2, 6]));
+  assert.throws(() => uploadResponseColor(Infinity, [-2, 6]));
 });
 
 test("hover uses combined barycentric geometric contributions, not a vertex index", () => {
