@@ -167,7 +167,8 @@ export default function UploadBrainViewer({ mapping, roi, values, range, onVoxel
     let fittedDistance = 0;
     const abortController = new AbortController();
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color("#F1EFE9");
+    // Keep the cortical surface on the Lab page rather than in a boxed stage.
+    scene.background = null;
     const surfaceRoot = new THREE.Group();
     scene.add(surfaceRoot);
     const objects = [];
@@ -190,13 +191,14 @@ export default function UploadBrainViewer({ mapping, roi, values, range, onVoxel
     callbackRef.current?.(null);
 
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     } catch {
       setStatus("error");
       setError("This browser cannot display the 3D brain. Enable WebGL or hardware acceleration and reload.");
       return undefined;
     }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.domElement.className = "upload-brain-webgl-canvas";
     renderer.domElement.tabIndex = 0;

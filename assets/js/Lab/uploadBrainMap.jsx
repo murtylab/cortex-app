@@ -11,7 +11,7 @@ export default function UploadBrainMap({ predictionResult, files, displayFiles =
   const [mappingError, setMappingError] = useState('');
   const [selectedId, setSelectedId] = useState(null);
   const [hoverIndex, setHoverIndex] = useState(null);
-  // Keep the inspected voxel available while moving from the canvas to its card.
+  // Keep the inspected voxel available while moving from the canvas to its preview.
   const inspectVoxel = useCallback((datum) => {
     const index = datum?.responseIndex;
     if (Number.isInteger(index) && index >= 0) setHoverIndex(index);
@@ -57,7 +57,7 @@ export default function UploadBrainMap({ predictionResult, files, displayFiles =
         <h3 className="lab-heading" id="upload-brain-heading">3D brain response</h3>
       </div>
       {notice ? <p className="upload-brain-notice" role="status">{notice}</p> : selected && (
-        <div className="upload-brain-card">
+        <div className="upload-brain-content">
           <div className="upload-brain-toolbar">
             <div>
               <strong>NSD Subject 1 · {region.toUpperCase()}</strong>
