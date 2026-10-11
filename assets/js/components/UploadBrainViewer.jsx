@@ -15,6 +15,11 @@ const VIEWS = {
   ventral: { direction: [0, -1, 0], up: [0, 0, -1] },
   dorsal: { direction: [0, 1, 0], up: [0, 0, -1] },
 };
+const VIEW_LABELS = {
+  overview: "Overview", lateral: "Right side", medial: "Left side", ventral: "Ventral", dorsal: "Dorsal",
+};
+// Start ventral regions from below, as in the original compact panel.
+const DEFAULT_VIEWS = { FFA: "ventral", FBA: "ventral", PPA: "ventral", VWFA: "ventral" };
 
 function disposeTree(root) {
   const geometries = new Set();
@@ -110,21 +115,26 @@ function hoverDatum(hit, object, canvasX, canvasY) {
   };
 }
 
-export default function UploadBrainViewer({ mapping, roi, values, range, onVoxelHover, onViewInteraction, view = "overview", resetKey = 0, hemisphereMode = "both" }) {
+export default function UploadBrainViewer({ mapping, roi, values, range, onVoxelHover, hemisphereMode = "both" }) {
   const mountRef = useRef(null);
   const runtimeRef = useRef(null);
   const callbackRef = useRef(onVoxelHover);
-  const interactionRef = useRef(onViewInteraction);
   const dataRef = useRef({ roi, values, range });
-  const viewRef = useRef(view);
+  const viewRef = useRef(DEFAULT_VIEWS[roi?.label] || "overview");
   const modeRef = useRef(hemisphereMode);
   const [status, setStatus] = useState("loading");
   const [error, setError] = useState("");
+  const [view, setView] = useState(DEFAULT_VIEWS[roi?.label] || "overview");
 
   useEffect(() => { callbackRef.current = onVoxelHover; }, [onVoxelHover]);
-  useEffect(() => { interactionRef.current = onViewInteraction; }, [onViewInteraction]);
   useEffect(() => { viewRef.current = view; }, [view]);
   useEffect(() => { modeRef.current = hemisphereMode; }, [hemisphereMode]);
+  useEffect(() => {
+    const nextView = DEFAULT_VIEWS[roi?.label] || "overview";
+    setView(nextView);
+    viewRef.current = nextView;
+    runtimeRef.current?.applyView(nextView);
+  }, [roi?.label]);
 
   useEffect(() => {
     dataRef.current = { roi, values, range };
@@ -212,7 +222,6 @@ export default function UploadBrainViewer({ mapping, roi, values, range, onVoxel
       needsRender = true;
       pointerEvent = null;
       reportHover(null);
-      interactionRef.current?.();
     });
 
     const fitDistance = () => {
@@ -308,7 +317,6 @@ export default function UploadBrainViewer({ mapping, roi, values, range, onVoxel
       camera.updateProjectionMatrix();
       pointerEvent = null;
       reportHover(null);
-      interactionRef.current?.();
       needsRender = true;
     };
     resize();
@@ -321,7 +329,6 @@ export default function UploadBrainViewer({ mapping, roi, values, range, onVoxel
     };
     const leave = () => { pointerEvent = null; reportHover(null); };
     listen(renderer.domElement, "pointermove", (event) => {
-      if (document.activeElement?.closest(".upload-brain-tooltip")) return;
       pointerEvent = { x: event.clientX, y: event.clientY };
     });
     listen(renderer.domElement, "pointerleave", leave);
@@ -493,17 +500,36 @@ export default function UploadBrainViewer({ mapping, roi, values, range, onVoxel
     };
   }, [mapping]);
 
-  useEffect(() => { runtimeRef.current?.applyView(view); }, [view, resetKey]);
+  useEffect(() => { runtimeRef.current?.applyView(view); }, [view]);
   useEffect(() => { runtimeRef.current?.applyMode(hemisphereMode); }, [hemisphereMode]);
+
+  const changeView = (nextView) => {
+    setView(nextView);
+    viewRef.current = nextView;
+    // Also reframe when resetting an already selected view.
+    runtimeRef.current?.applyView(nextView);
+  };
 
   return (
     <div className="upload-brain-viewer">
-      <div ref={mountRef} className="upload-brain-canvas" />
-      {status !== "ready" && (
-        <div className="upload-brain-status" role="status">
-          {status === "error" ? error : "Loading Subject 1 cortical surface…"}
-        </div>
-      )}
+      <div ref={mountRef} className="upload-brain-canvas">
+        {status !== "ready" && (
+          <div className="upload-brain-status" role="status">
+            {status === "error" ? error : "Loading Subject 1 cortical surface…"}
+          </div>
+        )}
+      </div>
+      <div className="upload-brain-view-controls" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <label>
+          View{" "}
+          <select aria-label="Brain view" value={view} disabled={status !== "ready"} onChange={(event) => changeView(event.target.value)}>
+            {Object.keys(VIEWS).map((name) => <option key={name} value={name}>{VIEW_LABELS[name]}</option>)}
+          </select>
+        </label>
+        <button type="button" disabled={status !== "ready"} onClick={() => changeView(DEFAULT_VIEWS[roi?.label] || "overview")}>
+          Reset view
+        </button>
+      </div>
     </div>
   );
 }

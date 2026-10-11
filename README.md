@@ -44,13 +44,13 @@ currently loaded images from that run (including any edits to a predefined set).
 previews do not change which image colors the brain. Colors share a fixed response
 scale across the run; gray cortex has no predictions in this view.
 
-The inline map uses a shared inflated-surface view, a display-controls sidebar,
-and a searchable image picker. The top thumbnail identifies the image shown on
-the brain; a voxel-hover card compares it with the highest-response image at
-that voxel without changing the brain. Search narrows only the picker, not the
-voxel comparison. Blue/cream/red colors use one symmetric, zero-centered scale
-fixed across the current image set. View and hemisphere controls do not change
-predictions or the comparison set.
+The inline map retains the compact image picker, below-map view controls, and
+two persistent image previews. Both inflated hemispheres share one camera and
+the visualization-style lighting and surface appearance. The previews distinguish
+the image coloring the brain from the highest-response image at the last inspected
+voxel. Blue/cream/red colors use one symmetric, zero-centered scale fixed across
+the current image set. Changing the view does not change predictions or the
+comparison set.
 
 The map requires NSD-1000 readouts (not Murty-185 mapping or fabricated demo results).
 It uses the training voxel selection and order: cortical mask in z/y/x C-order,
@@ -71,7 +71,7 @@ Checks:
 ```bash
 node --test assets/js/services/uploadBrainData.test.js
 node --test assets/js/services/preloadedBrainData.test.js
-node --test assets/js/services/uploadBrainProjection.test.js assets/js/services/uploadBrainInterface.test.js
+node --test assets/js/services/uploadBrainProjection.test.js
 python -B scripts/test_subject1_prediction_mapping.py -v
 npm run build
 ```
