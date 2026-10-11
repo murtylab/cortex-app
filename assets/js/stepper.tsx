@@ -2637,8 +2637,9 @@ useEffect(() => {
                       onClick={exploreInVisualization}
                       disabled={comparisonLoading}
                       loading={comparisonLoading}
+                      aria-busy={comparisonLoading}
                     >
-                      Explore in Visualization
+                      {comparisonLoading ? 'Opening Cortex-Compass…' : 'Open Cortex-Compass'}
                     </Button>
                   )}
                 </div>
@@ -2660,11 +2661,11 @@ useEffect(() => {
                 >
                   <div>
                     Your original result uses the settings you selected. For comparison with the historical image set,
-                    the visualization will use the same model with NSD-1000 predictions across FFA, PPA, and EBA.
+                    Cortex-Compass will use the same model with NSD-1000 predictions across FFA, PPA, and EBA.
                   </div>
                   {comparisonLoading && (
                     <div style={{ marginTop: 6, fontWeight: 500 }}>
-                      Preparing NSD comparison across FFA, PPA, and EBA…
+                      Preparing NSD-1000 predictions for Cortex-Compass across FFA, PPA, and EBA…
                     </div>
                   )}
                   {comparisonError && !comparisonLoading && (
@@ -2837,7 +2838,7 @@ useEffect(() => {
       <Modal
         title="Historical image evidence unavailable"
         open={unsupportedModelOpen}
-        okText="Create comparison"
+        okText="Open Cortex-Compass"
         cancelText="Cancel"
         confirmLoading={comparisonLoading}
         okButtonProps={{ disabled: !alternateComparisonModel || comparisonLoading }}
@@ -2874,7 +2875,7 @@ useEffect(() => {
         {alternateComparisonModel && (
           <p style={{ marginTop: 12 }}>
             The original result remains labeled <strong>{comparisonSnapshot?.model}</strong>; the standardized
-            visualization comparison will be labeled <strong>{alternateComparisonModel}</strong>.
+            Cortex-Compass comparison will be labeled <strong>{alternateComparisonModel}</strong>.
           </p>
         )}
       </Modal>

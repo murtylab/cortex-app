@@ -59,7 +59,7 @@ describe("visualization session contract", () => {
     expect(() => normalizeCreatedSession({ schema_version: 1 })).toThrow(/invalid/i);
   });
 
-  it("puts only the encoded token in the InfoViz fragment", () => {
+  it("puts only the encoded token in the Cortex-Compass handoff fragment", () => {
     const url = buildInfoVizSessionUrl("opaque token/with?chars");
     expect(url).toBe("/infoviz/#session=opaque%20token%2Fwith%3Fchars");
     expect(url).not.toContain("path=");
@@ -71,7 +71,7 @@ describe("visualization session contract", () => {
     expect(calls).toEqual(["/infoviz/#session=opaque-token"]);
   });
 
-  it("shows Explore only for a completed prediction with a request snapshot", () => {
+  it("shows Open Cortex-Compass only for a completed prediction with a request snapshot", () => {
     const complete = {
       showResults: true,
       predictionResult: [{ mean: { image: 1 } }],
@@ -88,5 +88,11 @@ describe("visualization session contract", () => {
     expect(getComparisonErrorMessage({
       response: { data: { detail: { code: "unsupported_model", message: "No historical evidence." } } },
     })).toBe("No historical evidence.");
+  });
+
+  it("names Cortex-Compass in the fallback error and preserves the original result", () => {
+    expect(getComparisonErrorMessage({})).toBe(
+      "Cortex-Compass could not be opened. Your original result is still available.",
+    );
   });
 });

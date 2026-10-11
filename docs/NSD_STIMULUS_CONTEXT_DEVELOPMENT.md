@@ -47,7 +47,7 @@ curl --fail http://localhost:5556/comparison/capabilities
 
 The session janitor removes expired JSON and copied PNG assets. The default TTL is 3,600 seconds. DreamSim MMD resources are loaded lazily and are not required for startup or comparison sessions.
 
-## Terminal 2: InfoViz (port 5174)
+## Terminal 2: Cortex-Compass (port 5174)
 
 ```bash
 cd "$VC_WORKSPACE/InfoViz-Prototype-Edition"
@@ -66,13 +66,13 @@ npm run dev
 Open `http://localhost:5173/lab/` for the fROI workflow. The whole-brain URL is independent of the NSD comparison service.
 
 For VS Code Remote SSH, forward only port 5173. Cortex App proxies `/infoviz/`
-to the machine-local InfoViz server and both apps proxy Core requests to the
+to the machine-local Cortex-Compass server and both apps proxy Core requests to the
 machine-local port 5556. For direct network access without port forwarding, use
 the university-machine hostname in browser-facing URLs and include the resulting
 origin in `CORTEX_ALLOWED_ORIGINS`.
 
 These two Vite commands use checked-in development fallbacks for the sibling
-layout. Environment variables remain available when Core or InfoViz runs on a
+layout. Environment variables remain available when Core or Cortex-Compass runs on a
 different host or port. Restart both Vite servers after changing any `VITE_*`
 variable.
 
@@ -95,7 +95,7 @@ npm run build
 
 ## Manual smoke matrix
 
-For each supported case, first confirm that the existing Cortex result and download action still work. Then choose **Explore in Visualization** and verify that InfoViz labels the original request separately from the NSD-1000 comparison.
+For each supported case, first confirm that the existing Cortex result and download action still work. Then choose **Open Cortex-Compass** and verify that Cortex-Compass labels the original request separately from the NSD-1000 comparison.
 
 | Primary request | Uploads | Expected session behavior |
 | --- | ---: | --- |
@@ -105,7 +105,7 @@ For each supported case, first confirm that the existing Cortex result and downl
 | Any dataset/ROI / unsupported model | 1 | No substitution; the user must explicitly select a supported comparison model or cancel |
 | Any valid session after TTL | any | Safe expired-session page and return link to Cortex |
 
-In InfoViz, also verify:
+In Cortex-Compass, also verify:
 
 - the URL fragment disappears after a successful session load;
 - uploaded markers appear in rankings, the fixed-domain distribution, voxel PCA, and the 77-feature visual PCA without moving historical points;

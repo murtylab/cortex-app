@@ -66,7 +66,7 @@ export function getComparisonErrorMessage(error) {
   if (typeof detail === "string" && detail.trim()) return detail;
   if (typeof detail?.message === "string" && detail.message.trim()) return detail.message;
   if (typeof error?.message === "string" && error.message.trim()) return error.message;
-  return "The NSD comparison could not be prepared. Your original result is still available.";
+  return "Cortex-Compass could not be opened. Your original result is still available.";
 }
 
 export async function getComparisonCapabilities() {
