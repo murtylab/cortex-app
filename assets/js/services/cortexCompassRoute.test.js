@@ -11,6 +11,17 @@ afterEach(() => {
 });
 
 describe("Cortex-Compass page route", () => {
+  it("keeps Compass out of the top navigation without removing the Lab workspace entry", () => {
+    const shell = fs.readFileSync(new URL("../../../lab/index.html", import.meta.url), "utf8");
+    const navigation = shell.match(/<nav id="navmenu"[\s\S]*?<\/nav>/)?.[0];
+    expect(navigation).toBeDefined();
+    expect(navigation).not.toContain("Cortex-Compass");
+    expect(navigation).not.toContain("/cortex-compass/");
+    expect(navigation).toContain('href="/lab/"');
+    expect(navigation).toContain("The Scoreboard");
+    expect(shell).toContain('src="/assets/js/index.tsx"');
+  });
+
   it.each(["/cortex-compass", "/cortex-compass/", "/cortex-compass/index.html"])(
     "reuses the Lab shell for %s",
     (url) => expect(rewriteCortexCompassRequest(url)).toBe("/lab/index.html"),
