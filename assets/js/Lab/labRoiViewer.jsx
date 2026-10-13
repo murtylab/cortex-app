@@ -146,10 +146,12 @@ export default function LabRoiViewer({ region }) {
   const regionRef = useRef(region);
   regionRef.current = region;
   const [status, setStatus] = useState("loading");
-  const [threshold, setThreshold] = useState(7);
+  const [threshold, setThreshold] = useState(3.3);
   const [view, setView] = useState(ROI_VIEW[roiKey(region)] || "lateral");
   const [helpOpen, setHelpOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isolate, setIsolate] = useState(true);
+  const isolateRef = useRef(true);
   const helpRef = useRef(null);
   const rootRef = useRef(null);
 
@@ -221,9 +223,11 @@ export default function LabRoiViewer({ region }) {
 
     const highlight = (name) => {
       const selected = (name || "").toUpperCase();
+      const solo = isolateRef.current;
       roiMeshes.forEach((meshes, roi) => {
         const on = roi === selected;
         meshes.forEach((mesh) => {
+          mesh.visible = !solo || on;
           if (mesh.userData.outline) mesh.userData.outline.visible = on;
         });
       });
@@ -364,6 +368,11 @@ export default function LabRoiViewer({ region }) {
   }, [region]);
 
   useEffect(() => {
+    isolateRef.current = isolate;
+    apiRef.current?.highlight(regionRef.current);
+  }, [isolate]);
+
+  useEffect(() => {
     if (!helpOpen) return undefined;
     const onPointerDown = (event) => {
       if (!helpRef.current?.contains(event.target)) setHelpOpen(false);
@@ -443,24 +452,42 @@ export default function LabRoiViewer({ region }) {
         <span className="lab-roi-hemi-label">Right</span>
       </div>
       <div className="lab-roi-toolbar">
-        <div className="lab-roi-thresholds">
-          {THRESHOLDS.map((value) => (
+        <div className="lab-roi-toolbar-start">
+          <div className="lab-roi-thresholds">
+            {THRESHOLDS.map((value) => (
+              <button
+                key={value}
+                type="button"
+                className={threshold === value ? "is-active" : undefined}
+                onClick={() => {
+                  if (value !== threshold) {
+                    setStatus("loading");
+                    setThreshold(value);
+                  }
+                }}
+              >
+                t &gt; {value}
+              </button>
+            ))}
+          </div>
+          <div className="lab-roi-modes" role="group" aria-label="Which fROIs to show">
             <button
-              key={value}
               type="button"
-              className={threshold === value ? "is-active" : undefined}
-              onClick={() => {
-                if (value !== threshold) {
-                  setStatus("loading");
-                  setThreshold(value);
-                }
-              }}
+              className={isolate ? undefined : "is-active"}
+              onClick={() => setIsolate(false)}
             >
-              t &gt; {value}
+              All
             </button>
-          ))}
+            <button
+              type="button"
+              className={isolate ? "is-active" : undefined}
+              onClick={() => setIsolate(true)}
+            >
+              Selected
+            </button>
+          </div>
         </div>
-        <div className="lab-roi-legend">
+        <div className={`lab-roi-legend${isolate ? " is-solo" : ""}`}>
           {REGION_OPTIONS.map((option) => (
             <span
               key={option.value}
@@ -547,6 +574,10 @@ export default function LabRoiViewer({ region }) {
                 <div>
                   <dt>t &gt; 3.3 / t &gt; 7</dt>
                   <dd>How strictly each fROI is defined</dd>
+                </div>
+                <div>
+                  <dt>All / Selected</dt>
+                  <dd>Show every fROI, or only the one chosen in the menu</dd>
                 </div>
                 <div>
                   <dt>Fullscreen</dt>

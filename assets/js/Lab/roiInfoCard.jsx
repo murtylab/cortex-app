@@ -5,6 +5,8 @@ import CardContent from "@mui/material/CardContent";
 import { LAB_ROI_INFO, REGION_OPTIONS } from "../constants";
 
 const RoiInfoCard = ({ region, variant = "stage", children }) => {
+  const [collapsed, setCollapsed] = React.useState(false);
+  const ignoreScrollUntil = React.useRef(0);
   const abbrev =
     REGION_OPTIONS.find(
       (option) => (option.value || "").toLowerCase() === (region || "").toLowerCase()
@@ -16,9 +18,27 @@ const RoiInfoCard = ({ region, variant = "stage", children }) => {
     description: "Select an fROI to see where it sits in visual cortex and what it typically prefers.",
   };
 
+  const setCollapsedFromUser = (next) => {
+    ignoreScrollUntil.current = performance.now() + 700;
+    setCollapsed(next);
+  };
+
+  React.useEffect(() => {
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - lastY;
+      lastY = y;
+      if (performance.now() < ignoreScrollUntil.current) return;
+      if (delta > 12 && y > 40) setCollapsed(true);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <Box
-      className={`lab-roi-card-wrap${variant === "rail" ? " is-rail" : ""}${children ? " has-viewer" : ""}`}
+      className={`lab-roi-card-wrap${variant === "rail" ? " is-rail" : ""}${children ? " has-viewer" : ""}${collapsed ? " is-collapsed" : ""}`}
       data-tutorial="lab-roi-card"
       sx={{
         height: variant === "rail" || children ? "auto" : "100%",
@@ -37,13 +57,39 @@ const RoiInfoCard = ({ region, variant = "stage", children }) => {
         }}
       >
         <CardContent className="lab-model-card lab-roi-card">
-          <div className="lab-roi-card-head">
+          <div
+            className="lab-roi-card-head"
+            onClick={() => {
+              if (collapsed) setCollapsedFromUser(false);
+            }}
+          >
             <div className="lab-roi-card-identity">
               <p className="lab-section-label">ROI Card</p>
               <span className="lab-model-card-name">{abbrev || "—"}</span>
               <p className="lab-model-card-type">{info.stream}</p>
             </div>
             <p className="lab-roi-card-description">{info.description}</p>
+            <button
+              type="button"
+              className="lab-roi-card-toggle"
+              aria-expanded={!collapsed}
+              aria-label={collapsed ? "Expand ROI card" : "Collapse ROI card"}
+              onClick={(event) => {
+                event.stopPropagation();
+                setCollapsedFromUser(!collapsed);
+              }}
+            >
+              <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+                <path
+                  d={collapsed ? "M2 4.5 6 8.5 10 4.5" : "M2 7.5 6 3.5 10 7.5"}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
           </div>
           {children ? <div className="lab-roi-card-viewer">{children}</div> : null}
         </CardContent>
