@@ -6,7 +6,7 @@ import { Typography, Link } from '@mui/material';
 import { MODEL_OPTIONS } from '../constants';
 import useRoiLeaderboardRank from './useRoiLeaderboardRank';
 
-const ModelCard = ({ region, dataset, model, variant = 'default' }) => {
+const ModelCard = ({ region, dataset, model, variant = 'default', collapsed = false, onCollapsedChange }) => {
   const modelMeta = MODEL_OPTIONS.find(option => option.value === model);
   const modelName = modelMeta?.label || model;
   const modelType = modelMeta?.type || 'Unknown Model Type';
@@ -28,7 +28,7 @@ const ModelCard = ({ region, dataset, model, variant = 'default' }) => {
   if (isLab) {
     return (
       <Box
-        className="lab-model-card-wrap"
+        className={`lab-model-card-wrap${collapsed ? ' is-collapsed' : ''}`}
         data-tutorial="lab-results-model-card"
       >
         <Card
@@ -38,11 +38,24 @@ const ModelCard = ({ region, dataset, model, variant = 'default' }) => {
             boxShadow: 'none',
             border: '0.5px solid var(--lab-hairline, #D6D2C6)',
             background: 'var(--lab-panel, #FBFAF6)',
-            aspectRatio: '1 / 1',
+            aspectRatio: collapsed ? 'auto' : '1 / 1',
             height: 'auto',
           }}
         >
-          <CardContent className="lab-model-card">
+          <CardContent className={`lab-model-card${collapsed ? ' is-collapsed' : ''}`} sx={{ position: 'relative' }}>
+            {onCollapsedChange && (
+              <button
+                type="button"
+                aria-expanded={!collapsed}
+                aria-label={collapsed ? 'Expand model card' : 'Collapse model card'}
+                onClick={() => onCollapsedChange(!collapsed)}
+                style={{ position: 'absolute', top: 12, right: 12, border: 0, background: 'none', color: 'var(--lab-muted)', cursor: 'pointer', padding: 4 }}
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+                  <path d={collapsed ? 'M2 4 6 8 10 4' : 'M2 8 6 4 10 8'} fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            )}
             <p className="lab-section-label">Model Card</p>
             <a
               className="lab-model-card-name"
@@ -53,20 +66,29 @@ const ModelCard = ({ region, dataset, model, variant = 'default' }) => {
             >
               {modelName}
             </a>
-            <p className="lab-model-card-type">{modelType}</p>
+            {!collapsed && <p className="lab-model-card-type">{modelType}</p>}
 
             <div className="lab-model-card-rank">
-              {ranking.status === 'ok' ? (
+              {collapsed ? (
+                <>
+                  <p className="lab-model-card-rank-fallback" style={{ margin: 0 }}>
+                    {ranking.status === 'ok' ? <>Rank <strong>{ranking.rank}</strong> of {ranking.total} models</> : rankCopy}
+                  </p>
+                  <a className="lab-model-card-link" href="/scoreboardQuantitative/?view=rank" target="_blank" rel="noopener noreferrer">
+                    View scoreboard
+                  </a>
+                </>
+              ) : ranking.status === 'ok' ? (
                 <>
                   <span className="lab-stat-kicker">Rank</span>
                   <span className="lab-stat-number">{ranking.rank}</span>
                   <div className="lab-model-card-rank-lines">
-                    <span className="lab-model-card-rank-meta">
+                    {!collapsed && <span className="lab-model-card-rank-meta">
                       of {ranking.total} models
-                    </span>
-                    <span className="lab-model-card-rank-scope">
+                    </span>}
+                    {!collapsed && <span className="lab-model-card-rank-scope">
                       {regionLabel} · {datasetLabel}
-                    </span>
+                    </span>}
                     <a
                       className="lab-model-card-link"
                       href="/scoreboardQuantitative/?view=rank"

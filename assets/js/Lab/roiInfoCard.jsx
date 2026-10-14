@@ -4,7 +4,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import { LAB_ROI_INFO, REGION_OPTIONS } from "../constants";
 
-const RoiInfoCard = ({ region, variant = "stage", children }) => {
+const RoiInfoCard = ({ region, variant = "stage", children, onClose }) => {
   const [collapsed, setCollapsed] = React.useState(false);
   const ignoreScrollUntil = React.useRef(0);
   const abbrev =
@@ -24,6 +24,7 @@ const RoiInfoCard = ({ region, variant = "stage", children }) => {
   };
 
   React.useEffect(() => {
+    if (onClose) return;
     let lastY = window.scrollY;
     const onScroll = () => {
       const y = window.scrollY;
@@ -34,7 +35,7 @@ const RoiInfoCard = ({ region, variant = "stage", children }) => {
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [onClose]);
 
   return (
     <Box
@@ -72,16 +73,17 @@ const RoiInfoCard = ({ region, variant = "stage", children }) => {
             <button
               type="button"
               className="lab-roi-card-toggle"
-              aria-expanded={!collapsed}
-              aria-label={collapsed ? "Expand ROI card" : "Collapse ROI card"}
+              aria-expanded={onClose ? undefined : !collapsed}
+              aria-label={onClose ? "Close ROI viewer" : collapsed ? "Expand ROI card" : "Collapse ROI card"}
               onClick={(event) => {
                 event.stopPropagation();
-                setCollapsedFromUser(!collapsed);
+                if (onClose) onClose();
+                else setCollapsedFromUser(!collapsed);
               }}
             >
               <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
                 <path
-                  d={collapsed ? "M2 4.5 6 8.5 10 4.5" : "M2 7.5 6 3.5 10 7.5"}
+                  d={onClose ? "M3 3 9 9 M9 3 3 9" : collapsed ? "M2 4.5 6 8.5 10 4.5" : "M2 7.5 6 3.5 10 7.5"}
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.4"

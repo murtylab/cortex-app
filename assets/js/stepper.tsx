@@ -12,6 +12,7 @@ import Uploader from './Lab/uploader.tsx';
 import RegionSelector from './Lab/regionselector.jsx';
 import Settings from './Lab/settings.jsx';
 import ModelCard from './Lab/modelcard.jsx';
+import InferenceHistory from './Lab/inferenceHistory.jsx';
 
 // image preview and grouping
 import ImagePreviewGroupedDnD from './Lab/imagePreviewGrid.tsx';
@@ -22,13 +23,14 @@ import PreloadDatasetPicker from './Lab/preloadDatasetPicker.jsx';
 // visualization graphics
 import BarChart from './Lab/barchart.jsx';
 import Heatmap from './Lab/heatmap.jsx';
-
 import BoxPlot from './Lab/boxplot.jsx';
+
 
 import DatasetCardLab from './Lab/datasetcard-lab.jsx';
 import StepHeading from './Lab/stepHeading.jsx';
 import LabRoiViewer from './Lab/labRoiViewer.jsx';
 import RoiInfoCard from './Lab/roiInfoCard.jsx';
+import RoiInfoCardCompact from './Lab/roiInfoCardCompact.jsx';
 import {
   REGION_OPTIONS,
   MURTY185_INCLUDED_REGIONS,
@@ -52,6 +54,19 @@ type PreviewFile = {
 
 
 type FileWithPath = File & { webkitRelativePath?: string };
+
+type InferenceHistoryEntry = {
+  id: number;
+  createdAt: number;
+  label: string;
+  result: any;
+  files: PreviewFile[];
+  settings: {
+    region: string; model: string; dataset: string; voxelOption: string;
+    voxelNumber: string; paper: string; participantName: string;
+    prestoreDataset: string | null;
+  };
+};
 
 type VoxelsData = Record<
   string, // imageName
@@ -181,6 +196,8 @@ const Stepper: React.FC = () => {
   const [model, setModel] = useState(DEFAULT_MODEL);
   const [dataset, setDataset] = useState(DEFAULT_DATASET);
   const [region, setRegion] = useState(DEFAULT_REGION);
+  const [stimuliSource, setStimuliSource] = useState<"upload" | "preload">("upload");
+  const [showRoiViewer, setShowRoiViewer] = useState(false);
   const selectRegion = (nextRegion: string) => {
     setRegion(nextRegion);
     if (!regionSupportsMurty185(nextRegion) && dataset !== "nsd_1000") {
@@ -214,13 +231,27 @@ const Stepper: React.FC = () => {
   //visualization
   const [vizOrder, setVizOrder] = useState("group");
   const [resultsPreviewCollapsed, setResultsPreviewCollapsed] = useState(true);
+  const [stimuliPreviewCollapsed, setStimuliPreviewCollapsed] = useState(false);
+  const [modelCardCollapsed, setModelCardCollapsed] = useState(false);
+  const [inferenceHistory, setInferenceHistory] = useState<InferenceHistoryEntry[]>([]);
+  const [activeHistoryId, setActiveHistoryId] = useState<number | null>(null);
+  const [historyToRestore, setHistoryToRestore] = useState<InferenceHistoryEntry | null>(null);
+  const historyIdRef = useRef(0);
 
   // prestore dataset
   const[prestoreDataset, setPrestoreDataset] = useState<string | null>(null);
   const [preloadLoading, setPreloadLoading] = useState(false);
   const [preloadLoadingKey, setPreloadLoadingKey] = useState<string | null>(null);
+  const preloadRequestRef = useRef(0);
   const isPreloadMode = !!prestoreDataset;
   const inputMode = isPreloadMode ? "preload" : "upload";
+  // Server keys change after inference; only actual stimuli changes clear history.
+  const stimuliHistoryKey = JSON.stringify([prestoreDataset, files.map((file) =>
+    [file.uid, file.groupKey, file.file?.size, file.file?.lastModified])]);
+  useEffect(() => {
+    setInferenceHistory([]);
+    setActiveHistoryId(null);
+  }, [stimuliHistoryKey]);
   // Bind spatial predictions to the exact settings and images that produced them.
   const inferenceContextKey = getInferenceContextKey({ model, dataset, region,
     voxelOption, voxelNumber, paper, participantName, prestoreDataset }, files);
@@ -1653,6 +1684,9 @@ const loadPreloadedPredictionByRegion = async (
 
 
 const loadPrestoredDataset = async (datasetKey: string, options: { silent?: boolean } = {}) => {
+  setInferenceHistory([]);
+  setActiveHistoryId(null);
+  const requestId = ++preloadRequestRef.current;
   setPreloadLoading(true);
   setPreloadLoadingKey(datasetKey);
   setPrestoreDataset(datasetKey);
@@ -1730,6 +1764,8 @@ const loadPrestoredDataset = async (datasetKey: string, options: { silent?: bool
       })
     );
 
+    if (requestId !== preloadRequestRef.current) return [];
+    setStimuliPreviewCollapsed(false);
     setFiles(preloadFiles);
     setFileMappings(preloadFiles);
     if (datasetKey.toLowerCase() === 'reza') {
@@ -1750,20 +1786,24 @@ const loadPrestoredDataset = async (datasetKey: string, options: { silent?: bool
     }
     return preloadFiles;
   } catch (err) {
+    if (requestId !== preloadRequestRef.current) return [];
     console.error(err);
     if (!options.silent) {
       message.error(`Failed to load dataset ${datasetKey}`);
     }
     return [];
   } finally {
-    setPreloadLoading(false);
-    setPreloadLoadingKey(null);
+    if (requestId === preloadRequestRef.current) {
+      setPreloadLoading(false);
+      setPreloadLoadingKey(null);
+    }
   }
 };
 
  
 const addIncomingFiles = (newFiles: File[], groupKey?: string) => {
   if (!newFiles?.length) return;
+  setStimuliPreviewCollapsed(false);
 
   const nextAdd: PreviewFile[] = newFiles
     .filter((f) => f.type?.startsWith("image/"))
@@ -1854,6 +1894,14 @@ const clearGroup = (uidsToRemove: string[]) => {
 
 
 const clearAll = () => {
+  setInferenceHistory([]);
+  setActiveHistoryId(null);
+  setStimuliPreviewCollapsed(false);
+  setModelCardCollapsed(false);
+  preloadRequestRef.current += 1;
+  setPreloadLoading(false);
+  setPreloadLoadingKey(null);
+  setPredictError(null);
   setFiles((prev) => {
     prev.forEach((x) => {
       try { URL.revokeObjectURL(x.blobURL); } catch {}
@@ -1869,6 +1917,11 @@ const clearAll = () => {
   setPredictstep(1);
   setUploaderKey((k) => k + 1); 
   setPrestoreDataset(null);
+};
+
+const switchStimuliSource = (source: "upload" | "preload") => {
+  clearAll();
+  setStimuliSource(source);
 };
 
 const moveItemToGroup = (uid: string | string[], toGroupKey: string) => {
@@ -1890,6 +1943,7 @@ useEffect(() => {
   setShowInsights(false);
   setShowResults(false);
   setPredictError(null);
+  setActiveHistoryId(null);
 }, [
   model,
   dataset,
@@ -1900,6 +1954,43 @@ useEffect(() => {
   prestoreDataset,
   region,
 ]);
+
+// Apply saved results after the settings-change effect has invalidated old results.
+useEffect(() => {
+  if (!historyToRestore) return;
+  const entry = historyToRestore;
+  const result = structuredClone(entry.result);
+  const contextKey = getInferenceContextKey(entry.settings, entry.files);
+  setPredictionResult(result);
+  setInsightRegionCache({ [entry.settings.region]: result });
+  setBrainRun({ contextKey, result, files: entry.files });
+  setActiveHistoryId(entry.id);
+  setPredictstep(2);
+  setShowResults(true);
+  setStimuliPreviewCollapsed(true);
+  setModelCardCollapsed(true);
+  setHistoryToRestore(null);
+  window.requestAnimationFrame(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+}, [historyToRestore]);
+
+const restoreInferenceHistory = (entry: InferenceHistoryEntry) => {
+  inferenceRequestRef.current += 1;
+  setPredictionLoading(false);
+  setLoading(false);
+  setPredictError(null);
+  setRegion(entry.settings.region);
+  setModel(entry.settings.model);
+  setDataset(entry.settings.dataset);
+  setVoxelOption(entry.settings.voxelOption);
+  setVoxelNumber(entry.settings.voxelNumber);
+  setPaper(entry.settings.paper);
+  setParticipantName(entry.settings.participantName);
+  setFiles(entry.files.map((file) => ({ ...file })));
+  setFileMappings(entry.files.map((file) => ({ ...file })));
+  setSelectedInsightRegions([entry.settings.region]);
+  setActiveHistoryId(entry.id);
+  setHistoryToRestore(entry);
+};
 
   useEffect(() => {
     if (import.meta.env.DEV) console.log("🔄 predictionResult updated:", predictionResult);
@@ -1955,6 +2046,10 @@ useEffect(() => {
 
   // Bottom Across-regions selection follows the top ROI selector.
   useEffect(() => {
+    if (!region) {
+      setSelectedInsightRegions([]);
+      return;
+    }
     if (availableInsightRegions.includes(region)) {
       setSelectedInsightRegions([region]);
       return;
@@ -2001,6 +2096,19 @@ useEffect(() => {
     setBrainRun(null);
     setPredictionLoading(true);
 
+    const saveHistory = (result: any, resultFiles: PreviewFile[]) => {
+      const entry: InferenceHistoryEntry = {
+        id: ++historyIdRef.current,
+        createdAt: Date.now(),
+        label: `${prestoreDataset ? PRELOAD_DATASETS[prestoreDataset]?.label || prestoreDataset : 'Customized'} • ${targetRegion.toUpperCase()}`,
+        result: structuredClone(result),
+        files: resultFiles.map((file) => ({ ...file })),
+        settings: { region: targetRegion, model, dataset, voxelOption, voxelNumber, paper, participantName, prestoreDataset },
+      };
+      setInferenceHistory((previous) => [...previous, entry].slice(-10));
+      setActiveHistoryId(entry.id);
+    };
+
     try {
       if (prestoreDataset) {
         const localResult = wrapPredictionResult(
@@ -2013,6 +2121,7 @@ useEffect(() => {
           setPredictionResult(localResult);
           setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: localResult }));
           setBrainRun({ contextKey: requestContext, result: localResult, files: requestFiles });
+          saveHistory(localResult, requestFiles);
 
           setPredictstep(2);
           setShowResults(true);
@@ -2045,6 +2154,7 @@ useEffect(() => {
       setFileMappings(withServerKeys);
       setBrainRun({ contextKey: requestContext, result: resultData, files: withServerKeys(requestFiles) });
       setPredictionResult(resultData);
+      saveHistory(resultData, withServerKeys(requestFiles));
       setInsightRegionCache((prev) => ({ ...prev, [targetRegion]: resultData }));
       setPredictError(null);
       setShowResults(true);
@@ -2330,6 +2440,10 @@ useEffect(() => {
   
   const runInference = async () => {
     const ok = await handlePrediction(region);
+    if (ok) {
+      setStimuliPreviewCollapsed(true);
+      setModelCardCollapsed(true);
+    }
     window.requestAnimationFrame(() => {
       resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
@@ -2374,7 +2488,10 @@ useEffect(() => {
               variant="lab"
               tutorialRootKey="lab-settings-region"
               activeTutorialKey="lab-results-region-active"
+              onView3D={() => { if (region) setShowRoiViewer((open) => !open); }}
+              is3DOpen={showRoiViewer}
             />
+            {/* <RoiInfoCardCompact region={region} /> */}
             <Settings
               variant="lab"
               region={region}
@@ -2391,54 +2508,53 @@ useEffect(() => {
             />
             <ModelCard
               variant="lab"
+              collapsed={modelCardCollapsed}
+              onCollapsedChange={setModelCardCollapsed}
               region={region}
               dataset={dataset}
               model={model}
             />
+            <InferenceHistory entries={inferenceHistory} activeId={activeHistoryId} onSelect={restoreInferenceHistory} />
           </div>
         </aside>
 
         <div className="lab-main-column">
-          <div className="lab-roi-stage">
-            <RoiInfoCard region={region}>
+          {showRoiViewer && region && <div className="lab-roi-stage">
+            <RoiInfoCard region={region} onClose={() => setShowRoiViewer(false)}>
               <LabRoiViewer region={region} />
             </RoiInfoCard>
-          </div>
+          </div>}
 
           <div data-tutorial="lab-upload-panel" className="lab-stimuli-canvas">
-            <StepHeading step={3}>Define the stimuli set</StepHeading>
+            <StepHeading step={3}>Upload  the stimuli set</StepHeading>
 
             <div className="lab-stimuli-sources">
-            <div
+            {stimuliSource === "upload" ? <div
               data-tutorial="lab-upload-uploader"
               className="lab-upload-column-panel"
             >
-              <div className="lab-subheading">Upload stimuli</div>
+              {/* <div className="lab-subheading">Upload stimuli</div> */}
               <Uploader
                 key={uploaderKey}
                 fillHeight
                 onAddFiles={(newFiles) => addIncomingFiles(newFiles)}
               />
-            </div>
-
-            <div className="lab-preload-inline">
-              <div className="lab-subheading">Or load a stimuli set from published papers</div>
+              <button
+                type="button"
+                className="lab-model-card-link lab-stimuli-source-switch"
+                onClick={() => switchStimuliSource("preload")}
+              >
+                No customized stimuli? Try run preload stimuli
+              </button>
+            </div> : <div className="lab-preload-inline">
+              {/* <div className="lab-subheading">Load a stimuli set from published papers</div> */}
               <PreloadDatasetPicker
                 selectedKey={prestoreDataset}
                 isLoading={preloadLoading}
                 loadingKey={preloadLoadingKey}
                 onSelectDataset={(key: string | null) => {
                   if (!key) {
-                    setPrestoreDataset(null);
-                    setPreloadLoading(false);
-                    setPreloadLoadingKey(null);
-                    setFiles([]);
-                    setFileMappings([]);
-                    setPredictionResult(null);
-                    clearRegionPredictionCache();
-                    setShowInsights(false);
-                    setShowResults(false);
-                    setPredictstep(1);
+                    clearAll();
                     return;
                   }
 
@@ -2452,7 +2568,14 @@ useEffect(() => {
                   Pick a paper to load its stimuli and see its Paper Card.
                 </div>
               )}
-            </div>
+              <button
+                type="button"
+                className="lab-model-card-link lab-stimuli-source-switch"
+                onClick={() => switchStimuliSource("upload")}
+              >
+                Want to run your own designed stimuli?
+              </button>
+            </div>}
             </div>
 
             <div data-tutorial="lab-upload-images-panel">
@@ -2461,6 +2584,9 @@ useEffect(() => {
                   files={files}
                   variant="lab"
                   eyebrow="Examine the uploaded stimuli"
+                  foldable
+                  panelCollapsed={stimuliPreviewCollapsed}
+                  onPanelCollapsedChange={setStimuliPreviewCollapsed}
                   title={inputMode === "preload" ? "Preloaded Images" : "Uploaded Images"}
                   groupDepth={1}
                   isPreload={isPreloadMode}
@@ -2488,7 +2614,7 @@ useEffect(() => {
                 type="primary"
                 data-tutorial="lab-run-inference"
                 onClick={runInference}
-                disabled={loading || predictionLoading || files.length === 0}
+                disabled={loading || predictionLoading || files.length === 0 || !region}
               >
                 {loading || predictionLoading ? "Processing..." : "Run Inference"}
               </Button>
@@ -2566,115 +2692,34 @@ useEffect(() => {
                 />
               )}
 
-              <div
-                className="lab-section-header"
-                data-tutorial="lab-results-get-insights"
-              >
+              {/* <div className="lab-section-header" data-tutorial="lab-results-get-insights">
                 <span className="lab-eyebrow">Advanced insights</span>
                 <h3 className="lab-heading">Across regions</h3>
               </div>
-
-              <div
-                style={{
-                  marginTop: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  flexWrap: 'wrap',
-                }}
-              >
-                <span
-                  style={{
-                    fontWeight: 500,
-                    whiteSpace: 'nowrap',
-                    fontSize: 13,
-                    fontFamily: "var(--lab-sans, 'Inter', sans-serif)",
-                    color: 'var(--lab-text, #211F1C)',
-                  }}
-                >
-                  ROI selection
-                </span>
-
+              <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--lab-text)' }}>ROI selection</span>
                 {availableInsightRegions.map((r) => {
                   const selected = selectedInsightRegions.includes(r);
-                  const label = REGION_OPTIONS.find((x) => x.value === r)?.label || r.toUpperCase();
-
+                  const label = REGION_OPTIONS.find((option) => option.value === r)?.label || r.toUpperCase();
                   return (
-                    <label
-                      key={r}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        cursor: 'pointer',
-                        fontSize: '13px',
-                        whiteSpace: 'nowrap',
-                        padding: '4px 8px',
-                        borderRadius: '5px',
-                        border: selected
-                          ? '1px solid rgba(107, 99, 88, 0.35)'
-                          : '1px solid transparent',
-                        background: selected
-                          ? 'rgba(247, 242, 238, 0.95)'
-                          : 'transparent',
-                        boxShadow: 'none',
-                        opacity:
-                          selectedInsightRegions.length > 0 && !selected ? 0.55 : 1,
-                        transition: 'all 220ms ease',
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selected}
-                        onChange={() => toggleInsightRegion(r)}
-                      />
-                      <span
-                        style={{
-                          fontFamily: "var(--lab-mono, 'IBM Plex Mono', monospace)",
-                          fontSize: '12px',
-                          fontWeight: 400,
-                          color: 'var(--lab-text, #211F1C)',
-                        }}
-                      >
-                        {label}
-                      </span>
+                    <label key={r} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 5, cursor: 'pointer', border: selected ? '1px solid rgba(107, 99, 88, 0.35)' : '1px solid transparent', background: selected ? 'rgba(247, 242, 238, 0.95)' : 'transparent', opacity: selectedInsightRegions.length > 0 && !selected ? 0.55 : 1 }}>
+                      <input type="checkbox" checked={selected} onChange={() => toggleInsightRegion(r)} />
+                      <span style={{ fontFamily: "var(--lab-mono, 'IBM Plex Mono', monospace)", fontSize: 12, color: 'var(--lab-text)' }}>{label}</span>
                     </label>
                   );
                 })}
               </div>
-
               {insightLoading && (
-                <div
-                  style={{
-                    marginTop: 16,
-                    width: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 10,
-                    minHeight: 120,
-                    color: 'var(--lab-secondary, #57534A)',
-                  }}
-                >
+                <div role="status" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, minHeight: 120, color: 'var(--lab-secondary)', fontSize: 13 }}>
                   <Spin size="large" />
-                  <span style={{ fontSize: 13, fontFamily: "var(--lab-sans, 'Inter', sans-serif)" }}>
-                    Loading cross-region insights…
-                  </span>
+                  <span>Loading cross-region insights…</span>
                 </div>
               )}
-
               {!insightLoading && showInsights && (
-                <div style={{ marginTop: "5px" }}>
-                  <BoxPlot
-                    regionDataMap={insightRegionDataMap}
-                    fileMappings={fileMappings}
-                    regionOrder={selectedInsightRegions}
-                    height={560}
-                    labChart
-                  />
+                <div style={{ marginTop: 5 }}>
+                  <BoxPlot regionDataMap={insightRegionDataMap} fileMappings={fileMappings} regionOrder={selectedInsightRegions} height={560} labChart />
                 </div>
-              )}
+              )} */}
               <Suspense fallback={<p role="status">Loading brain response panel…</p>}>
                 <UploadBrainMap
                   predictionResult={brainRun?.contextKey === inferenceContextKey ? brainRun.result : null}

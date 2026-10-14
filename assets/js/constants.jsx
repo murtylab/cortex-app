@@ -908,8 +908,15 @@ export const LAB_ROI_INFO = {
   
 export const VOXEL_OPTIONS = [
   { value: 'all-participants', label: 'All Participants' },
+  // { value: 'p1', label: 'Participant 1' },
+  // { value: 'p2', label: 'Participant 2' },
+  // { value: 'p3', label: 'Participant 3' },
+  // { value: 'p4', label: 'Participant 4' },
+
+
   // { value: 'specify-a-participant', label: 'Specify a Participant' },
   // { value: 'random-voxels', label: 'Specify Number of Random Voxels' },
+
 ];
   
 export const PAPER_OPTIONS = [

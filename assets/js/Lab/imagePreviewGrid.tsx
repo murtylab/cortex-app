@@ -695,20 +695,24 @@ export default function ImagePreviewGroupedDnD({
       </div>
 
       {foldable && isPanelCollapsed && (
-        <div
+        <button
+          type="button"
+          onClick={() => updatePanelCollapsed(false)}
+          aria-expanded={false}
           style={{
-            marginTop: 10,
-            padding: "10px 12px",
-            borderRadius: 8,
-            background: "rgba(255,255,255,0.7)",
-            border: "1px dashed rgba(0,0,0,0.14)",
-            color: "rgba(0,0,0,0.62)",
+            marginTop: 8,
+            padding: 0,
+            background: "none",
+            border: 0,
+            color: isLab ? "var(--lab-muted, #8A8378)" : "rgba(0,0,0,0.55)",
             fontSize: 12,
-            fontWeight: 600,
+            fontFamily: isLab ? "var(--lab-mono, 'IBM Plex Mono', monospace)" : undefined,
+            textAlign: "left",
+            cursor: "pointer",
           }}
         >
-          Unfold to see and rearrange
-        </div>
+          Unfold to see
+        </button>
       )}
 
       {!isPanelCollapsed && (

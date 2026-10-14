@@ -17,7 +17,7 @@ export const createXScale = (categories, innerWidth) =>
 export const styleTooltip = (tooltip) => {
   tooltip
     .style("position", "absolute")
-    .style("background", "#ffffff")
+    .style("background", "rgba(255, 255, 255, 0.8)")
     .style("border", "1px solid rgba(60, 55, 48, 0.18)")
     .style("border-radius", "8px")
     .style("padding", "12px 14px")

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { barchartStyles, styleTooltip } from './barchartstyles';
 import { LAB_CHART, LAB_COLORS, styleLabAxis, applyLabAxisTitle } from './labTheme';
+import { computeBoxStats } from './boxplot';
 
 // Fabio Crameri's "vik" perceptually-uniform diverging scientific colour map
 // (blue = negative, warm red = positive). Colour-blind safe.
@@ -37,6 +38,8 @@ const BarChart = ({
   const [containerWidth, setContainerWidth] = useState(0);
   
   const [selectedGroups, setSelectedGroups] = useState([]);
+  const [showBars, setShowBars] = useState(true);
+  const [showBoxplot, setShowBoxplot] = useState(false);
 
 
   
@@ -251,7 +254,8 @@ const BarChart = ({
       left: 80,
     };
 
-    const width = containerWidth;
+    const isBoxplotView = labChart && order === 'group' && showBoxplot;
+    const width = isBoxplotView ? Math.min(containerWidth * 0.85, 900) : containerWidth;
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -303,11 +307,42 @@ const BarChart = ({
     }
     styleTooltip(tooltip);
 
+    const showStimulusTooltip = (d) => {
+        const { blobURL, group, label } = getFileInfo(d.filename);
+
+        tooltip
+          .html(`
+            <div>
+              <p><strong>Filename:</strong> ${label}</p>
+              <p><strong>Group:</strong> ${group}</p>
+              <p><strong>Mean:</strong> ${Number(d.mean).toFixed(4)}</p>
+              <p><strong>SEM:</strong> ${Number(d.sem).toFixed(4)}</p>
+              ${
+                blobURL
+                  ? `<img
+                      src="${blobURL}"
+                      alt="Thumbnail"
+                      style="width: 140px; height: 140px; object-fit: cover; margin-top: 6px; border: 1px solid #ccc;"
+                    />`
+                  : ""
+              }
+            </div>
+          `)
+          .style("display", "block")
+          .style("opacity", 1);
+    };
+    const moveStimulusTooltip = (event) => {
+      const rect = containerRef.current.getBoundingClientRect();
+      tooltip.style("left", `${event.clientX - rect.left + 10}px`)
+        .style("top", `${event.clientY - rect.top - 40}px`);
+    };
+
     const shiftX = (x) => x + 20;
+    const barData = order !== 'group' || !labChart || showBars ? sortedData : [];
 
     // Bars
     const bars = g.selectAll(".bar")
-      .data(sortedData)
+      .data(barData)
       .enter()
       .append("rect")
       .attr("class", "bar")
@@ -339,35 +374,9 @@ const BarChart = ({
           d3.color(colorScale(d.mean))?.darker(0.5)?.toString() || colorScale(d.mean)
         );
 
-        const { blobURL, group, label } = getFileInfo(d.filename);
-
-        tooltip
-          .html(`
-            <div>
-              <p><strong>Filename:</strong> ${label}</p>
-              <p><strong>Group:</strong> ${group}</p>
-              <p><strong>Mean:</strong> ${Number(d.mean).toFixed(4)}</p>
-              <p><strong>SEM:</strong> ${Number(d.sem).toFixed(4)}</p>
-              ${
-                blobURL
-                  ? `<img
-                      src="${blobURL}"
-                      alt="Thumbnail"
-                      style="width: 140px; height: 140px; object-fit: cover; margin-top: 6px; border: 1px solid #ccc;"
-                    />`
-                  : ""
-              }
-            </div>
-          `)
-          .style("display", "block")
-          .style("opacity", 1);
+        showStimulusTooltip(d);
       })
-      .on("mousemove", (event) => {
-        const containerRect = containerRef.current.getBoundingClientRect();
-        tooltip
-          .style("left", `${event.clientX - containerRect.left + 10}px`)
-          .style("top", `${event.clientY - containerRect.top - 40}px`);
-      })
+      .on("mousemove", moveStimulusTooltip)
       .on("mouseout", (event, d) => {
         const color = colorScale(d.mean);
         d3.select(event.currentTarget).attr(
@@ -452,7 +461,7 @@ const BarChart = ({
 
     // Error bars
     g.selectAll(".error-bar")
-      .data(sortedData)
+      .data(barData)
       .enter()
       .append("line")
       .attr("class", "error-bar")
@@ -465,7 +474,7 @@ const BarChart = ({
       .attr("opacity", (d) => (isGroupHighlighted(d.filename) ? 1 : 0.2));
 
     g.selectAll(".cap-top")
-      .data(sortedData)
+      .data(barData)
       .enter()
       .append("line")
       .attr("x1", (d) => shiftX(barCenterX(d) - adjustedBandwidth / 4))
@@ -477,7 +486,7 @@ const BarChart = ({
       .attr("opacity", (d) => (isGroupHighlighted(d.filename) ? 1 : 0.2));
 
     g.selectAll(".cap-bottom")
-      .data(sortedData)
+      .data(barData)
       .enter()
       .append("line")
       .attr("x1", (d) => shiftX(barCenterX(d) - adjustedBandwidth / 4))
@@ -491,6 +500,69 @@ const BarChart = ({
 
 
 
+
+    if (labChart && order === 'group' && showBoxplot) {
+      const boxLayer = g.append('g').attr('class', 'group-boxplots');
+      groupSpans.forEach(({ group, startDatum, endDatum }) => {
+        const points = sortedData.filter((d) => getGroupForFilename(d.filename) === group && Number.isFinite(d.mean));
+        const stats = computeBoxStats(points.map((d) => d.mean));
+        if (!stats) return;
+        const groupColor = colorScale(d3.mean(points, (d) => d.mean));
+        const start = shiftX(barCenterX(startDatum) - adjustedBandwidth / 2);
+        const end = shiftX(barCenterX(endDatum) + adjustedBandwidth / 2);
+        const center = (start + end) / 2;
+        const boxWidth = Math.min(54, Math.max(12, (end - start) * 0.4));
+        // Equal-width box and point regions overlap by 40% of their width.
+        const boxCenter = center - boxWidth * 0.3;
+        const pointsCenter = center + boxWidth * 0.3;
+        const visibleBoxWidth = boxWidth * 0.7;
+        const pointRadius = 5.2;
+        const pointSpacing = pointRadius * 2 + 1;
+        const spread = Math.max(0, Math.min(boxWidth * 0.8, end - pointsCenter - pointRadius));
+        const placed = [];
+        const pointX = new Map();
+        // Pack nearby responses into separate horizontal lanes instead of random jitter.
+        [...points].sort((a, b) => a.mean - b.mean).forEach((point) => {
+          const y = yScale(point.mean);
+          const neighbors = placed.filter((other) => Math.abs(other.y - y) < pointSpacing);
+          const candidates = [0];
+          neighbors.forEach((other) => {
+            const offset = Math.sqrt(Math.max(0, pointSpacing ** 2 - (other.y - y) ** 2));
+            candidates.push(other.x - offset, other.x + offset);
+          });
+          candidates.sort((a, b) => Math.abs(a) - Math.abs(b));
+          const x = candidates.find((candidate) => Math.abs(candidate) <= spread &&
+            neighbors.every((other) => Math.hypot(candidate - other.x, y - other.y) >= pointSpacing - 0.01))
+            ?? (placed.length % 2 ? -1 : 1) * spread * ((placed.length * 0.618034) % 1);
+          placed.push({ x, y });
+          pointX.set(point.filename, pointsCenter + x);
+        });
+        const line = (x1, x2, value, value2 = value) => boxLayer.append('line')
+          .attr('x1', x1).attr('x2', x2).attr('y1', yScale(value)).attr('y2', yScale(value2))
+          .attr('stroke', '#706D65').attr('stroke-width', 1.4);
+        line(boxCenter, boxCenter, stats.lowerWhisker, stats.upperWhisker);
+        line(boxCenter - visibleBoxWidth / 3, boxCenter + visibleBoxWidth / 3, stats.lowerWhisker);
+        line(boxCenter - visibleBoxWidth / 3, boxCenter + visibleBoxWidth / 3, stats.upperWhisker);
+        boxLayer.append('rect').attr('x', boxCenter - visibleBoxWidth / 2).attr('width', visibleBoxWidth)
+          .attr('y', yScale(stats.q3)).attr('height', Math.max(1, yScale(stats.q1) - yScale(stats.q3)))
+          .attr('fill', groupColor).attr('fill-opacity', 0.8).attr('stroke', '#706D65');
+        line(boxCenter - visibleBoxWidth / 2, boxCenter + visibleBoxWidth / 2, stats.median);
+        boxLayer.selectAll(null).data(points).enter().append('circle')
+          .attr('cx', (d) => pointX.get(d.filename))
+          .attr('cy', (d) => yScale(d.mean)).attr('r', pointRadius)
+          .attr('fill', groupColor).attr('fill-opacity', 1).attr('stroke', '#fff').attr('stroke-width', 1)
+          .on('mouseover', (event, d) => {
+            d3.select(event.currentTarget).raise().attr('r', pointRadius * 1.5).attr('stroke-width', 1.5);
+            showStimulusTooltip(d);
+            moveStimulusTooltip(event);
+          })
+          .on('mousemove', moveStimulusTooltip)
+          .on('mouseout', (event, d) => {
+            d3.select(event.currentTarget).attr('r', pointRadius).attr('stroke-width', 1);
+            tooltip.style('display', 'none');
+          });
+      });
+    }
 
     if (order === "group" && groupSpans.length > 0) {
       const groupLabelY = -8;       
@@ -575,6 +647,8 @@ const BarChart = ({
     tutorialActiveGroup,
     tutorialSelectedGroups,
     labChart,
+    showBars,
+    showBoxplot,
   ]);
 
   return (
@@ -644,6 +718,19 @@ const BarChart = ({
             <option value="ranking">Rank</option>
           </select>
         </div>
+
+        {labChart && order === 'group' && (
+          <div style={{ display: 'flex', gap: 16, marginLeft: 'auto', fontSize: 13, fontFamily: "var(--lab-sans, 'Inter', sans-serif)" }}>
+            <label style={{ display: 'flex', gap: 5, alignItems: 'center', cursor: 'pointer' }}>
+              <input type="radio" name="lab-univariate-chart" checked={showBars} onChange={() => { setShowBars(true); setShowBoxplot(false); }} />
+              Bar chart
+            </label>
+            <label style={{ display: 'flex', gap: 5, alignItems: 'center', cursor: 'pointer' }}>
+              <input type="radio" name="lab-univariate-chart" checked={showBoxplot} onChange={() => { setShowBars(false); setShowBoxplot(true); }} />
+              Boxplot
+            </label>
+          </div>
+        )}
 
         {order === "ranking" && allGroups.length > 0 && (
           <div

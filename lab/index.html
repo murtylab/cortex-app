@@ -530,12 +530,33 @@
       height: auto;
     }
 
+    body.lab-page #container .lab-model-card-wrap.is-collapsed .MuiCard-root {
+      aspect-ratio: auto;
+      height: auto;
+      min-height: 0;
+    }
+
     body.lab-page #container .lab-model-card {
       height: 100%;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
       padding: 18px 16px 14px !important;
+    }
+
+    body.lab-page #container .lab-model-card.is-collapsed {
+      height: auto;
+      padding: 12px 16px !important;
+    }
+
+    body.lab-page #container .lab-model-card.is-collapsed .lab-model-card-name {
+      margin-top: 6px;
+      padding-right: 20px;
+    }
+
+    body.lab-page #container .lab-model-card.is-collapsed .lab-model-card-rank {
+      flex: none;
+      padding: 8px 0 0;
     }
 
     body.lab-page #container .lab-model-card-name {
@@ -734,15 +755,38 @@
 
     body.lab-page #container .lab-stimuli-sources {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1fr);
       gap: 28px;
       align-items: stretch;
+    }
+
+    body.lab-page #container .lab-stimuli-source-switch {
+      align-self: flex-end;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      text-align: right;
     }
 
     body.lab-page #container .lab-stimuli-sources > div {
       display: flex;
       flex-direction: column;
       min-width: 0;
+      height: 400px;
+      box-sizing: border-box;
+    }
+
+    body.lab-page #container .lab-stimuli-sources .lab-subheading,
+    body.lab-page #container .lab-stimuli-sources .lab-paper-grid,
+    body.lab-page #container .lab-stimuli-source-switch {
+      flex-shrink: 0;
+    }
+
+    body.lab-page #container .lab-stimuli-sources .lab-uploader-fill {
+      flex: 1;
+      height: auto !important;
+      min-height: 0;
     }
 
     body.lab-page #container .lab-preload-inline {
@@ -754,8 +798,8 @@
     /* Fixed height so picking a paper never resizes the row (and the uploader beside it). */
     body.lab-page #container .lab-preload-inline .lab-dataset-card-wrap,
     body.lab-page #container .lab-paper-placeholder {
-      flex: none;
-      height: 260px;
+      flex: 1;
+      min-height: 0;
       margin-top: 12px !important;
       box-sizing: border-box;
     }
