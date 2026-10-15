@@ -147,24 +147,24 @@ const ScoreboardPageQualitative: React.FC = () => {
 
   const datasetLabelMap: Record<string, string> = {
     murty185: "Murty185",
-    nsd_1000: "NSD1000",
-    bold_5000: "BOLD5000v2",
-    bonner_2021: "Bonner2021",
-    bmd_2024: "BMD2024",
-    kingbaker_2019: "King2019",
-    wardle_2020: "Wardle2020",
+    nsd1000: "NSD1000",
+    bold5000: "BOLD5000v2",
+    bonner: "Bonner2021",
+    BMD: "BMD2024",
+    kingbaker: "King2019",
+    wardle: "Wardle2020",
     nsd_syn: "NSD synthetic",
     global_score: "Global Score",
   };
 
    const datasetLabelMapShort: Record<string, string> = {
     murty185: "Murty",
-    nsd_1000: "NSD",
-    bold_5000: "BOLD",
-    bonner_2021: "Bonner",
-    bmd_2024: "BMD",
-    kingbaker_2019: "King",
-    wardle_2020: "Wardle",
+    nsd1000: "NSD",
+    bold5000: "BOLD",
+    bonner: "Bonner",
+    BMD: "BMD",
+    kingbaker: "King",
+    wardle: "Wardle",
     nsd_syn: "NSD Syn",
   };
 
@@ -757,7 +757,7 @@ const getOverviewColumnCount = (
           )
         }
         {training === "NSD" && (
-          <DatasetCard dataset={"nsd_1000"}/>
+          <DatasetCard dataset={"nsd1000"}/>
         )
         }
 

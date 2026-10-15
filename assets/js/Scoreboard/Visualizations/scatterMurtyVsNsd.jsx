@@ -27,7 +27,7 @@ const ScatterMurtyVsNsd = ({ murtyData, nsdData, murtyDataFull, nsdDataFull,roi,
 
       Object.keys(murtyVals).forEach((ds) => {
         if (datasetArray.length > 0 && !datasetArray.includes(ds)) return;
-        if (["murty185", "nsd_1000", "ceiling"].includes(ds)) return;
+        if (["murty185", "nsd_1000", "nsd1000", "ceiling"].includes(ds)) return;
         const x = murtyVals[ds]?.[0];
         const y = nsdVals[ds]?.[0];
         if (x != null && y != null) pts.push({ model, dataset: ds, x, y });
@@ -38,22 +38,23 @@ const ScatterMurtyVsNsd = ({ murtyData, nsdData, murtyDataFull, nsdDataFull,roi,
 
   //for global usage
   const color_map = {
-      bold_5000: "#1f78b4",
-      bonner_2021: "#4dd0e1",
-      bmd_2024: "#60bd68",
-      kingbaker_2019: "#9e75d6",
-      wardle_2020: "#e377c2",
+      bold5000: "#1f78b4",
+      bonner: "#4dd0e1",
+      BMD: "#60bd68",
+      kingbaker: "#9e75d6",
+      wardle: "#e377c2",
       nsd_syn: "#ffdd57",
     };
 
     const datasetLabelMap = {
       murty185: "Murty185",
       nsd_1000: "NSD1000",
-      bold_5000: "BOLD5000v2",
-      bonner_2021: "Bonner2021",
-      bmd_2024: "BMD2024",
-      kingbaker_2019: "King2019",
-      wardle_2020: "Wardle2020",
+      nsd1000: "NSD1000",
+      bold5000: "BOLD5000v2",
+      bonner: "Bonner2021",
+      BMD: "BMD2024",
+      kingbaker: "King2019",
+      wardle: "Wardle2020",
       nsd_syn: "NSD synthetic",
     };
 
@@ -130,7 +131,7 @@ const ScatterMurtyVsNsd = ({ murtyData, nsdData, murtyDataFull, nsdDataFull,roi,
         const nv = nsdDataFull[r][m];
         if(mv && nv) {
            Object.keys(mv).forEach(ds => {
-             if (!["murty185", "nsd_1000", "ceiling"].includes(ds)) {
+             if (!["murty185", "nsd_1000", "nsd1000", "ceiling"].includes(ds)) {
                if(mv[ds]) allVals.push(mv[ds][0]);
                if(nv[ds]) allVals.push(nv[ds][0]);
              }

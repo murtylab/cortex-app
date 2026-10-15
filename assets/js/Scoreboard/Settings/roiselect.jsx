@@ -28,13 +28,13 @@ const ROISelect = ({ region, setRegion, dataset, setDataset, allowToggle, mode, 
     // 3. ffa support list
     if (option.value === 'ffa') {
       
-      return ds.some(d => !['bold_5000', 'bonner_2021'].includes(d));
+      return ds.some(d => !['bold5000', 'bonner'].includes(d));
     }
 
     // 4. eba support list
     if (option.value === 'eba') {
       
-      const unsupportedForEBA = ['bold_5000', 'bonner_2021', 'kingbaker_2019', 'wardle_2020'];
+      const unsupportedForEBA = ['bold5000', 'bonner', 'kingbaker', 'wardle'];
       return ds.some(d => !unsupportedForEBA.includes(d));
     }
 

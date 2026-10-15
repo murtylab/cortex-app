@@ -5,7 +5,7 @@ const LEADERBOARD_PATHS = {
   murty185: '/assets/data/new/standardized_results_murty185_models_univariate.json',
 };
 
-const SKIP_EVAL_KEYS = new Set(['murty185', 'nsd_1000']);
+const SKIP_EVAL_KEYS = new Set(['murty185', 'nsd_1000', 'nsd1000']);
 const cache = new Map();
 
 function normalizeDatasetKey(dataset) {

@@ -23,14 +23,14 @@ const DatasetSelect = ({ dataset, setDataset, training, region, allowToggle, mod
   const isEnabled = (option) => {
     if (training === 'Murty185' && !MURTY185_DATASET.includes(option.value)) return false;
     if (training === 'NSD' && !NSD_DATASET.includes(option.value)) return false;
-    if (training === 'Murty185 VS NSD1000' && (option.value === 'murty185' || option.value === 'nsd_1000')) return false;
+    if (training === 'Murty185 VS NSD1000' && (option.value === 'murty185' || option.value === 'nsd1000')) return false;
     // if (
     //   Array.isArray(region) &&
     //   (region.includes('ffa') || region.includes('eba')) &&
-    //   (option.value === 'bonner_2021' || option.value === 'bold_5000')
+    //   (option.value === 'bonner' || option.value === 'bold5000')
     // )
     //   return false;
-    // if (Array.isArray(region) && region.includes('eba') && (option.value === 'kingbaker_2019' || option.value === 'wardle_2020'))
+    // if (Array.isArray(region) && region.includes('eba') && (option.value === 'kingbaker' || option.value === 'wardle'))
     //   return false;
     // return true;
     const r = Array.isArray(region) ? region : [];
@@ -40,10 +40,10 @@ const DatasetSelect = ({ dataset, setDataset, training, region, allowToggle, mod
 
     
     // if supported by FFA
-    const isSupportedByFFA = !['bold_5000', 'bonner_2021'].includes(option.value);
+    const isSupportedByFFA = !['bold5000', 'bonner'].includes(option.value);
     
     // if supported by PPA 
-    const isSupportedByEBA = !['bold_5000', 'bonner_2021', 'kingbaker_2019', 'wardle_2020'].includes(option.value);
+    const isSupportedByEBA = !['bold5000', 'bonner', 'kingbaker', 'wardle'].includes(option.value);
 
     // or logic
     

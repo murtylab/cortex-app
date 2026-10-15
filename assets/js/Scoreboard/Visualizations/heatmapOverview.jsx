@@ -43,7 +43,7 @@ const HeatmapOverview = ({
       const rawModels = Object.keys(data[roi]).filter((m) => m !== "ceiling");
       rawModels.forEach((model) => {
         Object.entries(data[roi][model] || {}).forEach(([x, vals]) => {
-          if (vals && !["murty185", "nsd_1000"].includes(x)) {
+          if (vals && !["murty185", "nsd1000"].includes(x)) {
             cellData.push({ model, x, raw: vals[0], norm: vals[1] });
             modelsSet.add(model);
             xLabelsSet.add(x);
