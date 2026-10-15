@@ -51,7 +51,7 @@ export default function UploadBrainMap({ predictionResult, files, displayFiles =
   else if (data.status !== 'ready') notice = data.reason;
 
   return (
-    <section className="upload-brain-map" aria-labelledby="upload-brain-heading" data-testid="upload-brain-map">
+    <section className="upload-brain-map" id="lab-results-spatial" aria-labelledby="upload-brain-heading" data-testid="upload-brain-map">
       <div className="lab-section-header">
         <span className="lab-eyebrow">Spatial analysis</span>
         <h3 className="lab-heading" id="upload-brain-heading">3D brain response</h3>

@@ -630,7 +630,7 @@ export default function ImagePreviewGroupedDnD({
         )}
 
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          {isLab && (
+          {isLab && !isPanelCollapsed && (
             <span
               className="lab-mono-num"
               style={{
@@ -661,41 +661,45 @@ export default function ImagePreviewGroupedDnD({
             </button>
           )}
 
-          <button
-            type="button"
-            data-tutorial="lab-upload-add-group"
-            disabled={groupEditingDisabled}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (groupEditingDisabled) return;
-              startAddGroup();
-            }}
-            style={btnStyle(groupEditingDisabled)}
-          >
-            {isLab ? "Add group" : "Add Group"}
-          </button>
+          {!isLab && (
+            <>
+              <button
+                type="button"
+                data-tutorial="lab-upload-add-group"
+                disabled={groupEditingDisabled}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (groupEditingDisabled) return;
+                  startAddGroup();
+                }}
+                style={btnStyle(groupEditingDisabled)}
+              >
+                Add Group
+              </button>
 
-          <button
-            type="button"
-            disabled={groupEditingDisabled}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (groupEditingDisabled) return;
-              onClear?.();
-              setCustomGroups([]);
-              setSelectedUids(new Set());
-              setSelectionAnchor(null);
-            }}
-            style={btnStyle(groupEditingDisabled)}
-          >
-            {isLab ? "Clear all" : "Clear All"}
-          </button>
+              <button
+                type="button"
+                disabled={groupEditingDisabled}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (groupEditingDisabled) return;
+                  onClear?.();
+                  setCustomGroups([]);
+                  setSelectedUids(new Set());
+                  setSelectionAnchor(null);
+                }}
+                style={btnStyle(groupEditingDisabled)}
+              >
+                Clear All
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      {foldable && isPanelCollapsed && (
+      {foldable && isPanelCollapsed && !isLab && (
         <button
           type="button"
           onClick={() => updatePanelCollapsed(false)}
@@ -718,6 +722,40 @@ export default function ImagePreviewGroupedDnD({
 
       {!isPanelCollapsed && (
         <div ref={panelContentRef}>
+          {isLab && (
+            <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8, marginTop: 10 }}>
+              <button
+                type="button"
+                data-tutorial="lab-upload-add-group"
+                disabled={groupEditingDisabled}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (groupEditingDisabled) return;
+                  startAddGroup();
+                }}
+                style={btnStyle(groupEditingDisabled)}
+              >
+                Add group
+              </button>
+              <button
+                type="button"
+                disabled={groupEditingDisabled}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (groupEditingDisabled) return;
+                  onClear?.();
+                  setCustomGroups([]);
+                  setSelectedUids(new Set());
+                  setSelectionAnchor(null);
+                }}
+                style={btnStyle(groupEditingDisabled)}
+              >
+                Clear all
+              </button>
+            </div>
+          )}
           {isAddingGroup && (
             <div
               style={{

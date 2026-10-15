@@ -1,6 +1,6 @@
 import React, { lazy, Suspense, useState, useEffect, useMemo, useRef } from 'react';
 import { Button, message, Spin } from 'antd';
-import { Images } from 'lucide-react';
+import { Download, Images, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { getFroiUserErrorMessage, runFroiPrediction, wrapPredictionResult } from './services/froiPredict.js';
 import { getInferenceContextKey } from './services/uploadBrainData.js';
 import { ConfigProvider } from 'antd';
@@ -233,6 +233,7 @@ const Stepper: React.FC = () => {
   const [resultsPreviewCollapsed, setResultsPreviewCollapsed] = useState(true);
   const [stimuliPreviewCollapsed, setStimuliPreviewCollapsed] = useState(false);
   const [modelCardCollapsed, setModelCardCollapsed] = useState(false);
+  const [settingsRailCollapsed, setSettingsRailCollapsed] = useState(false);
   const [inferenceHistory, setInferenceHistory] = useState<InferenceHistoryEntry[]>([]);
   const [activeHistoryId, setActiveHistoryId] = useState<number | null>(null);
   const [historyToRestore, setHistoryToRestore] = useState<InferenceHistoryEntry | null>(null);
@@ -2475,12 +2476,23 @@ const restoreInferenceHistory = (entry: InferenceHistoryEntry) => {
       }}
     >
     <ThemeProvider theme={muiLabTheme}>
-      <div className="lab-workspace">
+      <div className={`lab-workspace${settingsRailCollapsed ? " is-rail-collapsed" : ""}`}>
         <aside
-          className="lab-settings-rail"
+          className={`lab-settings-rail${settingsRailCollapsed ? " is-collapsed" : ""}`}
           data-tutorial="lab-stepper-nav"
         >
           <div data-tutorial="lab-settings-panel" className="lab-settings-rail-inner">
+            <button
+              type="button"
+              className="lab-rail-toggle"
+              aria-expanded={!settingsRailCollapsed}
+              aria-label={settingsRailCollapsed ? "Show the menu" : "Hide the menu"}
+              onClick={() => setSettingsRailCollapsed((collapsed) => !collapsed)}
+            >
+              {settingsRailCollapsed
+                ? <PanelLeftOpen size={16} strokeWidth={1.5} aria-hidden="true" />
+                : <PanelLeftClose size={16} strokeWidth={1.5} aria-hidden="true" />}
+            </button>
             <RegionSelector
               region={region}
               setRegion={selectRegion}
@@ -2603,6 +2615,10 @@ const restoreInferenceHistory = (entry: InferenceHistoryEntry) => {
                 />
               </div>
             </div>
+          </div>
+
+          <section className="lab-predictions">
+            <StepHeading>Run model predictions</StepHeading>
 
             <div className="lab-run-row">
               <div style={{ color: 'var(--lab-secondary, #57534A)', fontWeight: 500, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -2636,7 +2652,6 @@ const restoreInferenceHistory = (entry: InferenceHistoryEntry) => {
                 {predictError}
               </div>
             )}
-          </div>
 
           {(showResults || predictionLoading || !!currentRegionPredictionResult) && (
             <div
@@ -2645,18 +2660,45 @@ const restoreInferenceHistory = (entry: InferenceHistoryEntry) => {
               className="lab-results-panel"
               style={{ display: 'flex', flexDirection: 'column', marginTop: 8 }}
             >
-              <div className="lab-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 12 }}>
-                <div>
-                  <span className="lab-section-label">Prediction results</span>
-                  <h3 className="lab-heading">Readout for {region?.toUpperCase()}</h3>
-                </div>
-                <Button type="primary" onClick={downloadData} disabled={!currentRegionPredictionResult}>
+              <div className="lab-section-header" style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', gap: 16 }}>
+                <h3 className="lab-heading" style={{ margin: 0 }}>Prediction results</h3>
+                <button
+                  type="button"
+                  className="lab-download-data"
+                  onClick={downloadData}
+                  disabled={!currentRegionPredictionResult}
+                >
+                  <Download size={16} strokeWidth={1.5} aria-hidden="true" />
                   Download data
-                </Button>
+                </button>
               </div>
 
+              <nav className="lab-results-overview" aria-label="Result sections">
+                <a href="#lab-results-univariate">
+                  <span className="lab-results-overview-mark" aria-hidden="true" />
+                  <span className="lab-results-overview-copy">
+                    <span className="lab-results-overview-title"><span className="lab-results-overview-index">01</span>Univariate</span>
+                    <span className="lab-results-overview-detail">Voxel average responses</span>
+                  </span>
+                </a>
+                <a href="#lab-results-multivariate">
+                  <span className="lab-results-overview-mark" aria-hidden="true" />
+                  <span className="lab-results-overview-copy">
+                    <span className="lab-results-overview-title"><span className="lab-results-overview-index">02</span>Multivariate</span>
+                    <span className="lab-results-overview-detail">Dissimilarity matrix</span>
+                  </span>
+                </a>
+                <a href="#lab-results-spatial">
+                  <span className="lab-results-overview-mark" aria-hidden="true" />
+                  <span className="lab-results-overview-copy">
+                    <span className="lab-results-overview-title"><span className="lab-results-overview-index">03</span>Spatial</span>
+                    <span className="lab-results-overview-detail">3D brain response</span>
+                  </span>
+                </a>
+              </nav>
+
               {predictionLoading && <LinearIndeterminate />}
-              <div className="lab-section-header">
+              <div className="lab-section-header" id="lab-results-univariate">
                 <span className="lab-eyebrow">Univariate analysis</span>
                 <h3 className="lab-heading">Predicted voxel average responses</h3>
               </div>
@@ -2671,7 +2713,7 @@ const restoreInferenceHistory = (entry: InferenceHistoryEntry) => {
                     labChart
                   />
                 )}
-              <div className="lab-section-header">
+              <div className="lab-section-header" id="lab-results-multivariate">
                 <span className="lab-eyebrow">Multivariate analysis</span>
                 <h3 className="lab-heading">Representational dissimilarity matrix (RDM) from predicted voxel responses</h3>
               </div>
@@ -2731,6 +2773,7 @@ const restoreInferenceHistory = (entry: InferenceHistoryEntry) => {
               </Suspense>
             </div>
           )}
+          </section>
         </div>
       </div>
     </ThemeProvider>

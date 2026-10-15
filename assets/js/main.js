@@ -925,6 +925,8 @@
 
   // Scoreboard tutorials disabled for now (hide Tutorials FAB on scoreboard pages).
   const SCOREBOARD_TUTORIALS_ENABLED = false;
+  // Lab walkthrough still describes the previous interface, so hide the button until it is rewritten.
+  const TUTORIALS_ENABLED = false;
 
   function normalizeTutorialPath(pathname) {
     if (!pathname || pathname === '/') return '/';
@@ -943,6 +945,7 @@
   }
 
   function shouldShowTutorialFab() {
+    if (!TUTORIALS_ENABLED) return false;
     return SCOREBOARD_TUTORIALS_ENABLED || !isScoreboardTutorialPage();
   }
 
@@ -1887,6 +1890,8 @@
   }
 
   function resumeTutorialIfNeeded() {
+    if (!TUTORIALS_ENABLED) return;
+
     const storedState = readTutorialState();
     if (!storedState || !TUTORIALS[storedState.tutorialId]) {
       return;
