@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Typography, Button, Radio, ConfigProvider } from 'antd';
+import { Typography, Radio, ConfigProvider } from 'antd';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import MuiButton from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
 
 // LoadData
 import useLoadData from './DataProcess/loadData.jsx';
@@ -17,7 +15,7 @@ import ModelTypeSelect from './Scoreboard/Settings/modeltypeselect.jsx';
 
 
 import ChartSelect from './Scoreboard/Settings/chartselect.jsx';
-import PageSelect from './Scoreboard/Settings/pageselect.jsx';
+import FilterSectionHeader from './Scoreboard/Settings/filterSectionHeader.jsx';
 import QuestionSelect from './Scoreboard/Settings/questionselect.jsx';
 
 
@@ -67,7 +65,7 @@ const ScoreboardPageQuantitative: React.FC = () => {
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
   const [chartType, setChartType] = useState('uni');
-  const [rank, setRank] = useState('');
+  const [rank, setRank] = useState('accuracy');
  
 
   // interaction variable for overview and details
@@ -79,12 +77,7 @@ const ScoreboardPageQuantitative: React.FC = () => {
 
   const [modelType, setModelType] = useState<string[]>([]);
 
-  // const [pageView, setPageView] = useState('rank');
-  const initialView = (() => {
-    const v = new URLSearchParams(window.location.search).get("view");
-    return v === "2" ? "2" : "rank";
-  })();
-  const [pageView, setPageView] = useState(initialView);
+  const pageView: string = 'rank';
 
   const isDatasetDetailMode = pageView === 'rank' && dataset.length > 0 && !region.includes('Across Regions');
   const [activeQuestion, setActiveQuestion] = useState('q1');
@@ -157,24 +150,24 @@ const ScoreboardPageQuantitative: React.FC = () => {
 
   const datasetLabelMap: Record<string, string> = {
     murty185: "Murty185",
-    nsd_1000: "NSD1000",
-    bold_5000: "BOLD5000v2",
-    bonner_2021: "Bonner2021",
-    bmd_2024: "BMD2024",
-    kingbaker_2019: "King2019",
-    wardle_2020: "Wardle2020",
+    nsd1000: "NSD1000",
+    bold5000: "BOLD5000v2",
+    bonner: "Bonner2021",
+    BMD: "BMD2024",
+    kingbaker: "King2019",
+    wardle: "Wardle2020",
     nsd_syn: "NSD synthetic",
     global_score: "Global Score",
   };
 
    const datasetLabelMapShort: Record<string, string> = {
     murty185: "Murty",
-    nsd_1000: "NSD",
-    bold_5000: "BOLD",
-    bonner_2021: "Bonner",
-    bmd_2024: "BMD",
-    kingbaker_2019: "King",
-    wardle_2020: "Wardle",
+    nsd1000: "NSD",
+    bold5000: "BOLD",
+    bonner: "Bonner",
+    BMD: "BMD",
+    kingbaker: "King",
+    wardle: "Wardle",
     nsd_syn: "NSD Syn",
   };
 
@@ -339,10 +332,6 @@ const ScoreboardPageQuantitative: React.FC = () => {
 
         const runCycle = () => {
           if (!rankingDemoLoopRef.current) return;
-
-          if (pageViewRef.current !== 'rank') {
-            setPageView('rank');
-          }
 
           // Overview select #1 -> detail highlight and viewport focus.
           schedule(() => {
@@ -651,32 +640,6 @@ const getOverviewColumnCount = (
                 scrollbarWidth: 'thin',
               }}
             >
-              {/* view toggle: Leaderboard / Advanced Insights */}
-              <div data-tutorial="scoreboard-view-toggle" style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: '11px', color: '#888', marginLeft: 2, marginBottom: 4, fontFamily: "'Inter', system-ui, sans-serif" }}>VIEW</div>
-                <ButtonGroup size="small" fullWidth variant="outlined">
-                  {[{ value: 'rank', label: 'Leaderboard' }, { value: '2', label: 'Advanced Insights' }].map((opt) => (
-                    <MuiButton
-                      key={opt.value}
-                      onClick={() => setPageView(opt.value)}
-                      variant={pageView === opt.value ? 'contained' : 'outlined'}
-                      sx={{
-                        fontSize: '12px',
-                        padding: '4px 2px',
-                        textTransform: 'none',
-                        fontFamily: "'Inter', system-ui, sans-serif",
-                        borderColor: 'var(--tungsten)',
-                        color: pageView === opt.value ? 'white' : 'var(--tungsten)',
-                        backgroundColor: pageView === opt.value ? 'var(--tungsten)' : 'transparent',
-                        '&:hover': { borderColor: 'var(--tungsten)', backgroundColor: pageView === opt.value ? 'var(--tungsten)' : 'rgba(66,66,66,0.06)' },
-                      }}
-                    >
-                      {opt.label}
-                    </MuiButton>
-                  ))}
-                </ButtonGroup>
-              </div>
-
               {/* ChartSelect button group*/}
               <div
                 style={{
@@ -698,27 +661,7 @@ const getOverviewColumnCount = (
                 />
               </div>
 
-              {/* reset filters */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-                <Button
-                  type="text"
-                  disabled={!hasFilters}
-                  onClick={clearFilters}
-                  size="small"
-                  style={{
-                    padding: '2px 8px',
-                    fontSize: '11px',
-                    fontFamily: "'Inter', system-ui, sans-serif",
-                    color: hasFilters ? 'var(--tungsten)' : '#bbb',
-                    border: `1px solid ${hasFilters ? 'var(--tungsten)' : '#ddd'}`,
-                    borderRadius: 6,
-                    height: 'auto',
-                    lineHeight: '18px',
-                  }}
-                >
-                  Reset filters
-                </Button>
-              </div>
+              <FilterSectionHeader hasFilters={hasFilters} onReset={clearFilters} />
 
               <div data-tutorial="scoreboard-core-filters" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div data-tutorial="scoreboard-filter-training">
@@ -1217,7 +1160,7 @@ const getOverviewColumnCount = (
           )
         }
         {training === "NSD" && (
-          <DatasetCard dataset={"nsd_1000"}/>
+          <DatasetCard dataset={"nsd1000"}/>
         )
         }
 

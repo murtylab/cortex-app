@@ -10,14 +10,14 @@ export const UNAVAILABILITY = {
     nsd1000: ["NSD"],                             
   },
   datasetToROI: {           
-    bold_5000: ["ffa", "eba"], 
-    bonner_2021: ["ffa", "eba"], 
-    kingbaker_2019: ["eba"],
-    wardle_2020: ["eba"],
+    bold5000: ["ffa", "eba"],
+    bonner: ["ffa", "eba"],
+    kingbaker: ["eba"],
+    wardle: ["eba"],
   },
   roiToDataset: {
-    ffa: ["bold_5000","bonner_2021"],
-    eba: ["bold_5000", "bonner_2021","wardle_2020"],
+    ffa: ["bold5000","bonner"],
+    eba: ["bold5000", "bonner","wardle"],
   },
 };
 
@@ -908,22 +908,22 @@ export const REGION_OPTIONS = [
 
 export const DATASET_OPTIONS = [
     { value: 'murty185', label: 'Murty185' },
-    { value: 'nsd_1000', label: 'NSD1000' },
-    { value: 'bold_5000', label: 'BOLD5000v2' },
-    { value: 'bonner_2021', label: 'Bonner2021' },
-    { value: 'bmd_2024', label: 'BMD2024' },
-    { value: 'kingbaker_2019', label: 'King2019' },
-    { value: 'wardle_2020', label: 'Wardle2020' },
+    { value: 'nsd1000', label: 'NSD1000' },
+    { value: 'bold5000', label: 'BOLD5000v2' },
+    { value: 'bonner', label: 'Bonner2021' },
+    { value: 'BMD', label: 'BMD2024' },
+    { value: 'kingbaker', label: 'King2019' },
+    { value: 'wardle', label: 'Wardle2020' },
     { value: 'nsd_syn', label: 'NSD synthetic' },
   ];
 
 export const DATASET_OPTIONS_LESS = [
 
-    { value: 'bold_5000', label: 'BOLD5000v2' },
-    { value: 'bonner_2021', label: 'Bonner2021' },
-    { value: 'bmd_2024', label: 'BMD2024' },
-    { value: 'kingbaker_2019', label: 'King2019' },
-    { value: 'wardle_2020', label: 'Wardle2020' },
+    { value: 'bold5000', label: 'BOLD5000v2' },
+    { value: 'bonner', label: 'Bonner2021' },
+    { value: 'BMD', label: 'BMD2024' },
+    { value: 'kingbaker', label: 'King2019' },
+    { value: 'wardle', label: 'Wardle2020' },
     { value: 'nsd_syn', label: 'NSD synthetic' },
   ];
 
@@ -935,7 +935,8 @@ export const CHART_TYPE_OPTIONS = [
 ];
 
 export const RANK = [
-  { value: 'rank', label: 'Rank' },
+  { value: 'accuracy', label: 'Accuracy' },
+  { value: 'alphabet', label: 'Alphabet' },
 ];
 
 export const PAGE_VIEW_OPTIONS = [
@@ -951,8 +952,8 @@ export const ADVANCED_QUESTION = [
 ];
 
     
-export const MURTY185_DATASET = ['nsd_1000', 'bold_5000', 'bonner_2021','bmd_2024','kingbaker_2019','wardle_2020','nsd_syn' ];
-export const NSD_DATASET = ['murty185','bold_5000', 'bonner_2021','bmd_2024','kingbaker_2019','wardle_2020','nsd_syn'];
+export const MURTY185_DATASET = ['nsd1000', 'bold5000', 'bonner','BMD','kingbaker','wardle','nsd_syn' ];
+export const NSD_DATASET = ['murty185','bold5000', 'bonner','BMD','kingbaker','wardle','nsd_syn'];
 
 
 export const VOXEL_OPTIONS = [
@@ -972,19 +973,19 @@ export const MURTY185_INCLUDED_REGIONS = ['overall','ffa', 'eba', 'ppa'];
 
 
 export const DATASETCARD_OPTIONS = [
-  { value: "nsd_1000", label: "Natural Scenes Dataset (NSD1000)" },
+  { value: "nsd1000", label: "Natural Scenes Dataset (NSD1000)" },
   { value: "murty185", label: "Murty185" },
-  { value: 'bold_5000', label: 'BOLD5000v2' },
-  { value: 'bonner_2021', label: 'Bonner2021' },
-  { value: 'bmd_2024', label: 'BMD2024' },
-  { value: 'kingbaker_2019', label: 'King2019' },
-  { value: 'wardle_2020', label: 'Wardle2020' },
+  { value: 'bold5000', label: 'BOLD5000v2' },
+  { value: 'bonner', label: 'Bonner2021' },
+  { value: 'BMD', label: 'BMD2024' },
+  { value: 'kingbaker', label: 'King2019' },
+  { value: 'wardle', label: 'Wardle2020' },
   { value: 'nsd_syn', label: 'NSD synthetic' },
   // add more datasets...
 ];
 
 export const DATASETCARD_INFO_LOOKUP = {
-  nsd_1000: {
+  nsd1000: {
     category: "Natural Scenes",
     size: "1000 images",
     subjects: 8,
@@ -998,35 +999,35 @@ export const DATASETCARD_INFO_LOOKUP = {
     description: "An fMRI dataset of four participants responses in functionally-defined regions of interest (fROIs) to a diverse set of 185 naturalistic stimuli. Each of the 185 images was presented at least 20 times to each participant (Murty et al., 2021).",
     cardUrl: "https://www.nature.com/articles/s41467-021-25409-6"
   },
-  bold_5000: {
+  bold5000: {
     category: "Faces & Objects",
     size: "4,803 images",
     subjects: 4,
     description: "A Large-scale, slow event-related fMRI dataset collected on 4 subjects, each observing 5,254 images over 15 scanning sessions.",
     cardUrl: "https://bold5000-dataset.github.io/website/"
   },
-  bonner_2021: {
+  bonner: {
     category: "Objects",
     size: "810 images",
     subjects: 4,
     description: "fMRI responses while participants viewed 810 isolated objects (81 categories × 10 exemplars) on textured backgrounds; tests object co-occurrence representations (Bonner & Epstein, 2021).",
     cardUrl: "https://www.nature.com/articles/s41467-021-24368-2"
   },
-  bmd_2024: {
+  BMD: {
     category: "Naturalistic Videos",
     size: "1,102 short videos",
     subjects: 10,
     description: "Whole-brain fMRI while participants watched 3-second naturalistic clips with rich annotations (objects, scenes, actions, sentences, memorability) (Lahner et al., 2024).",
     cardUrl: "https://www.nature.com/articles/s41467-024-50310-3"
   },
-  kingbaker_2019: {
+  kingbaker: {
     category: "Multi-Domain Tasks",
     size: "26 tasks / 47 conditions",
     subjects: 24,
     description: "MDTB: four fMRI sessions per participant across diverse cognitive, motor, and affective tasks; used to derive functional parcellations of cerebellum/cortex (King & Hernandez-Castillo et al., 2019).",
     cardUrl: "https://pmc.ncbi.nlm.nih.gov/articles/PMC6591952/"
   },
-  wardle_2020: {
+  wardle: {
     category: "Faces",
     size: "96 images",
     subjects: 16,

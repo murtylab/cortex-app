@@ -2,11 +2,11 @@
   'use strict';
 
   const MODEL_PAGE_DATASETS = [
-    { key: 'bold_5000', label: 'BOLD5000' },
-    { key: 'bonner_2021', label: 'Bonner2021' },
-    { key: 'bmd_2024', label: 'BMD2024' },
-    { key: 'kingbaker_2019', label: 'KingBaker2019' },
-    { key: 'wardle_2020', label: 'Wardle2020' },
+    { key: 'bold5000', label: 'BOLD5000' },
+    { key: 'bonner', label: 'Bonner2021' },
+    { key: 'BMD', label: 'BMD2024' },
+    { key: 'kingbaker', label: 'KingBaker2019' },
+    { key: 'wardle', label: 'Wardle2020' },
     { key: 'nsd_syn', label: 'NSD Synthetic' }
   ];
 

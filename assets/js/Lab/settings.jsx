@@ -34,7 +34,7 @@ const Settings = ({
   region = '',
 }) => {
   const isLab = variant === 'lab';
-  const nsdOnly = isLab && !regionSupportsMurty185(region);
+  const nsdOnly = isLab && !!region && !regionSupportsMurty185(region);
   const datasetOptions = nsdOnly
     ? DATASET_OPTIONS.filter((option) => option.value === 'nsd_1000')
     : DATASET_OPTIONS;
@@ -114,7 +114,7 @@ const Settings = ({
         margintop: 2,
         marginLeft: 0,
         backgroundColor: isLab ? 'transparent' : 'var(--background-color)',
-        borderRadius: '8px',
+        borderRadius: isLab ? 0 : '8px',
         width: '100%',
         marginRight: '0 auto',
         flexDirection: isLab
@@ -125,8 +125,8 @@ const Settings = ({
       }}
     >
       {isLab ? (
-        <StepHeading step={2} id="lab-advanced-settings-label">
-          Configure the model
+        <StepHeading id="lab-advanced-settings-label">
+          Select a model
         </StepHeading>
       ) : (
         <Typography variant="body2" sx={{ textAlign: 'left', color: disabled ? '#888' : 'black', mt: 1, px: 2 }}>
@@ -175,24 +175,24 @@ const Settings = ({
         )}
       </FormControl>
 
-      {/* Voxel Selection — fixed display */}
+      {/* Participant Selection */}
       <FormControl sx={{ m: isLab ? 0 : 1, mt: isLab ? 1 : 1, minWidth: 0, textAlign: 'left' }} fullWidth size="small">
         <InputLabel shrink sx={sharedLabelSx} id="voxel-select-label">
           {isLab ? 'Voxels' : 'Select Voxels'}
         </InputLabel>
         <Select
           labelId="voxel-select-label"
-          value="all-participants"
-          disabled
-          sx={{
-            ...sharedSelectSx,
-            '& .MuiInputBase-input.Mui-disabled': {
-              WebkitTextFillColor: disabled ? '#888' : 'var(--text-main)',
-              opacity: 1,
-            },
-          }}
+          value={voxelOption}
+          onChange={(e) => setVoxelOption(e.target.value)}
+          disabled={disabled}
+          sx={sharedSelectSx}
+          MenuProps={sharedMenuProps}
         >
-          <MenuItem value="all-participants">{isLab ? 'All participants' : 'All Participants'}</MenuItem>
+          {VOXEL_OPTIONS.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              {isLab && option.value === 'all-participants' ? 'All participants' : option.label}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 

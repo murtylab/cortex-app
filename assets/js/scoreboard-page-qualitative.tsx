@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Button } from 'antd';
 
 // LoadData
 import useLoadData from './DataProcess/loadData.jsx';
@@ -14,6 +13,7 @@ import ModelTypeSelect from './Scoreboard/Settings/modeltypeselect.jsx';
 
 
 import ChartSelect from './Scoreboard/Settings/chartselect.jsx';
+import FilterSectionHeader from './Scoreboard/Settings/filterSectionHeader.jsx';
 import QuestionSelect from './Scoreboard/Settings/questionselect.jsx';
 
 
@@ -59,7 +59,7 @@ const ScoreboardPageQualitative: React.FC = () => {
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
   const [chartType, setChartType] = useState('uni');
-  const [rank, setRank] = useState('');
+  const [rank, setRank] = useState('accuracy');
  
 
   // interaction variable for overview and details
@@ -70,12 +70,7 @@ const ScoreboardPageQualitative: React.FC = () => {
 
   const [modelType, setModelType] = useState<string[]>([]);
 
-  // const [pageView, setPageView] = useState('rank');
-  const initialView = (() => {
-    const v = new URLSearchParams(window.location.search).get("view");
-    return v === "2" ? "2" : "rank";
-  })();
-  const [pageView, setPageView] = useState(initialView);
+  const pageView: string = 'rank';
 
   const isDatasetDetailMode = pageView === 'rank' && dataset.length > 0 && !region.includes('Across Regions');
   const [activeQuestion, setActiveQuestion] = useState('q1');
@@ -147,24 +142,24 @@ const ScoreboardPageQualitative: React.FC = () => {
 
   const datasetLabelMap: Record<string, string> = {
     murty185: "Murty185",
-    nsd_1000: "NSD1000",
-    bold_5000: "BOLD5000v2",
-    bonner_2021: "Bonner2021",
-    bmd_2024: "BMD2024",
-    kingbaker_2019: "King2019",
-    wardle_2020: "Wardle2020",
+    nsd1000: "NSD1000",
+    bold5000: "BOLD5000v2",
+    bonner: "Bonner2021",
+    BMD: "BMD2024",
+    kingbaker: "King2019",
+    wardle: "Wardle2020",
     nsd_syn: "NSD synthetic",
     global_score: "Global Score",
   };
 
    const datasetLabelMapShort: Record<string, string> = {
     murty185: "Murty",
-    nsd_1000: "NSD",
-    bold_5000: "BOLD",
-    bonner_2021: "Bonner",
-    bmd_2024: "BMD",
-    kingbaker_2019: "King",
-    wardle_2020: "Wardle",
+    nsd1000: "NSD",
+    bold5000: "BOLD",
+    bonner: "Bonner",
+    BMD: "BMD",
+    kingbaker: "King",
+    wardle: "Wardle",
     nsd_syn: "NSD Syn",
   };
 
@@ -569,27 +564,6 @@ const getOverviewColumnCount = (
                 scrollbarWidth: 'thin',
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-                <Button
-                  type="text"
-                  disabled={!hasFilters}
-                  onClick={clearFilters}
-                  size="small"
-                  style={{
-                    padding: '2px 8px',
-                    fontSize: '11px',
-                    fontFamily: "'Inter', system-ui, sans-serif",
-                    color: hasFilters ? 'var(--tungsten)' : '#bbb',
-                    border: `1px solid ${hasFilters ? 'var(--tungsten)' : '#ddd'}`,
-                    borderRadius: 6,
-                    height: 'auto',
-                    lineHeight: '18px',
-                  }}
-                >
-                  Reset filters
-                </Button>
-              </div>
-
               {/* ChartSelect button group*/}
               <div
                 style={{
@@ -613,6 +587,8 @@ const getOverviewColumnCount = (
               </div>
 
 
+
+              <FilterSectionHeader hasFilters={hasFilters} onReset={clearFilters} />
 
               <div data-tutorial="scoreboard-core-filters" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div data-tutorial="scoreboard-filter-training">
@@ -757,7 +733,7 @@ const getOverviewColumnCount = (
           )
         }
         {training === "NSD" && (
-          <DatasetCard dataset={"nsd_1000"}/>
+          <DatasetCard dataset={"nsd1000"}/>
         )
         }
 

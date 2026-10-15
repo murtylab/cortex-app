@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TRAINING_OPTIONS, TRAINING_OPTIONS_VS } from '../../constants-scoreboard';
+import { filterAccordionSx, filterExpandIconSx, filterSummarySx, filterTitleSx } from './filterChrome';
 
 
 const TrainingSelect = ({ training, setTraining, dataset, vsOption, expanded, onToggle }) => {
@@ -28,18 +29,12 @@ const TrainingSelect = ({ training, setTraining, dataset, vsOption, expanded, on
 
   return (
     //defaultExpanded (disabled default expand)
-    <Accordion expanded={expanded}  onChange={onToggle} disableGutters sx={{ bgcolor: 'transparent' }}>
+    <Accordion expanded={expanded} onChange={onToggle} disableGutters elevation={0} sx={filterAccordionSx}>
       <AccordionSummary
-        expandIcon={<ExpandMoreIcon sx={{ color: 'black' }} />}
-        sx={{
-          bgcolor: '#f5f5f5',
-          borderRadius: 1,
-          '&.Mui-expanded': { bgcolor: '#eaeaea' },
-          minHeight: 40,
-          px: 1.5,
-        }}
+        expandIcon={<ExpandMoreIcon sx={filterExpandIconSx} />}
+        sx={filterSummarySx}
       >
-        <Typography sx={{ fontWeight: 500, fontSize: '13px', color: 'var(--tungsten)' }}>Training Dataset</Typography>
+        <Typography sx={filterTitleSx}>Training Dataset</Typography>
       </AccordionSummary>
 
       <AccordionDetails sx={{ pl: 2 }}>

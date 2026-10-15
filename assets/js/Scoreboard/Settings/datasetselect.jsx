@@ -10,6 +10,7 @@ import {
   FormControlLabel,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { filterAccordionSx, filterExpandIconSx, filterSummarySx, filterTitleSx } from './filterChrome';
 import {
   DATASET_OPTIONS,
   DATASET_OPTIONS_LESS,
@@ -23,14 +24,14 @@ const DatasetSelect = ({ dataset, setDataset, training, region, allowToggle, mod
   const isEnabled = (option) => {
     if (training === 'Murty185' && !MURTY185_DATASET.includes(option.value)) return false;
     if (training === 'NSD' && !NSD_DATASET.includes(option.value)) return false;
-    if (training === 'Murty185 VS NSD1000' && (option.value === 'murty185' || option.value === 'nsd_1000')) return false;
+    if (training === 'Murty185 VS NSD1000' && (option.value === 'murty185' || option.value === 'nsd1000')) return false;
     // if (
     //   Array.isArray(region) &&
     //   (region.includes('ffa') || region.includes('eba')) &&
-    //   (option.value === 'bonner_2021' || option.value === 'bold_5000')
+    //   (option.value === 'bonner' || option.value === 'bold5000')
     // )
     //   return false;
-    // if (Array.isArray(region) && region.includes('eba') && (option.value === 'kingbaker_2019' || option.value === 'wardle_2020'))
+    // if (Array.isArray(region) && region.includes('eba') && (option.value === 'kingbaker' || option.value === 'wardle'))
     //   return false;
     // return true;
     const r = Array.isArray(region) ? region : [];
@@ -40,10 +41,10 @@ const DatasetSelect = ({ dataset, setDataset, training, region, allowToggle, mod
 
     
     // if supported by FFA
-    const isSupportedByFFA = !['bold_5000', 'bonner_2021'].includes(option.value);
+    const isSupportedByFFA = !['bold5000', 'bonner'].includes(option.value);
     
     // if supported by PPA 
-    const isSupportedByEBA = !['bold_5000', 'bonner_2021', 'kingbaker_2019', 'wardle_2020'].includes(option.value);
+    const isSupportedByEBA = !['bold5000', 'bonner', 'kingbaker', 'wardle'].includes(option.value);
 
     // or logic
     
@@ -64,18 +65,12 @@ const DatasetSelect = ({ dataset, setDataset, training, region, allowToggle, mod
 
   return (
     //defaultExpanded (disabled default expand)
-    <Accordion expanded={expanded}  onChange={onToggle}  disableGutters sx={{ bgcolor: 'transparent' }}>
+    <Accordion expanded={expanded} onChange={onToggle} disableGutters elevation={0} sx={filterAccordionSx}>
       <AccordionSummary
-        expandIcon={<ExpandMoreIcon sx={{ color: 'black' }} />}
-        sx={{
-          bgcolor: '#f5f5f5',
-          borderRadius: 1,
-          '&.Mui-expanded': { bgcolor: '#eaeaea' },
-          minHeight: 40,
-          px: 1.5,
-        }}
+        expandIcon={<ExpandMoreIcon sx={filterExpandIconSx} />}
+        sx={filterSummarySx}
       >
-        <Typography sx={{ fontWeight: 500, fontSize: '13px', color: 'var(--tungsten)' }}>Evaluation Dataset</Typography>
+        <Typography sx={filterTitleSx}>Evaluation Dataset</Typography>
       </AccordionSummary>
 
       <AccordionDetails sx={{ pl: 2 }}>

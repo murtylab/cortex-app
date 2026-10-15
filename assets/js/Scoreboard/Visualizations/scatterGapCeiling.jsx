@@ -3,15 +3,28 @@ import * as d3 from "d3";
 
 // color/ name map — theme-aligned palette
 const roiColors = { ppa: "#8966a3", ffa: "#c4708a", eba: "#6a9fa0", overall: "#aaa" };
+const DATASET_KEY_ALIASES = {
+  bold_5000: "bold5000",
+  bonner_2021: "bonner",
+  bmd_2024: "BMD",
+  kingbaker_2019: "kingbaker",
+  wardle_2020: "wardle",
+  nsd_1000: "nsd1000",
+};
+
+function canonicalDataset(dataset) {
+  return DATASET_KEY_ALIASES[dataset] || dataset;
+}
+
 const datasetShapes = {
-  bold_5000: d3.symbolCircle, bonner_2021: d3.symbolCircle, kingbaker_2019: d3.symbolCircle,
-  wardle_2020: d3.symbolCircle, bmd_2024: d3.symbolTriangle, nsd_syn: d3.symbolDiamond,
-  nsd_1000: d3.symbolCircle, murty185: d3.symbolCircle,
+  bold5000: d3.symbolCircle, bonner: d3.symbolCircle, kingbaker: d3.symbolCircle,
+  wardle: d3.symbolCircle, BMD: d3.symbolTriangle, nsd_syn: d3.symbolDiamond,
+  nsd1000: d3.symbolCircle, murty185: d3.symbolCircle,
 };
 const datasetLabelMap = {
-  murty185: "Murty185", nsd_1000: "NSD1000", bold_5000: "BOLD5000v2",
-  bonner_2021: "Bonner2021", bmd_2024: "BMD2024", kingbaker_2019: "King2019",
-  wardle_2020: "Wardle2020", nsd_syn: "NSD synthetic",
+  murty185: "Murty185", nsd1000: "NSD1000", bold5000: "BOLD5000v2",
+  bonner: "Bonner2021", BMD: "BMD2024", kingbaker: "King2019",
+  wardle: "Wardle2020", nsd_syn: "NSD synthetic",
 };
 const datasetTypeLabels = {
   circle: "Natural Dataset", triangle: "Video Dataset (BMD)", diamond: "Synthetic / OOD",
@@ -42,9 +55,10 @@ const ScatterGapCeiling = ({ murtyData, nsdData, ceilingData, roi, dataset, trai
       if (!rawData || typeof rawData !== 'object') return [];
       return Object.entries(rawData).map(([key, stats]) => {
         if (!key || !key.includes("/")) return null;
-        const [ds, rName] = key.split("/");
-        
-        const ceilingObj = ceilingData?.[key] || ceilingData?.[rName]?.[ds];
+        const [rawDataset, rName] = key.split("/");
+        const ds = canonicalDataset(rawDataset);
+
+        const ceilingObj = ceilingData?.[key] || ceilingData?.[rName]?.[rawDataset] || ceilingData?.[rName]?.[ds];
         const rawCeilingVals = ceilingObj?.correlation_points || [];
         const cMin = rawCeilingVals.length > 0 ? d3.min(rawCeilingVals) : (stats?.ceiling_mean || 0);
         const cMax = rawCeilingVals.length > 0 ? d3.max(rawCeilingVals) : (stats?.ceiling_mean || 0);

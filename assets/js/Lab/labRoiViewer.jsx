@@ -2,26 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { REGION_OPTIONS } from "../constants";
-
-const MODEL_PATHS = {
-  3.3: "/assets/brainModel/subj01_froi.glb?v=5",
-  7: "/assets/brainModel/subj01_froi_t7.glb?v=1",
-};
-const THRESHOLDS = [3.3, 7];
+const MODEL_PATH = "/assets/brainModel/subj01_froi_t7.glb?v=1";
+const SOLO_COLOR = "#8E6FBF";
 const TARGET_SIZE = 1.9;
 const OUTLINE_LIFT = 0.012;
-
-const ROI_COLORS = {
-  FFA: "#C0392B",
-  OFA: "#E8836F",
-  EBA: "#1F8A70",
-  FBA: "#7FC8A9",
-  PPA: "#2E5EAA",
-  OPA: "#6FA8DC",
-  RSC: "#8E6FBF",
-  VWFA: "#E09F3E",
-};
 
 const ROI_VIEW = {
   ffa: "ventral",
@@ -146,7 +130,6 @@ export default function LabRoiViewer({ region }) {
   const regionRef = useRef(region);
   regionRef.current = region;
   const [status, setStatus] = useState("loading");
-  const [threshold, setThreshold] = useState(7);
   const [view, setView] = useState(ROI_VIEW[roiKey(region)] || "lateral");
   const [helpOpen, setHelpOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -224,6 +207,7 @@ export default function LabRoiViewer({ region }) {
       roiMeshes.forEach((meshes, roi) => {
         const on = roi === selected;
         meshes.forEach((mesh) => {
+          mesh.visible = on;
           if (mesh.userData.outline) mesh.userData.outline.visible = on;
         });
       });
@@ -231,7 +215,7 @@ export default function LabRoiViewer({ region }) {
 
     const loader = new GLTFLoader();
     loader.load(
-      MODEL_PATHS[threshold],
+      MODEL_PATH,
       (gltf) => {
         if (!mount.isConnected) return;
         const meshes = [];
@@ -241,11 +225,13 @@ export default function LabRoiViewer({ region }) {
         meshes.forEach((child) => {
           const parsed = parseMeshName(child.name) || parseMeshName(child.parent?.name);
           if (!parsed) return;
+          const solo = parsed.kind === "roi";
           child.material = new THREE.MeshBasicMaterial({
-            vertexColors: true,
+            vertexColors: !solo,
+            color: solo ? SOLO_COLOR : 0xffffff,
             side: THREE.DoubleSide,
             depthWrite: true,
-            polygonOffset: parsed.kind === "roi",
+            polygonOffset: solo,
             polygonOffsetFactor: -1,
             polygonOffsetUnits: -1,
           });
@@ -353,7 +339,7 @@ export default function LabRoiViewer({ region }) {
       }
     };
     // region is applied through apiRef so the scene is not rebuilt on each click
-  }, [threshold]);
+  }, []);
 
   useEffect(() => {
     if (!apiRef.current) return;
@@ -443,36 +429,8 @@ export default function LabRoiViewer({ region }) {
         <span className="lab-roi-hemi-label">Right</span>
       </div>
       <div className="lab-roi-toolbar">
-        <div className="lab-roi-thresholds">
-          {THRESHOLDS.map((value) => (
-            <button
-              key={value}
-              type="button"
-              className={threshold === value ? "is-active" : undefined}
-              onClick={() => {
-                if (value !== threshold) {
-                  setStatus("loading");
-                  setThreshold(value);
-                }
-              }}
-            >
-              t &gt; {value}
-            </button>
-          ))}
-        </div>
-        <div className="lab-roi-legend">
-          {REGION_OPTIONS.map((option) => (
-            <span
-              key={option.value}
-              className={`lab-roi-legend-item${roiKey(region) === option.value ? " is-active" : ""}`}
-            >
-              <span
-                className="lab-roi-swatch"
-                style={{ background: ROI_COLORS[option.label] }}
-              />
-              {option.label}
-            </span>
-          ))}
+        <div className="lab-roi-toolbar-start">
+          <span className="lab-roi-threshold-label">T &gt; 7, NSD subject 1</span>
         </div>
         <div className="lab-roi-views">
           {VIEW_ORDER.map((name) => (
@@ -545,8 +503,8 @@ export default function LabRoiViewer({ region }) {
                   <dd>Each hemisphere turns on its own</dd>
                 </div>
                 <div>
-                  <dt>t &gt; 3.3 / t &gt; 7</dt>
-                  <dd>How strictly each fROI is defined</dd>
+                  <dt>t &gt; 7</dt>
+                  <dd>Each fROI uses the stricter definition</dd>
                 </div>
                 <div>
                   <dt>Fullscreen</dt>

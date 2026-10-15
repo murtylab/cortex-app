@@ -1,9 +1,10 @@
 import React from "react";
 
-export default function StepHeading({ step, children, id }) {
+/** @param {{ children: import("react").ReactNode, id?: string, className?: string }} props */
+export default function StepHeading({ children, id = undefined, className = "" }) {
   return (
-    <div className="lab-step-heading" id={id}>
-      <span className="lab-step-badge" aria-hidden="true">{step}</span>
+    <div className={className ? `lab-step-heading ${className}` : "lab-step-heading"} id={id}>
+      <span className="lab-step-mark" aria-hidden="true" />
       <span className="lab-step-heading-text">{children}</span>
     </div>
   );

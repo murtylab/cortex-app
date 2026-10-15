@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Pencil, X } from "lucide-react";
 import { collectDroppedImageFiles, hasExternalFileDrag } from "./collectDroppedFiles";
+import StepHeading from "./stepHeading.jsx";
 
 type FileWithPath = File & { webkitRelativePath?: string };
 
@@ -594,7 +595,7 @@ export default function ImagePreviewGroupedDnD({
         }}
       >
         {isLab ? (
-          <div className="lab-subheading">{eyebrow || title}</div>
+          <StepHeading>{eyebrow || title}</StepHeading>
         ) : (
           <div style={{ fontWeight: 700, color: "black" }}>{title}</div>
         )}
@@ -621,7 +622,7 @@ export default function ImagePreviewGroupedDnD({
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
         {isLab ? (
-          <div className="lab-subheading" style={{ marginBottom: 0 }}>{eyebrow || title}</div>
+          <StepHeading className="is-inline">{eyebrow || title}</StepHeading>
         ) : (
           <div style={{ fontWeight: 700, color: "black" }}>
             {title} <span style={{ fontWeight: 450, color: "rgba(0,0,0,0.55)" }}>({files.length})</span>
@@ -629,7 +630,7 @@ export default function ImagePreviewGroupedDnD({
         )}
 
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          {isLab && (
+          {isLab && !isPanelCollapsed && (
             <span
               className="lab-mono-num"
               style={{
@@ -660,59 +661,101 @@ export default function ImagePreviewGroupedDnD({
             </button>
           )}
 
-          <button
-            type="button"
-            data-tutorial="lab-upload-add-group"
-            disabled={groupEditingDisabled}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (groupEditingDisabled) return;
-              startAddGroup();
-            }}
-            style={btnStyle(groupEditingDisabled)}
-          >
-            {isLab ? "Add group" : "Add Group"}
-          </button>
+          {!isLab && (
+            <>
+              <button
+                type="button"
+                data-tutorial="lab-upload-add-group"
+                disabled={groupEditingDisabled}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (groupEditingDisabled) return;
+                  startAddGroup();
+                }}
+                style={btnStyle(groupEditingDisabled)}
+              >
+                Add Group
+              </button>
 
-          <button
-            type="button"
-            disabled={groupEditingDisabled}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (groupEditingDisabled) return;
-              onClear?.();
-              setCustomGroups([]);
-              setSelectedUids(new Set());
-              setSelectionAnchor(null);
-            }}
-            style={btnStyle(groupEditingDisabled)}
-          >
-            {isLab ? "Clear all" : "Clear All"}
-          </button>
+              <button
+                type="button"
+                disabled={groupEditingDisabled}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (groupEditingDisabled) return;
+                  onClear?.();
+                  setCustomGroups([]);
+                  setSelectedUids(new Set());
+                  setSelectionAnchor(null);
+                }}
+                style={btnStyle(groupEditingDisabled)}
+              >
+                Clear All
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      {foldable && isPanelCollapsed && (
-        <div
+      {foldable && isPanelCollapsed && !isLab && (
+        <button
+          type="button"
+          onClick={() => updatePanelCollapsed(false)}
+          aria-expanded={false}
           style={{
-            marginTop: 10,
-            padding: "10px 12px",
-            borderRadius: 8,
-            background: "rgba(255,255,255,0.7)",
-            border: "1px dashed rgba(0,0,0,0.14)",
-            color: "rgba(0,0,0,0.62)",
+            marginTop: 8,
+            padding: 0,
+            background: "none",
+            border: 0,
+            color: isLab ? "var(--lab-muted, #8A8378)" : "rgba(0,0,0,0.55)",
             fontSize: 12,
-            fontWeight: 600,
+            fontFamily: isLab ? "var(--lab-mono, 'IBM Plex Mono', monospace)" : undefined,
+            textAlign: "left",
+            cursor: "pointer",
           }}
         >
-          Unfold to see and rearrange
-        </div>
+          Unfold to see
+        </button>
       )}
 
       {!isPanelCollapsed && (
         <div ref={panelContentRef}>
+          {isLab && (
+            <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 8, marginTop: 10 }}>
+              <button
+                type="button"
+                data-tutorial="lab-upload-add-group"
+                disabled={groupEditingDisabled}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (groupEditingDisabled) return;
+                  startAddGroup();
+                }}
+                style={btnStyle(groupEditingDisabled)}
+              >
+                Add group
+              </button>
+              <button
+                type="button"
+                disabled={groupEditingDisabled}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (groupEditingDisabled) return;
+                  onClear?.();
+                  setCustomGroups([]);
+                  setSelectedUids(new Set());
+                  setSelectionAnchor(null);
+                }}
+                style={btnStyle(groupEditingDisabled)}
+              >
+                Clear all
+              </button>
+            </div>
+          )}
           {isAddingGroup && (
             <div
               style={{

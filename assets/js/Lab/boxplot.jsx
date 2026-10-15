@@ -72,7 +72,7 @@ const positionTooltip = (tooltip, event) => {
   tooltip.style("left", `${left}px`).style("top", `${top}px`);
 };
 
-const computeBoxStats = (values) => {
+export const computeBoxStats = (values) => {
   if (!values || values.length === 0) return null;
 
   const sorted = [...values].sort((a, b) => a - b);

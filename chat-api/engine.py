@@ -17,29 +17,29 @@ MODELS_META_PATH = REPO_ROOT / "cortex-web-app" / "public" / "assets" / "data" /
 
 # Scoreboard-style aggregation:
 # - Compute a per-model "global_score" as the mean over all *available* datasets
-#   excluding the training datasets shown in the UI ("murty185" and "nsd_1000").
+#   excluding the paired training columns ("murty185" and "nsd1000").
 # - Compute "overall" as the mean across ROIs (PPA/FFA/EBA) and datasets.
 #
 # This mirrors the logic in `assets/js/Scoreboard/Visualizations/heatmapDetail.jsx`.
-EXCLUDED_DATASETS = {"murty185", "nsd_1000"}
+EXCLUDED_DATASETS = {"murty185", "nsd_1000", "nsd1000"}
 ROIS = ["ppa", "ffa", "eba"]
 ROI_ALIASES = {"ppa": ["ppa", "parahippocampal", "place"], "ffa": ["ffa", "fusiform", "face"], "eba": ["eba", "extrastriate", "body"]}
 
 # Canonical evaluation dataset keys and their user-facing aliases
 EVAL_DATASET_ALIASES: dict[str, list[str]] = {
-    "bold_5000": ["bold5000", "bold_5000", "bold 5000", "bold-5000"],
-    "bonner_2021": ["bonner2021", "bonner_2021", "bonner 2021", "bonner"],
-    "bmd_2024": ["bmd2024", "bmd_2024", "bmd 2024", "bmd"],
-    "kingbaker_2019": ["kingbaker2019", "kingbaker_2019", "king2019", "king 2019", "kingbaker", "king baker"],
-    "wardle_2020": ["wardle2020", "wardle_2020", "wardle 2020", "wardle"],
+    "bold5000": ["bold5000", "bold_5000", "bold 5000", "bold-5000"],
+    "bonner": ["bonner2021", "bonner_2021", "bonner 2021", "bonner"],
+    "BMD": ["bmd2024", "bmd_2024", "bmd 2024", "bmd"],
+    "kingbaker": ["kingbaker2019", "kingbaker_2019", "king2019", "king 2019", "kingbaker", "king baker"],
+    "wardle": ["wardle2020", "wardle_2020", "wardle 2020", "wardle"],
     "nsd_syn": ["nsd_syn", "nsd syn", "nsd_synthetic", "nsd synthetic", "nsdsyn"],
 }
 EVAL_DATASET_LABELS: dict[str, str] = {
-    "bold_5000": "BOLD5000",
-    "bonner_2021": "Bonner2021",
-    "bmd_2024": "BMD2024",
-    "kingbaker_2019": "KingBaker2019",
-    "wardle_2020": "Wardle2020",
+    "bold5000": "BOLD5000",
+    "bonner": "Bonner2021",
+    "BMD": "BMD2024",
+    "kingbaker": "KingBaker2019",
+    "wardle": "Wardle2020",
     "nsd_syn": "NSD Synthetic",
 }
 

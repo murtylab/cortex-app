@@ -10,6 +10,7 @@ import {
   FormControlLabel,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { filterAccordionSx, filterExpandIconSx, filterSummarySx, filterTitleSx } from './filterChrome';
 
 function shortLabel(expKey) {
   // "berman_2017::main::PPA" → "berman_2017 [PPA]"
@@ -41,20 +42,12 @@ const ExperimentSelect = ({ experiments, selectedExperiments, setSelectedExperim
       : selectedExperiments.includes(value);
 
   return (
-    <Accordion expanded={expanded} onChange={onToggle} disableGutters sx={{ bgcolor: 'transparent' }}>
+    <Accordion expanded={expanded} onChange={onToggle} disableGutters elevation={0} sx={filterAccordionSx}>
       <AccordionSummary
-        expandIcon={<ExpandMoreIcon sx={{ color: 'black' }} />}
-        sx={{
-          bgcolor: '#f5f5f5',
-          borderRadius: 1,
-          '&.Mui-expanded': { bgcolor: '#eaeaea' },
-          minHeight: 40,
-          px: 1.5,
-        }}
+        expandIcon={<ExpandMoreIcon sx={filterExpandIconSx} />}
+        sx={filterSummarySx}
       >
-        <Typography sx={{ fontWeight: 500, fontSize: '13px', color: 'var(--tungsten)' }}>
-          Experiment
-        </Typography>
+        <Typography sx={filterTitleSx}>Experiment</Typography>
       </AccordionSummary>
 
       <AccordionDetails sx={{ pl: 2 }}>

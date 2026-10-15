@@ -18,6 +18,8 @@ const RegionSelector = ({
   tutorialRootKey = "lab-settings-region",
   activeTutorialKey = "lab-settings-region-active",
   variant = "default",
+  onView3D,
+  is3DOpen = false,
 }) => {
   const isEnabled = (option) => {
     if (variant === "lab") return true;
@@ -38,7 +40,7 @@ const RegionSelector = ({
   if (variant === "lab") {
     return (
       <FormControl data-tutorial={tutorialRootKey} sx={{ minWidth: 0 }} fullWidth>
-        <StepHeading step={1} id="region-buttons-group-label">
+        <StepHeading id="region-buttons-group-label">
           Select a fROI
         </StepHeading>
 
@@ -74,6 +76,22 @@ const RegionSelector = ({
             );
           })}
         </div>
+        {onView3D && (
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+            {region ? <button
+              type="button"
+              className="lab-model-card-link"
+              onClick={onView3D}
+              style={{ background: "none", border: 0, padding: 0, cursor: "pointer" }}
+            >
+              {is3DOpen ? "Close 3D x" : "View in 3D ->"}
+            </button> : (
+              <span className="lab-model-card-link" style={{ color: "var(--lab-muted, #8A8378)" }}>
+                Select an fROI to view in 3D
+              </span>
+            )}
+          </div>
+        )}
       </FormControl>
     );
   }

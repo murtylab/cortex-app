@@ -43,7 +43,7 @@ const HeatmapOverview = ({
       const rawModels = Object.keys(data[roi]).filter((m) => m !== "ceiling");
       rawModels.forEach((model) => {
         Object.entries(data[roi][model] || {}).forEach(([x, vals]) => {
-          if (vals && !["murty185", "nsd_1000"].includes(x)) {
+          if (vals && !["murty185", "nsd1000"].includes(x)) {
             cellData.push({ model, x, raw: vals[0], norm: vals[1] });
             modelsSet.add(model);
             xLabelsSet.add(x);
@@ -74,7 +74,7 @@ const HeatmapOverview = ({
     let xLabels = Array.from(xLabelsSet);
     let models = Array.from(modelsSet);
 
-    if (rank === "rank") {
+    if (rank !== "alphabet") {
       const avg = {};
       models.forEach((m) => {
         const vals = cellData.filter((d) => d.model === m).map((d) => d.raw);

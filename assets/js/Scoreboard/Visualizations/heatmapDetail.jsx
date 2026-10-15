@@ -13,12 +13,12 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
 
   const datasetLabelMap = {
     murty185: "Murty185",
-    nsd_1000: "NSD1000",
-    bold_5000: "BOLD5000v2",
-    bonner_2021: "Bonner2021",
-    bmd_2024: "BMD2024",
-    kingbaker_2019: "King2019",
-    wardle_2020: "Wardle2020",
+    nsd1000: "NSD1000",
+    bold5000: "BOLD5000v2",
+    bonner: "Bonner2021",
+    BMD: "BMD2024",
+    kingbaker: "King2019",
+    wardle: "Wardle2020",
     nsd_syn: "NSD synthetic",
     global_score: "Global Score",
   };
@@ -109,7 +109,7 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
     //   models.forEach((model) => {
     //     let rawVals = [];
     //     xLabels.forEach((ds) => {
-    //       if (["murty185", "nsd_1000"].includes(ds)) return;
+    //       if (["murty185", "nsd1000"].includes(ds)) return;
     //       const vals = data[roi][model]?.[ds];
     //       if (vals) {
     //         const raw = vals[0];
@@ -129,7 +129,7 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
     //   }) 
 
     //   ceilingData = xLabels
-    //     .filter((ds) => !["murty185", "nsd_1000"].includes(ds))
+    //     .filter((ds) => !["murty185", "nsd1000"].includes(ds))
     //     .map((ds) => {
     //       const vals = data[roi]?.ceiling?.[ds];
     //       return vals ? { x: ds, raw: vals[0], norm: vals[1] } : {};
@@ -144,7 +144,7 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
     //     });
     //   }
 
-    //   xLabels = ["global_score", ...xLabels.filter((ds) => !["murty185", "nsd_1000"].includes(ds))];
+    //   xLabels = ["global_score", ...xLabels.filter((ds) => !["murty185", "nsd1000"].includes(ds))];
     // } else if (dataset) {
     //   const rois = Object.keys(data).filter((roiName) => roiName.toLowerCase() !== "overall");
     //   models = [];
@@ -207,7 +207,7 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
       models.forEach((model) => {
         let rawVals = [];
         allPossibleDatasets.forEach((ds) => {
-          if (["murty185", "nsd_1000"].includes(ds)) return;
+          if (["murty185", "nsd1000"].includes(ds)) return;
           const vals = data[roi][model]?.[ds];
           if (vals) {
             rawVals.push(vals[0]);
@@ -220,7 +220,7 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
       });
 
       ceilingData = allPossibleDatasets
-        .filter(ds => !["murty185", "nsd_1000"].includes(ds))
+        .filter(ds => !["murty185", "nsd1000"].includes(ds))
         .map(ds => {
           const vals = data[roi]?.ceiling?.[ds];
           return vals ? { x: ds, raw: vals[0], norm: vals[1] } : null;
@@ -229,7 +229,7 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
       const cVals = ceilingData.map(d => d.raw).filter(v => v != null);
       if (cVals.length > 0) ceilingData.push({ x: "global_score", raw: d3.mean(cVals), norm: null });
       
-      xLabels = ["global_score", ...allPossibleDatasets.filter(ds => !["murty185", "nsd_1000"].includes(ds))];
+      xLabels = ["global_score", ...allPossibleDatasets.filter(ds => !["murty185", "nsd1000"].includes(ds))];
 
     } else if (dataset) {
       // Case 2: 固定 Dataset -> X轴是 ROI 名
@@ -284,12 +284,12 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
     //   });
     //   models.sort((a, b) => (modelGlobal[b] || -Infinity) - (modelGlobal[a] || -Infinity));
     // }
-    if (rank && rank !== "") {
+    if (rank === "alphabet") {
+      models.sort();
+    } else {
       const modelGlobal = {};
       cellData.forEach((d) => { if (d.x === "global_score") modelGlobal[d.model] = d.raw ?? -Infinity; });
       models.sort((a, b) => (modelGlobal[b] || -Infinity) - (modelGlobal[a] || -Infinity));
-    } else {
-      models.sort(); // 默认按字母排序，保证并排显示时模型行号一致
     }
 
     // 4. sorted rank store in Ref

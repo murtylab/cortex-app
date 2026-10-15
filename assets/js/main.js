@@ -7,7 +7,7 @@
   function toggleScrolled() {
     const selectBody = document.querySelector('body');
     const selectHeader = document.querySelector('#header');
-          body: 'The main panel shows quantitative model rankings. Click an item in the left overview to highlight and auto-locate the matching item in the right detail panel. Use the view toggle at the top of the filter panel to switch between Leaderboard and Advanced Insights.',
+          body: 'The main panel shows quantitative model rankings. Click an item in the left overview to highlight and auto-locate the matching item in the right detail panel. Use Rank to switch between accuracy order and alphabetical order.',
     window.scrollY > 100 ? selectBody.classList.add('scrolled') : selectBody.classList.remove('scrolled');
   }
 
@@ -248,11 +248,11 @@
   document.addEventListener('scroll', navmenuScrollspy);
 
   const MODEL_PAGE_DATASETS = [
-    { key: 'bold_5000', label: 'BOLD5000' },
-    { key: 'bonner_2021', label: 'Bonner2021' },
-    { key: 'bmd_2024', label: 'BMD2024' },
-    { key: 'kingbaker_2019', label: 'KingBaker2019' },
-    { key: 'wardle_2020', label: 'Wardle2020' },
+    { key: 'bold5000', label: 'BOLD5000' },
+    { key: 'bonner', label: 'Bonner2021' },
+    { key: 'BMD', label: 'BMD2024' },
+    { key: 'kingbaker', label: 'KingBaker2019' },
+    { key: 'wardle', label: 'Wardle2020' },
     { key: 'nsd_syn', label: 'NSD Synthetic' }
   ];
 
@@ -778,10 +778,9 @@
         {
           type: 'choice',
           title: 'Choose a Scoreboard Tutorial',
-          body: 'Select the tutorial you want to follow.\n\n- Leaderboard: Fastest entry for model ranking\n- Advanced Insights: Deep-dive scatter/gap analysis\n- Qualitative: Image-level predictions',
+          body: 'Select the tutorial you want to follow.\n\n- Leaderboard: Fastest entry for model ranking\n- Qualitative: Image-level predictions',
           choices: [
             { label: 'Quantitative – Leaderboard', tutorialId: 'scoreboardLeaderboard', step: 1, description: 'Rank models by brain-predictivity.' },
-            { label: 'Quantitative – Advanced Insights', tutorialId: 'scoreboardAdvancedInsights', step: 1, description: 'Scatter plots and gap-to-ceiling.' },
             { label: 'Qualitative – Leaderboard', tutorialId: 'scoreboardQualitative', step: 1, description: 'Image-level model predictions.' }
           ]
         },
@@ -804,7 +803,7 @@
           path: '/scoreboardQuantitative/',
           selector: '[data-tutorial="scoreboard-chart-panel"]',
           title: 'Read the Rankings',
-          body: 'The main panel shows quantitative model rankings. Click an item in the left overview to highlight and auto-locate the matching item in the right detail panel. Use the view toggle at the top of the filter panel to switch between Leaderboard and Advanced Insights.',
+          body: 'The main panel shows quantitative model rankings. Click an item in the left overview to highlight and auto-locate the matching item in the right detail panel. Use Rank to switch between accuracy order and alphabetical order.',
           prepare: { type: 'scoreboard-ranking-demo' },
           nextLabel: 'Finish',
         },
@@ -817,10 +816,9 @@
         {
           type: 'choice',
           title: 'Choose a Scoreboard Tutorial',
-          body: 'Select the tutorial you want to follow.\n\n- Leaderboard: Fastest entry for model ranking\n- Advanced Insights: Deep-dive scatter/gap analysis\n- Qualitative: Image-level predictions',
+          body: 'Select the tutorial you want to follow.\n\n- Leaderboard: Fastest entry for model ranking\n- Qualitative: Image-level predictions',
           choices: [
             { label: 'Quantitative – Leaderboard', tutorialId: 'scoreboardLeaderboard', step: 1, description: 'Rank models by brain-predictivity.' },
-            { label: 'Quantitative – Advanced Insights', tutorialId: 'scoreboardAdvancedInsights', step: 1, description: 'Scatter plots and gap-to-ceiling.' },
             { label: 'Qualitative – Leaderboard', tutorialId: 'scoreboardQualitative', step: 1, description: 'Image-level model predictions.' }
           ]
         },
@@ -868,10 +866,9 @@
         {
           type: 'choice',
           title: 'Choose a Scoreboard Tutorial',
-          body: 'Select the tutorial you want to follow.\n\n- Leaderboard: Fastest entry for model ranking\n- Advanced Insights: Deep-dive scatter/gap analysis\n- Qualitative: Image-level predictions',
+          body: 'Select the tutorial you want to follow.\n\n- Leaderboard: Fastest entry for model ranking\n- Qualitative: Image-level predictions',
           choices: [
             { label: 'Quantitative – Leaderboard', tutorialId: 'scoreboardLeaderboard', step: 1, description: 'Rank models by brain-predictivity.' },
-            { label: 'Quantitative – Advanced Insights', tutorialId: 'scoreboardAdvancedInsights', step: 1, description: 'Scatter plots and gap-to-ceiling.' },
             { label: 'Qualitative – Leaderboard', tutorialId: 'scoreboardQualitative', step: 1, description: 'Image-level model predictions.' }
           ]
         },
@@ -928,6 +925,8 @@
 
   // Scoreboard tutorials disabled for now (hide Tutorials FAB on scoreboard pages).
   const SCOREBOARD_TUTORIALS_ENABLED = false;
+  // Lab walkthrough still describes the previous interface, so hide the button until it is rewritten.
+  const TUTORIALS_ENABLED = false;
 
   function normalizeTutorialPath(pathname) {
     if (!pathname || pathname === '/') return '/';
@@ -946,6 +945,7 @@
   }
 
   function shouldShowTutorialFab() {
+    if (!TUTORIALS_ENABLED) return false;
     return SCOREBOARD_TUTORIALS_ENABLED || !isScoreboardTutorialPage();
   }
 
@@ -1890,6 +1890,8 @@
   }
 
   function resumeTutorialIfNeeded() {
+    if (!TUTORIALS_ENABLED) return;
+
     const storedState = readTutorialState();
     if (!storedState || !TUTORIALS[storedState.tutorialId]) {
       return;

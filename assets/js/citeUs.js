@@ -148,9 +148,8 @@
       "<li>" +
       '<a href="/scoreboardLanding/">The Scoreboard</a>' +
       "<ul>" +
-      '<li><a href="/scoreboardQuantitative/?view=rank">Quantitative-leaderboard</a></li>' +
-      '<li><a href="/scoreboardQuantitative/?view=2">Quantitative-Advanced Insights</a></li>' +
-      '<li><a href="/scoreboardQualitative/">Qualitative-leaderboard</a></li>' +
+      '<li><a href="/scoreboardQuantitative/">Quantitative</a></li>' +
+      '<li><a href="/scoreboardQualitative/">Qualitative</a></li>' +
       "</ul>" +
       "</li>" +
       "</ul>";

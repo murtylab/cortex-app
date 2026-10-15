@@ -206,13 +206,18 @@ export default function UploadBrainViewer({ mapping, roi, values, range, onVoxel
     renderer.domElement.setAttribute("aria-label", "Interactive Subject 1 cortical surface. Drag to rotate, scroll to zoom, or use arrow keys and plus or minus.");
     mount.appendChild(renderer.domElement);
 
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x827a70, 2.4));
+    // Ground matches the sky closely: ventral faces point down, so a dark
+    // ground color leaves that view almost unlit.
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xe4dfd6, 2.4));
     const keyLight = new THREE.DirectionalLight(0xffffff, 2.6);
     keyLight.position.set(1, 1.4, 1.8);
     scene.add(keyLight);
     const fillLight = new THREE.DirectionalLight(0xa8b7dc, 1.2);
     fillLight.position.set(-1.5, 0.2, -1);
     scene.add(fillLight);
+    const undersideLight = new THREE.DirectionalLight(0xfff6ee, 2.2);
+    undersideLight.position.set(0.2, -1.6, 0.45);
+    scene.add(undersideLight);
 
     const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 3000);
     const controls = new OrbitControls(camera, renderer.domElement);

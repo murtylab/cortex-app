@@ -30,7 +30,9 @@ const BarChartOverview = ({ data, roi, dataset, ceiling, rank, onModelClick, sel
       .map((model) => ({ model, val: roiData[model]?.[dataset]?.[0] }))
       .filter((d) => d.val !== undefined && d.val !== null);
 
-    if (rank && rank !== "") {
+    if (rank === "alphabet") {
+      arr = [...arr].sort((a, b) => a.model.localeCompare(b.model));
+    } else {
       arr = [...arr].sort((a, b) => d3.descending(a.val, b.val));
     }
 

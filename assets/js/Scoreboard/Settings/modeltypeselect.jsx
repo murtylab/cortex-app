@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { MODEL_TYPE_OPTIONS } from '../../constants-scoreboard';
+import { filterAccordionSx, filterExpandIconSx, filterSummarySx, filterTitleSx } from './filterChrome';
 
 const ModelTypeSelect = ({
   modelType,
@@ -36,25 +37,12 @@ const ModelTypeSelect = ({
   };
 
   return (
-    <Accordion
-      expanded={expanded}
-      onChange={onToggle}
-      disableGutters
-      sx={{ bgcolor: 'transparent' }}
-    >
+    <Accordion expanded={expanded} onChange={onToggle} disableGutters elevation={0} sx={filterAccordionSx}>
       <AccordionSummary
-        expandIcon={<ExpandMoreIcon sx={{ color: 'black' }} />}
-        sx={{
-          bgcolor: '#f5f5f5',
-          borderRadius: 1,
-          '&.Mui-expanded': { bgcolor: '#eaeaea' },
-          minHeight: 40,
-          px: 1.5,
-        }}
+        expandIcon={<ExpandMoreIcon sx={filterExpandIconSx} />}
+        sx={filterSummarySx}
       >
-        <Typography sx={{ fontWeight: 500, fontSize: '13px', color: 'var(--tungsten)' }}>
-          Model Type
-        </Typography>
+        <Typography sx={filterTitleSx}>Model Type</Typography>
       </AccordionSummary>
 
       <AccordionDetails sx={{ pl: 2 }}>
