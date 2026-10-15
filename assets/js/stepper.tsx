@@ -7,7 +7,11 @@ import {
   canExplorePrediction,
   getComparisonCapabilities,
   getComparisonErrorMessage,
+  getComparisonModels,
+  closeVisualizationTab,
   navigateToInfoViz,
+  openVisualizationTab,
+  requireSupportedComparisonModels,
   uploadComparisonStimuli,
 } from './services/visualizationSession.js';
 import { getInferenceContextKey } from './services/uploadBrainData.js';
@@ -37,6 +41,7 @@ import DatasetCardLab from './Lab/datasetcard-lab.jsx';
 import StepHeading from './Lab/stepHeading.jsx';
 import LabRoiViewer from './Lab/labRoiViewer.jsx';
 import RoiInfoCard from './Lab/roiInfoCard.jsx';
+import CortexCompassSection from './Lab/cortexCompassSection';
 import {
   REGION_OPTIONS,
   MURTY185_INCLUDED_REGIONS,
@@ -230,6 +235,12 @@ const Stepper: React.FC = () => {
   const [lastComparisonModel, setLastComparisonModel] = useState<string | null>(null);
   const comparisonRequestActive = useRef(false);
   const capabilityRequestActive = useRef(false);
+  const comparisonRequestRef = useRef(0);
+  const comparisonTabRef = useRef<Window | null>(null);
+  const dismissComparisonTab = (tab: Window | null) => {
+    if (comparisonTabRef.current === tab) comparisonTabRef.current = null;
+    closeVisualizationTab(tab);
+  };
 
 
   // basic visulization and prediction states
@@ -1914,6 +1925,11 @@ const renameGroupKey = (oldKey: string, newKey: string) => {
 
 
 useEffect(() => {
+  dismissComparisonTab(comparisonTabRef.current);
+  comparisonRequestRef.current += 1;
+  comparisonRequestActive.current = false;
+  capabilityRequestActive.current = false;
+  setComparisonLoading(false);
   setPredictionResult(null);
   setPredictstep(1);
   clearRegionPredictionCache();
@@ -1925,6 +1941,12 @@ useEffect(() => {
   setLastComparisonModel(null);
   setUnsupportedModelOpen(false);
   setAlternateComparisonModel(undefined);
+  return () => {
+    dismissComparisonTab(comparisonTabRef.current);
+    comparisonRequestRef.current += 1;
+    comparisonRequestActive.current = false;
+    capabilityRequestActive.current = false;
+  };
 }, [
   model,
   dataset,
@@ -2030,6 +2052,16 @@ useEffect(() => {
     setPredictError(null);
 
     const requestId = ++inferenceRequestRef.current;
+    dismissComparisonTab(comparisonTabRef.current);
+    comparisonRequestRef.current += 1;
+    comparisonRequestActive.current = false;
+    capabilityRequestActive.current = false;
+    setComparisonLoading(false);
+    setComparisonSnapshot(null);
+    setComparisonError(null);
+    setLastComparisonModel(null);
+    setUnsupportedModelOpen(false);
+    setAlternateComparisonModel(undefined);
     const requestContext = inferenceContextKey;
     const requestFiles = files;
     const isCurrentRequest = () => inferenceRequestRef.current === requestId &&
@@ -2380,7 +2412,7 @@ useEffect(() => {
     }
   };
 
-  const buildComparisonUploadFiles = () => files.map((item) => {
+  const buildComparisonUploadFiles = (requestFiles = files) => requestFiles.map((item) => {
     if (!item.file) {
       throw new Error(`Missing file data for ${item.label || item.uid}`);
     }
@@ -2390,73 +2422,126 @@ useEffect(() => {
     });
   });
 
-  const prepareComparison = async (comparisonModel: string, forceReupload = false) => {
-    if (comparisonRequestActive.current || capabilityRequestActive.current || !comparisonSnapshot) return;
+  const prepareComparison = async (
+    comparisonModel: string,
+    forceReupload = false,
+    capabilities = comparisonCapabilities,
+    reservedTab: Window | null = null,
+  ) => {
+    if (comparisonRequestActive.current || capabilityRequestActive.current || !comparisonSnapshot) {
+      dismissComparisonTab(reservedTab);
+      return;
+    }
 
+    const snapshot = comparisonSnapshot;
+    const requestFiles = files;
+    const requestContext = inferenceContextKey;
+    const requestInference = inferenceRequestRef.current;
+    const requestId = ++comparisonRequestRef.current;
+    const isCurrentRequest = () => comparisonRequestRef.current === requestId &&
+      inferenceContextRef.current === requestContext && inferenceRequestRef.current === requestInference;
     comparisonRequestActive.current = true;
     setComparisonLoading(true);
     setComparisonError(null);
     setLastComparisonModel(comparisonModel);
+    let targetTab = reservedTab;
+    let opened = false;
 
     try {
-      let stimuli = comparisonSnapshot.stimuli;
-      if (forceReupload || stimuli.length !== files.length) {
+      targetTab ??= openVisualizationTab();
+      if (targetTab.closed) throw new Error("The Cortex-Compass tab was closed. Click Open Cortex-Compass to try again.");
+      comparisonTabRef.current = targetTab;
+      const models = requireSupportedComparisonModels(comparisonModel, capabilities?.supported_models);
+      let stimuli = snapshot.stimuli;
+      if (forceReupload || stimuli.length !== requestFiles.length) {
         stimuli = await uploadComparisonStimuli(
-          buildComparisonUploadFiles(),
-          files.map((item) => item.label),
+          buildComparisonUploadFiles(requestFiles),
+          requestFiles.map((item) => item.label),
         );
-        setComparisonSnapshot((current) => current ? { ...current, stimuli } : current);
+        if (!isCurrentRequest()) return;
+        setComparisonSnapshot((current) => isCurrentRequest() && current === snapshot ? { ...current, stimuli } : current);
       }
 
       const session = await createVisualizationSession({
         stimuli,
         model: comparisonModel,
+        additionalModels: models.slice(1),
         sourceRequest: {
-          model: comparisonSnapshot.model,
-          dataset: comparisonSnapshot.dataset,
-          roi: comparisonSnapshot.roi,
+          model: snapshot.model,
+          dataset: snapshot.dataset,
+          roi: snapshot.roi,
         },
       });
-      navigateToInfoViz(session.session_id);
+      if (!isCurrentRequest()) return;
+      navigateToInfoViz(session.session_id, targetTab);
+      opened = true;
+      if (comparisonTabRef.current === targetTab) comparisonTabRef.current = null;
     } catch (error: any) {
+      if (!isCurrentRequest()) return;
       const text = getComparisonErrorMessage(error);
       setComparisonError(text);
       message.error(text);
     } finally {
-      comparisonRequestActive.current = false;
-      setComparisonLoading(false);
+      if (!opened) dismissComparisonTab(targetTab);
+      if (isCurrentRequest()) {
+        comparisonRequestActive.current = false;
+        setComparisonLoading(false);
+      }
     }
   };
 
   const exploreInVisualization = async () => {
     if (comparisonRequestActive.current || capabilityRequestActive.current || !comparisonSnapshot) return;
 
+    const snapshot = comparisonSnapshot;
+    const requestContext = inferenceContextKey;
+    const requestInference = inferenceRequestRef.current;
+    const requestId = ++comparisonRequestRef.current;
+    const isCurrentRequest = () => comparisonRequestRef.current === requestId &&
+      inferenceContextRef.current === requestContext && inferenceRequestRef.current === requestInference;
     capabilityRequestActive.current = true;
     setComparisonLoading(true);
+    setComparisonError(null);
+    let reservedTab: Window | null = null;
+    let handedToPreparation = false;
     try {
+      // Reserve the tab during the click, before asynchronous API work, so a
+      // popup blocker cannot reject the eventual prepared comparison handoff.
+      reservedTab = openVisualizationTab();
+      comparisonTabRef.current = reservedTab;
       const capabilities = comparisonCapabilities ?? await getComparisonCapabilities();
+      if (!isCurrentRequest()) return;
       setComparisonCapabilities(capabilities);
 
       if (capabilities.available === false) {
         throw new Error(capabilities.reason || "Historical comparison artifacts are unavailable on Cortex Core.");
       }
 
-      if (capabilities.supported_models.includes(comparisonSnapshot.model)) {
+      // All fixed baselines must be available, even when the user explicitly chooses an alternate primary.
+      requireSupportedComparisonModels('clip_rn50', capabilities.supported_models);
+
+      if (capabilities.supported_models.includes(snapshot.model)) {
         capabilityRequestActive.current = false;
-        setComparisonLoading(false);
-        await prepareComparison(comparisonSnapshot.model);
+        handedToPreparation = true;
+        await prepareComparison(snapshot.model, false, capabilities, reservedTab);
         return;
       }
 
+      dismissComparisonTab(reservedTab);
+      reservedTab = null;
       setAlternateComparisonModel(undefined);
       setUnsupportedModelOpen(true);
     } catch (error: any) {
+      if (!isCurrentRequest()) return;
       const text = getComparisonErrorMessage(error);
       setComparisonError(text);
       message.error(text);
     } finally {
-      capabilityRequestActive.current = false;
-      if (!comparisonRequestActive.current) setComparisonLoading(false);
+      if (!handedToPreparation) dismissComparisonTab(reservedTab);
+      if (isCurrentRequest()) {
+        capabilityRequestActive.current = false;
+        if (!comparisonRequestActive.current) setComparisonLoading(false);
+      }
     }
   };
 
@@ -2668,59 +2753,8 @@ useEffect(() => {
                   <Button type="primary" onClick={downloadData} disabled={!currentRegionPredictionResult}>
                     Download data
                   </Button>
-                  {canExplore && (
-                    <Button
-                      type="primary"
-                      onClick={exploreInVisualization}
-                      disabled={comparisonLoading}
-                      loading={comparisonLoading}
-                      aria-busy={comparisonLoading}
-                    >
-                      {comparisonLoading ? 'Opening Cortex-Compass…' : 'Open Cortex-Compass'}
-                    </Button>
-                  )}
                 </div>
               </div>
-
-              {canExplore && (
-                <div
-                  style={{
-                    marginTop: 10,
-                    padding: '10px 12px',
-                    border: '0.5px solid var(--lab-hairline, #D6D2C6)',
-                    borderRadius: 8,
-                    background: 'var(--lab-panel, #FBFAF6)',
-                    color: 'var(--lab-secondary, #57534A)',
-                    fontSize: 13,
-                    lineHeight: 1.5,
-                  }}
-                  aria-live="polite"
-                >
-                  <div>
-                    Your original result uses the settings you selected. For comparison with the historical image set,
-                    Cortex-Compass will use the same model with NSD-1000 predictions across FFA, PPA, and EBA.
-                  </div>
-                  {comparisonLoading && (
-                    <div style={{ marginTop: 6, fontWeight: 500 }}>
-                      Preparing NSD-1000 predictions for Cortex-Compass across FFA, PPA, and EBA…
-                    </div>
-                  )}
-                  {comparisonError && !comparisonLoading && (
-                    <div style={{ marginTop: 8, color: 'var(--lab-text, #211F1C)' }}>
-                      <span>{comparisonError}</span>{' '}
-                      {lastComparisonModel && (
-                        <Button
-                          size="small"
-                          onClick={() => prepareComparison(lastComparisonModel, true)}
-                          disabled={comparisonLoading}
-                        >
-                          Retry
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
 
               {predictionLoading && <LinearIndeterminate />}
               <div className="lab-section-header">
@@ -2877,6 +2911,15 @@ useEffect(() => {
                   stimulusSetLabel={prestoreDataset ? PRELOAD_DATASETS[prestoreDataset as keyof typeof PRELOAD_DATASETS]?.label ?? prestoreDataset : 'Uploaded images'}
                 />
               </Suspense>
+              {canExplore && (
+                <CortexCompassSection
+                  modelCount={getComparisonModels(lastComparisonModel || comparisonSnapshot?.model || model).length}
+                  loading={comparisonLoading}
+                  error={comparisonError}
+                  onOpen={exploreInVisualization}
+                  onRetry={lastComparisonModel ? () => { void prepareComparison(lastComparisonModel, true); } : undefined}
+                />
+              )}
             </div>
           )}
         </div>
@@ -2921,7 +2964,8 @@ useEffect(() => {
         {alternateComparisonModel && (
           <p style={{ marginTop: 12 }}>
             The original result remains labeled <strong>{comparisonSnapshot?.model}</strong>; the standardized
-            Cortex-Compass comparison will be labeled <strong>{alternateComparisonModel}</strong>.
+            Cortex-Compass comparison starts with <strong>{alternateComparisonModel}</strong> and also includes
+            EfficientNet, CLIP RN50, and VGG16 (ImageNet), without duplicates.
           </p>
         )}
       </Modal>

@@ -67,11 +67,15 @@ npm run dev
 
 Open `http://localhost:5173/lab/` for the fROI workflow. The whole-brain URL is independent of the NSD comparison service.
 
-After inference, **Open Cortex-Compass** opens `/cortex-compass/` within the
-Virtual Cortex shell rather than replacing the entire site. Its full-page
-workspace hosts `/infoviz/?embedded=1`; **Back to the Lab** preserves the mounted
-Lab's results. Opening `/cortex-compass/` directly starts reference-only mode.
-The opaque comparison token is retained in the current tab's history state for
+After inference, **Open Cortex-Compass** immediately opens a new browser tab at
+`/cortex-compass/?preparing=1`, showing the normal Cortex shell and comparison
+loading view. Once the comparison is ready, that same tab loads its session,
+hosting `/infoviz/?embedded=1`. There is no separate placeholder screen or
+reference-only visualization during preparation. The original Lab tab keeps
+its results so users can switch between the two. Allow pop-ups if the browser
+blocks the new tab. Failed or stale preparation closes only the pending tab.
+Opening `/cortex-compass/` directly starts reference-only mode.
+The opaque comparison token is retained in the comparison tab's history state for
 refresh, not in a query string or browser storage. Refreshing the Lab itself
 still resets its in-memory inference results.
 
@@ -142,9 +146,9 @@ In Cortex-Compass, also verify:
 - DreamSim upload placement is explicitly unavailable because the archived 1,792-dimensional references do not match the current 768-dimensional runtime encoder;
 - measured ground-truth fMRI views never show an uploaded stimulus.
 
-For the integrated workspace, also verify that Virtual Cortex's navigation
-stays visible, the duplicate visualization masthead is absent, and one click on
-**Back to the Lab** restores the existing results. Repeat with a second
-comparison session and confirm that the first session's frame history does not
-intercept the Back action. Open the standalone visualization separately to
+For the integrated workspace, also verify that the new tab opens immediately,
+Virtual Cortex's navigation stays visible, and the duplicate visualization
+masthead is absent. Switch back to the original Lab tab and confirm its results
+and selected image remain unchanged. Repeat with a second comparison session
+and confirm each opens in its own tab. Open the standalone visualization separately to
 confirm its original masthead and navigation are unchanged.

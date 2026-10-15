@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   buildCortexCompassSessionUrl,
+  buildCompassSessionToken,
   buildEmbeddedCompassUrl,
   COMPASS_OPEN_EVENT,
+  COMPASS_PREPARING_URL,
   isCortexCompassPath,
   readCompassSessionToken,
 } from "./cortexCompassNavigation.js";
@@ -12,6 +14,10 @@ const token = "opaque_session_token_0123456789";
 describe("Cortex-Compass internal navigation", () => {
   it("uses one stable event for the mounted Cortex workspace", () => {
     expect(COMPASS_OPEN_EVENT).toBe("cortex:open-compass");
+  });
+
+  it("opens preparation inside the normal Cortex-Compass host route", () => {
+    expect(COMPASS_PREPARING_URL).toBe("/cortex-compass/?preparing=1");
   });
 
   it.each(["/cortex-compass", "/cortex-compass/", "/cortex-compass/index.html"])(
@@ -30,6 +36,32 @@ describe("Cortex-Compass internal navigation", () => {
     expect(readCompassSessionToken("#session=" + "a".repeat(16))).toBe("a".repeat(16));
     expect(readCompassSessionToken("#session=" + "b".repeat(256))).toBe("b".repeat(256));
   });
+
+  it("bundles two to four individual sessions while preserving selected-model order", () => {
+    const tokens = [token, "second_session_token_0123456789", "third_session_token_0123456789", "fourth_session_token_0123456789"];
+    expect(buildCompassSessionToken([token])).toBe(token);
+    for (const length of [2, 3, 4]) {
+      const bundle = buildCompassSessionToken(tokens.slice(0, length));
+      expect(bundle).toBe(`multi-v1.${tokens.slice(0, length).join(".")}`);
+      expect(readCompassSessionToken(`#session=${encodeURIComponent(bundle)}`)).toBe(bundle);
+      expect(buildEmbeddedCompassUrl(bundle)).toBe(`/infoviz/?embedded=1#session=${bundle}`);
+    }
+  });
+
+  it.each([
+    "multi-v1.", `multi-v1.${token}`, `multi-v1.${token}.${token}`,
+    `multi-v1.${token}.short`, `multi-v1.${token}.${"a".repeat(257)}`,
+    `multi-v2.${token}.${"b".repeat(16)}`,
+    `multi-v1.${["a", "b", "c", "d", "e"].map((letter) => letter.repeat(16)).join(".")}`,
+  ])("safely rejects malformed multi-session links: %s", (bundle) => {
+    expect(readCompassSessionToken(`#session=${encodeURIComponent(bundle)}`)).toBeNull();
+  });
+
+  it.each([[], [token, token], ["short"], [token, 17], null, [token, ...["a", "b", "c", "d"].map((letter) => letter.repeat(16))]])(
+    "rejects invalid bundles before navigation: %s", (tokens) => {
+      expect(() => buildCompassSessionToken(tokens)).toThrow(/invalid or duplicate/i);
+    },
+  );
 
   it.each(["", "#", "#session=short", "#session=" + "a".repeat(257), "#session=opaque%2Fpath_is_not_a_token", "#session=%E0%A4%A", "#model=clip_rn50", null])(
     "safely ignores a malformed or absent session fragment: %s",

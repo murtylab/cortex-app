@@ -5,8 +5,8 @@ import CortexCompassWorkspace from './cortexCompassWorkspace';
 
 const TOKEN = '0123456789abcdef0123456789';
 
-function renderWorkspace(pathname = '/lab/', hash = '', historyState: unknown = null) {
-  vi.stubGlobal('window', { location: { pathname, hash }, history: { state: historyState } });
+function renderWorkspace(pathname = '/lab/', hash = '', historyState: unknown = null, search = '') {
+  vi.stubGlobal('window', { location: { pathname, hash, search }, history: { state: historyState } });
   return renderToStaticMarkup(
     <CortexCompassWorkspace><div data-testid="lab-results">Existing Lab results</div></CortexCompassWorkspace>,
   );
@@ -29,6 +29,37 @@ describe('Cortex-Compass site workspace', () => {
     expect(markup).toContain('src="/infoviz/?embedded=1"');
     expect(markup).toContain('Back to the Lab');
     expect(markup).not.toContain('Existing Lab results');
+  });
+
+  it('uses the integrated loading view during preparation without loading reference-only mode', () => {
+    const markup = renderWorkspace('/cortex-compass/', '', null, '?preparing=1');
+    expect(markup).toContain('Cortex-Compass inside Virtual Cortex');
+    expect(markup).toContain('Loading workspace…');
+    expect(markup).toContain('Opening Cortex-Compass');
+    expect(markup).toContain('Preparing uploaded stimuli and Murty reference images.');
+    expect(markup).toContain('Back to the Lab');
+    expect(markup).not.toContain('<iframe');
+    expect(markup).not.toContain('Existing Lab results');
+    expect(markup).not.toContain('Your Lab results remain open in the original tab.');
+    expect(markup).not.toContain('Preparing Cortex-Compass');
+  });
+
+  it('loads a supplied or saved comparison even if the preparation flag is present', () => {
+    expect(renderWorkspace('/cortex-compass/', `#session=${TOKEN}`, null, '?preparing=1'))
+      .toContain(`src="/infoviz/?embedded=1#session=${TOKEN}"`);
+    expect(renderWorkspace('/cortex-compass/', '', { cortexCompassSession: TOKEN }, '?preparing=1'))
+      .toContain(`src="/infoviz/?embedded=1#session=${TOKEN}"`);
+  });
+
+  it('does not let the preparation flag hide an invalid comparison link', () => {
+    const markup = renderWorkspace('/cortex-compass/', '#session=invalid', null, '?preparing=1');
+    expect(markup).toContain('This comparison link is invalid');
+    expect(markup).not.toContain('Opening Cortex-Compass');
+    expect(markup).not.toContain('<iframe');
+  });
+
+  it.each(['?preparing=0', '?other=1', ''])('leaves normal reference mode intact for %s', (search) => {
+    expect(renderWorkspace('/cortex-compass/', '', null, search)).toContain('src="/infoviz/?embedded=1"');
   });
 
   it('passes only the opaque token to the child fragment, not model settings or paths', () => {

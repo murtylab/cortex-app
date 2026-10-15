@@ -41,12 +41,33 @@ Analytics setup:
 
 The fROI backend and Cortex-Compass handoff URLs are configured through `.env.local`.
 Do not put temporary tunnel URLs or secrets in source control. After a successful
-fROI prediction, **Open Cortex-Compass** creates a temporary NSD-1000 comparison
-and opens `/cortex-compass/` inside Virtual Cortex's navigation. The Lab remains
-mounted, so **Back to the Lab** restores its results without another inference.
+fROI prediction, the fifth results section, below **3D brain response**, offers
+**Open Cortex-Compass**. It opens `/cortex-compass/?preparing=1` in a new browser
+tab immediately, showing Virtual Cortex's navigation and the normal comparison
+loading view. Once the temporary NSD-1000 comparison is ready, that same tab
+loads its session without a separate placeholder page or reference-only preview.
+The original Lab tab and all its results remain unchanged, so users
+can switch between the two tabs. A blocked popup shows an error in the Lab; failed
+or stale preparation closes only its pending tab. No same-tab redirect is used.
 The workspace embeds the same-origin `/infoviz/?embedded=1` page without a card
-border or duplicate site masthead. Only the opaque session token crosses the
+border or duplicate site masthead. Only opaque session tokens cross the
 handoff; model settings and image paths are not put in the URL.
+
+Each comparison includes the selected model plus EfficientNet (`efficient_net`),
+CLIP RN50 (`clip_rn50`), and VGG16 ImageNet (`vgg16_imagenet1kv1`). Duplicate models
+are run only once: three models when one baseline is selected, otherwise four.
+All models use the same uploaded images, Murty185 references, and NSD-1000
+predictions across FFA, PPA, and EBA. The selected model opens first; the original
+Lab result is unchanged. The frontend makes one sequential request per model to
+the existing single-model `POST /comparison-sessions` API; it does not send
+`additional_models` or require a combined-model backend response. A versioned
+`multi-v1` token bundle keeps the selected model first. Cortex-Compass loads and
+validates every session, checks that the sanitized image contents and reference
+settings match, and remaps independent upload IDs before presenting one workspace.
+The effective expiry is the earliest individual session expiry. A failed model
+does not open a partial comparison. Cortex Core must support reference data for
+every requested model. Changing settings or starting a new inference
+while preparing a comparison discards the old handoff rather than opening stale results.
 
 The visualization source remains in the sibling `InfoViz-Prototype-Edition`
 repository. Its standalone `/infoviz/` route and existing `INFOVIZ` environment

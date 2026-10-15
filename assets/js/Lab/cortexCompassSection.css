@@ -1,0 +1,44 @@
+.lab-compass-section {
+  margin-top: 40px;
+  padding: 0;
+  min-width: 0;
+}
+
+.lab-compass-description,
+.lab-compass-context,
+.lab-compass-status,
+.lab-compass-error {
+  max-width: 80ch;
+  font-family: var(--lab-sans, 'Inter', sans-serif);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--lab-secondary, #57534A);
+}
+
+.lab-compass-description {
+  margin: 0 0 6px;
+}
+
+.lab-compass-context {
+  margin: 0 0 16px;
+  font-size: 12px;
+}
+
+.lab-compass-status,
+.lab-compass-error {
+  margin: 12px 0 0;
+}
+
+.lab-compass-error {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--lab-text, #211F1C);
+}
+
+@media (max-width: 600px) {
+  .lab-compass-section > .ant-btn {
+    width: 100%;
+  }
+}

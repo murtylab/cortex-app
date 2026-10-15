@@ -10,6 +10,7 @@ type WorkspaceState = {
   open: boolean;
   sessionId: string | null;
   invalidLink: boolean;
+  preparing: boolean;
   hasLab: boolean;
   hasCompass: boolean;
 };
@@ -27,6 +28,8 @@ function initialWorkspace(): WorkspaceState {
     open,
     sessionId: open ? token ?? savedToken : null,
     invalidLink: open && suppliedToken && !token,
+    preparing: open && !suppliedToken && !token && !savedToken
+      && new URLSearchParams(window.location.search).get('preparing') === '1',
     hasLab: !open,
     hasCompass: open,
   };
@@ -71,7 +74,7 @@ export default function CortexCompassWorkspace({ children }: { children: ReactNo
       }
       if (sessionId !== currentSession.current) setFrameStatus('loading');
       currentSession.current = sessionId;
-      setWorkspace((previous) => ({ ...previous, open: true, sessionId, invalidLink: false, hasCompass: true }));
+      setWorkspace((previous) => ({ ...previous, open: true, sessionId, invalidLink: false, preparing: false, hasCompass: true }));
       window.scrollTo(0, 0);
     }
 
@@ -96,7 +99,11 @@ export default function CortexCompassWorkspace({ children }: { children: ReactNo
         : null);
       if (sessionId !== currentSession.current) setFrameStatus('loading');
       currentSession.current = sessionId;
-      setWorkspace((previous) => ({ ...previous, open: true, sessionId, invalidLink: suppliedToken && !token, hasCompass: true }));
+      setWorkspace((previous) => ({
+        ...previous, open: true, sessionId, invalidLink: suppliedToken && !token,
+        preparing: !suppliedToken && !sessionId && new URLSearchParams(window.location.search).get('preparing') === '1',
+        hasCompass: true,
+      }));
       if (hash) window.history.replaceState({ cortexCompassSession: sessionId }, '', '/cortex-compass/');
       window.scrollTo(0, 0);
     }
@@ -183,6 +190,14 @@ export default function CortexCompassWorkspace({ children }: { children: ReactNo
               <h2>This comparison link is invalid</h2>
               <p>Return to the Lab and open Cortex-Compass again.</p>
               <button type="button" onClick={returnToLab}>Return to the Lab</button>
+            </div>
+          ) : workspace.preparing ? (
+            <div className="cortex-compass-preparing" role="status" aria-live="polite">
+              <div className="cortex-compass-loading-panel">
+                <p className="cortex-compass-loading-eyebrow">Loading</p>
+                <h1>Opening Cortex-Compass</h1>
+                <p>Preparing uploaded stimuli and Murty reference images.</p>
+              </div>
             </div>
           ) : (
             <iframe
