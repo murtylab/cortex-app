@@ -38,7 +38,7 @@ function getQualiSlice(data, trainSource, region, allowedModelValues, rank, sele
   const src = data[trainSource];
   if (!src) return null;
   const { models: allModels, experiments: allExperiments, cells, conf_min = 1, conf_max = 4 } = src;
-  const isRanked = rank === 'rank';
+  const isRanked = rank !== 'alphabet';
   let models = (allowedModelValues && allowedModelValues.size > 0)
     ? allModels.filter(m => allowedModelValues.has(m))
     : [...allModels];

@@ -935,7 +935,8 @@ export const CHART_TYPE_OPTIONS = [
 ];
 
 export const RANK = [
-  { value: 'rank', label: 'Rank' },
+  { value: 'accuracy', label: 'Accuracy' },
+  { value: 'alphabet', label: 'Alphabet' },
 ];
 
 export const PAGE_VIEW_OPTIONS = [

@@ -74,7 +74,7 @@ const HeatmapOverview = ({
     let xLabels = Array.from(xLabelsSet);
     let models = Array.from(modelsSet);
 
-    if (rank === "rank") {
+    if (rank !== "alphabet") {
       const avg = {};
       models.forEach((m) => {
         const vals = cellData.filter((d) => d.model === m).map((d) => d.raw);

@@ -7,7 +7,7 @@
   function toggleScrolled() {
     const selectBody = document.querySelector('body');
     const selectHeader = document.querySelector('#header');
-          body: 'The main panel shows quantitative model rankings. Click an item in the left overview to highlight and auto-locate the matching item in the right detail panel. Use the view toggle at the top of the filter panel to switch between Leaderboard and Advanced Insights.',
+          body: 'The main panel shows quantitative model rankings. Click an item in the left overview to highlight and auto-locate the matching item in the right detail panel. Use Rank to switch between accuracy order and alphabetical order.',
     window.scrollY > 100 ? selectBody.classList.add('scrolled') : selectBody.classList.remove('scrolled');
   }
 
@@ -778,10 +778,9 @@
         {
           type: 'choice',
           title: 'Choose a Scoreboard Tutorial',
-          body: 'Select the tutorial you want to follow.\n\n- Leaderboard: Fastest entry for model ranking\n- Advanced Insights: Deep-dive scatter/gap analysis\n- Qualitative: Image-level predictions',
+          body: 'Select the tutorial you want to follow.\n\n- Leaderboard: Fastest entry for model ranking\n- Qualitative: Image-level predictions',
           choices: [
             { label: 'Quantitative – Leaderboard', tutorialId: 'scoreboardLeaderboard', step: 1, description: 'Rank models by brain-predictivity.' },
-            { label: 'Quantitative – Advanced Insights', tutorialId: 'scoreboardAdvancedInsights', step: 1, description: 'Scatter plots and gap-to-ceiling.' },
             { label: 'Qualitative – Leaderboard', tutorialId: 'scoreboardQualitative', step: 1, description: 'Image-level model predictions.' }
           ]
         },
@@ -804,7 +803,7 @@
           path: '/scoreboardQuantitative/',
           selector: '[data-tutorial="scoreboard-chart-panel"]',
           title: 'Read the Rankings',
-          body: 'The main panel shows quantitative model rankings. Click an item in the left overview to highlight and auto-locate the matching item in the right detail panel. Use the view toggle at the top of the filter panel to switch between Leaderboard and Advanced Insights.',
+          body: 'The main panel shows quantitative model rankings. Click an item in the left overview to highlight and auto-locate the matching item in the right detail panel. Use Rank to switch between accuracy order and alphabetical order.',
           prepare: { type: 'scoreboard-ranking-demo' },
           nextLabel: 'Finish',
         },
@@ -817,10 +816,9 @@
         {
           type: 'choice',
           title: 'Choose a Scoreboard Tutorial',
-          body: 'Select the tutorial you want to follow.\n\n- Leaderboard: Fastest entry for model ranking\n- Advanced Insights: Deep-dive scatter/gap analysis\n- Qualitative: Image-level predictions',
+          body: 'Select the tutorial you want to follow.\n\n- Leaderboard: Fastest entry for model ranking\n- Qualitative: Image-level predictions',
           choices: [
             { label: 'Quantitative – Leaderboard', tutorialId: 'scoreboardLeaderboard', step: 1, description: 'Rank models by brain-predictivity.' },
-            { label: 'Quantitative – Advanced Insights', tutorialId: 'scoreboardAdvancedInsights', step: 1, description: 'Scatter plots and gap-to-ceiling.' },
             { label: 'Qualitative – Leaderboard', tutorialId: 'scoreboardQualitative', step: 1, description: 'Image-level model predictions.' }
           ]
         },
@@ -868,10 +866,9 @@
         {
           type: 'choice',
           title: 'Choose a Scoreboard Tutorial',
-          body: 'Select the tutorial you want to follow.\n\n- Leaderboard: Fastest entry for model ranking\n- Advanced Insights: Deep-dive scatter/gap analysis\n- Qualitative: Image-level predictions',
+          body: 'Select the tutorial you want to follow.\n\n- Leaderboard: Fastest entry for model ranking\n- Qualitative: Image-level predictions',
           choices: [
             { label: 'Quantitative – Leaderboard', tutorialId: 'scoreboardLeaderboard', step: 1, description: 'Rank models by brain-predictivity.' },
-            { label: 'Quantitative – Advanced Insights', tutorialId: 'scoreboardAdvancedInsights', step: 1, description: 'Scatter plots and gap-to-ceiling.' },
             { label: 'Qualitative – Leaderboard', tutorialId: 'scoreboardQualitative', step: 1, description: 'Image-level model predictions.' }
           ]
         },

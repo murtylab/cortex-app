@@ -10,6 +10,7 @@ import {
   FormControlLabel,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { filterAccordionSx, filterExpandIconSx, filterSummarySx, filterTitleSx } from './filterChrome';
 import {
   DATASET_OPTIONS,
   DATASET_OPTIONS_LESS,
@@ -64,18 +65,12 @@ const DatasetSelect = ({ dataset, setDataset, training, region, allowToggle, mod
 
   return (
     //defaultExpanded (disabled default expand)
-    <Accordion expanded={expanded}  onChange={onToggle}  disableGutters sx={{ bgcolor: 'transparent' }}>
+    <Accordion expanded={expanded} onChange={onToggle} disableGutters elevation={0} sx={filterAccordionSx}>
       <AccordionSummary
-        expandIcon={<ExpandMoreIcon sx={{ color: 'black' }} />}
-        sx={{
-          bgcolor: '#f5f5f5',
-          borderRadius: 1,
-          '&.Mui-expanded': { bgcolor: '#eaeaea' },
-          minHeight: 40,
-          px: 1.5,
-        }}
+        expandIcon={<ExpandMoreIcon sx={filterExpandIconSx} />}
+        sx={filterSummarySx}
       >
-        <Typography sx={{ fontWeight: 500, fontSize: '13px', color: 'var(--tungsten)' }}>Evaluation Dataset</Typography>
+        <Typography sx={filterTitleSx}>Evaluation Dataset</Typography>
       </AccordionSummary>
 
       <AccordionDetails sx={{ pl: 2 }}>

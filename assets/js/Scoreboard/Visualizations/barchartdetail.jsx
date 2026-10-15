@@ -32,7 +32,9 @@ const BarChartDetail = ({
       }))
       .filter((d) => d.val !== undefined && d.val !== null);
 
-    if (rank && rank !== "") {
+    if (rank === "alphabet") {
+      results = [...results].sort((a, b) => a.model.localeCompare(b.model));
+    } else {
       results = [...results].sort((a, b) => d3.descending(a.val, b.val));
     }
 

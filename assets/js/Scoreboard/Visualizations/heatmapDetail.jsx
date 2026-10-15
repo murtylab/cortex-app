@@ -284,12 +284,12 @@ const HeatmapDetail = ({ data, roi, dataset, rank, selectedModel, onModelClick, 
     //   });
     //   models.sort((a, b) => (modelGlobal[b] || -Infinity) - (modelGlobal[a] || -Infinity));
     // }
-    if (rank && rank !== "") {
+    if (rank === "alphabet") {
+      models.sort();
+    } else {
       const modelGlobal = {};
       cellData.forEach((d) => { if (d.x === "global_score") modelGlobal[d.model] = d.raw ?? -Infinity; });
       models.sort((a, b) => (modelGlobal[b] || -Infinity) - (modelGlobal[a] || -Infinity));
-    } else {
-      models.sort(); // 默认按字母排序，保证并排显示时模型行号一致
     }
 
     // 4. sorted rank store in Ref

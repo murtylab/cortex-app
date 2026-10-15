@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ROI_OPTIONS } from '../../constants-scoreboard';
+import { filterAccordionSx, filterExpandIconSx, filterSummarySx, filterTitleSx } from './filterChrome';
 
 const ROISelect = ({ region, setRegion, dataset, setDataset, allowToggle, mode, training,expanded, onToggle, isVS }) => {
   // button logic group
@@ -96,18 +97,12 @@ const ROISelect = ({ region, setRegion, dataset, setDataset, allowToggle, mode, 
 
   return (
     //defaultExpanded (disabled default expand)
-    <Accordion  expanded={expanded}  onChange={onToggle}   disableGutters sx={{ bgcolor: 'transparent' }}> 
+    <Accordion expanded={expanded} onChange={onToggle} disableGutters elevation={0} sx={filterAccordionSx}>
       <AccordionSummary
-        expandIcon={<ExpandMoreIcon sx={{ color: 'black' }} />}
-        sx={{
-          bgcolor: '#f5f5f5',
-          borderRadius: 1,
-          '&.Mui-expanded': { bgcolor: '#eaeaea' },
-          minHeight: 40,
-          px: 1.5,
-        }}
+        expandIcon={<ExpandMoreIcon sx={filterExpandIconSx} />}
+        sx={filterSummarySx}
       >
-        <Typography sx={{ fontWeight: 500, fontSize: '13px', color: 'var(--tungsten)' }}>Region of Interest</Typography>
+        <Typography sx={filterTitleSx}>Region of Interest</Typography>
       </AccordionSummary>
 
       <AccordionDetails sx={{ pl: 2 }}>
