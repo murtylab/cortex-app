@@ -40,7 +40,7 @@ const RegionSelector = ({
   if (variant === "lab") {
     return (
       <FormControl data-tutorial={tutorialRootKey} sx={{ minWidth: 0 }} fullWidth>
-        <StepHeading step={1} id="region-buttons-group-label">
+        <StepHeading id="region-buttons-group-label">
           Select a fROI
         </StepHeading>
 

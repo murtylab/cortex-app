@@ -114,7 +114,7 @@ const Settings = ({
         margintop: 2,
         marginLeft: 0,
         backgroundColor: isLab ? 'transparent' : 'var(--background-color)',
-        borderRadius: '8px',
+        borderRadius: isLab ? 0 : '8px',
         width: '100%',
         marginRight: '0 auto',
         flexDirection: isLab
@@ -125,8 +125,8 @@ const Settings = ({
       }}
     >
       {isLab ? (
-        <StepHeading step={2} id="lab-advanced-settings-label">
-          Configure the model
+        <StepHeading id="lab-advanced-settings-label">
+          Select a model
         </StepHeading>
       ) : (
         <Typography variant="body2" sx={{ textAlign: 'left', color: disabled ? '#888' : 'black', mt: 1, px: 2 }}>

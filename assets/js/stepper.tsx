@@ -2526,7 +2526,7 @@ const restoreInferenceHistory = (entry: InferenceHistoryEntry) => {
           </div>}
 
           <div data-tutorial="lab-upload-panel" className="lab-stimuli-canvas">
-            <StepHeading step={3}>Upload  the stimuli set</StepHeading>
+            <StepHeading>Upload the stimuli set</StepHeading>
 
             <div className="lab-stimuli-sources">
             {stimuliSource === "upload" ? <div
@@ -2544,7 +2544,7 @@ const restoreInferenceHistory = (entry: InferenceHistoryEntry) => {
                 className="lab-model-card-link lab-stimuli-source-switch"
                 onClick={() => switchStimuliSource("preload")}
               >
-                No customized stimuli? Try run preload stimuli
+                {"No customized stimuli? Try run preload stimuli ->"}
               </button>
             </div> : <div className="lab-preload-inline">
               {/* <div className="lab-subheading">Load a stimuli set from published papers</div> */}
@@ -2583,7 +2583,7 @@ const restoreInferenceHistory = (entry: InferenceHistoryEntry) => {
                 <ImagePreviewGroupedDnD
                   files={files}
                   variant="lab"
-                  eyebrow="Examine the uploaded stimuli"
+                  eyebrow="Arrange the conditions"
                   foldable
                   panelCollapsed={stimuliPreviewCollapsed}
                   onPanelCollapsedChange={setStimuliPreviewCollapsed}

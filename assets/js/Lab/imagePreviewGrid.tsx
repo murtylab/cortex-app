@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Pencil, X } from "lucide-react";
 import { collectDroppedImageFiles, hasExternalFileDrag } from "./collectDroppedFiles";
+import StepHeading from "./stepHeading.jsx";
 
 type FileWithPath = File & { webkitRelativePath?: string };
 
@@ -594,7 +595,7 @@ export default function ImagePreviewGroupedDnD({
         }}
       >
         {isLab ? (
-          <div className="lab-subheading">{eyebrow || title}</div>
+          <StepHeading>{eyebrow || title}</StepHeading>
         ) : (
           <div style={{ fontWeight: 700, color: "black" }}>{title}</div>
         )}
@@ -621,7 +622,7 @@ export default function ImagePreviewGroupedDnD({
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
         {isLab ? (
-          <div className="lab-subheading" style={{ marginBottom: 0 }}>{eyebrow || title}</div>
+          <StepHeading className="is-inline">{eyebrow || title}</StepHeading>
         ) : (
           <div style={{ fontWeight: 700, color: "black" }}>
             {title} <span style={{ fontWeight: 450, color: "rgba(0,0,0,0.55)" }}>({files.length})</span>
