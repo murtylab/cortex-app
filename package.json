@@ -32,7 +32,10 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "dev:compass": "node scripts/build-cortex-compass.mjs --dev",
+    "build": "node scripts/build-cortex-compass.mjs --all",
+    "build:site": "vite build",
+    "build:compass": "node scripts/build-cortex-compass.mjs",
     "preview": "vite preview",
     "test": "vitest run && npm run test:brain",
     "test:brain": "node --test assets/js/services/uploadBrainData.test.js assets/js/services/preloadedBrainData.test.js assets/js/services/uploadBrainProjection.test.js"

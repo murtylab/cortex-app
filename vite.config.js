@@ -73,7 +73,7 @@ export default defineConfig(({ command, mode }) => {
           rewrite: (path) => path.replace(/^\/cortex-core/, ''),
         },
         // Keep the visualization on Cortex App's forwarded browser port. The
-        // sibling InfoViz Vite server is configured with base `/infoviz/`, so
+        // linked Cortex-Compass Vite server uses base `/infoviz/`, so
         // its modules, data files, images, and HMR websocket stay in scope.
         '/infoviz': {
           target: infoVizProxyTarget,
@@ -82,6 +82,20 @@ export default defineConfig(({ command, mode }) => {
         },
       },
       ...(ngrokHost ? { hmr: { host: ngrokHost, clientPort: 443 } } : {}),
+    },
+    preview: {
+      host: true,
+      strictPort: true,
+      port: 4173,
+      // Preview must serve the built dist/infoviz files, not fall back to the
+      // development visualization server and hide a missing submodule build.
+      proxy: {
+        '/cortex-core': {
+          target: cortexCoreProxyTarget,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/cortex-core/, ''),
+        },
+      },
     },
     resolve: {
       alias: {

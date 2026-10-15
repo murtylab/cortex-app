@@ -20,9 +20,21 @@ Cortex-Compass both work when port 5173 is opened through VS Code Remote
 SSH. Ports 5556 and 5174 do not need separate browser forwarding. Cortex-Compass's
 development base defaults to `/infoviz/` as shown in the runbook.
 
-2. Run the app:
+2. Initialize the linked visualization and install dependencies:
 
 ```bash
+git submodule update --init --recursive
+npm ci
+npm --prefix apps/cortex-compass ci
+```
+
+For a new checkout, use `git clone --branch IUI --recurse-submodules https://github.com/murtylab/cortex-app.git`.
+
+3. Run Cortex-Compass and the host in separate terminals:
+
+```bash
+npm run dev:compass
+# In another terminal:
 npm run dev
 ```
 
@@ -71,15 +83,45 @@ while preparing a comparison discards the old handoff rather than opening stale 
 Restoring an inference-history entry also restores Cortex-Compass access for that
 run and cancels any comparison still being prepared for the previous result.
 
-The visualization source remains in the sibling `InfoViz-Prototype-Edition`
-repository. Its standalone `/infoviz/` route and existing `INFOVIZ` environment
-names are unchanged; no source-folder move is needed. `npm run build` produces
-the host's `/cortex-compass/` HTML entry, but does not bundle the sibling app.
-A combined release must also serve Cortex-Compass's compiled output at
-`/infoviz/` and route `/cortex-core/` to the matching backend. Development proxies
-are not a production deployment configuration. The embedded URL must remain
-same-origin (normally `VITE_CORTEX_INFOVIZ_URL=/infoviz`), rather than pointing
-directly at another site's visualization URL.
+## Linked Cortex-Compass repository
+
+`apps/cortex-compass` is a Git submodule of
+[`KruthikRavikanti/InfoViz-Prototype-Edition`](https://github.com/KruthikRavikanti/InfoViz-Prototype-Edition).
+It lives inside the Cortex App checkout while keeping its own history. The parent
+records an exact visualization commit; it does not silently follow the latest
+`IUI` tip. Existing independent InfoViz checkouts remain valid and are not moved.
+
+`npm run build` builds the host and the pinned visualization together. The host
+entry is `dist/cortex-compass/index.html`; the visualization and its public data
+are published under `dist/infoviz/`. `npm run preview` serves those built files
+without relying on the development visualization server. The child build uses
+its lockfile and installs its development/build dependencies when missing or stale.
+`npm run build:site` is available for a host-only build.
+
+The standalone `/infoviz/` route and existing `INFOVIZ` environment names are
+unchanged. Keep the embedded URL same-origin (normally
+`VITE_CORTEX_INFOVIZ_URL=/infoviz`). A deployed host still needs `/cortex-core/`
+routed to the matching backend for upload comparisons; development proxies do
+not configure that production route. No Core deployment is changed by this link.
+
+The linked repo does not have to be public. If it is private, collaborators and
+the build system need read access to **both** repositories. Enable recursive
+submodule checkout and provide an appropriately scoped deploy key, GitHub App
+token, or access token through the build system's secret store—not `.gitmodules`.
+Changing source-repository visibility does not hide JavaScript served by a public site.
+
+To update the link deliberately, publish the child commit first, then update and
+test the parent pointer:
+
+```bash
+git submodule update --remote -- apps/cortex-compass
+npm run build
+git add apps/cortex-compass
+git commit -m "Update Cortex-Compass revision"
+```
+
+Private reference bundles, checkpoints, uploaded images, sessions, environment
+files, and dependency directories are not part of the submodule publication.
 
 The complete three-service startup, artifact generation, validation, and smoke-test procedure is in
 [`docs/NSD_STIMULUS_CONTEXT_DEVELOPMENT.md`](docs/NSD_STIMULUS_CONTEXT_DEVELOPMENT.md).

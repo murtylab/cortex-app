@@ -1,0 +1,4 @@
+[submodule "apps/cortex-compass"]
+	path = apps/cortex-compass
+	url = https://github.com/KruthikRavikanti/InfoViz-Prototype-Edition.git
+	branch = IUI
