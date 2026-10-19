@@ -1,0 +1,10 @@
+:root { --lab-hairline: #d6d2c6; --lab-panel: #fbfaf6; --lab-text: #211f1c; --lab-muted: #8a8378; --lab-accent: #90619b; --lab-sans: Inter, system-ui, sans-serif; --lab-mono: 'IBM Plex Mono', monospace; --lab-page-bg: #f7f7f4; }
+body { margin: 0; background: var(--lab-page-bg); color: var(--lab-text); font-family: var(--lab-sans); }
+* { box-sizing: border-box; }
+.canvas-page { padding: 24px 32px; max-width: 1920px; margin: auto; }
+.canvas-page > header { margin-bottom: 24px; }
+.canvas-page > header a, .canvas-page > a { color: var(--lab-accent); font-size: 12px; }
+.canvas-page h1 { margin: 12px 0 6px; font: 600 30px Georgia, serif; }
+.canvas-page > header p { margin: 0; font-size: 12px; color: var(--lab-muted); }
+.canvas-page .canvas-viewport { max-height: calc(100vh - 290px); min-height: 500px; }
+@media(max-width:760px) { .canvas-page { padding: 16px 10px; } }

@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useId } from 'react';
 import * as d3 from 'd3';
 import { barchartStyles, styleTooltip } from './barchartstyles';
 import { LAB_CHART, LAB_COLORS, styleLabAxis, applyLabAxisTitle } from './labTheme';
 import { computeBoxStats } from './boxplot';
+import { chartInterpolator } from './chartPalettes';
 
 // Fabio Crameri's "vik" perceptually-uniform diverging scientific colour map
 // (blue = negative, warm red = positive). Colour-blind safe.
@@ -31,8 +32,17 @@ const BarChart = ({
   setOrder,
   tutorialSelectedGroups = null,
   labChart = false,
+  fixedChartType = null,
+  hideControls = false,
+  showGroupLabels = true,
+  palette = 'default',
+  colorLow,
+  colorHigh,
+  highlightedFilenames = null,
+  highlightColor = '#D46B24',
 }) => {
   const svgRef = useRef(null);
+  const chartId = useId();
   const containerRef = useRef(null);
   const tutorialChartAnimationsRef = useRef([]);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -40,6 +50,9 @@ const BarChart = ({
   const [selectedGroups, setSelectedGroups] = useState([]);
   const [showBars, setShowBars] = useState(true);
   const [showBoxplot, setShowBoxplot] = useState(false);
+  const renderBoxes = fixedChartType ? fixedChartType === 'box' : showBoxplot;
+  const renderBars = fixedChartType ? fixedChartType === 'bar' : showBars;
+  const highlightedSet = useMemo(() => new Set(highlightedFilenames || []), [highlightedFilenames]);
 
 
   
@@ -137,6 +150,7 @@ const BarChart = ({
   };
 
   const isGroupHighlighted = (filename) => {
+    if (highlightedSet.size > 0) return highlightedSet.has(filename);
     if (order !== "ranking") return true;
 
     const group = getGroupForFilename(filename);
@@ -254,7 +268,7 @@ const BarChart = ({
       left: 80,
     };
 
-    const isBoxplotView = labChart && order === 'group' && showBoxplot;
+    const isBoxplotView = labChart && order === 'group' && renderBoxes && !hideControls;
     const width = isBoxplotView ? Math.min(containerWidth * 0.85, 900) : containerWidth;
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
@@ -290,7 +304,7 @@ const BarChart = ({
     const colorScale = d3
       .scaleDiverging()
       .domain([yMin, 0, yMax])
-      .interpolator(d3.interpolateRgbBasis(VIK_COLORS));
+      .interpolator(chartInterpolator(palette, colorLow, colorHigh, d3.interpolateRgbBasis(VIK_COLORS)));
 
     const g = svg
       .attr("width", width)
@@ -333,12 +347,26 @@ const BarChart = ({
     };
     const moveStimulusTooltip = (event) => {
       const rect = containerRef.current.getBoundingClientRect();
-      tooltip.style("left", `${event.clientX - rect.left + 10}px`)
-        .style("top", `${event.clientY - rect.top - 40}px`);
+      const padding = 10;
+      const leftEdge = Math.max(rect.left, 0) + padding;
+      const rightEdge = Math.min(rect.right, window.innerWidth) - padding;
+      tooltip.style('box-sizing', 'border-box')
+        .style('min-width', `${Math.min(200, Math.max(0, rightEdge - leftEdge))}px`)
+        .style('max-width', `${Math.min(400, Math.max(0, rightEdge - leftEdge))}px`)
+        .style('overflow-wrap', 'anywhere');
+      const bounds = tooltip.node().getBoundingClientRect();
+      let left = event.clientX + padding;
+      if (left + bounds.width > rightEdge) left = event.clientX - bounds.width - padding;
+      left = Math.max(leftEdge, Math.min(left, rightEdge - bounds.width));
+      const top = Math.max(padding, Math.min(event.clientY - 40, window.innerHeight - bounds.height - padding));
+      const scaleX = rect.width / containerRef.current.offsetWidth || 1;
+      const scaleY = rect.height / containerRef.current.offsetHeight || 1;
+      tooltip.style('left', `${(left - rect.left) / scaleX}px`)
+        .style('top', `${(top - rect.top) / scaleY}px`);
     };
 
     const shiftX = (x) => x + 20;
-    const barData = order !== 'group' || !labChart || showBars ? sortedData : [];
+    const barData = order !== 'group' || !labChart || renderBars ? sortedData : [];
 
     // Bars
     const bars = g.selectAll(".bar")
@@ -361,12 +389,12 @@ const BarChart = ({
       })
       .attr("opacity", (d) => (isGroupHighlighted(d.filename) ? 1 : 0.2))
       .attr("stroke", (d) =>
-        tutorialActiveGroup && getGroupForFilename(d.filename) === tutorialActiveGroup
+        highlightedSet.has(d.filename) ? highlightColor : tutorialActiveGroup && getGroupForFilename(d.filename) === tutorialActiveGroup
           ? "rgba(91, 58, 110, 0.9)"
           : "none"
       )
       .attr("stroke-width", (d) =>
-        tutorialActiveGroup && getGroupForFilename(d.filename) === tutorialActiveGroup ? 2.2 : 0
+        highlightedSet.has(d.filename) || tutorialActiveGroup && getGroupForFilename(d.filename) === tutorialActiveGroup ? 2.2 : 0
       )
       .on("mouseover", (event, d) => {
         d3.select(event.currentTarget).attr(
@@ -375,6 +403,7 @@ const BarChart = ({
         );
 
         showStimulusTooltip(d);
+        moveStimulusTooltip(event);
       })
       .on("mousemove", moveStimulusTooltip)
       .on("mouseout", (event, d) => {
@@ -501,7 +530,7 @@ const BarChart = ({
 
 
 
-    if (labChart && order === 'group' && showBoxplot) {
+    if (labChart && order === 'group' && renderBoxes) {
       const boxLayer = g.append('g').attr('class', 'group-boxplots');
       groupSpans.forEach(({ group, startDatum, endDatum }) => {
         const points = sortedData.filter((d) => getGroupForFilename(d.filename) === group && Number.isFinite(d.mean));
@@ -550,7 +579,10 @@ const BarChart = ({
         boxLayer.selectAll(null).data(points).enter().append('circle')
           .attr('cx', (d) => pointX.get(d.filename))
           .attr('cy', (d) => yScale(d.mean)).attr('r', pointRadius)
-          .attr('fill', groupColor).attr('fill-opacity', 1).attr('stroke', '#fff').attr('stroke-width', 1)
+          .attr('fill', groupColor).attr('fill-opacity', 1)
+          .attr('opacity', (d) => isGroupHighlighted(d.filename) ? 1 : 0.18)
+          .attr('stroke', (d) => highlightedSet.has(d.filename) ? highlightColor : '#fff')
+          .attr('stroke-width', (d) => highlightedSet.has(d.filename) ? 2.3 : 1)
           .on('mouseover', (event, d) => {
             d3.select(event.currentTarget).raise().attr('r', pointRadius * 1.5).attr('stroke-width', 1.5);
             showStimulusTooltip(d);
@@ -558,13 +590,13 @@ const BarChart = ({
           })
           .on('mousemove', moveStimulusTooltip)
           .on('mouseout', (event, d) => {
-            d3.select(event.currentTarget).attr('r', pointRadius).attr('stroke-width', 1);
+            d3.select(event.currentTarget).attr('r', pointRadius).attr('stroke-width', highlightedSet.has(d.filename) ? 2.3 : 1);
             tooltip.style('display', 'none');
           });
       });
     }
 
-    if (order === "group" && groupSpans.length > 0) {
+    if (showGroupLabels && order === "group" && groupSpans.length > 0) {
       const groupLabelY = -8;       
       const tickHeight = 8;        
       const textOffsetY = -12;    
@@ -649,6 +681,8 @@ const BarChart = ({
     labChart,
     showBars,
     showBoxplot,
+    renderBoxes, renderBars, hideControls, showGroupLabels, palette, colorLow, colorHigh,
+    highlightedSet, highlightColor,
   ]);
 
   return (
@@ -666,7 +700,7 @@ const BarChart = ({
         paddingTop: '10px',
       }}
     >
-      <div
+      {!hideControls && <div
         className="controls"
         style={{
           display: 'flex',
@@ -689,7 +723,7 @@ const BarChart = ({
           }}
         >
           <label
-            htmlFor="order"
+            htmlFor={`${chartId}-order`}
             style={labChart ? {
               fontFamily: "var(--lab-sans, 'Inter', sans-serif)",
               fontSize: 13,
@@ -700,7 +734,7 @@ const BarChart = ({
             {labChart ? 'Order by' : 'Order by:'}
           </label>
           <select
-            id="order"
+            id={`${chartId}-order`}
             value={order}
             onChange={(e) => setOrder(e.target.value)}
             style={labChart ? {
@@ -722,11 +756,11 @@ const BarChart = ({
         {labChart && order === 'group' && (
           <div style={{ display: 'flex', gap: 16, marginLeft: 'auto', fontSize: 13, fontFamily: "var(--lab-sans, 'Inter', sans-serif)" }}>
             <label style={{ display: 'flex', gap: 5, alignItems: 'center', cursor: 'pointer' }}>
-              <input type="radio" name="lab-univariate-chart" checked={showBars} onChange={() => { setShowBars(true); setShowBoxplot(false); }} />
+              <input type="radio" name={`${chartId}-type`} checked={showBars} onChange={() => { setShowBars(true); setShowBoxplot(false); }} />
               Bar chart
             </label>
             <label style={{ display: 'flex', gap: 5, alignItems: 'center', cursor: 'pointer' }}>
-              <input type="radio" name="lab-univariate-chart" checked={showBoxplot} onChange={() => { setShowBars(false); setShowBoxplot(true); }} />
+              <input type="radio" name={`${chartId}-type`} checked={showBoxplot} onChange={() => { setShowBars(false); setShowBoxplot(true); }} />
               Boxplot
             </label>
           </div>
@@ -835,7 +869,7 @@ const BarChart = ({
             </button>
           </div>
         )}
-      </div>
+      </div>}
 
       <svg
         ref={svgRef}

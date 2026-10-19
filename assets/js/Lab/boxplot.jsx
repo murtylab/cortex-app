@@ -111,7 +111,7 @@ const stableJitter = (key, amplitude) => {
 };
 
 /** @param {BoxPlotProps} props */
-const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560, labChart = false }) => {
+const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], regionLabels = {}, sharedScale = false, height = 560, labChart = false }) => {
   const svgRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -288,13 +288,7 @@ const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560, 
       .append("g")
       .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-    let tooltip = d3.select("body").select(".boxplot-tooltip");
-    if (tooltip.empty()) {
-      tooltip = d3
-        .select("body")
-        .append("div")
-        .attr("class", "tooltip boxplot-tooltip");
-    }
+    const tooltip = d3.select("body").append("div").attr("class", "tooltip boxplot-tooltip");
     styleTooltip(tooltip);
     tooltip
       .style("position", "fixed")
@@ -312,7 +306,7 @@ const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560, 
         (d) => d.region === region && d.points.length > 0 && d.stats
       );
 
-      const regionValues = regionRows.flatMap((d) => d.points.map((p) => p.value));
+      const regionValues = (sharedScale ? rows : regionRows).flatMap((d) => d.points.map((p) => p.value));
       const yMin = d3.min(regionValues);
       const yMax = d3.max(regionValues);
       if (yMin == null || yMax == null) return;
@@ -335,7 +329,7 @@ const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560, 
         .style("font-size", labChart ? "11px" : "16px")
         .style("font-weight", labChart ? 400 : 600)
         .style("fill", labChart ? LAB_CHART.category.fill : null)
-        .text(region.toUpperCase());
+        .text(regionLabels[region] || region.toUpperCase());
 
       const yAxisG = panel
         .append("g")
@@ -464,12 +458,13 @@ const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560, 
         .attr("stroke-width", 1.1)
         .attr("opacity", 0.95)
         .on("mouseover", (event, d) => {
+          d3.select(event.currentTarget).raise().attr("r", 4.3 * 1.25);
           const { blobURL, label } = getFileInfo(d.filename);
 
           tooltip
             .html(`
               <div>
-                <p style="margin: 0 0 6px 0;"><strong>Region:</strong> ${d.region.toUpperCase()}</p>
+                <p style="margin: 0 0 6px 0;"><strong>${regionLabels[d.region] ? 'Run' : 'Region'}:</strong> ${regionLabels[d.region] || d.region.toUpperCase()}</p>
                 <p style="margin: 0 0 6px 0;"><strong>Group:</strong> ${d.group}</p>
                 <p style="margin: 0 0 10px 0;"><strong>Stimulus:</strong> ${label}</p>
 
@@ -519,7 +514,8 @@ const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560, 
         .on("mousemove", (event) => {
           positionTooltip(tooltip, event);
         })
-        .on("mouseout", () => {
+        .on("mouseout", (event) => {
+          d3.select(event.currentTarget).attr("r", 4.3);
           tooltip.style("display", "none");
         });
 
@@ -542,9 +538,9 @@ const BoxPlot = ({ regionDataMap, fileMappings, regionOrder = [], height = 560, 
     });
 
     return () => {
-      d3.select("body").selectAll(".boxplot-tooltip").remove();
+      tooltip.remove();
     };
-  }, [aggregated, fileMap, hasRenderableData, height, regions.length, svgWidth, totalInnerWidth, margin.left, margin.top, labChart]);
+  }, [aggregated, fileMap, hasRenderableData, height, regions.length, svgWidth, totalInnerWidth, margin.left, margin.top, labChart, regionLabels, sharedScale]);
 
   if (!hasRenderableData) {
     return (

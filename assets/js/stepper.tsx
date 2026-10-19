@@ -13,6 +13,9 @@ import RegionSelector from './Lab/regionselector.jsx';
 import Settings from './Lab/settings.jsx';
 import ModelCard from './Lab/modelcard.jsx';
 import InferenceHistory from './Lab/inferenceHistory.jsx';
+import ComparePredictionResults from './Lab/comparePredictionResults.jsx';
+import type { CanvasCard } from './Lab/canvas/types';
+import useCanvasWorkspace from './Lab/canvas/useCanvasWorkspace';
 
 // image preview and grouping
 import ImagePreviewGroupedDnD from './Lab/imagePreviewGrid.tsx';
@@ -236,6 +239,16 @@ const Stepper: React.FC = () => {
   const [settingsRailCollapsed, setSettingsRailCollapsed] = useState(false);
   const [inferenceHistory, setInferenceHistory] = useState<InferenceHistoryEntry[]>([]);
   const [activeHistoryId, setActiveHistoryId] = useState<number | null>(null);
+  const [showComparison, setShowComparison] = useState(false);
+  const [comparisonSelection, setComparisonSelection] = useState<number[] | null>(null);
+  const [comparisonCanvas, setComparisonCanvas] = useState<CanvasCard[]>([]);
+  const comparisonRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (inferenceHistory.length < 2) setShowComparison(false);
+    setComparisonCanvas((previous) => previous.filter((card) => inferenceHistory.some((entry) => entry.id === card.historyId)));
+    if (inferenceHistory.length === 0) setComparisonSelection(null);
+    else setComparisonSelection((previous) => previous === null ? null : previous.filter((id) => inferenceHistory.some((entry) => entry.id === id)));
+  }, [inferenceHistory]);
   const [historyToRestore, setHistoryToRestore] = useState<InferenceHistoryEntry | null>(null);
   const historyIdRef = useRef(0);
 
@@ -249,6 +262,7 @@ const Stepper: React.FC = () => {
   // Server keys change after inference; only actual stimuli changes clear history.
   const stimuliHistoryKey = JSON.stringify([prestoreDataset, files.map((file) =>
     [file.uid, file.groupKey, file.file?.size, file.file?.lastModified])]);
+  const canvasWorkspace = useCanvasWorkspace({ entries: inferenceHistory, cards: comparisonCanvas, onChange: setComparisonCanvas, resetKey: stimuliHistoryKey });
   useEffect(() => {
     setInferenceHistory([]);
     setActiveHistoryId(null);
@@ -1975,6 +1989,7 @@ useEffect(() => {
 }, [historyToRestore]);
 
 const restoreInferenceHistory = (entry: InferenceHistoryEntry) => {
+  setShowComparison(false);
   inferenceRequestRef.current += 1;
   setPredictionLoading(false);
   setLoading(false);
@@ -2440,6 +2455,7 @@ const restoreInferenceHistory = (entry: InferenceHistoryEntry) => {
         };
   
   const runInference = async () => {
+    setShowComparison(false);
     const ok = await handlePrediction(region);
     if (ok) {
       setStimuliPreviewCollapsed(true);
@@ -2526,7 +2542,14 @@ const restoreInferenceHistory = (entry: InferenceHistoryEntry) => {
               dataset={dataset}
               model={model}
             />
-            <InferenceHistory entries={inferenceHistory} activeId={activeHistoryId} onSelect={restoreInferenceHistory} />
+            <InferenceHistory entries={inferenceHistory} activeId={activeHistoryId} onSelect={restoreInferenceHistory}
+              hasCompareSheet={comparisonSelection !== null} isCompareOpen={showComparison} compareCount={comparisonSelection?.length || 0}
+              onCompare={() => {
+              setActiveHistoryId(null);
+              setComparisonSelection((previous) => previous ?? inferenceHistory.slice(-2).map((entry) => entry.id));
+              setShowComparison(true);
+              window.requestAnimationFrame(() => comparisonRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+            }} />
           </div>
         </aside>
 
@@ -2653,7 +2676,12 @@ const restoreInferenceHistory = (entry: InferenceHistoryEntry) => {
               </div>
             )}
 
-          {(showResults || predictionLoading || !!currentRegionPredictionResult) && (
+          {showComparison && inferenceHistory.length >= 2 && (
+            <div ref={comparisonRef}>
+              <ComparePredictionResults entries={inferenceHistory} selectedIds={comparisonSelection || []} onSelectionChange={setComparisonSelection} canvasCards={comparisonCanvas} onCanvasChange={setComparisonCanvas} canvasWorkspace={canvasWorkspace} onClose={() => setShowComparison(false)} />
+            </div>
+          )}
+          {!showComparison && (showResults || predictionLoading || !!currentRegionPredictionResult) && (
             <div
               ref={resultsRef}
               data-tutorial="lab-results-panel"

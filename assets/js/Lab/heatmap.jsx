@@ -2,8 +2,9 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { heatmapStyles, styleTooltip } from './heatmapstyles';
 import { LAB_CHART, LAB_COLORS, styleLabAxis, applyLabAxisTitle } from './labTheme';
+import { chartInterpolator } from './chartPalettes';
 
-const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, height, fileMappings, order, labChart = false }) => {
+const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, height, fileMappings, order, labChart = false, showLegend = true, showGroupLabels = true, palette = 'default', colorLow, colorHigh, colorMin, colorMax, canvasFit = false, highlightedFilenames = null, highlightColor = '#D46B24' }) => {
   const svgRef = useRef();
   const containerRef = useRef();
   const [containerWidth, setContainerWidth] = useState(0); 
@@ -12,7 +13,7 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
     useEffect(() => {
 
       setTimeout(() => {
-        document.querySelectorAll('.tooltip').forEach((el) => {
+        containerRef.current?.querySelectorAll('.tooltip').forEach((el) => {
           el.style.opacity = "1";
           el.style.visibility = "visible";
         });
@@ -73,7 +74,7 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
 
     const svg = d3.select(svgRef.current);
 
-    const margin = heatmapStyles.margin;
+    const margin = canvasFit ? { top: showGroupLabels ? 32 : 12, right: 16, bottom: showLegend ? 54 : 12, left: showLegend ? 80 : 12 } : heatmapStyles.margin;
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -93,16 +94,18 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
     }
 
     const n = currentOrder.length;
-    const extraRight = order === "group" && groupSpans.length > 0 ? 70 : 0;
-    const cellSize = Math.min((innerWidth - extraRight) / n, innerHeight / n);
+    const extraRight = showGroupLabels && order === "group" && groupSpans.length > 0 ? (canvasFit ? 120 : 70) : 0;
+    const cellSize = Math.max(1, Math.min((innerWidth - extraRight) / n, innerHeight / n));
     const actualInner = cellSize * n;
 
     const xScale = d3.scaleBand().domain(currentOrder).range([0, actualInner]).padding(0);
     const yScale = d3.scaleBand().domain(currentOrder).range([0, actualInner]).padding(0);
 
     // Set up color scale
-    const colorScale = d3.scaleSequential(d3.interpolatePlasma)
-      .domain([d3.min(heatmapData, d => d.value), d3.max(heatmapData, d => d.value)]);
+    const autoDomain = [d3.min(heatmapData, d => d.value), d3.max(heatmapData, d => d.value)];
+    const requestedDomain = [Number.isFinite(colorMin) ? colorMin : autoDomain[0], Number.isFinite(colorMax) ? colorMax : autoDomain[1]];
+    const colorScale = d3.scaleSequential(chartInterpolator(palette, colorLow, colorHigh))
+      .domain(requestedDomain[0] < requestedDomain[1] ? requestedDomain : autoDomain).clamp(true);
 
     // Adjust SVG size to fit the square grid exactly
     svg.attr("width", actualInner + margin.left + margin.right + extraRight)
@@ -112,13 +115,28 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
     svg.selectAll("*").remove();
     const g = svg.append("g").attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-    let tooltip = d3.select(containerRef.current).select(".tooltip");
+    let tooltip = canvasFit ? d3.select('body').append('div').attr('class', 'tooltip canvas-rdm-tooltip') : d3.select(containerRef.current).select(".tooltip");
     if (tooltip.empty()) {
       tooltip = d3.select(containerRef.current)
         .append("div")
         .attr("class", "tooltip");
     }
     styleTooltip(tooltip);
+    const highlighted = new Set(highlightedFilenames || []);
+    const isHighlighted = (d) => highlighted.has(d.x) || highlighted.has(d.y);
+    if (canvasFit) tooltip.style('position', 'fixed');
+    const moveTooltip = (event) => {
+      if (!canvasFit) {
+        const rect = containerRef.current.getBoundingClientRect();
+        tooltip.style('left', `${event.clientX - rect.left + 10}px`).style('top', `${event.clientY - rect.top - 40}px`);
+        return;
+      }
+      const bounds = tooltip.node().getBoundingClientRect();
+      let left = event.clientX + 12;
+      if (left + bounds.width > window.innerWidth - 12) left = event.clientX - bounds.width - 12;
+      tooltip.style('left', `${Math.max(12, left)}px`)
+        .style('top', `${Math.max(12, Math.min(event.clientY - 40, window.innerHeight - bounds.height - 12))}px`);
+    };
 
     // Draw heatmap rectangles
     const rects = g.selectAll("rect")
@@ -131,6 +149,9 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
             .attr("width", cellSize)
             .attr("height", cellSize)
             .attr("fill", d => colorScale(d.value))
+            .attr('opacity', d => !highlighted.size || isHighlighted(d) ? 1 : 0.18)
+            .attr('stroke', d => isHighlighted(d) ? highlightColor : 'none')
+            .attr('stroke-width', d => isHighlighted(d) ? 1.4 : 0)
             .on("mouseover", (event, d) => {
               const fx = getFileInfo(d.x);
               const fy = getFileInfo(d.y);
@@ -233,12 +254,10 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
               .style("display", "block")
               .style("opacity", 1)
               .style("visibility", "visible");
+              moveTooltip(event);
             })
             .on("mousemove", event => {
-              const containerRect = containerRef.current.getBoundingClientRect(); 
-              tooltip
-                .style("left", `${event.clientX - containerRect.left + 10}px`)
-                .style("top", `${event.clientY - containerRect.top - 40}px`);
+              moveTooltip(event);
             })
             .on("mouseout", () => {
               tooltip
@@ -250,11 +269,11 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
     
     //legend
     // Add legend
+    if (showLegend) {
     const legend = g.append("g")
       .attr("transform", `translate(-50, 0)`); // Move legend to the left of the heatmap
     
-    const legendColorScale = d3.scaleSequential(d3.interpolatePlasma)
-      .domain([d3.min(heatmapData, d => d.value), d3.max(heatmapData, d => d.value)]);
+    const legendColorScale = colorScale.copy();
     
     const legendHeight = actualInner;
     const legendWidth = 20;
@@ -302,9 +321,10 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
       .style("font-size", labChart ? `${LAB_CHART.axisTitle.fontSize}px` : "15px")
       .text("distance");
     if (labChart) applyLabAxisTitle(legendTitle2);
+    }
 
     // Group bracket labels (top + right) when order === "group"
-    if (order === "group" && groupSpans.length > 0) {
+    if (showGroupLabels && order === "group" && groupSpans.length > 0) {
       const TICK = 6;
 
       // ── Top labels (for columns) ──
@@ -370,10 +390,10 @@ const Heatmap = ({ heatmapData, originalFilenames, sortedFilenames, width, heigh
     }
 
     return () => {
-        d3.select(".tooltip").remove(); // Cleanup tooltip on component unmount
+        tooltip.remove(); // Remove only this chart's tooltip.
     };
 
-  }, [heatmapData, originalFilenames, sortedFilenames, width, height, order, fileMappings, labChart]);
+  }, [heatmapData, originalFilenames, sortedFilenames, width, height, order, fileMappings, labChart, showLegend, showGroupLabels, palette, colorLow, colorHigh, colorMin, colorMax, canvasFit, highlightedFilenames, highlightColor]);
 
   return (
     <div ref={containerRef} style={{ position: 'relative', width, height, backgroundColor: 'transparent' }}>

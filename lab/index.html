@@ -1046,6 +1046,29 @@
       cursor: not-allowed;
     }
 
+    body.lab-page #container .lab-custom-canvas-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    body.lab-page #container .lab-custom-canvas-card {
+      min-width: 0;
+      border: 1px solid var(--lab-hairline);
+      border-radius: 8px;
+      background: var(--lab-panel);
+    }
+
+    body.lab-page #container .lab-custom-canvas-card.is-full {
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 900px) {
+      body.lab-page #container .lab-custom-canvas-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
     body.lab-page #container .lab-results-overview {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));

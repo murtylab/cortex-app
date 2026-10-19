@@ -31,6 +31,7 @@ export default defineConfig(({ command }) => ({
       input: {
         main: 'index.html',
         lab: 'lab/index.html',
+        labCanvas: 'lab/canvas/index.html',
         labWholeBrain: 'lab-whole-brain/index.html',
         scoreboardQuantitative: 'scoreboardQuantitative/index.html',
         scoredboardQuality: 'scoreboardQualitative/index.html',
