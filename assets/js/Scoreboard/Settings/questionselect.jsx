@@ -20,7 +20,7 @@ const QuestionSelect = ({ value, onChange }) => {
         marginBottom: 8,
       }}
     >
-      <Text style={{ color: '#6b4a8c', fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap', fontFamily: "'Inter', system-ui, sans-serif", letterSpacing: '0.03em' }}>
+      <Text style={{ color: 'var(--accent-strong, #6b4a8c)', fontSize: '13px', fontWeight: 600, whiteSpace: 'nowrap', fontFamily: "'Inter', system-ui, sans-serif", letterSpacing: '0.03em' }}>
         Insight Question
       </Text>
 

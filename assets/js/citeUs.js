@@ -142,7 +142,7 @@
       '<a href="/labLanding/">The Lab</a>' +
       "<ul>" +
       '<li><a href="/lab/">Functional Regions</a></li>' +
-      '<li><a href="/lab-whole-brain/">Whole Brain</a></li>' +
+      '<li hidden><a href="/lab-whole-brain/">Whole Brain</a></li>' +
       "</ul>" +
       "</li>" +
       "<li>" +

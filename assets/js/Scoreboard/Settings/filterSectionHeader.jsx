@@ -21,7 +21,7 @@ const FilterSectionHeader = ({ hasFilters, onReset }) => (
       <div
         style={{
           fontSize: '11px',
-          color: '#888',
+          color: 'var(--text-sub, #888)',
           marginLeft: 2,
           fontFamily: "'Inter', system-ui, sans-serif",
         }}

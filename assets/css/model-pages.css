@@ -3,8 +3,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Caveat:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 :root {
-  --bg: #f7f7f4;
-  --panel: #FBFAF6;
+  --bg: #ffffff;
+  --panel: #ffffff;
   --text-main: #211F1C;
   --text-sub: #57534A;
   --text-muted: #8A8378;
@@ -60,7 +60,7 @@
 }
 
 .performance-dataset-table-comparison thead .performance-dataset-header-sub th {
-  background: rgba(247, 247, 244, 0.96);
+  background: rgba(255, 255, 255, 0.96);
   color: var(--text-sub);
   font-family: var(--mono-font);
   font-size: 0.72rem;
@@ -394,7 +394,7 @@ body.lab-page .navmenu .dropdown ul {
 
 /* Navbar overrides */
 .navbar {
-  background: rgba(247, 247, 244, 0.95);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   box-shadow: none;
   border-bottom: 0.5px solid var(--border);
@@ -427,10 +427,13 @@ body.lab-page .navmenu .dropdown ul {
   background: none;
   -webkit-background-clip: unset;
   background-clip: unset;
-  -webkit-text-fill-color: var(--heading);
-  color: var(--heading);
+  -webkit-text-fill-color: #211f1c;
+  color: #211f1c;
   font-family: var(--serif-font);
-  font-weight: 600;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
 }
 
 .performance-toolbar {

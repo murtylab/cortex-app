@@ -15,7 +15,7 @@ const ChartSelect = ({ chartType, setChartType, rank, setRank, enable, showType 
       
       {/* first group：Univariate vs Multivariate */}
       {showType && <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <div style={{ fontSize: '11px', color: '#888', marginLeft: 2 }}>ANALYSIS</div>
+        <div style={{ fontSize: '11px', color: 'var(--text-sub, #888)', marginLeft: 2 }}>ANALYSIS</div>
         <ButtonGroup size="small" fullWidth variant="outlined">
           {CHART_TYPE_OPTIONS.map((option) => (
             <Button
@@ -51,7 +51,7 @@ const ChartSelect = ({ chartType, setChartType, rank, setRank, enable, showType 
       {/* second group：rank */}
       {enable && (
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <div style={{ fontSize: '11px', color: '#888', marginLeft: 2 }}>RANK</div>
+          <div style={{ fontSize: '11px', color: 'var(--text-sub, #888)', marginLeft: 2 }}>RANK</div>
           <ButtonGroup size="small" fullWidth variant="outlined">
             {RANK.map((option) => (
               <Button

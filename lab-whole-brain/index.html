@@ -84,6 +84,11 @@
         <h1 class="sitename">Cortex</h1>
       </a>
 
+      <div class="header-mode-switch" role="group" aria-label="Lab view" hidden>
+        <a href="/lab/">Functional Regions (fROIs)</a>
+        <a href="/lab-whole-brain/" aria-current="page" hidden>Whole Brain</a>
+      </div>
+
       <nav id="navmenu" class="navmenu">
         <ul>
           <li><a href="/">Home</a></li>
@@ -94,7 +99,7 @@
             </a>
             <ul>
               <li><a href="/lab/">Functional Regions (fROIs)</a></li>
-              <li><a href="/lab-whole-brain/" class="active">Whole Brain</a></li>
+              <li hidden><a href="/lab-whole-brain/" class="active">Whole Brain</a></li>
             </ul>
           </li>
           <li class="dropdown">

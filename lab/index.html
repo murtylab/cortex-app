@@ -31,8 +31,8 @@
   <style>
     /* ── Lab page design tokens (scoped; does not affect other pages) ── */
     body.lab-page {
-      --lab-page-bg: #f7f7f4;
-      --lab-panel: #FBFAF6;
+      --lab-page-bg: #ffffff;
+      --lab-panel: #ffffff;
       --lab-text: #211F1C;
       --lab-secondary: #57534A;
       --lab-muted: #8A8378;
@@ -1551,6 +1551,11 @@
         <h1 class="sitename">Cortex</h1>
       </a>
 
+      <div class="header-mode-switch" role="group" aria-label="Lab view" hidden>
+        <a href="/lab/" aria-current="page">Functional Regions (fROIs)</a>
+        <a href="/lab-whole-brain/" hidden>Whole Brain</a>
+      </div>
+
       <nav id="navmenu" class="navmenu">
         <ul>
           <li><a href="/">Home</a></li>
@@ -1561,7 +1566,7 @@
             </a>
             <ul>
               <li><a href="/lab/">Functional Regions (fROIs)</a></li>
-              <li><a href="/lab-whole-brain/">Whole Brain</a></li>
+              <li hidden><a href="/lab-whole-brain/">Whole Brain</a></li>
             </ul>
           </li>
           <li class="dropdown">

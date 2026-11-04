@@ -1,4 +1,4 @@
-:root { --lab-hairline: #d6d2c6; --lab-panel: #fbfaf6; --lab-text: #211f1c; --lab-muted: #8a8378; --lab-accent: #90619b; --lab-sans: Inter, system-ui, sans-serif; --lab-mono: 'IBM Plex Mono', monospace; --lab-page-bg: #f7f7f4; }
+:root { --lab-hairline: #d6d2c6; --lab-panel: #ffffff; --lab-text: #211f1c; --lab-muted: #8a8378; --lab-accent: #90619b; --lab-sans: Inter, system-ui, sans-serif; --lab-mono: 'IBM Plex Mono', monospace; --lab-page-bg: #ffffff; }
 body { margin: 0; background: var(--lab-page-bg); color: var(--lab-text); font-family: var(--lab-sans); }
 * { box-sizing: border-box; }
 .canvas-page { padding: 24px 32px; max-width: 1920px; margin: auto; }

@@ -571,15 +571,15 @@ const getOverviewColumnCount = (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: 16 }}>
         <div style={{ width: 40, height: 40, border: '3px solid #e8e2ee', borderTopColor: '#8966a3', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-        <span style={{ color: '#666' }}>Loading scoreboard data…</span>
+        <span style={{ color: 'var(--text-sub, #666)' }}>Loading scoreboard data…</span>
       </div>
     );
   }
   if (!hasData) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: 12, padding: 24, textAlign: 'center' }}>
-        <span style={{ fontSize: 18, color: '#333' }}>Scoreboard data could not be loaded.</span>
-        <span style={{ color: '#666' }}>Check the browser console (F12) for errors and ensure JSON data files exist under <code>/assets/data/new/</code>.</span>
+        <span style={{ fontSize: 18, color: 'var(--text-main, #333)' }}>Scoreboard data could not be loaded.</span>
+        <span style={{ color: 'var(--text-sub, #666)' }}>Check the browser console (F12) for errors and ensure JSON data files exist under <code>/assets/data/new/</code>.</span>
       </div>
     );
   }
@@ -782,7 +782,7 @@ const getOverviewColumnCount = (
                 {isDatasetDetailMode && dataset.map((dsName) => (
                   region.map((roiValue) => (
                     <div key={`${dsName}-${roiValue}`} style={{ flex: 1, minHeight: '80px', background: 'var(--background-color)', padding: '6px', borderRadius: 6, display: 'flex', flexDirection: 'column' }}>
-                      <div style={{ textAlign: 'center', fontSize: '10px', fontWeight: 500, color: '#888' }}>
+                      <div style={{ textAlign: 'center', fontSize: '10px', fontWeight: 500, color: 'var(--text-sub, #888)' }}>
                         {roiValue === 'Across Regions' ? 'Across Regions' : roiValue} ({dsName})
                       </div>
                       <div style={{ flex: 1, minHeight: 0 }}>
@@ -943,17 +943,17 @@ const getOverviewColumnCount = (
                         : null;
 
                       if (training === 'Murty185 VS NSD1000') {
-                        return <span style={{ fontSize: '16px', fontWeight: 600, color: '#333' }}>Murty185 vs NSD1000 Performance Comparison</span>;
+                        return <span style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-main, #333)' }}>Murty185 vs NSD1000 Performance Comparison</span>;
                       }
                       if (isDatasetROI) {
-                        return <span style={{ fontSize: '16px', fontWeight: 600, color: '#333' }}>Model Performance Gap to Ceiling (Trained on {trainingLabel})</span>;
+                        return <span style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-main, #333)' }}>Model Performance Gap to Ceiling (Trained on {trainingLabel})</span>;
                       }
                       return (
                         <>
-                          <span style={{ display: 'block', fontSize: '16px', fontWeight: 600, color: '#333' }}>
+                          <span style={{ display: 'block', fontSize: '16px', fontWeight: 600, color: 'var(--text-main, #333)' }}>
                             {regionLabel} Performance
                           </span>
-                          <span style={{ display: 'block', fontSize: '12px', fontWeight: 400, color: '#999', marginTop: 2 }}>
+                          <span style={{ display: 'block', fontSize: '12px', fontWeight: 400, color: 'var(--text-sub, #999)', marginTop: 2 }}>
                             Trained on {trainingLabel}{datasetLabel ? ` · Evaluated on ${datasetLabel}` : ''}
                           </span>
                         </>
@@ -1105,7 +1105,7 @@ const getOverviewColumnCount = (
                             fontWeight: 500,
                             marginBottom: 12,
                             fontSize: '13px',
-                            color: '#555',
+                            color: 'var(--text-sub, #555)',
                             textTransform: 'uppercase',
                             background: 'var(--background-color)',
                             padding: '4px 0',

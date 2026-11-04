@@ -625,7 +625,7 @@
           path: '/labLanding/',
           selector: '[data-tutorial="lab-category-selective-link"]',
           title: 'Choose a Lab Path',
-          body: 'Start with Functional Regions (fROIs), or open Whole Brain from the same landing page.',
+          body: 'Start with Functional Regions (fROIs).',
           nextLabel: 'Enter The Lab',
           advanceOnTargetClick: true,
         },

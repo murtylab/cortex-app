@@ -4,7 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="/assets/js/paperTheme.js"></script>
-    <title>Virtual Visual Cortex</title>
+    <script>
+        (function () {
+            try {
+                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || window.scrollY > 8) {
+                    document.documentElement.classList.add('hero-intro-skip');
+                    return;
+                }
+            } catch (e) {}
+            document.documentElement.classList.add('hero-intro-pending');
+        })();
+    </script>
+    <title>Virtual Visual Cortex – The NeuroAI community building the future.</title>
     <link href="/assets/img/logo.svg" rel="icon" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,7 +31,7 @@
     <style>
 
         :root {
-            --bg-color: #f7f7f4;
+            --bg-color: #ffffff;
             --tungsten: #3a352f;
             --text-main: #3d3832;
             --text-sub: #6b6358;
@@ -36,6 +47,10 @@
             --body-font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
             --mono-font: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
             --script-font: 'Caveat', 'Segoe Script', 'Bradley Hand', cursive;
+        }
+
+        [hidden] {
+            display: none !important;
         }
 
         body {
@@ -56,9 +71,69 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background-color: var(--bg-color); 
-            z-index: 0; 
-            pointer-events: none; 
+            background-color: var(--bg-color);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .home-theme-toggle {
+            display: none !important;
+            position: fixed;
+            right: max(18px, env(safe-area-inset-right, 0px));
+            top: max(16px, env(safe-area-inset-top, 0px));
+            z-index: 20;
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: #211f1c;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            pointer-events: auto;
+        }
+
+        .home-theme-toggle:hover {
+            background: rgba(0, 0, 0, 0.06);
+        }
+
+        .home-theme-toggle .theme-icon {
+            grid-area: 1 / 1;
+            width: 16px;
+            height: 16px;
+            transition: transform 0.35s ease, opacity 0.35s ease;
+        }
+
+        .home-theme-toggle .theme-icon-moon {
+            opacity: 0;
+            transform: rotate(90deg) scale(0);
+        }
+
+        html.theme-dark .home-theme-toggle .theme-icon-sun {
+            opacity: 0;
+            transform: rotate(-90deg) scale(0);
+        }
+
+        html.theme-dark .home-theme-toggle .theme-icon-moon {
+            opacity: 1;
+            transform: rotate(0) scale(1);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .home-theme-toggle .theme-icon {
+                transition: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .home-theme-toggle {
+                right: max(10px, env(safe-area-inset-right, 0px));
+                top: max(10px, env(safe-area-inset-top, 0px));
+                width: 32px;
+                height: 32px;
+            }
         }
 
         /* Top-left VSS satellite pill → /vss-satellite/ */
@@ -121,9 +196,9 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
-            padding: 0 8%;
+            padding: 16vh 8% 0;
             box-sizing: border-box;
             position: relative;
             pointer-events: none;
@@ -137,12 +212,44 @@
             pointer-events: auto;
         }
 
+        html.hero-intro-pending .hero-heading-block {
+            opacity: 0;
+            transform: translate3d(0, -72px, 0);
+        }
+
+        html.hero-intro-settle .hero-heading-block {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+            transition: opacity 3s cubic-bezier(0.45, 0.02, 0.18, 1),
+                transform 3s cubic-bezier(0.45, 0.02, 0.18, 1);
+        }
+
+        html.hero-intro-done .hero-heading-block,
+        html.hero-intro-skip .hero-heading-block {
+            opacity: 1;
+            transform: none;
+        }
+
+        html.hero-intro-pending #typewriter-text,
+        html.hero-intro-pending #typewriter-text::after {
+            animation: none;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html.hero-intro-pending .hero-heading-block,
+            html.hero-intro-settle .hero-heading-block {
+                opacity: 1;
+                transform: none;
+                transition: none;
+            }
+        }
+
         .hero-title {
             font-family: var(--heading-font);
             font-size: 6.25rem;
             font-weight: 700;
             letter-spacing: -1.5px;
-            color: var(--tungsten);
+            color: #000000;
             margin: 0;
             line-height: 1.15;
             pointer-events: auto;
@@ -151,19 +258,95 @@
 
         .typewriter-container {
             font-size: 1.1rem;
-            font-weight: 400;
-            color: var(--text-sub);
-            margin-top: 15px;
-            margin-bottom: 40px;
-            height: 24px;
+            font-weight: 600;
+            color: #2a2a2a;
+            margin-top: 0;
+            margin-bottom: 22px;
+            height: auto;
+            min-height: 1.4em;
             display: flex;
             align-items: center;
             justify-content: center;
             pointer-events: auto;
         }
 
-        .cursor {
+        #typewriter-text {
+            position: relative;
             display: inline-block;
+            background-image: linear-gradient(
+                90deg,
+                #2a2a2a 0%,
+                #2a2a2a 32%,
+                #c98d9a 38%,
+                #b8a4bc 48%,
+                #c4b4cc 60%,
+                #2a2a2a 68%,
+                #2a2a2a 100%
+            );
+            background-size: 340% 100%;
+            background-repeat: no-repeat;
+            background-position: 100% 50%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+            animation: subtitle-shine 6.2s linear infinite;
+        }
+
+        #typewriter-text::after {
+            content: attr(data-label);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background-image: linear-gradient(
+                90deg,
+                transparent 0%,
+                transparent 78%,
+                rgba(255, 255, 255, 0.45) 90%,
+                #fff 100%
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+            opacity: 0;
+            pointer-events: none;
+            filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.95));
+            animation: subtitle-flash 6.2s linear infinite;
+        }
+
+        @keyframes subtitle-shine {
+            0% { background-position: 100% 50%; }
+            40% { background-position: 0% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes subtitle-flash {
+            0%, 28% { opacity: 0; }
+            35% { opacity: 1; }
+            42% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #typewriter-text,
+            #typewriter-text::after {
+                animation: none;
+            }
+
+            #typewriter-text {
+                background-image: none;
+                color: #2a2a2a;
+                -webkit-text-fill-color: #2a2a2a;
+            }
+
+            #typewriter-text::after {
+                opacity: 0;
+            }
+        }
+
+        .cursor {
+            display: none;
             width: 2px;
             height: 1.2em;
             background-color: var(--accent-color);
@@ -180,177 +363,125 @@
             display: flex;
             flex-direction: row;
             flex-wrap: nowrap;
-            gap: 16px;
-            width: 100%;
+            justify-content: center;
+            gap: 40px;
+            width: auto;
             pointer-events: auto;
         }
 
         .btn-primary {
-            flex: 1;
-            min-width: 0;
-            background: var(--tungsten);
-            color: #f7f7f4;
+            flex: 0 0 auto;
+            width: fit-content;
+            background: #000000;
+            color: #ffffff;
             border: none;
-            padding: 14px 24px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            border-radius: var(--radius-control);
+            height: 42px;
+            padding: 0 20px;
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 1.2;
+            border-radius: 999px;
             cursor: pointer;
-            transition: background 0.25s ease;
+            transition: background-color 0.25s ease, box-shadow 0.25s ease;
             box-shadow: none;
             text-decoration: none;
-            display: flex;
+            display: inline-flex;
             justify-content: center;
             align-items: center;
+            white-space: nowrap;
+        }
+
+        .hero-heading-block .btn-primary {
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18), 0 8px 18px rgba(0, 0, 0, 0.12);
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, #c98d9a 0%, #b8a4bc 50%, #c4b4cc 100%);
-            box-shadow: 0 6px 16px rgba(184, 164, 188, 0.28);
+            background: #2a2a2a;
+            box-shadow: none;
+        }
+
+        .hero-heading-block .btn-primary:hover {
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2), 0 10px 22px rgba(0, 0, 0, 0.14);
         }
 
         .btn-primary .btn-label {
+            color: #ffffff;
+        }
+
+        .spacer { height: 2vh; }
+
+        .intro-section {
             position: relative;
-            background-image: linear-gradient(
-                90deg,
-                #f7f7f4 0%,
-                #f7f7f4 32%,
-                #c98d9a 38%,
-                #b8a4bc 48%,
-                #c4b4cc 60%,
-                #f7f7f4 68%,
-                #f7f7f4 100%
-            );
-            background-size: 340% 100%;
-            background-repeat: no-repeat;
-            background-position: 100% 50%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            -webkit-text-fill-color: transparent;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 0 8% 4vh;
+            pointer-events: auto;
         }
 
-        .btn-primary .btn-label::after {
-            content: attr(data-label);
-            position: absolute;
-            left: 0;
-            top: 0;
-            background-image: linear-gradient(
-                90deg,
-                transparent 0%,
-                transparent 78%,
-                rgba(255, 255, 255, 0.35) 90%,
-                #fff 100%
-            );
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            -webkit-text-fill-color: transparent;
-            opacity: 0;
-            pointer-events: none;
-            filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.95));
+        .intro-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            padding: 30px 28px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transition: transform 0.3s, background 0.3s;
         }
 
-        .btn-group .btn-primary:first-child .btn-label {
-            animation: btn-text-shine-left 6.2s linear infinite;
+        .intro-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.9);
         }
 
-        .btn-group .btn-primary:last-child .btn-label {
-            animation: btn-text-shine-right 6.2s linear infinite;
+        .intro-card .section-title {
+            margin: 0;
+            text-align: left;
         }
 
-        .btn-group .btn-primary:first-child .btn-label::after {
-            animation: btn-text-flash-left 6.2s linear infinite;
+        .intro-card p {
+            margin: 0;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--text-sub);
         }
 
-        .btn-group .btn-primary:last-child .btn-label::after {
-            animation: btn-text-flash-right 6.2s linear infinite;
+        .intro-points {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        .btn-group:hover .btn-label,
-        .btn-group:hover .btn-label::after {
-            animation: none;
+        .intro-points li {
+            font-size: 0.9rem;
+            line-height: 1.7;
+            color: var(--text-main);
         }
 
-        .btn-group:hover .btn-label {
-            background-image: none;
-            color: #f7f7f4;
-            -webkit-text-fill-color: #f7f7f4;
+        .intro-points strong {
+            font-weight: 600;
+            color: var(--text-main);
         }
 
-        .btn-group:hover .btn-label::after {
-            opacity: 0;
+        .intro-points span {
+            color: var(--text-sub);
         }
 
-        @keyframes btn-text-shine-left {
-            0% { background-position: 100% 50%; }
-            40% { background-position: 0% 50%; }
-            100% { background-position: 0% 50%; }
+        .intro-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: auto;
+            padding-top: 8px;
         }
-
-        @keyframes btn-text-shine-right {
-            0%, 50% { background-position: 100% 50%; }
-            90% { background-position: 0% 50%; }
-            99.9% { background-position: 0% 50%; }
-            100% { background-position: 100% 50%; }
-        }
-
-        @keyframes btn-text-flash-left {
-            0%, 28% { opacity: 0; }
-            35% { opacity: 1; }
-            42% { opacity: 0; }
-            100% { opacity: 0; }
-        }
-
-        @keyframes btn-text-flash-right {
-            0%, 78% { opacity: 0; }
-            85% { opacity: 1; }
-            92% { opacity: 0; }
-            100% { opacity: 0; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .btn-primary .btn-label,
-            .btn-primary .btn-label::after {
-                animation: none;
-            }
-
-            .btn-primary .btn-label {
-                background-image: none;
-                color: #f7f7f4;
-                -webkit-text-fill-color: #f7f7f4;
-            }
-
-            .btn-primary .btn-label::after {
-                opacity: 0;
-            }
-        }
-
-        .scroll-indicator {
-            position: absolute;
-            bottom: 28px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: var(--accent-color);
-            font-size: 1.5rem;
-            line-height: 1;
-            pointer-events: none;
-            animation: scroll-bounce 2s ease-in-out infinite;
-            opacity: 1;
-            transition: opacity 0.35s ease;
-        }
-
-        body.scrolled .scroll-indicator {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        @keyframes scroll-bounce {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(6px); }
-        }
-
-        .spacer { height: 10vh; }
 
         .stats-section {
             padding: 80px 8%;
@@ -400,7 +531,7 @@
         }
 
         .faq-section {
-            margin: 80px 10% 150px 10%;
+            margin: 80px 8% 150px 8%;
             padding: 60px;
             background: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(12px);
@@ -501,7 +632,7 @@
         }
 
         .latest-news-section {
-            margin: 80px 10% 0 10%;
+            margin: 80px 8% 0 8%;
             padding: 60px;
             background: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(12px);
@@ -858,7 +989,7 @@
             }
 
             .hero-section {
-                padding: 0 1.25rem;
+                padding: 13vh 1.25rem 0;
                 min-height: 100svh;
                 height: auto;
             }
@@ -880,21 +1011,34 @@
                 min-height: 2.6em;
                 font-size: 0.95rem;
                 padding: 0 4px;
-                margin-bottom: 28px;
+                margin-bottom: 18px;
             }
 
             .btn-group {
                 flex-direction: column;
                 flex-wrap: wrap;
-                gap: 10px;
-                width: 100%;
-                max-width: 320px;
+                align-items: center;
+                gap: 16px;
+                width: auto;
+                max-width: none;
             }
 
             .btn-primary {
-                width: 100%;
-                padding: 12px 16px;
-                font-size: 0.88rem;
+                width: fit-content;
+                height: 40px;
+                padding: 0 18px;
+                font-size: 14px;
+            }
+
+            .intro-section {
+                grid-template-columns: 1fr;
+                padding: 0 5% 24px;
+                gap: 16px;
+            }
+
+            .intro-card {
+                padding: 24px 20px;
+                border-radius: 18px;
             }
 
             .stats-section {
@@ -919,8 +1063,8 @@
             .faq-section,
             .team-section,
             .latest-news-section {
-                margin-left: 4%;
-                margin-right: 4%;
+                margin-left: 5%;
+                margin-right: 5%;
                 padding: 28px 18px;
                 border-radius: 18px;
             }
@@ -950,10 +1094,6 @@
             .news-item-title {
                 font-size: 1rem;
             }
-
-            .scroll-indicator {
-                bottom: 18px;
-            }
         }
 
         @media (max-width: 480px) {
@@ -968,7 +1108,7 @@
         }
 
         .team-section {
-            margin: 80px 10% 0 10%;
+            margin: 80px 8% 0 8%;
             padding: 60px;
             background: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(12px);
@@ -1027,12 +1167,114 @@
             border-bottom: none;
         }
 
+        html.theme-dark {
+            --bg-color: #0a0a0a;
+            --tungsten: #f4f0ea;
+            --text-main: #f6f3ee;
+            --text-sub: #ddd6cb;
+            --card-bg: rgba(255, 255, 255, 0.14);
+            --hairline-color: rgba(255, 255, 255, 0.24);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            --accent-color: #5ED6FF;
+            --accent-strong: #7EB8F5;
+            --accent-muted: rgba(94, 214, 255, 0.22);
+        }
+
+        html.theme-dark .home-theme-toggle {
+            color: #f4f1ec;
+        }
+
+        html.theme-dark .home-theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        html.theme-dark .hero-title {
+            color: #ffffff;
+        }
+
+        html.theme-dark .typewriter-container {
+            color: #f0ebe4;
+        }
+
+        html.theme-dark #typewriter-text {
+            background-image: linear-gradient(
+                90deg,
+                #f0ebe4 0%,
+                #f0ebe4 28%,
+                #4C8FE8 36%,
+                #5ED6FF 48%,
+                #49C7C1 60%,
+                #f0ebe4 70%,
+                #f0ebe4 100%
+            );
+        }
+
+        html.theme-dark .btn-primary {
+            background: #ffffff;
+            color: #111111;
+        }
+
+        html.theme-dark .btn-primary .btn-label {
+            color: #111111;
+        }
+
+        html.theme-dark .btn-primary:hover {
+            background: #e8e8e8;
+        }
+
+        html.theme-dark .intro-card,
+        html.theme-dark .stat-card,
+        html.theme-dark .faq-section,
+        html.theme-dark .latest-news-section,
+        html.theme-dark .team-section {
+            background: rgba(255, 255, 255, 0.14);
+            border-color: rgba(255, 255, 255, 0.26);
+        }
+
+        html.theme-dark .intro-card:hover,
+        html.theme-dark .stat-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        html.theme-dark .intro-card p,
+        html.theme-dark .intro-points span,
+        html.theme-dark .stat-label,
+        html.theme-dark .faq-content p,
+        html.theme-dark .news-item-time {
+            color: #ddd6cb;
+        }
+
+        html.theme-dark .section-title,
+        html.theme-dark .news-item-title,
+        html.theme-dark .faq-question,
+        html.theme-dark .team-name-list {
+            color: #f4f1ec;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html.theme-dark #typewriter-text {
+                background-image: none;
+                color: #f0ebe4;
+                -webkit-text-fill-color: #f0ebe4;
+            }
+        }
+
     </style>
     <link rel="stylesheet" href="/assets/css/paper-theme.css">
 </head>
 <body>
 
     <div id="vis-container"></div>
+
+    <button type="button" class="home-theme-toggle" id="home-theme-toggle" hidden aria-label="Switch to dark theme">
+        <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.75"></circle>
+            <path d="M12 3v1.5M12 19.5V21M4.93 4.93l1.06 1.06M18.01 18.01l1.06 1.06M3 12h1.5M19.5 12H21M4.93 19.07l1.06-1.06M18.01 5.99l1.06-1.06" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"></path>
+        </svg>
+        <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M16.5 13.2A6.8 6.8 0 0 1 10.8 7.5 6.4 6.4 0 0 1 11.2 5 8 8 0 1 0 19 12.8a6.4 6.4 0 0 1-2.5.4z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"></path>
+        </svg>
+    </button>
 
     <!-- Temporarily hidden: top-left Latest News pill (moved into the Latest News section below).
     <a href="/vss-satellite/" class="cortex-home-event-pill" target="_blank" rel="noopener noreferrer">🧠 Latest News: Come to our VSS 2026 Satellite event!</a>
@@ -1045,23 +1287,51 @@
                 <h1 class="hero-title">Virtual Visual Cortex</h1>
 
                 <div class="typewriter-container">
-                    <span id="typewriter-text"></span><span class="cursor"></span>
+                    <span id="typewriter-text" data-label=">100 executable brain models in your browser: in-silico neuroscience for everyone.">>100 executable brain models in your browser: in-silico neuroscience for everyone.</span><span class="cursor"></span>
                 </div>
 
                 <div class="btn-group">
-                <a href="/labLanding/" class="btn-primary">
+                <a href="/lab/" class="btn-primary">
                     <span class="btn-label" data-label="Predict Brain Responses">Predict Brain Responses</span>
                 </a>
 
-                <a href="/scoreboardLanding/" class="btn-primary">
+                <a href="/scoreboardQuantitative/" class="btn-primary">
                     <span class="btn-label" data-label="Check Model Performance">Check Model Performance</span>
                 </a>
                 </div>
             </div>
-            <div class="scroll-indicator" aria-hidden="true">↓</div>
         </div>
 
         <div class="spacer"></div>
+
+        <section class="intro-section" aria-label="The Lab and The Scoreboard">
+            <article class="intro-card">
+                <h2 class="section-title">The Lab</h2>
+                <p>An interactive environment for designing your own experiments. Upload visual stimuli, run models, and explore predicted brain responses across regions of interest.</p>
+                <ul class="intro-points">
+                    <li><strong>Upload Stimuli</strong> <span>Bring your own image sets to test a hypothesis.</span></li>
+                    <li><strong>Training Settings</strong> <span>Choose a training source and a model to predict.</span></li>
+                    <li><strong>Prediction Results</strong> <span>Inspect predictions and reflect on the hypothesis.</span></li>
+                </ul>
+                <div class="intro-actions">
+                    <a href="/lab/" class="btn-primary"><span class="btn-label">Functional Regions (fROIs)</span></a>
+                    <a href="/lab-whole-brain/" class="btn-primary" hidden><span class="btn-label">Whole Brain</span></a>
+                </div>
+            </article>
+            <article class="intro-card">
+                <h2 class="section-title">The Scoreboard</h2>
+                <p>Compare model performance across training sources, regions of interest, and datasets, and see how models generalize.</p>
+                <ul class="intro-points">
+                    <li><strong>Models</strong> <span>Which AI models best predict brain activity across datasets?</span></li>
+                    <li><strong>Regions</strong> <span>Which brain regions are hardest to explain?</span></li>
+                    <li><strong>Datasets</strong> <span>Which datasets are hardest to explain, and how does training data change that?</span></li>
+                </ul>
+                <div class="intro-actions">
+                    <a href="/scoreboardQuantitative/" class="btn-primary"><span class="btn-label">Quantitative</span></a>
+                    <a href="/scoreboardQualitative/" class="btn-primary"><span class="btn-label">Qualitative</span></a>
+                </div>
+            </article>
+        </section>
 
         <div class="stats-section" id="stats-section">
             <div class="stat-card">
@@ -1308,7 +1578,8 @@
             setTimeout(type, typeSpeed);
         }
 
-        document.addEventListener('DOMContentLoaded', type);
+        // Typewriter is paused; the subtitle is the static sentence above.
+        // document.addEventListener('DOMContentLoaded', type);
     </script>
 
     <script>
@@ -1317,17 +1588,6 @@
                 item.classList.toggle('open');
             });
         });
-    </script>
-
-    <script>
-        (function() {
-            const SCROLL_THRESHOLD = 60;
-            function updateScrollClass() {
-                document.body.classList.toggle('scrolled', window.scrollY > SCROLL_THRESHOLD);
-            }
-            window.addEventListener('scroll', updateScrollClass, { passive: true });
-            updateScrollClass();
-        })();
     </script>
 
     <script>
@@ -1379,21 +1639,38 @@
         // --- Configuration ---
         const MODEL_PATH = '/assets/brainModel/whole_brain_draco.glb'; 
         
-        const SAMPLING_RATE = 6;
+        const SAMPLING_RATE = 2;
         const EXPANSION_FACTOR = 3.0;
         const ROTATION_FACTOR = Math.PI * 1.0;
         const WAVE_SPEED = 1.0;
         const WAVE_AMPLITUDE = 0.08;
         const INITIAL_PROGRESS = 1 / 15;
+        const MODEL_SCALE = 0.16;
+        // Places the visible left and right tips equally far from the page edges.
+        const MODEL_OFFSET_X = 2;
+        // Resting angle and size sit a little past the fully-risen pose.
+        const POSE_AFTER = 0.1;
+        // Geometry Y center of the brain mesh, in model units.
+        const MESH_CENTER_Y = 28.73;
+        const MESH_HEIGHT = 115;
+        // Scroll this far before the brain, now centered, begins to turn.
+        const RISE_VIEWPORTS = 0.8;
+        const INTRO_GATHER_MS = 2200;
+        const INTRO_HOLD_MS = 180;
+        const INTRO_SETTLE_MS = 3000;
 
-        // Camera Offset
-        const INITIAL_CAM_POS = { x: 5, y: 0, z: 24 };
+        // Closer than the original z=24 framing, but far enough that the
+        // near side of the brain stays inside the frame.
+        const INITIAL_CAM_POS = { x: 5.2, y: 0, z: 25 };
 
         // --- Scene Setup ---
         const container = document.getElementById('vis-container');
         const scene = new THREE.Scene();
-        const PAGE_BG = document.documentElement.classList.contains('theme-white') ? 0xffffff : 0xf7f7f4;
-        scene.fog = new THREE.FogExp2(PAGE_BG, 0.02); 
+        function pageBgHex() {
+            return document.documentElement.classList.contains('theme-dark') ? 0x0a0a0a : 0xffffff;
+        }
+        const PAGE_BG = pageBgHex();
+        scene.fog = new THREE.FogExp2(PAGE_BG, 0.004); 
         const clock = new THREE.Clock();
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -1429,7 +1706,54 @@
             context.fill();
             return new THREE.CanvasTexture(canvas);
         }
+        function createGlowTexture() {
+            const size = 128;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const context = canvas.getContext('2d');
+            const center = size / 2;
+            const glow = context.createRadialGradient(center, center, 0, center, center, center);
+            glow.addColorStop(0, 'rgba(255,255,255,0.95)');
+            glow.addColorStop(0.16, 'rgba(255,255,255,0.55)');
+            glow.addColorStop(0.42, 'rgba(255,255,255,0.16)');
+            glow.addColorStop(1, 'rgba(255,255,255,0)');
+            context.fillStyle = glow;
+            context.fillRect(0, 0, size, size);
+            return new THREE.CanvasTexture(canvas);
+        }
         const circleSprite = createCircleTexture();
+        const glowSprite = createGlowTexture();
+        const MOON_PALETTE = [
+            new THREE.Color('#2E66B8'),
+            new THREE.Color('#4C8FE8'),
+            new THREE.Color('#5ED6FF'),
+            new THREE.Color('#49C7C1'),
+        ];
+
+        function sampleMoonColor(t, target) {
+            const scaled = Math.max(0, Math.min(0.999, t)) * (MOON_PALETTE.length - 1);
+            const index = Math.floor(scaled);
+            const mix = scaled - index;
+            target.copy(MOON_PALETTE[index]).lerp(MOON_PALETTE[index + 1] || MOON_PALETTE[index], mix);
+            return target;
+        }
+
+        function isDarkTheme() {
+            return document.documentElement.classList.contains('theme-dark');
+        }
+
+        function applyPointThemeColors() {
+            if (!brainParticles) return;
+            const dark = isDarkTheme();
+            brainParticles.children.forEach((pointsObj) => {
+                const geometry = pointsObj.geometry;
+                const next = dark ? geometry.userData.darkColors : geometry.userData.lightColors;
+                if (!next || !geometry.attributes.color) return;
+                geometry.attributes.color.array.set(next);
+                geometry.attributes.color.needsUpdate = true;
+            });
+        }
 
         // --- Model Loading ---
         const dracoLoader = new DRACOLoader();
@@ -1437,7 +1761,19 @@
         const loader = new GLTFLoader();
         loader.setDRACOLoader(dracoLoader);
         let brainParticles = null;
-        let globalScrollProgress = 0; 
+        let globalScrollProgress = 0;
+        let introStartedAt = null;
+        let introGather = 1;
+        let introGatherLinear = 1;
+        let introSettle = 1;
+        let introSettleLinear = 1;
+        let introSkipped = document.documentElement.classList.contains('hero-intro-skip');
+        let idleSpinStartedAt = null;
+        const facingMaterials = [];
+        const modelCenter = new THREE.Vector3();
+        // Half the brain's view-space depth at the resting scale, used to
+        // fade points that sit behind the shell center.
+        const HALF_DEPTH = 12.5; 
 
         loader.load(MODEL_PATH, (gltf) => {
             const originalScene = gltf.scene;
@@ -1447,6 +1783,8 @@
                 if (child.isMesh) {
                     const originalGeo = child.geometry;
                     if (originalGeo.attributes.position.count < 500) return;
+                    // The second shell sits on top of the first and reads as haze.
+                    if (child.name && child.name.includes('.001')) return;
 
                     originalGeo.computeBoundingBox();
                     const minZ = originalGeo.boundingBox.min.z;
@@ -1456,10 +1794,29 @@
                     const totalCount = originalPositions.length / 3;
                     
                     const positionsList = [];
-                    const colorsList = [];
-                    const phasesList = []; 
+                    const scatterList = [];
+                    const gatherInertiaList = [];
+                    const settleInertiaList = [];
+                    const lightColorsList = [];
+                    const darkColorsList = [];
+                    const phasesList = [];
+                    const glowPositions = [];
+                    const glowScatter = [];
+                    const glowGatherInertia = [];
+                    const glowSettleInertia = [];
+                    const glowLightColors = [];
+                    const glowDarkColors = [];
+                    const glowPhases = [];
+                    const glowStrengths = []; 
                     
                     const colorObj = new THREE.Color();
+                    const moonColor = new THREE.Color();
+                    const pickInertia = function () {
+                        const roll = Math.random();
+                        if (roll < 0.42) return Math.random() * 0.2;
+                        if (roll < 0.76) return 0.24 + Math.random() * 0.34;
+                        return 0.62 + Math.random() * 0.38;
+                    };
 
                     for (let i = 0; i < totalCount; i += SAMPLING_RATE) {
                         const x = originalPositions[i * 3];
@@ -1469,38 +1826,77 @@
                         positionsList.push(x, y, z);
                         const phase = Math.random() * Math.PI * 2;
                         phasesList.push(phase);
+                        const theta = Math.random() * Math.PI * 2;
+                        const phi = Math.acos(Math.random() * 2 - 1);
+                        const radius = 180 + Math.random() * 280;
+                        const plen = Math.hypot(x, y, z) || 1;
+                        scatterList.push(
+                            (x / plen * 0.55 + Math.sin(phi) * Math.cos(theta) * 0.45) * radius,
+                            (y / plen * 0.55 + Math.sin(phi) * Math.sin(theta) * 0.45) * radius,
+                            (z / plen * 0.55 + Math.cos(phi) * 0.45) * radius
+                        );
+                        gatherInertiaList.push(pickInertia());
+                        settleInertiaList.push(pickInertia());
 
                         const normalizedZ = (z - minZ) / rangeZ;
                         const t = normalizedZ + (phase / (Math.PI * 2)) * 0.15;
                         const tClamp = Math.max(0, Math.min(1, t));
-                        const hue = 0.93 - tClamp * 0.16 + (Math.sin(phase) * 0.012);
-                        const sat = 0.36 + (1 - normalizedZ) * 0.08 + Math.sin(phase * 2) * 0.025;
-                        const light = 0.58 + normalizedZ * 0.08 + Math.cos(phase) * 0.04;
+                        const hue = Math.max(0.74, Math.min(0.98, 0.94 - tClamp * 0.18 + (Math.sin(phase) * 0.012)));
+                        const sat = 0.56 + (1 - normalizedZ) * 0.14 + Math.sin(phase * 2) * 0.03;
+                        const pink = Math.max(0, (hue - 0.88) / 0.10);
+                        const light = 0.64 + normalizedZ * 0.08 + Math.cos(phase) * 0.03 + pink * 0.14;
                         colorObj.setHSL(
-                            Math.max(0.76, Math.min(0.98, hue)),
-                            Math.max(0.32, Math.min(0.50, sat)),
-                            Math.max(0.52, Math.min(0.68, light))
+                            hue,
+                            Math.max(0.50, Math.min(0.74, sat)),
+                            Math.max(0.60, Math.min(0.90, light))
                         );
-                        colorsList.push(colorObj.r, colorObj.g, colorObj.b);
+                        sampleMoonColor(tClamp, moonColor);
+                        lightColorsList.push(colorObj.r, colorObj.g, colorObj.b);
+                        darkColorsList.push(moonColor.r, moonColor.g, moonColor.b);
+                        if (Math.random() < 0.012) {
+                            glowPositions.push(x, y, z);
+                            glowScatter.push(
+                                scatterList[scatterList.length - 3],
+                                scatterList[scatterList.length - 2],
+                                scatterList[scatterList.length - 1]
+                            );
+                            glowGatherInertia.push(gatherInertiaList[gatherInertiaList.length - 1]);
+                            glowSettleInertia.push(settleInertiaList[settleInertiaList.length - 1]);
+                            glowLightColors.push(colorObj.r, colorObj.g, colorObj.b);
+                            glowDarkColors.push(moonColor.r, moonColor.g, moonColor.b);
+                            glowPhases.push(phase);
+                            glowStrengths.push(0.75 + Math.random() * 0.7);
+                        }
                     }
 
+                    const startColors = isDarkTheme() ? darkColorsList : lightColorsList;
                     const sparseGeometry = new THREE.BufferGeometry();
                     sparseGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positionsList, 3));
-                    sparseGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colorsList, 3));
+                    sparseGeometry.setAttribute('color', new THREE.Float32BufferAttribute(startColors, 3));
                     sparseGeometry.setAttribute('phase', new THREE.Float32BufferAttribute(phasesList, 1));
                     sparseGeometry.userData.originalPositions = new Float32Array(positionsList);
+                    sparseGeometry.userData.scatterOffsets = new Float32Array(scatterList);
+                    sparseGeometry.userData.gatherInertia = new Float32Array(gatherInertiaList);
+                    sparseGeometry.userData.settleInertia = new Float32Array(settleInertiaList);
+                    sparseGeometry.userData.lightColors = new Float32Array(lightColorsList);
+                    sparseGeometry.userData.darkColors = new Float32Array(darkColorsList);
 
                     const material = new THREE.PointsMaterial({
-                        size: 0.048,
+                        size: 0.042,
                         map: circleSprite,
                         vertexColors: true,
                         transparent: true,
-                        opacity: 0.92,
-                        depthWrite: true,
-                        alphaTest: 0.1,
+                        opacity: 1,
+                        depthWrite: false,
+                        depthTest: true,
+                        alphaTest: 0.45,
                     });
 
                     material.onBeforeCompile = (shader) => {
+                        shader.uniforms.uCenterDepth = { value: 25 };
+                        shader.uniforms.uHalfDepth = { value: HALF_DEPTH };
+                        material.userData.shader = shader;
+                        facingMaterials.push(material);
                         shader.vertexShader = shader.vertexShader.replace(
                             '#include <common>',
                             '#include <common>\nvarying float vViewDepth;\n'
@@ -1510,26 +1906,20 @@
                             `
                             vViewDepth = -mvPosition.z;
                             #include <fog_vertex>
-                            float dist = -mvPosition.z;
-                            float boost = 1.0;
-                            if (dist < 22.0) {
-                                boost = 1.0 + pow((22.0 - dist) * 0.08, 1.4);
-                            }
-                            boost = min(boost, 1.48);
-                            gl_PointSize *= boost;
                             `
                         );
                         shader.fragmentShader = shader.fragmentShader.replace(
                             '#include <common>',
-                            '#include <common>\nvarying float vViewDepth;\n'
+                            '#include <common>\nvarying float vViewDepth;\nuniform float uCenterDepth;\nuniform float uHalfDepth;\n'
                         );
                         shader.fragmentShader = shader.fragmentShader.replace(
                             '#include <map_fragment>',
                             `
                             #include <map_fragment>
-                            float depthFade = smoothstep(26.0, 17.0, vViewDepth);
-                            diffuseColor.a *= 0.62 + 0.38 * depthFade;
-                            diffuseColor.rgb *= 0.88 + 0.12 * depthFade;
+                            float along = (vViewDepth - uCenterDepth) / max(uHalfDepth, 0.001);
+                            float back = smoothstep(-0.05, 0.85, along);
+                            diffuseColor.a *= mix(1.0, 0.34, back);
+                            diffuseColor.rgb *= mix(1.0, 0.92, back);
                             `
                         );
                     };
@@ -1539,15 +1929,80 @@
                     points.rotation.copy(child.rotation);
                     points.scale.copy(child.scale);
                     particlesGeometry.add(points);
+
+                    if (glowPositions.length) {
+                        const glowGeometry = new THREE.BufferGeometry();
+                        glowGeometry.setAttribute('position', new THREE.Float32BufferAttribute(glowPositions, 3));
+                        glowGeometry.setAttribute('color', new THREE.Float32BufferAttribute(isDarkTheme() ? glowDarkColors : glowLightColors, 3));
+                        glowGeometry.setAttribute('phase', new THREE.Float32BufferAttribute(glowPhases, 1));
+                        glowGeometry.setAttribute('glowStrength', new THREE.Float32BufferAttribute(glowStrengths, 1));
+                        glowGeometry.userData.originalPositions = new Float32Array(glowPositions);
+                        glowGeometry.userData.scatterOffsets = new Float32Array(glowScatter);
+                        glowGeometry.userData.gatherInertia = new Float32Array(glowGatherInertia);
+                        glowGeometry.userData.settleInertia = new Float32Array(glowSettleInertia);
+                        glowGeometry.userData.lightColors = new Float32Array(glowLightColors);
+                        glowGeometry.userData.darkColors = new Float32Array(glowDarkColors);
+
+                        const glowMaterial = new THREE.PointsMaterial({
+                            size: 0.16,
+                            map: glowSprite,
+                            vertexColors: true,
+                            transparent: true,
+                            opacity: 0.42,
+                            depthWrite: false,
+                            depthTest: false,
+                            blending: THREE.NormalBlending,
+                        });
+                        glowMaterial.onBeforeCompile = (shader) => {
+                            shader.uniforms.uCenterDepth = { value: 25 };
+                            shader.uniforms.uHalfDepth = { value: HALF_DEPTH };
+                            shader.uniforms.uTime = { value: 0 };
+                            glowMaterial.userData.shader = shader;
+                            facingMaterials.push(glowMaterial);
+                            shader.vertexShader = shader.vertexShader.replace(
+                                '#include <common>',
+                                '#include <common>\nattribute float phase;\nattribute float glowStrength;\nvarying float vPhase;\nvarying float vViewDepth;\n'
+                            );
+                            shader.vertexShader = shader.vertexShader.replace(
+                                '#include <fog_vertex>',
+                                `
+                                vPhase = phase;
+                                vViewDepth = -mvPosition.z;
+                                gl_PointSize *= glowStrength;
+                                #include <fog_vertex>
+                                `
+                            );
+                            shader.fragmentShader = shader.fragmentShader.replace(
+                                '#include <common>',
+                                '#include <common>\nvarying float vPhase;\nvarying float vViewDepth;\nuniform float uCenterDepth;\nuniform float uHalfDepth;\nuniform float uTime;\n'
+                            );
+                            shader.fragmentShader = shader.fragmentShader.replace(
+                                '#include <map_fragment>',
+                                `
+                                #include <map_fragment>
+                                float along = (vViewDepth - uCenterDepth) / max(uHalfDepth, 0.001);
+                                float back = smoothstep(-0.05, 0.85, along);
+                                float pulse = 0.62 + 0.38 * sin(uTime * 1.3 + vPhase);
+                                diffuseColor.a *= mix(1.0, 0.3, back) * pulse;
+                                `
+                            );
+                        };
+
+                        const glowPoints = new THREE.Points(glowGeometry, glowMaterial);
+                        glowPoints.position.copy(child.position);
+                        glowPoints.rotation.copy(child.rotation);
+                        glowPoints.scale.copy(child.scale);
+                        particlesGeometry.add(glowPoints);
+                    }
                 }
             });
 
-            particlesGeometry.scale.set(0.16, 0.16, 0.16);
+            particlesGeometry.scale.set(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE);
             particlesGeometry.position.set(0, -3.5, 0);
             
             brainParticles = particlesGeometry;
             scene.add(brainParticles);
-            
+            startHeroIntro();
             animate();
         }, undefined, (error) => { console.error(error); });
 
@@ -1563,6 +2018,46 @@
             return start * (1 - t) + end * t;
         }
 
+        function easeOut(t, power) {
+            return 1 - Math.pow(1 - Math.max(0, Math.min(1, t)), power);
+        }
+
+        function easeInOutPow(t, power) {
+            const x = Math.max(0, Math.min(1, t));
+            if (x < 0.5) return Math.pow(2 * x, power) / 2;
+            return 1 - Math.pow(2 * (1 - x), power) / 2;
+        }
+
+        function finishHeroIntro() {
+            introGather = 1;
+            introGatherLinear = 1;
+            introSettle = 1;
+            introSettleLinear = 1;
+            introStartedAt = null;
+            introSkipped = true;
+            if (idleSpinStartedAt === null) idleSpinStartedAt = clock.getElapsedTime();
+            document.documentElement.classList.remove('hero-intro-pending');
+            document.documentElement.classList.add('hero-intro-done');
+        }
+
+        function startHeroIntro() {
+            if (introSkipped || window.matchMedia('(prefers-reduced-motion: reduce)').matches || window.scrollY > 8) {
+                finishHeroIntro();
+                document.documentElement.classList.add('hero-intro-skip');
+                return;
+            }
+            introGather = 0;
+            introGatherLinear = 0;
+            introSettle = 0;
+            introSettleLinear = 0;
+            introStartedAt = performance.now();
+            document.documentElement.classList.add('hero-intro-pending');
+        }
+
+        window.addEventListener('scroll', function () {
+            if (introStartedAt !== null && window.scrollY > 24) finishHeroIntro();
+        }, { passive: true });
+
         // --- Animate ---
         function animate() {
             requestAnimationFrame(animate);
@@ -1570,43 +2065,107 @@
             const time = clock.getElapsedTime();
             controls.update();
 
-            const effectiveProgress = INITIAL_PROGRESS + (1 - INITIAL_PROGRESS) * globalScrollProgress;
+            const risePx = window.innerHeight * RISE_VIEWPORTS;
+            const riseT = Math.min(1, Math.max(0, window.scrollY / risePx));
+            const rise = riseT * riseT * (3 - 2 * riseT);
+            const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+            const afterRise = Math.min(1, Math.max(0, (window.scrollY - risePx) / Math.max(1, maxScroll - risePx)));
+            const motion = POSE_AFTER + (1 - POSE_AFTER) * afterRise;
+            const effectiveProgress = INITIAL_PROGRESS + (1 - INITIAL_PROGRESS) * motion;
 
             const currentOffset = 0;
             camera.setViewOffset(window.innerWidth, window.innerHeight, currentOffset, 0, window.innerWidth, window.innerHeight);
 
+            if (introStartedAt !== null) {
+                const elapsed = performance.now() - introStartedAt;
+                introGatherLinear = Math.max(0, Math.min(1, elapsed / INTRO_GATHER_MS));
+                introGather = easeInOutPow(introGatherLinear, 4);
+                const settleT = (elapsed - INTRO_GATHER_MS - INTRO_HOLD_MS) / INTRO_SETTLE_MS;
+                introSettleLinear = Math.max(0, Math.min(1, settleT));
+                const nextSettle = easeInOutPow(settleT, 3);
+                if (nextSettle > 0 && introSettle === 0) {
+                    document.documentElement.classList.remove('hero-intro-pending');
+                    document.documentElement.classList.add('hero-intro-settle');
+                }
+                introSettle = nextSettle;
+                if (settleT >= 1) {
+                    introStartedAt = null;
+                    introGather = 1;
+                    introGatherLinear = 1;
+                    introSettle = 1;
+                    introSettleLinear = 1;
+                    if (idleSpinStartedAt === null) idleSpinStartedAt = time;
+                    document.documentElement.classList.add('hero-intro-done');
+                }
+            }
+
             if (brainParticles) {
                 const zRollFadeEnd = 0.12;
                 const zRotateThreshold = 0.85;
-                const ySpinSpeed = 0.22;
-                const ySpinAmplitude = 0.45;
                 const baseY = (effectiveProgress * ROTATION_FACTOR) + (Math.PI / 2);
-                const fade = 1 - Math.min(1, globalScrollProgress / zRollFadeEnd);
-                const initialYSpin = Math.sin(time * ySpinSpeed) * ySpinAmplitude * fade;
-                brainParticles.rotation.y = baseY + initialYSpin;
+                const introStill = introSettle < 1;
+                if (!introStill && idleSpinStartedAt === null) idleSpinStartedAt = time;
+                const idleSpin = (!introStill && idleSpinStartedAt !== null)
+                    ? Math.sin((time - idleSpinStartedAt) * 0.22) * 0.45 * (1 - rise)
+                    : 0;
+                brainParticles.rotation.y = baseY + idleSpin;
 
-                if (globalScrollProgress < zRollFadeEnd) {
+                if (afterRise < zRollFadeEnd) {
                     brainParticles.rotation.z = 0;
-                } else if (globalScrollProgress > zRotateThreshold) {
+                } else if (afterRise > zRotateThreshold) {
                     brainParticles.rotation.z += 0.0005;
                 } else {
                     brainParticles.rotation.z = 0;
                 }
 
+                const halfH = camera.position.length() * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+                const restY = lerp(-halfH * 0.68, 0, rise);
+                const introY = lerp(0, -halfH * 0.68, introSettle);
+                const centerY = lerp(introY, restY, rise);
+                const expansion = 1 + (effectiveProgress * EXPANSION_FACTOR);
+                const sizeMul = 1;
+                brainParticles.scale.setScalar(MODEL_SCALE);
+                brainParticles.position.set(MODEL_OFFSET_X, centerY - MESH_CENTER_Y * MODEL_SCALE, 0);
+
+                camera.updateMatrixWorld();
+                brainParticles.getWorldPosition(modelCenter);
+                modelCenter.applyMatrix4(camera.matrixWorldInverse);
+                const centerDepth = -modelCenter.z;
+                facingMaterials.forEach((mat) => {
+                    const shader = mat.userData.shader;
+                    if (!shader) return;
+                    shader.uniforms.uCenterDepth.value = centerDepth;
+                    shader.uniforms.uHalfDepth.value = HALF_DEPTH * expansion * sizeMul;
+                    if (shader.uniforms.uTime) shader.uniforms.uTime.value = time;
+                });
+
+                const travelY = halfH * 0.68;
                 brainParticles.children.forEach(pointsObj => {
                     const geometry = pointsObj.geometry;
                     const positions = geometry.attributes.position.array;
                     const originals = geometry.userData.originalPositions;
+                    const scatter = geometry.userData.scatterOffsets;
+                    const gatherInertia = geometry.userData.gatherInertia;
+                    const settleInertia = geometry.userData.settleInertia;
                     const phases = geometry.attributes.phase.array;
-                    const expansion = 1 + (effectiveProgress * EXPANSION_FACTOR);
 
                     for (let i = 0; i < positions.length; i += 3) {
                         const ox = originals[i], oy = originals[i+1], oz = originals[i+2];
+                        const gDrag = gatherInertia ? gatherInertia[i / 3] : 0;
+                        const sDrag = settleInertia ? settleInertia[i / 3] : 0;
+                        const gatherDelay = gDrag * 0.62;
+                        const settleDelay = sDrag * 0.72;
+                        const pointGather = easeInOutPow((introGatherLinear - gatherDelay) / Math.max(0.001, 1 - gatherDelay), 2.4 + gDrag * 2.2);
+                        const pointSettle = easeInOutPow((introSettleLinear - settleDelay) / Math.max(0.001, 1 - settleDelay), 2.2 + sDrag * 1.8);
                         const wave = Math.sin(time * WAVE_SPEED + oy * 0.5 + phases[i/3]) * WAVE_AMPLITUDE;
-                        
-                        positions[i]     = (ox + wave) * expansion;
-                        positions[i + 1] = (oy + wave) * expansion;
-                        positions[i + 2] = (oz + wave) * expansion;
+                        const scatterAmt = 1 - pointGather;
+                        const sx = scatter ? scatter[i] * scatterAmt : 0;
+                        const sy = scatter ? scatter[i + 1] * scatterAmt : 0;
+                        const sz = scatter ? scatter[i + 2] * scatterAmt : 0;
+                        const lagY = travelY * Math.max(0, introSettle - pointSettle) / MODEL_SCALE;
+                        positions[i]     = (ox + wave + sx) * expansion;
+                        positions[i + 1] = (oy + wave + sy) * expansion + lagY;
+                        positions[i + 2] = (oz + wave + sz) * expansion;
                     }
                     geometry.attributes.position.needsUpdate = true;
                 });
@@ -1615,12 +2174,36 @@
             renderer.render(scene, camera);
         }
 
+        function syncSceneTheme() {
+            if (scene.fog) scene.fog.color.setHex(pageBgHex());
+            applyPointThemeColors();
+        }
+        window.addEventListener('cortex-theme-change', syncSceneTheme);
+
         window.addEventListener('resize', () => {
             renderer.setSize(window.innerWidth, window.innerHeight);
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
         });
 
+    </script>
+
+    <script>
+        (function () {
+            var btn = document.getElementById('home-theme-toggle');
+            if (!btn || !window.CortexTheme) return;
+            function sync() {
+                var dark = window.CortexTheme.get() === 'dark';
+                btn.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+                btn.setAttribute('aria-pressed', String(dark));
+            }
+            btn.addEventListener('click', function () {
+                window.CortexTheme.toggle();
+                sync();
+            });
+            window.addEventListener('cortex-theme-change', sync);
+            sync();
+        })();
     </script>
 
     <script src="/assets/js/citeUs.js"></script>
