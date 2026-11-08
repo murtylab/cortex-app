@@ -1640,6 +1640,9 @@
         const MODEL_PATH = '/assets/brainModel/whole_brain_draco.glb'; 
         
         const SAMPLING_RATE = 2;
+        const ASCII_CHARS = ['.', ':', '+', '*', '#', '%', '@', '8', '$'];
+        const ASCII_COUNT = ASCII_CHARS.length;
+        const ASCII_CELL_CSS = 14;
         const EXPANSION_FACTOR = 3.0;
         const ROTATION_FACTOR = Math.PI * 1.0;
         const WAVE_SPEED = 1.0;
@@ -1692,7 +1695,6 @@
         controls.autoRotate = false;
         controls.target.set(0, 0, 0);
 
-        // --- Texture ---
         function createCircleTexture() {
             const size = 64;
             const canvas = document.createElement('canvas');
@@ -1701,8 +1703,8 @@
             const context = canvas.getContext('2d');
             const center = size / 2;
             context.beginPath();
-            context.arc(center, center, size/2, 0, 2 * Math.PI);
-            context.fillStyle = '#ffffff'; 
+            context.arc(center, center, size / 2, 0, 2 * Math.PI);
+            context.fillStyle = '#ffffff';
             context.fill();
             return new THREE.CanvasTexture(canvas);
         }
@@ -1722,8 +1724,235 @@
             context.fillRect(0, 0, size, size);
             return new THREE.CanvasTexture(canvas);
         }
+        function createAsciiAtlas() {
+            const cell = 128;
+            const canvas = document.createElement('canvas');
+            canvas.width = cell * ASCII_COUNT;
+            canvas.height = cell;
+            const context = canvas.getContext('2d');
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.fillStyle = '#ffffff';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.font = `700 ${Math.floor(cell * 0.78)}px "Courier New", Courier, ui-monospace, monospace`;
+            for (let i = 0; i < ASCII_COUNT; i++) {
+                context.fillText(ASCII_CHARS[i], i * cell + cell / 2, cell / 2 + 2);
+            }
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.generateMipmaps = false;
+            texture.minFilter = THREE.NearestFilter;
+            texture.magFilter = THREE.NearestFilter;
+            texture.needsUpdate = true;
+            return texture;
+        }
         const circleSprite = createCircleTexture();
         const glowSprite = createGlowTexture();
+        const asciiAtlas = createAsciiAtlas();
+        const reduceAsciiMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const ASCII_FLICKER = reduceAsciiMotion ? 2.5 : 12;
+        const TRAIL_MAX = 80;
+        const TRAIL_LIFE = 2.2;
+        const trailPoints = [];
+        const trailUniforms = Array.from({ length: TRAIL_MAX }, () => new THREE.Vector3());
+        let lastPointer = null;
+
+        function makeBrainRT() {
+            const w = Math.max(1, renderer.domElement.width);
+            const h = Math.max(1, renderer.domElement.height);
+            const rt = new THREE.WebGLRenderTarget(w, h, {
+                minFilter: THREE.LinearFilter,
+                magFilter: THREE.LinearFilter,
+                format: THREE.RGBAFormat,
+            });
+            rt.texture.generateMipmaps = false;
+            rt.texture.colorSpace = THREE.LinearSRGBColorSpace;
+            return rt;
+        }
+        let brainRT = makeBrainRT();
+        const asciiScene = new THREE.Scene();
+        const asciiCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+        const asciiMaterial = new THREE.ShaderMaterial({
+            transparent: true,
+            depthTest: false,
+            depthWrite: false,
+            toneMapped: false,
+            uniforms: {
+                tDiffuse: { value: brainRT.texture },
+                tAtlas: { value: asciiAtlas },
+                uResolution: { value: new THREE.Vector2(renderer.domElement.width, renderer.domElement.height) },
+                uCell: { value: ASCII_CELL_CSS * renderer.getPixelRatio() },
+                uCharCount: { value: ASCII_COUNT },
+                uTime: { value: 0 },
+                uFlicker: { value: ASCII_FLICKER },
+                uTrail: { value: trailUniforms },
+                uTrailCount: { value: 0 },
+                uTrailRadius: { value: ASCII_CELL_CSS * renderer.getPixelRatio() * 5.2 },
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = vec4(position.xy, 0.0, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D tDiffuse;
+                uniform sampler2D tAtlas;
+                uniform vec2 uResolution;
+                uniform float uCell;
+                uniform float uCharCount;
+                uniform float uTime;
+                uniform float uFlicker;
+                uniform vec3 uTrail[80];
+                uniform int uTrailCount;
+                uniform float uTrailRadius;
+                varying vec2 vUv;
+
+                float hash(vec2 p) {
+                    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+                }
+
+                float trailWidth(float age) {
+                    return mix(0.02, 1.0, pow(clamp(age, 0.0, 1.0), 1.7));
+                }
+
+                float sdCapsule(vec2 p, vec2 a, vec2 b, float ra, float rb) {
+                    vec2 pa = p - a;
+                    vec2 ba = b - a;
+                    float h = clamp(dot(pa, ba) / max(dot(ba, ba), 0.0001), 0.0, 1.0);
+                    return length(pa - ba * h) - mix(ra, rb, h);
+                }
+
+                float stamp(float sd) {
+                    return 1.0 - smoothstep(0.0, uCell * 0.75, sd);
+                }
+
+                float trailMask(vec2 cellCenter) {
+                    float m = 0.0;
+                    if (uTrailCount <= 0) return 0.0;
+                    m = max(m, stamp(distance(cellCenter, uTrail[0].xy) - uTrailRadius));
+                    for (int i = 0; i < 79; i++) {
+                        if (i + 1 >= uTrailCount) break;
+                        vec2 a = uTrail[i].xy;
+                        vec2 b = uTrail[i + 1].xy;
+                        if (distance(a, b) < uCell * 0.65) continue;
+                        float ra = i == 0 ? uTrailRadius : uTrailRadius * trailWidth(uTrail[i].z);
+                        float rb = uTrailRadius * trailWidth(uTrail[i + 1].z);
+                        m = max(m, stamp(sdCapsule(cellCenter, a, b, ra, rb)));
+                    }
+                    return m;
+                }
+
+                void main() {
+                    vec4 original = texture2D(tDiffuse, vUv);
+                    vec2 frag = vUv * uResolution;
+                    vec2 cell = floor(frag / uCell);
+                    vec2 cellMin = cell * uCell;
+                    vec2 cellCenter = cellMin + uCell * 0.5;
+                    float mask = uTrailCount > 0 ? trailMask(cellCenter) : 0.0;
+                    float speckle = hash(cell + vec2(5.2, 13.8));
+                    float lifeTick = floor(uTime * 1.8 + speckle * 10.0);
+                    float alive = hash(cell + vec2(lifeTick, 2.7));
+                    float keep = mask - speckle * 0.5 * (1.0 - smoothstep(0.42, 0.96, mask));
+                    keep *= step(0.34, alive);
+                    vec4 outC = original;
+                    if (keep >= 0.14) {
+                        vec3 col = vec3(0.0);
+                        float lum = 0.0;
+                        vec2 mid = cellCenter / uResolution;
+                        vec2 q = vec2(uCell * 0.28 / uResolution.x, uCell * 0.28 / uResolution.y);
+                        vec2 taps[5];
+                        taps[0] = mid;
+                        taps[1] = mid + vec2(-q.x, -q.y);
+                        taps[2] = mid + vec2(q.x, -q.y);
+                        taps[3] = mid + vec2(-q.x, q.y);
+                        taps[4] = mid + vec2(q.x, q.y);
+                        for (int i = 0; i < 5; i++) {
+                            vec4 s = texture2D(tDiffuse, taps[i]);
+                            float l = max(s.r, max(s.g, s.b)) * s.a;
+                            if (l > lum) {
+                                lum = l;
+                                col = s.rgb;
+                            }
+                        }
+                        float breath = 0.86 + 0.14 * sin(uTime * 1.25);
+                        float tick = floor(uTime * uFlicker + hash(cell) * 19.0);
+                        float n = hash(cell + vec2(tick, tick * 0.37));
+                        float dens = clamp(lum * breath * 1.2 + (n - 0.5) * 0.2, 0.0, 0.999);
+                        if (dens < 0.045) {
+                            outC = vec4(0.0);
+                        } else {
+                            vec2 local = (frag - cellMin) / uCell;
+                            local = (local - 0.5) / 0.86 + 0.5;
+                            float charIndex = floor(dens * (uCharCount - 0.001));
+                            charIndex = clamp(charIndex + floor(n * 3.0) - 1.0, 0.0, uCharCount - 1.0);
+                            vec2 atlasUV = vec2((charIndex + local.x) / uCharCount, local.y);
+                            vec4 glyph = texture2D(tAtlas, atlasUV);
+                            bool inGlyph = local.x >= 0.0 && local.x <= 1.0
+                                && local.y >= 0.0 && local.y <= 1.0
+                                && glyph.a >= 0.15;
+                            vec3 cellBg = mix(vec3(1.0), col, 0.06);
+                            outC = vec4(cellBg, 1.0);
+                            if (inGlyph) {
+                                outC.rgb = mix(cellBg, col, glyph.a);
+                            }
+                        }
+                    }
+                    gl_FragColor = linearToOutputTexel(outC);
+                }
+            `,
+        });
+        asciiScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), asciiMaterial));
+
+        function syncAsciiPass() {
+            const w = Math.max(1, renderer.domElement.width);
+            const h = Math.max(1, renderer.domElement.height);
+            const pr = renderer.getPixelRatio();
+            if (brainRT) brainRT.dispose();
+            brainRT = makeBrainRT();
+            asciiMaterial.uniforms.tDiffuse.value = brainRT.texture;
+            asciiMaterial.uniforms.uResolution.value.set(w, h);
+            asciiMaterial.uniforms.uCell.value = ASCII_CELL_CSS * pr;
+            asciiMaterial.uniforms.uTrailRadius.value = ASCII_CELL_CSS * pr * 5.2;
+        }
+
+        function pointerToFrag(event) {
+            const pr = renderer.getPixelRatio();
+            return {
+                x: event.clientX * pr,
+                y: (window.innerHeight - event.clientY) * pr,
+            };
+        }
+
+        function pushTrailPoint(x, y, time) {
+            trailPoints.push({ x, y, t: time });
+            if (trailPoints.length > TRAIL_MAX) trailPoints.splice(0, trailPoints.length - TRAIL_MAX);
+        }
+
+        window.addEventListener('pointermove', (event) => {
+            if (introSettle < 1) {
+                lastPointer = null;
+                return;
+            }
+            const next = pointerToFrag(event);
+            const time = clock.getElapsedTime();
+            const pr = renderer.getPixelRatio();
+            const step = Math.max(8, ASCII_CELL_CSS * pr * 0.4);
+            if (lastPointer) {
+                const dx = next.x - lastPointer.x;
+                const dy = next.y - lastPointer.y;
+                const dist = Math.hypot(dx, dy);
+                const n = Math.min(16, Math.floor(dist / step));
+                for (let i = 1; i <= n; i++) {
+                    const t = i / (n + 1);
+                    pushTrailPoint(lastPointer.x + dx * t, lastPointer.y + dy * t, time);
+                }
+            }
+            pushTrailPoint(next.x, next.y, time);
+            lastPointer = next;
+        }, { passive: true });
+        window.addEventListener('pointerleave', () => { lastPointer = null; });
+        window.addEventListener('blur', () => { lastPointer = null; });
         const MOON_PALETTE = [
             new THREE.Color('#2E66B8'),
             new THREE.Color('#4C8FE8'),
@@ -2171,7 +2400,37 @@
                 });
             }
 
-            renderer.render(scene, camera);
+            while (trailPoints.length && time - trailPoints[0].t > TRAIL_LIFE) trailPoints.shift();
+            let trailCount = 0;
+            if (introSettle >= 1 && lastPointer) {
+                trailUniforms[0].set(lastPointer.x, lastPointer.y, 1);
+                trailCount = 1;
+            }
+            if (introSettle >= 1) {
+                const minSep = ASCII_CELL_CSS * renderer.getPixelRatio() * 0.65;
+                for (let i = trailPoints.length - 1; i >= 0 && trailCount < TRAIL_MAX; i--) {
+                    const point = trailPoints[i];
+                    const age = 1 - (time - point.t) / TRAIL_LIFE;
+                    if (age <= 0) continue;
+                    const prev = trailUniforms[trailCount - 1];
+                    if (prev && Math.hypot(point.x - prev.x, point.y - prev.y) < minSep) continue;
+                    trailUniforms[trailCount].set(point.x, point.y, age);
+                    trailCount += 1;
+                }
+            }
+            asciiMaterial.uniforms.uTrailCount.value = trailCount;
+            asciiMaterial.uniforms.uTime.value = time;
+            renderer.setClearColor(0x000000, 0);
+            if (trailCount === 0) {
+                renderer.setRenderTarget(null);
+                renderer.render(scene, camera);
+            } else {
+                renderer.setRenderTarget(brainRT);
+                renderer.render(scene, camera);
+                renderer.setRenderTarget(null);
+                asciiMaterial.uniforms.tDiffuse.value = brainRT.texture;
+                renderer.render(asciiScene, asciiCamera);
+            }
         }
 
         function syncSceneTheme() {
@@ -2184,6 +2443,7 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
+            syncAsciiPass();
         });
 
     </script>
