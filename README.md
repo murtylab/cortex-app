@@ -45,6 +45,28 @@ npm run build
 npm run preview
 ```
 
+### Updating an existing IUI checkout
+
+From the Cortex App checkout, update both the host and its pinned Cortex-Compass
+revision:
+
+```bash
+git switch IUI
+git pull --ff-only --recurse-submodules origin IUI
+git submodule update --init --recursive
+```
+
+Restart `npm run dev:compass` and `npm run dev` in their separate terminals.
+The Compass launcher installs its dependencies when its lockfile changes; run
+`npm ci` in the host if its dependencies changed. For a built deployment, run
+`npm run build` and restart the existing serving process instead.
+
+A plain pull without recursive submodule updating can leave the visualization on
+an older checkout. Use the pinned revision above rather than `--remote` when
+running a released version. The latest comparison and selectivity UI changes use
+the existing Core IUI backend and reference bundle; an already working backend
+configuration can stay in place.
+
 Analytics setup:
 
 - GA4 is integrated in the root Vite app, not in `cortex-web-app`
