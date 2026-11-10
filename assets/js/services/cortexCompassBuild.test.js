@@ -54,7 +54,7 @@ function fixture({ dependencies = true } = {}) {
   return { root, paths, runner, install, write };
 }
 
-describe('pinned Cortex-Compass build integration', () => {
+describe('bundled Cortex-Compass build integration', () => {
   it('runs the combined build from npm while keeping standalone site/Compass and dev commands', () => {
     const metadata = JSON.parse(fs.readFileSync(new URL('../../../package.json', import.meta.url), 'utf8'));
     expect(metadata.scripts.build).toBe('node scripts/build-cortex-compass.mjs --all');
@@ -64,11 +64,11 @@ describe('pinned Cortex-Compass build integration', () => {
     expect(metadata.scripts).not.toHaveProperty('postinstall');
   });
 
-  it('gives an actionable missing-submodule error before installing or building anything', () => {
+  it('gives an actionable missing-workspace error before installing or building anything', () => {
     const item = fixture();
     fs.rmSync(item.paths.checkout, { recursive: true, force: true });
     expect(() => runCompassBuild({ projectRoot: item.root, mode: 'all', runner: item.runner }))
-      .toThrow(/git submodule update --init --recursive/);
+      .toThrow(/Restore apps\/cortex-compass from the cortex-app IUI checkout/);
     expect(item.runner).not.toHaveBeenCalled();
   });
 
@@ -168,7 +168,7 @@ describe('pinned Cortex-Compass build integration', () => {
     expect(item.runner).not.toHaveBeenCalled();
   });
 
-  it('starts the same pinned child in development without running builds', () => {
+  it('starts the bundled workspace in development without running builds', () => {
     const item = fixture();
     runCompassBuild({ projectRoot: item.root, mode: 'dev', runner: item.runner });
     expect(item.runner).toHaveBeenCalledExactlyOnceWith(expect.stringMatching(/^npm(?:\.cmd)?$/),

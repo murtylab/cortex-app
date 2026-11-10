@@ -1,0 +1,403 @@
+import { Fragment, useEffect, useMemo, useState } from 'react';
+import { ImageGrid } from './ImageGrid';
+import type {
+  AggregateHeatmapCell,
+  ClusterComparisonSummary,
+  ClusteringData,
+  ClusteringMethod,
+  EvidenceImage,
+  ModelRoiColumn,
+  SelectedHeatmapCell,
+  WideCsvRow,
+} from '../types/data';
+import { downloadJson } from '../utils/browserActions';
+import { calculateClusterComparison, buildCompareSummary } from '../utils/compare';
+import { CLUSTERING_METHODS, loadVoxelClusterView } from '../utils/clustering';
+import { findSharedCompareNeighbors } from '../utils/discovery';
+import { buildEvidenceView } from '../utils/evidence';
+import { inferModelCategory } from '../utils/modelTags';
+import { CompareResponseTools } from './CompareResponseTools';
+
+type CompareDrawerProps = {
+  compareMode: boolean;
+  compareCells: SelectedHeatmapCell[];
+  isOpen: boolean;
+  clustering: ClusteringData;
+  heatmapCells: AggregateHeatmapCell[];
+  rows: WideCsvRow[];
+  modelRoiColumns: ModelRoiColumn[];
+  topK: number;
+  onDismiss: () => void;
+};
+
+type ClusterComparisonStatus = 'idle' | 'loading' | 'ready' | 'error';
+type ClusterComparisonsByMethod = Partial<Record<ClusteringMethod, ClusterComparisonSummary | null>>;
+
+function fmt(score: number | null) { return score === null ? '—' : score.toFixed(3); }
+function fmtDiff(v: number | null) {
+  if (v === null) return '—';
+  return `${v >= 0 ? '+' : ''}${v.toFixed(3)}`;
+}
+function fmtPercent(v: number | null) { return v === null ? '—' : `${v.toFixed(1)}%`; }
+function fmtRatio(v: number | null) { return v === null ? '—' : `${(v * 100).toFixed(1)}%`; }
+
+function sortClusterLabels(labels: string[]): string[] {
+  return [...labels].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+}
+
+function ImageModal({ image, onClose }: { image: EvidenceImage; onClose: () => void }) {
+  const [missing, setMissing] = useState(false);
+  return (
+    <div className="image-modal-backdrop" role="presentation" onClick={onClose}>
+      <div className="image-modal" role="dialog" aria-modal="true" aria-label={image.imageName}
+           onClick={(e) => e.stopPropagation()}>
+        <div className="image-modal-header">
+          <div>
+            <h3>{image.imageName}</h3>
+            <p>{image.valueLabel ?? `Value: ${image.value.toFixed(3)}`}</p>
+          </div>
+          <button type="button" onClick={onClose}>Close</button>
+        </div>
+        {missing
+          ? <span className="modal-missing-image">Image unavailable</span>
+          : <img src={image.imageUrl} alt={image.imageName} onError={() => setMissing(true)} />}
+      </div>
+    </div>
+  );
+}
+
+function CellCard({
+  label, cell, evidenceView, onOpenImage,
+}: {
+  label: 'A' | 'B';
+  cell: SelectedHeatmapCell;
+  evidenceView: ReturnType<typeof buildEvidenceView>;
+  onOpenImage: (i: EvidenceImage) => void;
+}) {
+  return (
+    <article className="compare-cell-card" aria-label={`Selection ${label}: ${cell.model}, ${cell.roi.toUpperCase()}`}>
+      <div className="compare-card-heading">
+        <span>{label}</span>
+        <div>
+          <h3>{cell.model}</h3>
+          <p>
+            <span style={{ textTransform: 'uppercase', fontWeight: 700 }}>{cell.roi}</span>
+            {' · '}
+            <span className="model-tag">{inferModelCategory(cell.model)}</span>
+          </p>
+        </div>
+      </div>
+      <dl className="compare-metrics">
+        <div><dt>Alignment</dt><dd>{fmt(cell.score)}</dd></div>
+        <div><dt>ROI rank</dt><dd>{cell.rankWithinRoi === null ? '—' : `#${cell.rankWithinRoi}`}</dd></div>
+      </dl>
+      {evidenceView ? (
+        <details className="compare-response-galleries">
+          <summary>Highest &amp; lowest responses</summary>
+          <ImageGrid title="Highest responses" images={evidenceView.topImages} onOpenImage={onOpenImage} compact />
+          <ImageGrid title="Lowest responses" images={evidenceView.bottomImages} onOpenImage={onOpenImage} compact />
+        </details>
+      ) : (
+        <p className="compare-empty">Predicted responses unavailable.</p>
+      )}
+    </article>
+  );
+}
+
+function ClusterOverlapMatrix({ comparison }: { comparison: ClusterComparisonSummary }) {
+  const aLabels = sortClusterLabels(Array.from(new Set(comparison.intersections.map((intersection) => intersection.aLabel))));
+  const bLabels = sortClusterLabels(Array.from(new Set(comparison.intersections.map((intersection) => intersection.bLabel))));
+  const countByPair = new Map(comparison.intersections.map((intersection) => [`${intersection.aLabel}\u0000${intersection.bLabel}`, intersection.count]));
+  const maxCount = Math.max(...comparison.intersections.map((intersection) => intersection.count), 1);
+
+  return (
+    <div className="compare-cluster-matrix-wrap">
+      <div
+        className="compare-cluster-matrix"
+        style={{ gridTemplateColumns: `minmax(44px,.8fr) repeat(${bLabels.length}, minmax(42px,1fr))` }}
+        role="img"
+        aria-label="Cluster overlap heatmap"
+      >
+        <span className="compare-cluster-matrix-corner">A / B</span>
+        {bLabels.map((label) => (
+          <span className="compare-cluster-matrix-label" key={`b-${label}`}>B{label}</span>
+        ))}
+        {aLabels.map((aLabel) => (
+          <Fragment key={`a-row-${aLabel}`}>
+            <span className="compare-cluster-matrix-label compare-cluster-matrix-label-row">A{aLabel}</span>
+            {bLabels.map((bLabel) => {
+              const count = countByPair.get(`${aLabel}\u0000${bLabel}`) ?? 0;
+              const intensity = count / maxCount;
+              return (
+                <span
+                  className="compare-cluster-matrix-cell"
+                  key={`${aLabel}-${bLabel}`}
+                  style={{ backgroundColor: `color-mix(in srgb, var(--accent) ${(0.08 + intensity * 0.48) * 100}%, transparent)` }}
+                  title={`A${aLabel} / B${bLabel}: ${count} images`}
+                >
+                  {count}
+                </span>
+              );
+            })}
+          </Fragment>
+        ))}
+      </div>
+      <p className="compare-cluster-matrix-caption">Darker cells contain more shared images.</p>
+    </div>
+  );
+}
+
+function ClusterComparisonSection({
+  status,
+  comparisons,
+}: {
+  status: ClusterComparisonStatus;
+  comparisons: ClusterComparisonsByMethod;
+}) {
+  const availableComparisons = CLUSTERING_METHODS
+    .map((method) => ({ method, comparison: comparisons[method.id] ?? null }))
+    .filter(({ comparison }) => comparison !== null);
+
+  if (status === 'loading') {
+    return (
+      <section className="compare-cluster-section">
+        <div>
+          <h3>Cluster agreement</h3>
+          <p>Loading cluster assignments…</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (status === 'error' || availableComparisons.length === 0) {
+    return (
+      <section className="compare-cluster-section">
+        <div>
+          <h3>Cluster agreement</h3>
+          <p>Clusters unavailable for this pair.</p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="compare-cluster-section">
+      <div>
+        <h3>Cluster agreement</h3>
+        <p>Predicted-response image clusters.</p>
+      </div>
+
+      <div className="compare-cluster-grid">
+        {availableComparisons.map(({ method, comparison }) => {
+          if (!comparison) return null;
+          return (
+            <article className="compare-cluster-card" key={method.id}>
+              <div className="compare-cluster-card-heading">
+                <h4>{method.label}</h4>
+                <span>{method.description}</span>
+              </div>
+              <dl className="compare-cluster-metrics">
+                <div><dt title="Adjusted Rand index: agreement between image cluster assignments, adjusted for chance">ARI</dt><dd>{fmt(comparison.adjustedRandIndex)}</dd></div>
+                <div><dt title="Normalized mutual information between image cluster assignments">NMI</dt><dd>{fmt(comparison.normalizedMutualInformation)}</dd></div>
+              </dl>
+              <details className="compare-cluster-details">
+                <summary>Overlap details</summary>
+                <p>Cluster numbers are local to A and B; compare image membership, not labels.</p>
+                <dl className="compare-cluster-metrics">
+                  <div><dt>Pair agreement</dt><dd>{fmtRatio(comparison.pairAgreement)}</dd></div>
+                  <div><dt>Co-cluster Jaccard</dt><dd>{fmtRatio(comparison.coClusterJaccard)}</dd></div>
+                  <div><dt>Images</dt><dd>{comparison.sharedImageCount}</dd></div>
+                  <div><dt>Clusters A/B</dt><dd>{comparison.clusterCountA} / {comparison.clusterCountB}</dd></div>
+                </dl>
+                <ClusterOverlapMatrix comparison={comparison} />
+                <div className="compare-cluster-intersections">
+                  {comparison.largestIntersections.map((intersection) => (
+                    <span key={`${intersection.aLabel}-${intersection.bLabel}`}>
+                      A{intersection.aLabel} / B{intersection.bLabel}: {intersection.count}
+                    </span>
+                  ))}
+                </div>
+              </details>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+export function CompareDrawer({
+  compareMode, compareCells, isOpen, clustering, heatmapCells, rows, modelRoiColumns, topK, onDismiss,
+}: CompareDrawerProps) {
+  const [modalImage, setModalImage] = useState<EvidenceImage | null>(null);
+  const [clusterComparisonStatus, setClusterComparisonStatus] = useState<ClusterComparisonStatus>('idle');
+  const [clusterComparisons, setClusterComparisons] = useState<ClusterComparisonsByMethod>({});
+  const [cellA, cellB] = compareCells;
+
+  const evidenceA = useMemo(
+    () => (cellA ? buildEvidenceView(cellA, rows, modelRoiColumns, topK) : null),
+    [cellA, modelRoiColumns, rows, topK],
+  );
+  const evidenceB = useMemo(
+    () => (cellB ? buildEvidenceView(cellB, rows, modelRoiColumns, topK) : null),
+    [cellB, modelRoiColumns, rows, topK],
+  );
+  const summary = cellA && cellB ? buildCompareSummary(cellA, evidenceA, cellB, evidenceB) : null;
+
+  // kept for future use
+  const _neighbors = useMemo(
+    () => (cellA && cellB ? findSharedCompareNeighbors(cellA, evidenceA, cellB, evidenceB, heatmapCells, rows, modelRoiColumns, topK) : []),
+    [cellA, cellB, evidenceA, evidenceB, heatmapCells, modelRoiColumns, rows, topK],
+  );
+
+  useEffect(() => {
+    if (!isOpen || !cellA || !cellB) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onDismiss(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [isOpen, cellA, cellB, onDismiss]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    if (!compareMode || !cellA || !cellB) {
+      setClusterComparisons({});
+      setClusterComparisonStatus('idle');
+      return () => { ignore = true; };
+    }
+
+    setClusterComparisonStatus('loading');
+    setClusterComparisons({});
+
+    Promise.all(
+      CLUSTERING_METHODS.map(async (method) => {
+        try {
+          const summaries = clustering.voxelSummariesByMethod[method.id] ?? [];
+          const [viewA, viewB] = await Promise.all([
+            loadVoxelClusterView(summaries, cellA),
+            loadVoxelClusterView(summaries, cellB),
+          ]);
+
+          return [
+            method.id,
+            viewA && viewB ? calculateClusterComparison(viewA.points, viewB.points) : null,
+          ] as const;
+        } catch {
+          return [method.id, null] as const;
+        }
+      }),
+    )
+      .then((entries) => {
+        if (ignore) return;
+        setClusterComparisons(Object.fromEntries(entries) as ClusterComparisonsByMethod);
+        setClusterComparisonStatus('ready');
+      })
+      .catch(() => {
+        if (ignore) return;
+        setClusterComparisons({});
+        setClusterComparisonStatus('error');
+      });
+
+    return () => { ignore = true; };
+  }, [cellA, cellB, clustering, compareMode]);
+
+  function handleExport() {
+    if (!cellA || !cellB || !summary) return;
+    downloadJson('compare-summary.json', {
+      cellA: { roi: cellA.roi, model: cellA.model, modelCategory: inferModelCategory(cellA.model), aggregateScore: cellA.score, evidence: evidenceA },
+      cellB: { roi: cellB.roi, model: cellB.model, modelCategory: inferModelCategory(cellB.model), aggregateScore: cellB.score, evidence: evidenceB },
+      summary,
+      clusterComparisons,
+    });
+  }
+
+  if (!compareMode || !cellA || !cellB) return null;
+
+  return (
+    <div className="compare-dialog-host" hidden={!isOpen}>
+    <div className="compare-modal-backdrop" role="presentation" onClick={onDismiss}>
+      <section
+        className="compare-drawer compare-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Compare selections"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Heading */}
+        <div className="compare-drawer-heading">
+          <div>
+            <h2>Compare selections</h2>
+            <p>Predicted image responses for A and B.</p>
+          </div>
+          <button className="compare-close-button" type="button" onClick={onDismiss}>
+            Close &thinsp; <kbd style={{ fontFamily: 'inherit', fontSize: '.72rem', opacity: .7 }}>Esc</kbd>
+          </button>
+        </div>
+
+        <div className="compare-drawer-body">
+          {/* Side-by-side cards */}
+          <div className="compare-card-grid">
+            <CellCard label="A" cell={cellA} evidenceView={evidenceA} onOpenImage={setModalImage} />
+            <CellCard label="B" cell={cellB} evidenceView={evidenceB} onOpenImage={setModalImage} />
+          </div>
+
+          <CompareResponseTools key={`${cellA.id}:${cellB.id}`} cellA={cellA} cellB={cellB}
+            evidenceA={evidenceA} evidenceB={evidenceB} clustering={clustering} onOpenImage={setModalImage} />
+
+          {/* Overlap section */}
+          {summary ? (
+            <details className="compare-agreement-details">
+              <summary>Agreement details &amp; image overlap</summary>
+            <section className="compare-overlap-section">
+              <div className="compare-badge-row">
+                <span className="compare-rank-similarity" title="Spearman correlation between the two image-response rankings">
+                  Rank correlation (ρ): {fmt(summary.rankSimilarity.spearmanRho)}
+                </span>
+                <span>Highest-response overlap: {summary.top.overlap.length}</span>
+                <span>Lowest-response overlap: {summary.bottom.overlap.length}</span>
+                <span>Alignment Δ (A−B): {fmtDiff(summary.aggregateScoreDifference)}</span>
+              </div>
+              <details className="compare-metric-details">
+                <summary>Response details</summary>
+                <dl className="compare-metrics">
+                  <div><dt>Images ranked</dt><dd>{summary.rankSimilarity.sharedImageCount}</dd></div>
+                  <div><dt>Mean response Δ (A−B)</dt><dd>{fmtDiff(summary.imageMeanDifference)}</dd></div>
+                  <div><dt>Rescaled rank correlation</dt><dd>{fmtPercent(summary.rankSimilarity.similarityScore)}</dd></div>
+                </dl>
+                <p>The percentage is (ρ + 1) / 2 × 100, not the percentage of matching images.</p>
+              </details>
+
+              <div className="panel-action-row">
+                <button type="button" onClick={handleExport}>Export JSON</button>
+              </div>
+
+              <ClusterComparisonSection status={clusterComparisonStatus} comparisons={clusterComparisons} />
+
+              <details className="compare-image-details">
+                <summary>Shared &amp; unique images</summary>
+                <div className="compare-overlap-grid">
+                  <ImageGrid title="Shared highest" images={summary.top.overlap} onOpenImage={setModalImage} compact />
+                  <ImageGrid title="Highest · A only" images={summary.top.uniqueA} onOpenImage={setModalImage} compact />
+                  <ImageGrid title="Highest · B only" images={summary.top.uniqueB} onOpenImage={setModalImage} compact />
+                </div>
+                <div className="compare-overlap-grid">
+                  <ImageGrid title="Shared lowest" images={summary.bottom.overlap} onOpenImage={setModalImage} compact />
+                  <ImageGrid title="Lowest · A only" images={summary.bottom.uniqueA} onOpenImage={setModalImage} compact />
+                  <ImageGrid title="Lowest · B only" images={summary.bottom.uniqueB} onOpenImage={setModalImage} compact />
+                </div>
+              </details>
+            </section>
+            </details>
+          ) : (
+            <p className="compare-empty">
+              Responses unavailable for one or both selections.
+            </p>
+          )}
+        </div>
+
+        {modalImage && <ImageModal image={modalImage} onClose={() => setModalImage(null)} />}
+      </section>
+    </div>
+    </div>
+  );
+}

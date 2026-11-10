@@ -1,16 +1,16 @@
 # NSD stimulus-context development runbook
 
-This runbook starts Cortex App, its linked Cortex-Compass frontend, and the existing
+This runbook starts Cortex App, its bundled Cortex-Compass frontend, and the existing
 Core backend for local development. It does not deploy or modify production.
 
 ## Prerequisites and reference bundle
 
 Start in the parent directory containing `cortex-app` and `cortex-core`.
-Cortex-Compass source is the `cortex-app/apps/cortex-compass` submodule:
+Cortex-Compass source and browser data are tracked directly in
+`cortex-app/apps/cortex-compass` on the `IUI` branch:
 
 ```bash
 export VC_WORKSPACE="$(pwd)"
-git -C "$VC_WORKSPACE/cortex-app" submodule update --init --recursive
 npm --prefix "$VC_WORKSPACE/cortex-app" ci
 npm --prefix "$VC_WORKSPACE/cortex-app/apps/cortex-compass" ci
 mkdir -p "$VC_WORKSPACE/.runtime/gradio" \
@@ -19,8 +19,8 @@ mkdir -p "$VC_WORKSPACE/.runtime/gradio" \
 ```
 
 Use the verified 126-model reference release already installed in the
-private artifact installation. Its browser assets are tracked in the linked
-visualization repo, but the matching
+private artifact installation. Its browser assets are tracked in the bundled
+visualization directory, but the matching
 server-only `artifacts/reference/` bundle is not. For another machine, follow
 the visualization README's **Moving the standardized release to another
 machine** instructions. Do not run the legacy 26-model artifact builder over
@@ -96,21 +96,32 @@ machine-local port 5556. For direct network access without port forwarding, use
 the university-machine hostname in browser-facing URLs and include the resulting
 origin in `CORTEX_ALLOWED_ORIGINS`.
 
-These two frontend commands use the checked-out submodule and the host's local
+These two frontend commands use the bundled visualization and the host's local
 backend routing. Environment variables remain available when Core or Cortex-Compass runs on a
 different host or port. Restart both Vite servers after changing any `VITE_*`
 variable.
 
 ## Combined release layout
 
-The frontend repos keep separate histories, with the exact InfoViz revision
-pinned at `apps/cortex-compass`. Initialize it with
-`git submodule update --init --recursive`. `npm run build` emits the host's
-`/cortex-compass/` entry and builds the linked frontend directly into
+The host and Cortex-Compass are tracked together in Cortex App's `IUI` branch.
+A normal clone or pull includes `apps/cortex-compass` without a separate
+visualization repository checkout. Its imported source came from
+`InfoViz-Prototype-Edition` revision `8847bf97c17b3028e1bbea171a8ca8b0e96ffaa3`;
+new visualization changes are committed with Cortex App.
+`npm run build` emits the host's
+`/cortex-compass/` entry and builds the bundled frontend directly into
 `dist/infoviz/` with base `/infoviz/`. Publish that combined `dist` and configure
 the Core backend route separately. `npm run preview` serves the built visualization,
-not the development `/infoviz` proxy. A private child repo is supported when the
-builder has read access and recursively checks out the submodule.
+not the development `/infoviz` proxy. The builder needs access only to Cortex App
+for frontend source and browser assets.
+
+For a checkout that used the former submodule, first follow the root README's
+**One-time conversion from the former submodule** instructions. Git may refuse
+to overwrite its populated directory; retain that directory as an external
+backup before installing the directly tracked copy.
+After conversion, update with `git pull --ff-only origin IUI`, then restart
+`npm run dev:compass` and `npm run dev`, or rebuild the combined production output.
+The visualization launcher reinstalls its dependencies if its lockfile changed.
 
 Do not copy `node_modules`, private `artifacts/reference`, upload sessions, or
 trained checkpoints into the frontend output. Upload comparison support also

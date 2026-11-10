@@ -20,15 +20,14 @@ Cortex-Compass both work when port 5173 is opened through VS Code Remote
 SSH. Ports 5556 and 5174 do not need separate browser forwarding. Cortex-Compass's
 development base defaults to `/infoviz/` as shown in the runbook.
 
-2. Initialize the linked visualization and install dependencies:
+2. Install the host and visualization dependencies:
 
 ```bash
-git submodule update --init --recursive
 npm ci
 npm --prefix apps/cortex-compass ci
 ```
 
-For a new checkout, use `git clone --branch IUI --recurse-submodules https://github.com/murtylab/cortex-app.git`.
+For a new checkout, use `git clone --branch IUI https://github.com/murtylab/cortex-app.git`.
 
 3. Run Cortex-Compass and the host in separate terminals:
 
@@ -47,13 +46,13 @@ npm run preview
 
 ### Updating an existing IUI checkout
 
-From the Cortex App checkout, update both the host and its pinned Cortex-Compass
-revision:
+If this checkout still uses the former Cortex-Compass submodule, complete the
+one-time conversion below before pulling this release. Once converted, update
+the host and Cortex-Compass together:
 
 ```bash
 git switch IUI
-git pull --ff-only --recurse-submodules origin IUI
-git submodule update --init --recursive
+git pull --ff-only origin IUI
 ```
 
 Restart `npm run dev:compass` and `npm run dev` in their separate terminals.
@@ -61,11 +60,32 @@ The Compass launcher installs its dependencies when its lockfile changes; run
 `npm ci` in the host if its dependencies changed. For a built deployment, run
 `npm run build` and restart the existing serving process instead.
 
-A plain pull without recursive submodule updating can leave the visualization on
-an older checkout. Use the pinned revision above rather than `--remote` when
-running a released version. The latest comparison and selectivity UI changes use
-the existing Core IUI backend and reference bundle; an already working backend
-configuration can stay in place.
+Cortex-Compass is tracked directly in this repository, so a normal pull includes
+its source and browser data. The comparison and selectivity UI use the existing
+Core IUI backend and reference bundle; an already working backend configuration
+can stay in place.
+
+#### One-time conversion from the former submodule
+
+Git can refuse to replace an initialized submodule with ordinary tracked files
+because its existing contents would be overwritten. Preserve that directory in
+a backup outside the Cortex App checkout before pulling the conversion. The
+backup retains any local edits, environment files, dependencies, and paper
+outputs; the pull installs the bundled visualization at the same app path.
+From the Cortex App root on `IUI`:
+
+```bash
+compass_backup="$(mktemp -d "$(dirname "$PWD")/cortex-compass-before-embedded.XXXXXX")"
+mv apps/cortex-compass "$compass_backup/cortex-compass"
+git -c submodule.recurse=false pull --ff-only origin IUI
+```
+
+Keep the backup. Restore only needed local configuration or private artifacts,
+not its old tracked source or `.git` file. If the backend's reference bundle was
+inside the former submodule, point `CORTEX_REFERENCE_ARTIFACT_DIR` to the retained
+bundle or restore that ignored bundle before restarting Core. An already external
+reference bundle keeps its existing path. The frontend launcher reinstalls
+dependencies as needed. Later pulls use the normal update commands above.
 
 Analytics setup:
 
@@ -105,18 +125,20 @@ while preparing a comparison discards the old handoff rather than opening stale 
 Restoring an inference-history entry also restores Cortex-Compass access for that
 run and cancels any comparison still being prepared for the previous result.
 
-## Linked Cortex-Compass repository
+## Bundled Cortex-Compass
 
-`apps/cortex-compass` is a Git submodule of
-[`KruthikRavikanti/InfoViz-Prototype-Edition`](https://github.com/KruthikRavikanti/InfoViz-Prototype-Edition).
-It lives inside the Cortex App checkout while keeping its own history. The parent
-records an exact visualization commit; it does not silently follow the latest
-`IUI` tip. Existing independent InfoViz checkouts remain valid and are not moved.
+`apps/cortex-compass` is ordinary tracked source inside Cortex App's `IUI` branch.
+It was imported from
+[`KruthikRavikanti/InfoViz-Prototype-Edition`](https://github.com/KruthikRavikanti/InfoViz-Prototype-Edition),
+revision `8847bf97c17b3028e1bbea171a8ca8b0e96ffaa3`. That repository preserves the
+earlier development history. Current Cortex-Compass changes are committed here
+with the host; cloning or pulling Cortex App includes the visualization without
+a second repository checkout.
 
-`npm run build` builds the host and the pinned visualization together. The host
+`npm run build` builds the host and bundled visualization together. The host
 entry is `dist/cortex-compass/index.html`; the visualization and its public data
 are published under `dist/infoviz/`. `npm run preview` serves those built files
-without relying on the development visualization server. The child build uses
+without relying on the development visualization server. The visualization build uses
 its lockfile and installs its development/build dependencies when missing or stale.
 `npm run build:site` is available for a host-only build.
 
@@ -124,26 +146,20 @@ The standalone `/infoviz/` route and existing `INFOVIZ` environment names are
 unchanged. Keep the embedded URL same-origin (normally
 `VITE_CORTEX_INFOVIZ_URL=/infoviz`). A deployed host still needs `/cortex-core/`
 routed to the matching backend for upload comparisons; development proxies do
-not configure that production route. No Core deployment is changed by this link.
+not configure that production route. Bundling the frontend does not change the
+Core deployment.
 
-The linked repo does not have to be public. If it is private, collaborators and
-the build system need read access to **both** repositories. Enable recursive
-submodule checkout and provide an appropriately scoped deploy key, GitHub App
-token, or access token through the build system's secret store—not `.gitmodules`.
-Changing source-repository visibility does not hide JavaScript served by a public site.
-
-To update the link deliberately, publish the child commit first, then update and
-test the parent pointer:
+Update the visualization in this repository and validate the combined build:
 
 ```bash
-git submodule update --remote -- apps/cortex-compass
+npm --prefix apps/cortex-compass test
 npm run build
 git add apps/cortex-compass
-git commit -m "Update Cortex-Compass revision"
+git commit -m "Update Cortex-Compass"
 ```
 
 Private reference bundles, checkpoints, uploaded images, sessions, environment
-files, and dependency directories are not part of the submodule publication.
+files, and dependency directories are not part of the frontend publication.
 
 The complete three-service startup, artifact generation, validation, and smoke-test procedure is in
 [`docs/NSD_STIMULUS_CONTEXT_DEVELOPMENT.md`](docs/NSD_STIMULUS_CONTEXT_DEVELOPMENT.md).

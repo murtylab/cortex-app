@@ -1,0 +1,304 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://murtylab.example/schemas/cortex-reference-manifest-v1.json",
+  "title": "Cortex NSD-1000 reference artifact manifest",
+  "type": "object",
+  "allOf": [{"not": {"required": ["coverage_extension", "prediction_standardization"]}}],
+  "required": [
+    "schema_version",
+    "reference_version",
+    "checksum",
+    "dataset",
+    "rois",
+    "supported_models",
+    "image_count",
+    "reference_count",
+    "voxel_counts",
+    "clustering",
+    "artifact_schema",
+    "source_selection",
+    "artifacts",
+    "optional_artifacts",
+    "generator_git",
+    "generated_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "reference_version": {
+      "$ref": "#/$defs/sha256"
+    },
+    "checksum": {
+      "$ref": "#/$defs/sha256"
+    },
+    "dataset": {
+      "const": "nsd_1000"
+    },
+    "rois": {
+      "const": [
+        "ffa",
+        "ppa",
+        "eba"
+      ]
+    },
+    "supported_models": {
+      "type": "array",
+      "minItems": 26,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "image_count": {
+      "const": 185
+    },
+    "reference_count": {
+      "const": 185
+    },
+    "image_ids_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "coverage_extension": {
+      "type": "object",
+      "required": ["policy", "parent_reference_version", "baseline_models", "added_models", "baseline_manifest_sha256"],
+      "properties": {
+        "policy": {"const": "append_only_preserve_baseline_artifacts_v1"},
+        "parent_reference_version": {"$ref": "#/$defs/sha256"},
+        "baseline_manifest_sha256": {"$ref": "#/$defs/sha256"},
+        "baseline_models": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "added_models": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "prediction_policies": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "required": ["numeric_policy", "precision_helper_sha256"],
+            "properties": {
+              "precision_helper_sha256": {"$ref": "#/$defs/sha256"},
+              "numeric_policy": {
+                "type": "object",
+                "required": ["policy", "output_dtype", "float32_matmul_precision", "cuda_matmul_allow_tf32", "cudnn_allow_tf32", "cudnn_deterministic", "cudnn_benchmark", "cuda_autocast_enabled", "cpu_autocast_enabled"],
+                "properties": {
+                  "policy": {"const": "fp32_no_tf32_v1"},
+                  "output_dtype": {"const": "float32"},
+                  "float32_matmul_precision": {"const": "highest"},
+                  "cuda_matmul_allow_tf32": {"type": "boolean", "const": false},
+                  "cudnn_allow_tf32": {"type": "boolean", "const": false},
+                  "cudnn_deterministic": {"type": "boolean", "const": true},
+                  "cudnn_benchmark": {"type": "boolean", "const": false},
+                  "cuda_autocast_enabled": {"type": "boolean", "const": false},
+                  "cpu_autocast_enabled": {"type": "boolean", "const": false}
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "model_prediction_policies": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "required": ["response_policy", "deterministic_per_stimulus", "noise_modes"],
+            "properties": {
+              "response_policy": {"enum": ["evaluation_mode", "seeded_stochastic_sampling"]},
+              "deterministic_per_stimulus": {"type": "boolean"},
+              "noise_modes": {"enum": [[], ["neuronal"]]}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "prediction_standardization": {
+      "type": "object",
+      "required": ["policy", "analysis_input_policy", "parent_reference_version", "parent_manifest_sha256", "parent_snapshot_sha256", "parent_library_versions", "regenerated_models", "inference_provenance_sha256", "prediction_policies", "model_prediction_policies"],
+      "properties": {
+        "policy": {"const": "full_roster_fp32_regeneration_v1"},
+        "analysis_input_policy": {"const": "canonical_float32_promoted_float64_v1"},
+        "parent_reference_version": {"$ref": "#/$defs/sha256"},
+        "parent_manifest_sha256": {"$ref": "#/$defs/sha256"},
+        "parent_snapshot_sha256": {"$ref": "#/$defs/sha256"},
+        "parent_library_versions": {"type": "object", "additionalProperties": {"type": "string"}},
+        "regenerated_models": {"type": "array", "minItems": 26, "uniqueItems": true, "items": {"type": "string"}},
+        "inference_provenance_sha256": {"type": "object", "minProperties": 26, "additionalProperties": {"$ref": "#/$defs/sha256"}},
+        "prediction_policies": {"$ref": "#/properties/coverage_extension/properties/prediction_policies"},
+        "model_prediction_policies": {"$ref": "#/properties/coverage_extension/properties/model_prediction_policies"}
+      },
+      "additionalProperties": false
+    },
+    "voxel_counts": {
+      "type": "object",
+      "required": [
+        "ffa",
+        "ppa",
+        "eba"
+      ],
+      "properties": {
+        "ffa": {
+          "const": 716
+        },
+        "ppa": {
+          "const": 753
+        },
+        "eba": {
+          "const": 2045
+        }
+      },
+      "additionalProperties": false
+    },
+    "clustering": {
+      "type": "object"
+    },
+    "artifact_schema": {
+      "type": "object",
+      "required": [
+        "format",
+        "allow_pickle",
+        "arrays"
+      ]
+    },
+    "source_selection": {
+      "type": "object",
+      "minProperties": 78
+    },
+    "artifacts": {
+      "type": "object",
+      "minProperties": 26,
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "ffa",
+          "ppa",
+          "eba"
+        ],
+        "properties": {
+          "ffa": {
+            "$ref": "#/$defs/artifact"
+          },
+          "ppa": {
+            "$ref": "#/$defs/artifact"
+          },
+          "eba": {
+            "$ref": "#/$defs/artifact"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "optional_artifacts": {
+      "type": "object",
+      "required": [
+        "visual",
+        "dreamsim"
+      ],
+      "properties": {
+        "visual": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/artifact"
+            },
+            {
+              "type": "object",
+              "required": [
+                "available",
+                "feature_schema"
+              ],
+              "properties": {
+                "available": {
+                  "const": true
+                },
+                "feature_schema": {
+                  "const": "infoviz_visual_77_v1"
+                }
+              }
+            }
+          ]
+        },
+        "dreamsim": {
+          "type": "object",
+          "required": [
+            "available",
+            "reason"
+          ],
+          "properties": {
+            "available": {
+              "const": false
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "generator_git": {
+      "type": "object",
+      "required": [
+        "commit",
+        "dirty"
+      ]
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "artifact": {
+      "type": "object",
+      "required": [
+        "path",
+        "sha256",
+        "size_bytes",
+        "arrays"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^(models/[a-zA-Z0-9_.-]+/(ffa|ppa|eba)|visual)\\.npz$"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "arrays": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "dtype",
+              "shape"
+            ],
+            "properties": {
+              "dtype": {
+                "type": "string"
+              },
+              "shape": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

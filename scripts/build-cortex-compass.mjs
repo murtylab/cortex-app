@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** Build the pinned Compass checkout; never fetch or update its Git revision. */
+/** Build the Cortex-Compass workspace tracked directly in this repository. */
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
@@ -9,7 +9,7 @@ import { loadEnv } from 'vite';
 
 const PROJECT_ROOT = fileURLToPath(new URL('../', import.meta.url));
 const COMPASS_BASE = '/infoviz/';
-const CHECKOUT_HELP = 'Run git submodule update --init --recursive from cortex-app.';
+const WORKSPACE_HELP = 'Restore apps/cortex-compass from the cortex-app IUI checkout.';
 
 export function compassBuildPaths(projectRoot = PROJECT_ROOT) {
   const root = path.resolve(projectRoot);
@@ -25,10 +25,10 @@ export function compassBuildPaths(projectRoot = PROJECT_ROOT) {
   };
 }
 
-function validateCheckout(paths) {
+function validateWorkspace(paths) {
   for (const relative of ['package.json', 'package-lock.json', 'vite.config.ts', 'index.html', 'public/data/reference_manifest.json']) {
     if (!fs.existsSync(path.join(paths.checkout, relative))) {
-      throw new Error(`Cortex-Compass submodule is missing or incomplete at apps/cortex-compass. ${CHECKOUT_HELP}`);
+      throw new Error(`Cortex-Compass workspace is missing or incomplete at apps/cortex-compass. ${WORKSPACE_HELP}`);
     }
   }
   const metadata = JSON.parse(fs.readFileSync(paths.packageJson, 'utf8'));
@@ -66,13 +66,13 @@ export function runCompassBuild({
 } = {}) {
   if (!['build', 'all', 'dev'].includes(mode)) throw new Error(`Unknown Cortex-Compass build mode: ${mode}`);
   const paths = compassBuildPaths(projectRoot);
-  validateCheckout(paths);
+  validateWorkspace(paths);
   validateOutput(paths);
   const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
   const env = { ...environment, VITE_INFOVIZ_BASE_PATH: COMPASS_BASE };
   if (mode === 'dev') {
     // Share only the host's backend proxy setting, not its dotenv files or
-    // unrelated local secrets, when running the pinned child directly.
+    // unrelated local secrets, when running the workspace directly.
     const proxyTarget = environment.CORTEX_CORE_PROXY_TARGET
       || loadEnv('development', paths.root, 'CORTEX_CORE_PROXY_TARGET').CORTEX_CORE_PROXY_TARGET;
     if (proxyTarget) env.CORTEX_CORE_PROXY_TARGET = proxyTarget;
